@@ -1,0 +1,9 @@
+Method,Resolution,Entropy (bits),Laplacian_Var,Pink_Cast (%),Runtime (ms),FPS
+1. Ảnh gốc ESP32-CAM (640x480),800x600,6.364,121.1,17.45,0.0,0.0
+2. Đối chứng 1: Global HE (RGB),800x600,7.461,1108.4,12.28,0.85,1231.3
+3. Đối chứng 2: Global HE (LAB),800x600,7.206,1303.7,17.27,1.84,550.9
+4. Giai đoạn 1: Wavelet+NLM + Khử hồng,800x600,6.32,59.4,2.55,157.51,6.4
+5. Giai đoạn 1+2: + Haze-Pivot & CLAHE,800x600,6.817,120.0,7.11,166.01,6.1
+6. Pipeline Đề xuất (VGA 640x480),800x600,6.85,226.5,7.03,436.59,2.3
+7. Pipeline Đề xuất + ESPCN HD 720p (960x720),960x720,6.86,153.3,7.05,476.24,2.1
+8. Pipeline Đề xuất + ESPCN Full HD 1080p (1440x1080),1440x1080,6.853,56.8,7.01,614.68,1.6
