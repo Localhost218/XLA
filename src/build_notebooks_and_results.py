@@ -398,15 +398,15 @@ save_nb(nb1, f"{ROOT}/notebooks/01_Data_Prep_and_Degradation.ipynb")
 # --- NOTEBOOK 02: STAGE 1 PREPROCESS & PINK RECOVERY (TV1) ---
 nb2 = new_notebook()
 nb2.cells = [
-    new_markdown_cell(r"""# Notebook 02: Giai đoạn 1 — Khử nhiễu Bilateral & Nội suy mềm vùng cháy sáng hồng (Chương 2 & 3)
+    new_markdown_cell(r"""# Notebook 02: Giai đoạn 1 — Khôi phục vùng cháy sáng hồng & Khử nhiễu lai đa miền Wavelet + Non-Local Means (Chương 2, 3, 4 & 6)
 **Phụ trách:** Thành viên 1 (Nhóm trưởng)
 
-### Cơ sở toán học:
-1. **Lọc song phương bảo toàn biên (Bilateral Filter):** Khử nhiễu khối JPEG $8\times8$ với $d=5, \sigma_{\text{color}}=28, \sigma_{\text{space}}=28$.
-2. **Mặt nạ nội suy mềm vùng cháy sáng hồng $\alpha(x,y) \in [0, 1]$:**
+### Cơ sở toán học & Lý do chọn tham số:
+1. **Mặt nạ nội suy mềm vùng cháy sáng hồng $\alpha(x,y) \in [0, 1]$ (Chương 2 & 4):**
    $$RB_{\text{mean}}(x,y) = \frac{R(x,y) + B(x,y)}{2}, \quad D_{\text{pink}}(x,y) = \max(0, RB_{\text{mean}}(x,y) - G(x,y))$$
-   $$\alpha(x,y) = G_{\sigma=1.8} * \left( \text{clip}\left(\frac{RB_{\text{mean}} - T_{\text{high}}}{42}, 0, 1\right) \cdot \text{clip}\left(\frac{D_{\text{pink}} - \Delta T}{18}, 0, 1\right) \right)$$
-3. **Cân bằng trắng tự động có mặt nạ (Masked Gray World AWB):** Loại trừ vùng bão hòa $\alpha(x,y) \ge 0.20$ khi ước lượng trung bình kênh màu."""),
+   $$\alpha(x,y) = G_{7\times 7, \sigma=1.5} * \left( \text{clip}\left(\frac{RB_{\text{mean}} - 135.0}{40.0}, 0, 1\right) \cdot \text{clip}\left(\frac{D_{\text{pink}} - 7.0}{16.0}, 0, 1\right) \right)$$
+2. **Cân bằng trắng tự động có mặt nạ (Masked Gray World AWB - Chương 4):** Loại trừ vùng bão hòa ($\alpha(x,y) \ge 0.20$, $Y \notin (30, 215)$) với biên độ dịch chuyển tối đa $\pm 6\%$.
+3. **Khử nhiễu lai đa miền (Chương 3 & 6):** Phân rã Wavelet `sym4` 3 mức ngưỡng mềm `BayesShrink` trên YCbCr kết hợp `fastNlMeansDenoising` ($h=4.5$) có mặt nạ bảo vệ tán lá cây trên $L^*$ và lọc Median $3\times3$ + Bilateral ($d=5, \sigma_{\text{color}}=14, \sigma_{\text{space}}=7$) trên $a^*, b^*$."""),
     new_code_cell("""import sys, cv2
 import matplotlib.pyplot as plt
 sys.path.insert(0, "/home/ngtukien/Projects/XLA")
@@ -427,13 +427,14 @@ save_nb(nb2, f"{ROOT}/notebooks/02_Stage1_Preprocess_PinkFix.ipynb")
 # --- NOTEBOOK 03: STAGE 2 LAB CLAHE & BASELINES (TV3) ---
 nb3 = new_notebook()
 nb3.cells = [
-    new_markdown_cell(r"""# Notebook 03: Giai đoạn 2 — Tăng cường tương phản cục bộ trên không gian CIE LAB & Đối chứng Histogram (Chương 3)
+    new_markdown_cell(r"""# Notebook 03: Giai đoạn 2 — Khử sương mờ Haze-Pivot & Tăng cường tương phản cục bộ CIE LAB CLAHE (Chương 3 & 4)
 **Phụ trách:** Thành viên 3
 
-### Cơ sở toán học:
-1. Chuyển đổi không gian màu `RGB` $\rightarrow$ `CIE LAB`, tách kênh độ sáng $L$ và 2 kênh sắc độ $a, b$.
-2. Kéo giãn dải động khử mù sương kết hợp **CLAHE** (`clipLimit = 2.2`, `tileGridSize = (8, 8)`) trên kênh $L$.
-3. Hiệu chỉnh Gamma ($\gamma = 1.18$): $L_{\text{out}} = 255 \cdot (L_{\text{CLAHE}}/255)^{\gamma}$ giúp triệt tiêu màn sương đục ngoài trời."""),
+### Cơ sở toán học & Lý do chọn tham số:
+1. Chuyển đổi không gian màu `BGR` $\rightarrow$ `CIE L*a*b*` (Chương 4), tách kênh độ chói $L^*$ và 2 kênh sắc độ $a^*, b^*$.
+2. **Khử sương mờ qua điểm tựa độ chói (Haze-Pivot Contrast Restoration):** Kéo giãn tuyến tính kênh $L^*$ quanh điểm tựa màn sương $L_{\text{pivot}} = 172.0$ với hệ số khuếch đại $\gamma_{\text{gain}} = 1.26$ (tự động thích nghi theo phân vị $P_{98} - P_2$):
+   $$L_{\text{dehaze}}^* = \text{clip}\big(L_{\text{pivot}}^{\text{eff}} + \gamma_{\text{gain}}^{\text{eff}}(L^* - L_{\text{pivot}}^{\text{eff}}), \; 0, \; 255\big)$$
+3. **Cân bằng lược đồ cục bộ CLAHE (Chương 3) & Bù bão hòa sắc độ:** Áp dụng `clipLimit = 1.5`, `tileGridSize = (8, 8)` pha trộn mượt ở tỷ lệ $\beta_{\text{CLAHE}} = 0.22$, đồng thời phục hồi độ bão hòa sắc độ $a^*, b^*$ ($c_{\text{gain}} \in [1.24, 1.58]$)."""),
     new_code_cell("""import sys, cv2
 sys.path.insert(0, "/home/ngtukien/Projects/XLA")
 from src.uav_pipeline import run_full_pipeline, compute_entropy
@@ -441,7 +442,7 @@ from src.uav_pipeline import run_full_pipeline, compute_entropy
 img_in = cv2.imread("/home/ngtukien/Projects/XLA/data/samples/sample_real_sky_pink.jpg")
 res = run_full_pipeline(img_in, return_intermediates=True)
 print(f"Shannon Entropy đầu vào: {compute_entropy(img_in):.3f} bits")
-print(f"Shannon Entropy đầu ra:  {compute_entropy(res['output']):.3f} bits")""",
+print(f"Shannon Entropy đầu ra:  {compute_entropy(res['output_720p']):.3f} bits")""",
     execution_count=1,
     outputs=[
         text_output(f"Shannon Entropy đầu vào: {compute_entropy(img_p):.3f} bits\nShannon Entropy đầu ra:  {compute_entropy(img_out_p):.3f} bits"),
@@ -450,29 +451,29 @@ print(f"Shannon Entropy đầu ra:  {compute_entropy(res['output']):.3f} bits")"
 ]
 save_nb(nb3, f"{ROOT}/notebooks/03_Stage2_LAB_CLAHE_Baselines.ipynb")
 
-# --- NOTEBOOK 04: STAGE 3 SHARPENING & 720P UPSCALING (TV2) ---
+# --- NOTEBOOK 04: STAGE 3 SHARPENING & 720P/1080P UPSCALING (TV2) ---
 nb4 = new_notebook()
 nb4.cells = [
-    new_markdown_cell(r"""# Notebook 04: Giai đoạn 3 — Làm sắc nét biên Unsharp Masking & Nội suy Bicubic nâng chuẩn 720p HD (Chương 2, 3 & 4)
+    new_markdown_cell(r"""# Notebook 04: Giai đoạn 3 — Giải chập Richardson-Lucy PSF, Làm nét có cổng biên Sobel & Siêu phân giải ESPCN 720p/1080p (Chương 2, 3, 5 + SOTA)
 **Phụ trách:** Thành viên 2
 
-### Cơ sở toán học:
-1. **Unsharp Masking có ngưỡng chống nhiễu:**
-   $$M_{\text{detail}}(x,y) = I_{\text{CLAHE}}(x,y) - (G_{\sigma=1.1} * I_{\text{CLAHE}})(x,y)$$
-   $$I_{\text{out}}(x,y) = I_{\text{CLAHE}}(x,y) + k \cdot w_{\text{thresh}}(M_{\text{detail}}) \cdot M_{\text{detail}}(x,y)$$
-2. **Nâng độ phân giải hiển thị lên chuẩn 720p ($960 \times 720$):** Áp dụng nội suy **Bicubic (`cv2.INTER_CUBIC`)** kết hợp tinh chỉnh sắc nét biên và xuất Video Demo Side-by-Side."""),
+### Cơ sở toán học & Lý do chọn tham số:
+1. **Giải chập quang học lặp Richardson-Lucy PSF (Chương 3):** Khử mờ quang học của thấu kính OV2640 với nhân Gaussian PSF $5\times5$ ($\sigma_{\text{PSF}} = 0.88$, 4 vòng lặp).
+2. **Unsharp Masking có cổng đạo hàm Sobel & mặt nạ tán lá (Chương 3 & 5):** Dùng biên độ gradient Sobel $\|\nabla L^*\|$ kết hợp mặt nạ thực vật $w_{\text{foliage}}$ để chỉ làm sắc nét xe cộ, vạch kẻ đường, mái nhà, cây xanh và giữ mặt đường phẳng mịn tuyệt đối.
+3. **Siêu phân giải mạng học sâu mã nguồn mở ESPCN ($3\times$ ONNX) + Lanczos-4 (Chương 2 + SOTA):** Nâng độ phân giải hiển thị lên chuẩn **HD 720p ($960 \times 720$ / $1280 \times 720$)** và **Full HD 1080p ($1440 \times 1080$ / $1920 \times 1080$)**."""),
     new_code_cell("""import sys, cv2
 sys.path.insert(0, "/home/ngtukien/Projects/XLA")
-from src.uav_pipeline import run_full_pipeline, upscale_to_720p, compute_laplacian_var
+from src.uav_pipeline import run_full_pipeline, upscale_to_hd, compute_laplacian_var
 
 img_in = cv2.imread("/home/ngtukien/Projects/XLA/data/samples/sample_sim_pink_road_1.jpg")
 res = run_full_pipeline(img_in, return_intermediates=True)
-img_hd = upscale_to_720p(res["stage2"], target_height=720)
-print(f"Kích thước gốc: {img_in.shape[1]}x{img_in.shape[0]} -> Kích thước nâng 720p: {img_hd.shape[1]}x{img_hd.shape[0]}")
+img_hd = res["output_720p"]
+img_fhd = res["output_1080p"]
+print(f"Kích thước gốc: {img_in.shape[1]}x{img_in.shape[0]} -> HD 720p: {img_hd.shape[1]}x{img_hd.shape[0]} -> Full HD 1080p: {img_fhd.shape[1]}x{img_fhd.shape[0]}")
 print(f"Độ sắc nét (Laplacian Variance): Trước làm nét = {compute_laplacian_var(res['stage2']):.1f} -> Sau làm nét = {compute_laplacian_var(res['output']):.1f}")""",
     execution_count=1,
     outputs=[
-        text_output(f"Kích thước gốc: {im_base.shape[1]}x{im_base.shape[0]} -> Kích thước nâng 720p: {im_720p.shape[1]}x{im_720p.shape[0]}\nĐộ sắc nét (Laplacian Variance): Trước làm nét = {compute_laplacian_var(res_b['stage2']):.1f} -> Sau làm nét = {compute_laplacian_var(res_b['output']):.1f}"),
+        text_output(f"Kích thước gốc: {im_base.shape[1]}x{im_base.shape[0]} -> HD 720p: {im_720p.shape[1]}x{im_720p.shape[0]} -> Full HD 1080p: {im_1080p.shape[1]}x{im_1080p.shape[0]}\nĐộ sắc nét (Laplacian Variance): Trước làm nét = {compute_laplacian_var(res_b['stage2']):.1f} -> Sau làm nét = {compute_laplacian_var(res_b['output']):.1f}"),
         img_output(b64_fig4)
     ])
 ]
@@ -484,8 +485,8 @@ nb5.cells = [
     new_markdown_cell(r"""# Notebook 05: Đánh giá Thực nghiệm Định tính & Định lượng trên 90 Ảnh UAV (Mục 4 Báo cáo)
 **Phụ trách:** Thành viên 4
 
-Chạy đánh giá toàn diện trên:
-- **Bảng 1:** 30 cặp ảnh đối chứng có tham chiếu (`data/synthetic_gt/` vs `data/synthetic_degraded/`) với các chỉ số **PSNR (dB)** $\uparrow$, **SSIM** $\uparrow$, **Sai số màu $\Delta E_{ab}$** $\downarrow$, **Pink Cast (%)** $\downarrow$.
+Chạy đánh giá toàn diện so sánh với 2 phương pháp đối chứng (`Global HE RGB`, `Global HE CIE LAB`) và nghiên cứu cắt giảm từng bước (Ablation Study) trên:
+- **Bảng 1:** 30 cặp ảnh đối chứng có tham chiếu (`data/synthetic_gt/` vs `data/synthetic_degraded/`) với các chỉ số **PSNR (dB)** $\uparrow$, **SSIM** $\uparrow$, **Sai số màu $\Delta E_{ab}^*$** $\downarrow$, **Entropy (bits)** $\uparrow$, **Laplacian Variance** $\uparrow$, **Pink Cast (%)** $\downarrow$.
 - **Bảng 2:** 60 ảnh bay UAV thực nghiệm (`data/real_uav/`) với các chỉ số **Shannon Entropy (bits)** $\uparrow$, **Laplacian Variance** $\uparrow$, **Pink Cast (%)** $\downarrow$, **Runtime (ms/frame)** $\downarrow$ và **FPS** $\uparrow$."""),
     new_code_cell("""import pandas as pd
 ROOT = "/home/ngtukien/Projects/XLA"
@@ -514,25 +515,27 @@ save_nb(nb5, f"{ROOT}/notebooks/05_Evaluation_50Images_Tables.ipynb")
 # --- NOTEBOOK 00: MASTER END-TO-END REPORT NOTEBOOK (ALL MEMBERS) ---
 nb0 = new_notebook()
 nb0.cells = [
-    new_markdown_cell(r"""# ĐỒ ÁN HỌC PHẦN XỬ LÝ ẢNH (IMAGE PROCESSING)
-## ĐỀ TÀI: Xây dựng pipeline khôi phục màu sắc và nâng cao chất lượng ảnh thu nhận từ UAV sử dụng camera giá rẻ ESP32-CAM
-**Giảng viên hướng dẫn:** Thầy Phạm Văn Cường  
-**Nhóm thực hiện:** Nhóm 4 thành viên (Đóng góp đều 25%/thành viên)
+    new_markdown_cell(r"""# ĐỒ ÁN HỌC PHẦN XỬ LÝ ẢNH (IMAGE PROCESSING) — PTIT
+## ĐỀ TÀI: Xây dựng Pipeline Khôi phục Màu sắc, Khử nhiễu Đa miền và Nâng cao Chất lượng Ảnh thu nhận từ UAV sử dụng Camera giá rẻ ESP32-CAM (OV2640)
+**Giảng viên hướng dẫn:** PGS.TS. Phạm Văn Cường  
+**Nhóm thực hiện:** Nhóm 4 thành viên (Đóng góp đều 25%/thành viên)  
+**Kiến thức học phần áp dụng:** Chương 2, Chương 3, Chương 4, Chương 5, Chương 6 và Chương 9
 
 ---
-### Mục 1 & 2: Định nghĩa Bài toán & Tập dữ liệu Đa nguồn (Đã Augment chống Overfit)
-- **Đầu vào:** Khung hình thu từ cảm biến giá rẻ **OV2640 (ESP32-CAM)** trên UAV ($2.5 - 6.5\text{ fps}$) chịu 3 suy giảm vật lý: (1) Cháy sáng lệch màu hồng/tím (Pink/Magenta Highlight Cast), (2) Độ tương phản thấp & phủ sương mờ (Haze), (3) Mờ nhòe rung động & nhiễu khối JPEG.
-- **Tập dữ liệu thực nghiệm:** 3 Video FPV thực tế + **60 ảnh UAV thực nghiệm đa nguồn (`data/real_uav/`)** + **30 cặp ảnh đối chứng có Ground Truth (`data/synthetic_gt/` & `data/synthetic_degraded/`)** đã qua biến đổi hình học & suy giảm ngẫu nhiên."""),
-    new_code_cell("""# 1. Minh họa Giai đoạn 1: Khử nhiễu Bilateral + Phát hiện mặt nạ mềm & Khôi phục vùng cháy sáng hồng
+### Mục 1 & 2: Định nghĩa Bài toán & Tập dữ liệu Đa nguồn (90 ảnh + 3 Video FPV)
+- **Đầu vào:** Khung hình thu từ cảm biến giá rẻ **OV2640 (ESP32-CAM)** trên UAV ($2.5 - 6.5\text{ fps}$) chịu 3 suy giảm vật lý cốt lõi: (1) Lệch màu cháy sáng hồng/tím (Pink/Magenta Highlight Cast), (2) Độ tương phản thấp, phủ sương mờ (Haze) kèm nhiễu hạt CMOS & nhiễu khối JPEG $8\times8$, (3) Mờ nhòe quang học PSF & độ phân giải gốc thấp.
+- **Tập dữ liệu thực nghiệm:** 3 Video FPV thực tế + **60 ảnh UAV thực nghiệm đa nguồn (`data/real_uav/`)** + **30 cặp ảnh đối chứng có Ground Truth (`data/synthetic_gt/` & `data/synthetic_degraded/`)**.
+- **Báo cáo tổng quát đầy đủ:** Xem tại [`BAO_CAO_DO_AN.md`](../BAO_CAO_DO_AN.md) và [`docs/BaoCao_DoAn_XuLyAnh.pdf`](../docs/BaoCao_DoAn_XuLyAnh.pdf)."""),
+    new_code_cell("""# 1. Minh họa Giai đoạn 1: Mặt nạ trọng số mềm α(x,y), Khôi phục vùng cháy hồng & Khử nhiễu lai Wavelet+NLM
 import sys, cv2, pandas as pd
 sys.path.insert(0, "/home/ngtukien/Projects/XLA")
 from src.uav_pipeline import run_full_pipeline, compute_pink_cast_index, compute_entropy, compute_laplacian_var""",
     execution_count=1,
     outputs=[img_output(b64_fig1)]),
-    new_code_cell("""# 2. Minh họa Giai đoạn 2: Tăng cường tương phản cục bộ CLAHE (CIE LAB) & Phân tích Histogram RGB""",
+    new_code_cell("""# 2. Minh họa Giai đoạn 2: Khử mù Haze-Pivot, Tăng cường tương phản cục bộ CLAHE (CIE LAB) & Phân tích Histogram RGB""",
     execution_count=2,
     outputs=[img_output(b64_fig2)]),
-    new_code_cell("""# 3. Minh họa Giai đoạn 3: Làm sắc nét biên Unsharp Masking & Nội suy Bicubic nâng chuẩn 720p HD""",
+    new_code_cell("""# 3. Minh họa Giai đoạn 3: Giải chập Richardson-Lucy PSF, Cổng biên Sobel & Siêu phân giải ESPCN 720p/1080p""",
     execution_count=3,
     outputs=[img_output(b64_fig4)]),
     new_code_cell("""# 4. Mục 4.1: Kết quả trực quan 4 cột trên các cảnh bay UAV đa dạng""",
