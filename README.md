@@ -1,29 +1,28 @@
 # ĐỒ ÁN XỬ LÝ ẢNH (IMAGE PROCESSING) — PTIT
-## Đề tài: Xây dựng Pipeline Khôi phục Màu sắc, Khử nhiễu Đa miền và Nâng cao Chất lượng Ảnh thu nhận từ UAV sử dụng Camera giá rẻ ESP32-CAM (OV2640)
+## Đề tài: Xây dựng Pipeline Khôi phục Màu sắc, Khử nhiễu và Nâng cao Chất lượng Ảnh thu nhận từ UAV sử dụng Camera giá rẻ ESP32-CAM (OV2640)
 
 * **Đơn vị:** Khoa Trí tuệ Nhân tạo – Học viện Công nghệ Bưu chính Viễn thông (PTIT)
 * **Giảng viên hướng dẫn:** PGS.TS. Phạm Văn Cường
-* **Loại dự án:** Lựa chọn 2 – Dự án xử lý ảnh thực tế (kết hợp tích hợp mô hình học sâu mã nguồn mở có sẵn **ESPCN** ở bước nâng cấp siêu phân giải HD 720p / Full HD 1080p)
-* **Kiến thức học phần áp dụng:** Chương 2, Chương 3, Chương 4, Chương 5, Chương 6 và Chương 9
-* **Báo cáo chi tiết:** Xem toàn văn tại [`BAO_CAO_DO_AN.md`](BAO_CAO_DO_AN.md) và bản in PDF chuẩn học thuật tại [`docs/BaoCao_DoAn_XuLyAnh.pdf`](docs/BaoCao_DoAn_XuLyAnh.pdf)
+* **Loại dự án:** Lựa chọn 2 – Dự án xử lý ảnh thực tế (kết hợp thử nghiệm mã nguồn mở có sẵn theo hướng dẫn tại Trang 7 `DoAn_XuLyAnh.pdf`)
+* **Kiến thức học phần áp dụng (bám sát bộ bài giảng `docs/1_XLA1` $\rightarrow$ `9_XLA9`):**
+  * **Chương 2 (`2_XLA2_Co ban ve XLA.pdf`):** Hệ thống thị giác người (mắt nhạy cảm độ sáng hơn màu sắc – Slide 40), thu nhận ảnh cảm quang, lấy mẫu & lượng tử hóa 8-bit ($256$ mức xám – Slide 23–25), độ phân giải không gian & mức cường độ sáng (Slide 26–38).
+  * **Chương 3 (`3_XLA3_Nang cao chat luong anh.pdf`):** Toán tử điểm $g(x,y) = T[f(x,y)]$, phân ngưỡng, biến đổi tuyến tính tăng độ tương phản (Slide 9–21); Lược đồ xám (Histogram) & Cân bằng lược đồ xám HE/CLAHE (Slide 22–38); Toán tử láng giềng làm mịn & Khôi phục ảnh nhiễu bằng Bộ lọc trung vị (Median Filter) và Bộ lọc trung bình có điều kiện bảo toàn biên (Slide 43–80).
+  * **Chương 4 (`4_XLA4_ Cac he mau va ky thuat in anh.pdf`):** Định dạng ảnh JPG/PNG (Slide 13–23), mô hình màu cộng RGB (Slide 28–31) và mô hình tách biệt Độ sáng (Value/Luminance) khỏi Độ màu & Độ bão hòa (Saturation – Slide 37–41).
+  * **Chương 5 (`5_XLA5_Phat hien bien.pdf`):** Ba bước phát hiện biên, Đạo hàm bậc 1 – Bộ lọc Sobel & phân ngưỡng biên (Slide 11–25), Đạo hàm bậc 2 – Toán tử Laplacian & Tăng cường ảnh bằng Laplacian (Slide 27–35), Phân vùng biên vs. miền đồng nhất (Slide 55–58).
+  * **Chương 6 (`6_XLA6_Nen anh.pdf`) & Chương 9 (`9_XLA9_Dao duc AI trong XLA.pdf`):** Chuẩn nén JPEG khối $8 \times 8$ DCT & lượng tử hóa (Slide 40–45), tiêu chí đánh giá khách quan MSE/SNR/PSNR (Slide 39), và đạo đức chỉnh sửa ảnh (Slide 5).
+* **Báo cáo tổng quát:** Xem toàn văn tại [`BAO_CAO_DO_AN.md`](BAO_CAO_DO_AN.md) và bản PDF chuẩn nộp bài tại [`docs/BaoCao_DoAn_XuLyAnh.pdf`](docs/BaoCao_DoAn_XuLyAnh.pdf).
 
 ---
 
 ## 1. Môi trường & Yêu cầu Hệ thống (Environment)
 
-* **Hệ điều hành:** Linux (Ubuntu 20.04/22.04/24.04), Windows 10/11 hoặc macOS (Chạy 100% trên CPU thông thường, không bắt buộc GPU rời).
-* **Phiên bản Python:** Python `>= 3.10` (Khuyến nghị Python `3.11` hoặc `3.12`).
-* **Các thư viện cốt lõi (`requirements.txt`):**
-  * `opencv-python >= 4.8.0`: Biến đổi không gian màu CIE $L^*a^*b^*$, CLAHE, lọc Non-Local Means, Median, Bilateral, toán tử Sobel/Laplacian, nội suy Lanczos-4 và xử lý video.
-  * `scikit-image >= 0.21.0` & `PyWavelets >= 1.4.1`: Lọc khử nhiễu đa phân giải Wavelet ngưỡng mềm BayesShrink (`denoise_wavelet`), giải chập lặp quang học Richardson-Lucy PSF (`richardson_lucy`) và tính độ đo chuẩn `PSNR`, `SSIM`.
-  * `onnxruntime >= 1.16.0`: Thực thi mô hình học sâu siêu phân giải mã nguồn mở **ESPCN (Sub-Pixel CNN $3\times$)** (`models/espcn_super_res.onnx`).
-  * `numpy`, `pandas`, `matplotlib`, `nbformat`, `jupyter`, `imageio-ffmpeg`: Tính toán ma trận, xuất biểu đồ 300 DPI, tạo bảng CSV, thực thi Notebook và mã hóa video H.264.
+* **Hệ điều hành:** Linux (Ubuntu 20.04/22.04/24.04), Windows 10/11 hoặc macOS (Chạy 100% trên CPU thông thường).
+* **Phiên bản Python:** Python `>= 3.10`.
+* **Thư viện sử dụng (`requirements.txt`):** `opencv-python`, `scikit-image`, `PyWavelets`, `numpy`, `pandas`, `matplotlib`, `nbformat`, `onnxruntime`, `imageio-ffmpeg`.
 
 ---
 
 ## 2. Hướng dẫn Cài đặt (Installation)
-
-Từ thư mục gốc của dự án (`XLA/`), chạy lệnh cài đặt toàn bộ thư viện phụ thuộc:
 
 ```bash
 pip install -r requirements.txt
@@ -33,14 +32,15 @@ pip install -r requirements.txt
 
 ## 3. Cấu trúc Thư mục & Đường dẫn Dữ liệu (Dataset & Directory Structure)
 
-Toàn bộ dữ liệu kiểm thử (**90 ảnh tĩnh** gồm 60 ảnh bay UAV thực nghiệm + 30 cặp ảnh đối chứng Ground Truth, cùng **3 video bay FPV thực tế** và **6 ảnh mẫu**) đã được đóng gói sẵn trực tiếp trong thư mục `data/` của kho lưu trữ (không cần tải thủ công từ bên ngoài):
+Toàn bộ dữ liệu kiểm thử (**90 ảnh tĩnh** gồm 60 ảnh bay UAV thực nghiệm + 30 cặp ảnh đối chứng Ground Truth, cùng **3 video bay FPV thực tế** và **6 ảnh mẫu**) đã được tích hợp sẵn trong thư mục `data/`:
 
 ```text
 XLA/
 ├── BAO_CAO_DO_AN.md                        # Báo cáo tổng quát đồ án (bản Markdown đầy đủ)
 ├── docs/
 │   ├── BaoCao_DoAn_XuLyAnh.pdf             # Báo cáo tổng quát đồ án (bản PDF chuẩn 4-10 trang để nộp)
-│   └── DoAn_XuLyAnh.pdf                    # File quy định yêu cầu đồ án của PGS.TS. Phạm Văn Cường
+│   ├── DoAn_XuLyAnh.pdf                    # File hướng dẫn đồ án của PGS.TS. Phạm Văn Cường
+│   └── 1_XLA1... -> 9_XLA9...pdf           # Bộ bài giảng gốc của học phần Xử lý ảnh
 ├── data/                                   # [ĐƯỜNG DẪN DỮ LIỆU ĐÃ TÍCH HỢP SẴN]
 │   ├── samples/                            # 6 ảnh mẫu tiêu biểu phục vụ chạy demo nhanh
 │   ├── real_uav/                           # 60 ảnh bay UAV thực nghiệm đa bối cảnh (>= 50 ảnh theo quy định)
@@ -48,9 +48,6 @@ XLA/
 │   ├── synthetic_degraded/                 # 30 ảnh suy giảm mô phỏng phần cứng OV2640 tương ứng
 │   ├── raw_videos/                         # 3 video bay FPV thực tế từ camera ESP32-CAM
 │   └── dataset_manifest.csv                # Bảng log chi tiết nguồn và tham số của toàn bộ 90 ảnh
-├── models/
-│   ├── espcn_super_res.onnx                # Mô hình học sâu mã nguồn mở ESPCN 3x Super-Resolution (ONNX)
-│   └── realesrgan_vulkan/                  # Bộ công cụ mã nguồn mở Real-ESRGAN NCNN Vulkan
 ├── src/
 │   ├── __init__.py
 │   ├── uav_pipeline.py                     # Module lõi chứa toàn bộ Pipeline 3 giai đoạn, Baselines & Độ đo
@@ -58,44 +55,42 @@ XLA/
 ├── notebooks/
 │   ├── 00_Full_Pipeline_Master.ipynb       # [Tổng hợp] Notebook báo cáo End-to-End có sẵn kết quả inline
 │   ├── 01_Data_Prep_and_Degradation.ipynb  # [TV2 & TV4] Chuẩn bị 90 ảnh đa nguồn & Mô hình suy giảm OV2640
-│   ├── 02_Stage1_Preprocess_PinkFix.ipynb  # [TV1] Mặt nạ khử cháy hồng α(x,y) + Masked AWB + Wavelet/NLM Denoise
-│   ├── 03_Stage2_LAB_CLAHE_Baselines.ipynb # [TV3] CIE LAB Haze-Pivot + CLAHE + Đối chứng Global HE + Histogram
-│   ├── 04_Stage3_Sharpen_Upscale720p.ipynb # [TV2] Giải chập Richardson-Lucy + Sobel Gate + ESPCN 720p/1080p
-│   └── 05_Evaluation_50Images_Tables.ipynb # [TV4] Đánh giá định lượng 90 ảnh & Xuất Bảng 1, Bảng 2
+│   ├── 02_Stage1_Preprocess_PinkFix.ipynb  # [TV1] Toán tử điểm & Phân ngưỡng mềm khử hồng + Lọc nhiễu (Ch.3, 4, 6)
+│   ├── 03_Stage2_LAB_CLAHE_Baselines.ipynb # [TV3] Tách kênh sáng, Kéo giãn tương phản & CLAHE + Histogram (Ch.3, 4)
+│   ├── 04_Stage3_Sharpen_Upscale720p.ipynb # [TV2] Phát hiện biên Sobel + Tăng cường Laplacian & Nâng HD (Ch.2, 5)
+│   └── 05_Evaluation_50Images_Tables.ipynb # [TV4] Đánh giá định lượng 90 ảnh & Xuất Bảng 1, Bảng 2 (Ch.3, 5, 6)
 ├── results/
 │   ├── figures/                            # 4 hình minh họa chuẩn 300 DPI cho báo cáo
 │   ├── hd_outputs/                         # Bộ ảnh đầu ra độ phân giải thực 1:1 (HD 720p & Full HD 1080p)
 │   ├── tables/                             # Bảng số liệu định lượng CSV (table1_synthetic, table2_real_uav)
 │   └── video/                              # 4 video demo kết quả khôi phục và đối sánh Side-by-Side (720p & 1080p)
-├── requirements.txt                        # Danh sách thư viện cài đặt
-├── PLAN.md                                 # Kế hoạch thiết kế toán học và lộ trình thực hiện
-└── README.md                               # Tài liệu hướng dẫn sử dụng này
+├── web/
+│   ├── server.py                           # Backend FastAPI xử lý upload Ảnh/Video & gọi Pipeline 3 giai đoạn
+│   └── index.html                          # Giao diện Web kéo thả (Drag & Drop), Slider so sánh & Player MP4
+├── requirements.txt
+├── PLAN.md
+└── README.md
 ```
 
 ---
 
 ## 4. Lệnh chạy Chương trình (Execution Commands)
 
-### Cách 1: Chạy kịch bản tự động tái tạo toàn bộ Bảng số liệu, Hình minh họa 300 DPI, Video Demo & Notebooks
+### Chạy ứng dụng Web kéo thả Ảnh/Video (`XLA UAV Restoration Studio`):
+```bash
+python3 web/server.py
+```
+Sau khi khởi động, mở trình duyệt tại **`http://localhost:8000`** (có thể đổi cổng bằng biến môi trường `PORT=8080 python3 web/server.py`):
+* **Kéo & thả (Drag & Drop)** hoặc chọn bất kỳ file Ảnh (`.jpg`, `.png`, `.webp`, `.bmp`) hoặc Video (`.mp4`, `.avi`, `.mov`, `.mkv`) — pipeline tự động chạy ngay và xuất kết quả mới.
+* Hoặc bấm trực tiếp vào các **mẫu UAV có sẵn** (`data/samples/`, `data/raw_videos/`) để chạy thử nhanh.
+* Hỗ trợ **Slider so sánh Trước / Sau**, xem từng giai đoạn (Stage 1 / Stage 2 / Output), theo dõi tiến trình xử lý video theo frame, xem các chỉ số định lượng (Pink Cast Index, Entropy, Laplacian Variance) và tải file kết quả về máy.
+
+### Chạy kịch bản tái tạo toàn bộ Bảng số liệu, Hình minh họa 300 DPI, Video Demo & Notebooks:
 ```bash
 python3 src/build_notebooks_and_results.py
 ```
 
-### Cách 2: Chạy khôi phục và nâng cấp siêu phân giải cho một ảnh bất kỳ bằng Python CLI
-```bash
-python3 -c "
-import cv2
-from src.uav_pipeline import run_full_pipeline
-img = cv2.imread('data/samples/sample_sim_pink_road_1.jpg')
-res = run_full_pipeline(img, return_intermediates=True)
-cv2.imwrite('results/demo_output_720p.png', res['output_720p'])
-cv2.imwrite('results/demo_output_1080p.png', res['output_1080p'])
-print('Đã xuất ảnh khôi phục HD 720p và Full HD 1080p thành công!')
-"
-```
-
-### Cách 3: Mở và tương tác trực tiếp trên Jupyter Notebook / VS Code / Google Colab
-Toàn bộ 6 tệp trong thư mục `notebooks/` đã được thực thi sẵn và nhúng đầy đủ biểu đồ, hình ảnh, bảng số liệu. Để khởi động Jupyter:
+### Mở báo cáo tương tác trên Jupyter Notebook / VS Code:
 ```bash
 jupyter notebook notebooks/00_Full_Pipeline_Master.ipynb
 ```
@@ -104,21 +99,11 @@ jupyter notebook notebooks/00_Full_Pipeline_Master.ipynb
 
 ## 5. Đầu ra Mong đợi (Expected Outputs)
 
-Sau khi chạy lệnh thực nghiệm, hệ thống tự động sinh ra các đầu ra chuẩn xác sau:
-
-1. **Bảng kết quả định lượng (`results/tables/table1_synthetic_metrics.csv` & `table2_real_uav_metrics.csv`):**
-   * **Trên 30 cặp ảnh đối chứng (Synthetic Ground Truth):**
-     * **PSNR:** Tăng từ **$20.35\text{ dB}$** (Ảnh suy giảm) và **$12.53\text{ dB}$** (Đối chứng Global HE RGB) lên **$27.66\text{ dB}$** (Giai đoạn 1+2) và **$27.42\text{ dB}$** (Full Pipeline) — cải thiện **$+7.07\text{ dB}$** so với ảnh gốc.
-     * **SSIM:** Tăng từ **$0.7015$** lên **$0.8295$** (Giai đoạn 1+2) và **$0.8180$** (Full Pipeline).
-     * **Sai lệch màu CIE LAB ($\Delta E_{ab}^*$):** Giảm **$60\%$**, từ **$24.74$** xuống **$9.89 - 10.06$**.
-   * **Trên 60 ảnh bay UAV thực nghiệm (`data/real_uav/`):**
-     * **Pink Cast Index (PCI %):** Giảm từ **$17.45\%$** xuống **$2.55\%$** sau Giai đoạn 1 và duy trì ở **$7.01\% - 7.05\%$** sau khi kích tương phản & độ bão hòa toàn cảnh.
-     * **Shannon Entropy:** Tăng từ **$6.364\text{ bits}$** lên **$6.850 - 6.860\text{ bits}$**.
-     * **Độ sắc nét biên (Laplacian Variance):** Tăng gấp **$1.87$ lần**, từ **$121.1$** lên **$226.5$**.
-2. **Hình ảnh minh họa báo cáo (`results/figures/` & `results/hd_outputs/`):**
-   * `fig1_stage1_pink_mask_recovery.png`: Minh họa mặt nạ trọng số mềm $\alpha(x,y)$ và khôi phục vùng cháy hồng.
-   * `fig2_stage2_lab_clahe_histograms.png`: Đối sánh ảnh đầu vào – đầu ra và biểu đồ Histogram 3 kênh RGB.
-   * `fig3_4col_comparison_grid.png`: Lưới so sánh 4 cột trên 3 cảnh bay UAV khác nhau.
-   * `fig4_upscale_720p_zoom.png`: Phóng to vùng chi tiết (Zoom-in ROI) chứng minh mặt đường sạch nhiễu hạt và tán cây/xe cộ sắc nét ở chuẩn HD 720p & Full HD 1080p.
-3. **Video Demo thực tế (`results/video/`):**
-   * `demo_esp32_restoration_720p.mp4` & `demo_urban_uav_SideBySide_FullHD_1080p.mp4`: Video đối sánh trực tiếp Side-by-Side (Trái: Gốc ESP32-CAM, Phải: Đã khôi phục qua Pipeline).
+* **Trên 30 cặp ảnh đối chứng (`results/tables/table1_synthetic_metrics.csv`):**
+  * **PSNR (Chương 6 Slide 39):** Tăng từ **$20.35\text{ dB}$** (Ảnh suy giảm) và **$12.53\text{ dB}$** (Đối chứng Global HE RGB) lên **$27.66\text{ dB}$** (Giai đoạn 1+2) và **$27.42\text{ dB}$** (Pipeline đầy đủ) — tăng **$+7.07\text{ dB}$** so với ảnh gốc.
+  * **SSIM:** Tăng từ **$0.7015$** lên **$0.8295$** (Giai đoạn 1+2) và **$0.8180$** (Pipeline đầy đủ).
+  * **Sai lệch màu ($\Delta E$):** Giảm **$60\%$**, từ **$24.74$** xuống **$9.89 - 10.06$**.
+* **Trên 60 ảnh bay UAV thực nghiệm (`results/tables/table2_real_uav_metrics.csv`):**
+  * **Pink Cast Index (PCI %):** Giảm từ **$17.45\%$** xuống **$2.55\%$** sau Giai đoạn 1 và duy trì ở **$7.01\% - 7.05\%$** sau khi kéo giãn tương phản & bù độ bão hòa màu.
+  * **Entropy lược đồ xám (Chương 3):** Tăng từ **$6.364\text{ bits}$** lên **$6.850 - 6.860\text{ bits}$**.
+  * **Phương sai đạo hàm bậc 2 Laplacian (Chương 5):** Tăng gấp **$1.87$ lần**, từ **$121.1$** lên **$226.5$**.

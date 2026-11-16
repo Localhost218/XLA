@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XLA UAV Restoration Pipeline — Ảnh & Video</title>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --surface: #131a26;
+      --surface-2: #1a2333;
+      --border: #263248;
+      --text: #e6edf7;
+      --muted: #8b9bb4;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --blue: #3b82f6;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .title-wrap h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.14);
+      color: var(--accent);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      align-items: center;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .control-group label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    select {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus { border-color: var(--accent); }
+
+    .dropzone {
+      border: 2px dashed var(--border);
+      background: linear-gradient(180deg, rgba(26, 35, 51, 0.55), rgba(19, 26, 38, 0.85));
+      border-radius: 16px;
+      padding: 42px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      margin-bottom: 18px;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.08);
+      transform: translateY(-1px);
+    }
+    .dropzone-icon {
+      font-size: 2.4rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .dropzone h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .dropzone p {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #052e1f;
+    }
+    .btn-primary:hover { background: var(--accent-hover); color: #fff; }
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--muted); }
+
+    .samples-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 22px;
+    }
+    .samples-title {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+    }
+    .samples-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sample-chip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sample-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .status-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 22px;
+    }
+    .status-card.visible { display: block; }
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: var(--surface-2);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blue), var(--accent));
+      transition: width 0.25s ease;
+    }
+    .error-banner {
+      display: none;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      font-size: 0.9rem;
+    }
+    .error-banner.visible { display: block; }
+
+    .result-section { display: none; }
+    .result-section.visible { display: block; }
+    .result-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .tab-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--surface-2);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Before / After Slider */
+    .compare-wrap {
+      position: relative;
+      width: 100%;
+      max-height: 70vh;
+      background: #05070b;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      user-select: none;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .compare-stage {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      max-height: 70vh;
+    }
+    .compare-stage img {
+      display: block;
+      max-width: 100%;
+      max-height: 70vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+    .compare-before {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      clip-path: inset(0 50% 0 0);
+    }
+    .compare-before img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .compare-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+      pointer-events: none;
+    }
+    .compare-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #052e1f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+    }
+    .compare-label {
+      position: absolute;
+      top: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(11, 15, 23, 0.78);
+      border: 1px solid var(--border);
+      pointer-events: none;
+    }
+    .label-left { left: 12px; color: #fca5a5; }
+    .label-right { right: 12px; color: #6ee7b7; }
+    .compare-range {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: ew-resize;
+      margin: 0;
+    }
+
+    .single-view {
+      width: 100%;
+      background: #05070b;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .single-view img, .single-view video {
+      max-width: 100%;
+      max-height: 70vh;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .metric-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    .metric-sub {
+      font-size: 0.78rem;
+      color: var(--accent);
+      margin-top: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-wrap">
+        <h1>
+          <span>🛸 XLA UAV Restoration Studio</span>
+          <span class="badge">Wavelet + NLM + LAB CLAHE + RL + ESPCN</span>
+        </h1>
+        <p class="subtitle">
+          Kéo thả Ảnh hoặc Video vào bên dưới — Pipeline 3 giai đoạn tự động khử ám hồng, khử nhiễu, cân bằng tương phản và nâng độ phân giải.
+        </p>
+      </div>
+    </header>
+
+    <div class="controls-bar">
+      <div class="control-group">
+        <label for="imageMode">Đầu ra Ảnh:</label>
+        <select id="imageMode">
+          <option value="hd_720p" selected>HD 720p (ESPCN Super-Res)</option>
+          <option value="full_hd_1080p">Full HD 1080p (ESPCN Super-Res)</option>
+          <option value="native">Độ phân giải gốc (Native)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="videoMode">Đầu ra Video:</label>
+        <select id="videoMode">
+          <option value="side_by_side_720p" selected>Side-by-Side 720p (So sánh)</option>
+          <option value="hd_720p">Full-frame HD 720p</option>
+          <option value="side_by_side_1080p">Side-by-Side 1080p (So sánh)</option>
+          <option value="full_hd_1080p">Full-frame Full HD 1080p</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="maxFrames">Số frame Video tối đa:</label>
+        <select id="maxFrames">
+          <option value="60">60 frames (~2s, nhanh)</option>
+          <option value="90" selected>90 frames (~3s)</option>
+          <option value="180">180 frames (~6s)</option>
+          <option value="0">Toàn bộ video</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="dropzone" class="dropzone">
+      <input type="file" id="fileInput" accept="image/*,video/*" hidden />
+      <span class="dropzone-icon">📥</span>
+      <h2>Kéo & thả Video hoặc Ảnh vào đây (hoặc bấm để chọn file)</h2>
+      <p>Hỗ trợ JPG, PNG, WEBP, MP4, AVI, MOV, MKV — Tự động chạy pipeline ngay khi thả file</p>
+    </div>
+
+    <div class="samples-box">
+      <div class="samples-title">Hoặc bấm chạy thử ngay với dữ liệu UAV mẫu có sẵn:</div>
+      <div id="samplesList" class="samples-list">
+        <span style="color: var(--muted); font-size: 0.85rem;">Đang tải danh sách mẫu...</span>
+      </div>
+    </div>
+
+    <div id="errorBanner" class="error-banner"></div>
+
+    <div id="statusCard" class="status-card">
+      <div class="status-row">
+        <div id="statusText"><span class="spinner"></span>Đang xử lý...</div>
+        <div id="statusDetail" style="color: var(--muted); font-size: 0.85rem;"></div>
+      </div>
+      <div class="progress-track">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <section id="resultSection" class="result-section">
+      <div class="result-header">
+        <h3 id="resultTitle">Kết quả khôi phục</h3>
+        <a id="downloadBtn" class="btn btn-primary" href="#" download>⬇ Tải kết quả về máy</a>
+      </div>
+
+      <div id="imageTabs" class="tabs" style="display: none;">
+        <button class="tab-btn active" data-view="compare">So sánh Trước / Sau (Slider)</button>
+        <button class="tab-btn" data-view="output">Kết quả cuối (Output)</button>
+        <button class="tab-btn" data-view="stage1">Giai đoạn 1 (Khử hồng + Denoise)</button>
+        <button class="tab-btn" data-view="stage2">Giai đoạn 2 (LAB + CLAHE)</button>
+        <button class="tab-btn" data-view="input">Ảnh gốc (Input)</button>
+      </div>
+
+      <div id="compareContainer" class="compare-wrap" style="display: none;">
+        <div class="compare-stage">
+          <img id="cmpAfterImg" alt="Output" />
+          <div id="cmpBeforeClip" class="compare-before">
+            <img id="cmpBeforeImg" alt="Input" />
+          </div>
+          <div id="cmpDivider" class="compare-divider"></div>
+          <div id="cmpHandle" class="compare-handle">⇄</div>
+          <span class="compare-label label-left">TRƯỚC (Gốc)</span>
+          <span class="compare-label label-right">SAU (Khôi phục)</span>
+          <input id="cmpSlider" class="compare-range" type="range" min="0" max="100" value="50" />
+        </div>
+      </div>
+
+      <div id="singleContainer" class="single-view" style="display: none;"></div>
+
+      <div id="metricsGrid" class="metrics-grid"></div>
+    </section>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const samplesList = document.getElementById("samplesList");
+    const statusCard = document.getElementById("statusCard");
+    const statusText = document.getElementById("statusText");
+    const statusDetail = document.getElementById("statusDetail");
+    const progressFill = document.getElementById("progressFill");
+    const errorBanner = document.getElementById("errorBanner");
+    const resultSection = document.getElementById("resultSection");
+    const resultTitle = document.getElementById("resultTitle");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const imageTabs = document.getElementById("imageTabs");
+    const compareContainer = document.getElementById("compareContainer");
+    const singleContainer = document.getElementById("singleContainer");
+    const metricsGrid = document.getElementById("metricsGrid");
+
+    const cmpAfterImg = document.getElementById("cmpAfterImg");
+    const cmpBeforeImg = document.getElementById("cmpBeforeImg");
+    const cmpBeforeClip = document.getElementById("cmpBeforeClip");
+    const cmpDivider = document.getElementById("cmpDivider");
+    const cmpHandle = document.getElementById("cmpHandle");
+    const cmpSlider = document.getElementById("cmpSlider");
+
+    let currentResult = null;
+    let pollTimer = null;
+
+    function showError(msg) {
+      errorBanner.textContent = msg;
+      errorBanner.classList.add("visible");
+    }
+    function clearError() {
+      errorBanner.classList.remove("visible");
+    }
+
+    function setSlider(pct) {
+      cmpBeforeClip.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+      cmpDivider.style.left = `${pct}%`;
+      cmpHandle.style.left = `${pct}%`;
+    }
+    cmpSlider.addEventListener("input", (e) => setSlider(Number(e.target.value)));
+
+    async function loadSamples() {
+      try {
+        const res = await fetch("/api/samples");
+        const data = await res.json();
+        samplesList.innerHTML = "";
+        const items = [
+          ...data.images.map((x) => ({ ...x, icon: "🖼️" })),
+          ...data.videos.map((x) => ({ ...x, icon: "🎬" })),
+        ];
+        if (!items.length) {
+          samplesList.innerHTML = '<span style="color:var(--muted)">Không tìm thấy file mẫu.</span>';
+          return;
+        }
+        for (const item of items) {
+          const btn = document.createElement("button");
+          btn.className = "sample-chip";
+          btn.textContent = `${item.icon} ${item.name}`;
+          btn.onclick = () => runSample(item.path, item.name);
+          samplesList.appendChild(btn);
+        }
+      } catch {
+        samplesList.innerHTML = '<span style="color:var(--muted)">Không tải được danh sách mẫu.</span>';
+      }
+    }
+
+    function buildQuery() {
+      const imageMode = document.getElementById("imageMode").value;
+      const videoMode = document.getElementById("videoMode").value;
+      const maxFrames = document.getElementById("maxFrames").value;
+      return `image_mode=${encodeURIComponent(imageMode)}&video_mode=${encodeURIComponent(videoMode)}&max_frames=${encodeURIComponent(maxFrames)}`;
+    }
+
+    function startLoading(label) {
+      clearError();
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      resultSection.classList.remove("visible");
+      statusCard.classList.add("visible");
+      statusText.innerHTML = `<span class="spinner"></span>${label}`;
+      statusDetail.textContent = "";
+      progressFill.style.width = "18%";
+    }
+
+    async function runFile(file) {
+      startLoading(`Đang tải lên & chạy pipeline cho "${file.name}"...`);
+      try {
+        const res = await fetch(`/api/process?${buildQuery()}`, {
+          method: "POST",
+          headers: { "X-Filename": encodeURIComponent(file.name) },
+          body: file,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Lỗi xử lý file.");
+        handleProcessResponse(data, file.name);
+      } catch (err) {
+        statusCard.classList.remove("visible");
+        showError(err.message);
+      }
+    }
+
+    async function runSample(samplePath, displayName) {
+      startLoading(`Đang chạy pipeline trên mẫu "${displayName}"...`);
+      try {
+        const res = await fetch(`/api/process?${buildQuery()}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sample_path: samplePath }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Lỗi xử lý mẫu.");
+        handleProcessResponse(data, displayName);
+      } catch (err) {
+        statusCard.classList.remove("visible");
+        showError(err.message);
+      }
+    }
+
+    function handleProcessResponse(data, name) {
+      if (data.media_type === "image") {
+        statusCard.classList.remove("visible");
+        renderImageResult(data, name);
+      } else if (data.media_type === "video") {
+        pollVideoJob(data.job_id, name);
+      }
+    }
+
+    function pollVideoJob(jobId, name) {
+      pollTimer = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/jobs/${jobId}`);
+          const job = await res.json();
+          if (job.status === "error") {
+            clearInterval(pollTimer);
+            pollTimer = null;
+            statusCard.classList.remove("visible");
+            showError(job.error || "Xử lý video thất bại.");
+            return;
+          }
+          if (job.status === "encoding") {
+            statusText.innerHTML = `<span class="spinner"></span>Đang nén MP4 H.264 cho "${name}"...`;
+            progressFill.style.width = "95%";
+            return;
+          }
+          if (job.status === "done") {
+            clearInterval(pollTimer);
+            pollTimer = null;
+            progressFill.style.width = "100%";
+            statusCard.classList.remove("visible");
+            renderVideoResult(job, name);
+            return;
+          }
+          const done = job.frames_done || 0;
+          const total = job.total_frames || 1;
+          const pct = Math.min(92, Math.max(8, Math.round((done / total) * 92)));
+          progressFill.style.width = `${pct}%`;
+          statusText.innerHTML = `<span class="spinner"></span>Đang xử lý video "${name}"...`;
+          statusDetail.textContent = `Frame ${done} / ${total}${job.avg_ms ? ` (${job.avg_ms} ms/frame)` : ""}`;
+        } catch (err) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+          statusCard.classList.remove("visible");
+          showError("Mất kết nối khi theo dõi tiến trình video.");
+        }
+      }, 600);
+    }
+
+    function renderImageResult(data, name) {
+      currentResult = data;
+      resultTitle.textContent = `Kết quả Ảnh: ${name}`;
+      downloadBtn.href = data.files.output;
+      downloadBtn.download = `restored_${name.replace(/\.[^.]+$/, "")}.png`;
+
+      imageTabs.style.display = "flex";
+      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelector('.tab-btn[data-view="compare"]').classList.add("active");
+
+      cmpBeforeImg.src = data.files.input;
+      cmpAfterImg.src = data.files.output;
+      setSlider(50);
+      cmpSlider.value = 50;
+
+      compareContainer.style.display = "flex";
+      singleContainer.style.display = "none";
+
+      const b = data.metrics.before;
+      const a = data.metrics.after;
+      metricsGrid.innerHTML = `
+        <div class="metric-card">
+          <div class="metric-label">Pink Cast Index (Ám hồng)</div>
+          <div class="metric-value">${b.pci}% → ${a.pci}%</div>
+          <div class="metric-sub">Thấp hơn là màu trung tính hơn</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Entropy (Độ giàu thông tin)</div>
+          <div class="metric-value">${b.entropy} → ${a.entropy} bits</div>
+          <div class="metric-sub">Cao hơn là tương phản tốt hơn</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Laplacian Var (Độ sắc nét)</div>
+          <div class="metric-value">${b.laplacian_var} → ${a.laplacian_var}</div>
+          <div class="metric-sub">Chi tiết biên & tán cây rõ hơn</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Độ phân giải & Thời gian</div>
+          <div class="metric-value">${b.width}×${b.height} → ${a.width}×${a.height}</div>
+          <div class="metric-sub">Xử lý trong ${data.metrics.runtime_ms} ms</div>
+        </div>
+      `;
+      resultSection.classList.add("visible");
+    }
+
+    function renderVideoResult(job, name) {
+      currentResult = job;
+      resultTitle.textContent = `Kết quả Video: ${name}`;
+      downloadBtn.href = job.files.output;
+      downloadBtn.download = `restored_${name.replace(/\.[^.]+$/, "")}.mp4`;
+
+      imageTabs.style.display = "none";
+      compareContainer.style.display = "none";
+      singleContainer.style.display = "block";
+      singleContainer.innerHTML = `<video src="${job.files.output}" controls autoplay loop playsinline></video>`;
+
+      const m = job.metrics || {};
+      const b = m.before || {};
+      const a = m.after || {};
+      metricsGrid.innerHTML = `
+        <div class="metric-card">
+          <div class="metric-label">Số frame đã xử lý</div>
+          <div class="metric-value">${m.frames || job.frames_done} frames</div>
+          <div class="metric-sub">${m.avg_ms || "-"} ms/frame (${m.fps || "-"} FPS)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Độ phân giải đầu ra</div>
+          <div class="metric-value">${job.out_width}×${job.out_height}</div>
+          <div class="metric-sub">H.264 MP4 (yuv420p)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Pink Cast Index (Frame đầu)</div>
+          <div class="metric-value">${b.pci ?? "-"}% → ${a.pci ?? "-"}%</div>
+          <div class="metric-sub">Khử ám hồng OV2640</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Entropy (Frame đầu)</div>
+          <div class="metric-value">${b.entropy ?? "-"} → ${a.entropy ?? "-"} bits</div>
+          <div class="metric-sub">Cân bằng sáng LAB + CLAHE</div>
+        </div>
+      `;
+      resultSection.classList.add("visible");
+    }
+
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (!currentResult || currentResult.media_type !== "image") return;
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const view = btn.dataset.view;
+        if (view === "compare") {
+          compareContainer.style.display = "flex";
+          singleContainer.style.display = "none";
+        } else {
+          compareContainer.style.display = "none";
+          singleContainer.style.display = "block";
+          singleContainer.innerHTML = `<img src="${currentResult.files[view]}" alt="${view}" />`;
+        }
+      });
+    });
+
+    dropzone.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files.length) runFile(e.target.files[0]);
+      fileInput.value = "";
+    });
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer.files.length) runFile(e.dataTransfer.files[0]);
+    });
+
+    loadSamples();
+  </script>
+</body>
+</html>
