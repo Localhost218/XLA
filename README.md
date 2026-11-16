@@ -50,7 +50,9 @@ XLA/
 │   └── dataset_manifest.csv                # Bảng log chi tiết nguồn và tham số của toàn bộ 90 ảnh
 ├── src/
 │   ├── __init__.py
-│   ├── uav_pipeline.py                     # Module lõi chứa toàn bộ Pipeline 3 giai đoạn, Baselines & Độ đo
+│   ├── uav_pipeline.py                     # Pipeline v2 (thích nghi: hồng/AWB/nhiễu/Retinex/ESPCN-Y)
+│   ├── uav_pipeline_v1.py                  # Bản gốc đóng băng để so sánh "Trước"
+│   ├── data_augmentation.py                # Sinh tập augmented đa kịch bản có seed (data/augmented/)
 │   └── build_notebooks_and_results.py      # Script chạy thực nghiệm 90 ảnh, xuất hình 300 DPI, bảng CSV & Video
 ├── notebooks/
 │   ├── 00_Full_Pipeline_Master.ipynb       # [Tổng hợp] Notebook báo cáo End-to-End có sẵn kết quả inline
@@ -97,13 +99,18 @@ jupyter notebook notebooks/00_Full_Pipeline_Master.ipynb
 
 ---
 
-## 5. Đầu ra Mong đợi (Expected Outputs)
+## 5. Kết quả Trước vs Sau cải thiện (pipeline v2)
 
-* **Trên 30 cặp ảnh đối chứng (`results/tables/table1_synthetic_metrics.csv`):**
-  * **PSNR (Chương 6 Slide 39):** Tăng từ **$20.35\text{ dB}$** (Ảnh suy giảm) và **$12.53\text{ dB}$** (Đối chứng Global HE RGB) lên **$27.66\text{ dB}$** (Giai đoạn 1+2) và **$27.42\text{ dB}$** (Pipeline đầy đủ) — tăng **$+7.07\text{ dB}$** so với ảnh gốc.
-  * **SSIM:** Tăng từ **$0.7015$** lên **$0.8295$** (Giai đoạn 1+2) và **$0.8180$** (Pipeline đầy đủ).
-  * **Sai lệch màu ($\Delta E$):** Giảm **$60\%$**, từ **$24.74$** xuống **$9.89 - 10.06$**.
-* **Trên 60 ảnh bay UAV thực nghiệm (`results/tables/table2_real_uav_metrics.csv`):**
-  * **Pink Cast Index (PCI %):** Giảm từ **$17.45\%$** xuống **$2.55\%$** sau Giai đoạn 1 và duy trì ở **$7.01\% - 7.05\%$** sau khi kéo giãn tương phản & bù độ bão hòa màu.
-  * **Entropy lược đồ xám (Chương 3):** Tăng từ **$6.364\text{ bits}$** lên **$6.850 - 6.860\text{ bits}$**.
-  * **Phương sai đạo hàm bậc 2 Laplacian (Chương 5):** Tăng gấp **$1.87$ lần**, từ **$121.1$** lên **$226.5$**.
+Môi trường chạy: `python -m venv .venv && .venv/Scripts/pip install -r requirements.txt`. Tạo tập augmented: `python -m src.data_augmentation --seed 2026`. Chạy benchmark: `python -m src.build_notebooks_and_results` (bản "Trước" là `src/uav_pipeline_v1.py`). Bảng đầy đủ ở `results/tables/` (table3..table8), hình `results/figures/fig5..fig8`.
+
+| Nhóm | Chỉ số | Đầu vào | Trước (v1) | Sau (v2) |
+|---|---|---|---|---|
+| 30 cặp synthetic gốc | PSNR / SSIM / ΔE | 20.35 / 0.702 / 24.74 | **27.42 / 0.818 / 10.06** | 25.39 / 0.700 / 14.55 |
+| haze_pink | PSNR / ΔE | 15.84 / 42.38 | 20.36 / 25.03 | **25.22 / 15.98** |
+| low_light | PSNR / ΔE / L̄ / % đen | 14.32 / 52.32 / 16.6 / 0.8 | 10.82 / 79.96 / 4.3 / 51.4 | **18.25 / 32.51 / 30.9 / 0.06** |
+| backlit_uneven | PSNR / ΔE / % đen | 16.86 / 35.01 / 2.3 | 13.51 / 53.62 / 29.4 | **17.24 / 34.13 / 1.5** |
+| motion_jpeg | PSNR / ΔE | 28.67 / 7.21 | 21.54 / 19.37 | 24.50 / 15.16 |
+| 60 ảnh thật | PCI % / % đen | 17.45 / 0 | 7.03 / 1.94 | **1.38 / 0.38** |
+| Ảnh tối 051–056 | L̄ | 22–35 | 5.7–19.6 (052/053: 41–69 % đen) | **36–44, 0 % đen** |
+
+Lưu ý trung thực: trên 30 cặp synthetic gốc, v1 vẫn tốt hơn v2 về PSNR/SSIM/ΔE vì v1 dùng pivot cố định 172 trùng đúng mô hình sinh suy giảm của tập này; v2 là bản thích nghi nên đổi lấy việc không phá ảnh tối. Với `motion_jpeg`, v2 không vượt ảnh đầu vào về PSNR/ΔE (các cảnh GT vốn tối bị nâng sáng, xem `table7`). Thời gian chạy tuần tự v2 ≈ 5.5 s/ảnh 800×600 so với v1 ≈ 4.1 s.

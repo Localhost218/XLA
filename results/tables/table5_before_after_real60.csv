@@ -1,0 +1,4 @@
+Method,Entropy (bits),Laplacian_Var,Pink_Cast (%),L_mean,Crush0 (%),Clip255 (%),Runtime (ms)
+1. Ảnh đầu vào (suy giảm),6.364,121.1,17.45,51.1,0.0,0.0,0.0
+4. TRƯỚC cải thiện: Pipeline v1 (VGA),6.85,226.5,7.03,44.9,1.94,0.07,15424.0
+7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),7.159,186.5,1.38,44.6,0.38,0.0,21669.1

@@ -1,9 +1,10 @@
-Method,Resolution,PSNR (dB),SSIM,DeltaE_ab,Entropy (bits),Laplacian_Var,Pink_Cast (%)
-1. Ảnh suy giảm (ESP32-CAM 640x480),800x600,20.35,0.7015,24.74,6.648,142.2,8.52
-2. Đối chứng 1: Global HE (RGB),800x600,12.53,0.4155,59.38,7.888,1760.8,8.98
-3. Đối chứng 2: Global HE (LAB),800x600,13.09,0.4214,52.17,7.542,1782.3,8.69
-4. Giai đoạn 1: Wavelet+NLM + Khử hồng,800x600,20.89,0.7639,22.98,6.526,52.4,2.61
-5. Giai đoạn 1+2: + Haze-Pivot & CLAHE,800x600,27.66,0.8295,9.89,6.884,109.8,5.68
-6. Pipeline Đề xuất (3 Giai đoạn - VGA),800x600,27.42,0.818,10.06,6.917,186.9,5.61
-7. Pipeline Đề xuất + ESPCN HD 720p (960x720),960x720,27.4,0.8051,10.09,6.917,134.1,5.67
-8. Pipeline Đề xuất + ESPCN Full HD 1080p (1440x1080),1440x1080,27.33,0.7881,10.16,6.91,54.2,5.63
+Method,Resolution,PSNR (dB),SSIM,DeltaE_ab,Entropy (bits),Laplacian_Var,Pink_Cast (%),L_mean,Crush0 (%),Clip255 (%),Runtime (ms)
+1. Ảnh đầu vào (suy giảm),800x600,20.35,0.7015,24.74,6.648,142.2,8.52,43.5,0.0,0.0,0.0
+2. Đối chứng 1: Global HE (RGB),800x600,12.53,0.4155,59.38,7.888,1760.8,8.98,53.0,0.79,0.78,52.4
+3. Đối chứng 2: Global HE (LAB),800x600,13.09,0.4214,52.17,7.542,1782.3,8.69,50.5,0.56,0.08,721.3
+4. TRƯỚC cải thiện: Pipeline v1 (VGA),800x600,27.42,0.818,10.06,6.917,186.9,5.61,36.6,3.88,0.02,14573.1
+5. SAU: Giai đoạn 1 (khử hồng + AWB + khử nhiễu thích nghi),800x600,20.43,0.7122,24.07,6.628,114.1,0.0,43.6,0.0,0.0,6496.4
+6. SAU: Giai đoạn 1+2 (Retinex/veil/dehaze + CLAHE),800x600,25.28,0.6837,14.61,7.194,319.3,0.39,36.5,0.97,0.0,10644.3
+7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),800x600,25.39,0.6996,14.55,7.2,215.6,0.41,36.5,0.92,0.0,21210.2
+8. SAU: Pipeline v2 + ESPCN HD 720p,960x720,25.27,0.6748,14.67,7.224,158.2,0.41,36.4,1.04,0.0,25163.5
+9. SAU: Pipeline v2 + ESPCN Full HD 1080p,1440x1080,25.11,0.6442,14.86,7.232,59.8,0.41,36.4,1.11,0.0,26666.0

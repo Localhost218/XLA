@@ -1,0 +1,4 @@
+Method,PSNR (dB),SSIM,DeltaE_ab,Entropy (bits),Laplacian_Var,Pink_Cast (%),L_mean,Crush0 (%),Clip255 (%),Runtime (ms)
+1. Ảnh đầu vào (suy giảm),20.35,0.7015,24.74,6.648,142.2,8.52,43.5,0.0,0.0,0.0
+4. TRƯỚC cải thiện: Pipeline v1 (VGA),27.42,0.818,10.06,6.917,186.9,5.61,36.6,3.88,0.02,14573.1
+7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),25.39,0.6996,14.55,7.2,215.6,0.41,36.5,0.92,0.0,21210.2

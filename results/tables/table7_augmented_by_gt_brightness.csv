@@ -1,0 +1,31 @@
+Scenario,GT_class,Method,PSNR (dB),SSIM,DeltaE_ab,L_mean,Crush0 (%)
+haze_pink,GT bình thường (L*>=30),1. Ảnh đầu vào (suy giảm),17.35,0.81,32.65,54.94,0.0
+haze_pink,GT bình thường (L*>=30),4. TRƯỚC cải thiện: Pipeline v1 (VGA),21.44,0.85,20.38,50.03,0.3
+haze_pink,GT bình thường (L*>=30),7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),25.93,0.87,12.9,42.71,0.52
+low_light,GT bình thường (L*>=30),1. Ảnh đầu vào (suy giảm),12.46,0.39,63.8,19.95,0.5
+low_light,GT bình thường (L*>=30),4. TRƯỚC cải thiện: Pipeline v1 (VGA),9.03,0.16,97.98,5.94,40.58
+low_light,GT bình thường (L*>=30),7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),17.57,0.54,35.7,33.14,0.09
+backlit_uneven,GT bình thường (L*>=30),1. Ảnh đầu vào (suy giảm),15.36,0.79,40.81,29.32,0.26
+backlit_uneven,GT bình thường (L*>=30),4. TRƯỚC cải thiện: Pipeline v1 (VGA),12.51,0.5,60.52,21.43,12.83
+backlit_uneven,GT bình thường (L*>=30),7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),15.91,0.78,39.56,30.82,1.02
+motion_jpeg,GT bình thường (L*>=30),1. Ảnh đầu vào (suy giảm),27.53,0.74,8.03,43.57,0.05
+motion_jpeg,GT bình thường (L*>=30),4. TRƯỚC cải thiện: Pipeline v1 (VGA),21.65,0.64,18.79,37.74,3.02
+motion_jpeg,GT bình thường (L*>=30),7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),23.7,0.7,15.27,42.48,0.57
+haze_pink,GT tối (L*<30),1. Ảnh đầu vào (suy giảm),13.24,0.6,59.2,42.96,0.0
+haze_pink,GT tối (L*<30),4. TRƯỚC cải thiện: Pipeline v1 (VGA),18.5,0.72,33.06,32.34,4.45
+haze_pink,GT tối (L*<30),7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),23.98,0.77,21.3,25.83,1.62
+low_light,GT tối (L*<30),1. Ảnh đầu vào (suy giảm),17.52,0.34,32.48,10.87,1.44
+low_light,GT tối (L*<30),4. TRƯỚC cải thiện: Pipeline v1 (VGA),13.92,0.17,48.84,1.37,70.11
+low_light,GT tối (L*<30),7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),19.42,0.43,27.01,26.96,0.0
+backlit_uneven,GT tối (L*<30),1. Ảnh đầu vào (suy giảm),19.45,0.72,24.98,11.29,5.89
+backlit_uneven,GT tối (L*<30),4. TRƯỚC cải thiện: Pipeline v1 (VGA),15.24,0.29,41.69,4.25,57.98
+backlit_uneven,GT tối (L*<30),7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),19.52,0.73,24.74,23.03,2.29
+motion_jpeg,GT tối (L*<30),1. Ảnh đầu vào (suy giảm),30.64,0.84,5.79,19.86,6.59
+motion_jpeg,GT tối (L*<30),4. TRƯỚC cải thiện: Pipeline v1 (VGA),21.35,0.53,20.37,12.67,29.45
+motion_jpeg,GT tối (L*<30),7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),25.88,0.76,14.97,21.9,6.05
+geometric,GT bình thường (L*>=30),1. Ảnh đầu vào (suy giảm),17.3,0.67,39.22,35.21,0.23
+geometric,GT bình thường (L*>=30),4. TRƯỚC cải thiện: Pipeline v1 (VGA),15.46,0.51,52.93,26.93,19.21
+geometric,GT bình thường (L*>=30),7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),19.89,0.72,28.16,35.96,0.64
+geometric,GT tối (L*<30),1. Ảnh đầu vào (suy giảm),21.18,0.63,31.94,24.49,3.46
+geometric,GT tối (L*<30),4. TRƯỚC cải thiện: Pipeline v1 (VGA),17.31,0.48,35.89,15.98,30.22
+geometric,GT tối (L*<30),7. SAU cải thiện: Pipeline v2 (3 giai đoạn - VGA),23.12,0.65,20.71,22.45,3.41

@@ -1,3 +1,6 @@
 results/web_jobs/
 __pycache__/
 *.pyc
+.venv/
+.tmp/
+.pip_cache/
