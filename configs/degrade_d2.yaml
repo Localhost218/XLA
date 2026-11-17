@@ -1,0 +1,52 @@
+# D2: "bản sao số" camera ESP32-S3 + OV3660 (phase 05 bước 5; phase 07 hiệu chỉnh). Đọc bằng xla/degrade/d2_camera.py.
+# Số đo nằm ở configs/camera_profile.yaml (contract §6); file này chỉ chứa tham số chuỗi làm xấu.
+# Mỗi khối ghi `matches:` = trường hồ sơ mà khối đọc trực tiếp hoặc phải làm khớp (phase 06 đo, phase 07 chỉnh).
+# Khoảng [a, b] = lấy đều mỗi ảnh. Giá trị khởi đầu: phase 05, chưa hiệu chỉnh.
+version: "0.1.0"
+
+haze:                            # (a) I = J·t + A·(1−t), tính trong không gian tuyến tính
+  matches: [haze.dark_channel_15px_0_255, haze.y_p1_0_255, haze.saturation_0_255]
+  airlight_0_1: [0.80, 0.95]     # A theo sRGB 0–1
+  airlight_tint_bgr: [1.0, 1.0, 1.0]
+  dark_scale: 1.0                # nhân dark channel đích (lấy mẫu từ hồ sơ) — núm cho phase 07
+  t_range: [0.2, 1.0]
+
+lens:                            # (b) PSF Gauss + tối góc cos⁴ (tâm khung 640×480)
+  matches: [sharpness.psf_sigma_px_fit, sharpness.mtf50_cyc_per_px, sharpness.laplacian_var,
+            vignette.focal_px_fit, vignette.corner_center_ratio]
+  psf_sigma_scale: [0.85, 1.15]  # nhân sharpness.psf_sigma_px_fit
+  vignette_focal_scale: [0.95, 1.05]
+
+tone:                            # (c) phơi sáng → cắt từng kênh ở 1,0 → nhân WB R/B + hệ số ra k → hồng ở vùng sáng
+  matches: [color.wb_gain_r_fit, color.wb_gain_b_fit, color.r_over_g, color.b_over_g,
+            magenta.highlight_y_0_255, magenta.frac_pixels, magenta.frac_frames_gt_0p5pct]
+  brightness: [0.9, 1.15]        # độ sáng tông trung tính (= phơi sáng × k)
+  highlight_gain_scale: 1.0      # nhân k suy từ magenta.highlight_y p50
+  cast_r: 1.0                    # lệch WB còn lại (r_over_g), phase 07 chỉnh
+  cast_b: 1.0
+
+isp:                             # (d) làm mềm + nhiễu sau ISP theo NLF, phổ theo PSD
+  matches: [noise.nlf, noise.psd_radial, noise.sigma_immerkaer_0_255, sharpness.laplacian_var]
+  soften_sigma: [0.3, 0.7]
+  noise_scale: [0.8, 1.2]        # nhân σ của NLF (JPEG cuối còn ăn bớt nhiễu)
+  chroma_noise_frac: 0.3
+
+strip:                           # (e) dải mép trái → 640×480
+  matches: [left_strip.width_px, left_strip.mean_y_strip, left_strip.mean_y_ref]
+  # Các số dưới đo trực tiếp 117 khung (1/25) của 20261102-100941 ngày 18/11 (bỏ 34 khung không thấy dải tối),
+  # cột 1–7: dải tối bắt đầu ở hàng p5/p50/p95 = 146/152/200, Y khối tối p50 = 64, vạch đỏ RGB p50 = 126/87/96,
+  # chu kỳ 60 px (FFT), pha 17–24, cao vạch p50 = 8 px. Hồ sơ chưa có các trường này.
+  width_jitter_px: [-1.0, 1.0]
+  start_row: [146, 200]
+  dark_y_0_255: 64
+  red_bgr_0_255: [96, 87, 126]
+  red_period_px: 60
+  red_phase_px: [17, 24]
+  red_band_px: 8
+  edge_blur_sigma: 1.0
+
+jpeg:                            # (f) JPEG một lần cuối: Pillow qtables + 4:2:2, không truyền quality
+  matches: [jpeg.qtable_luma, jpeg.qtable_chroma, jpeg.subsampling, jpeg.other_qualities, blocking.ratio_8x8]
+  real_q: 12                     # bảng đo thật của hồ sơ
+  real_q_weight: 0.8
+  hypothesis_q_range: [19, 40]   # auto-quality, bảng Annex K × q/16 (verified: false, Deferred 1)

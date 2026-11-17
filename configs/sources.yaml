@@ -1,0 +1,90 @@
+# Dữ liệu nguồn sạch cho D0/D1/D2 (phase 05). Đọc bằng xla/degrade/sources.py.
+# Đường dẫn tương đối tính từ src_datasets_dir của configs/paths.yaml (D:/DevCache/datasets/src).
+# Plan Deferred 2 (dataset) và 3 (lọc nadir): sửa ở đây để đổi lựa chọn.
+
+downloads:                       # file đã tải (D:/IOT_Tools/downloads), sha256 để tái lập
+  visdrone:
+    license: "VisDrone (AISKYEYE), chỉ dùng nghiên cứu phi thương mại"
+    files:
+      - name: VisDrone2019-DET-train.zip
+        url: https://github.com/ultralytics/assets/releases/download/v0.0.0/VisDrone2019-DET-train.zip
+        bytes: 1549875511
+        sha256: 86a77eba93137bfc16e4993860de9245b0675c0dba0d3ab98fb458699e256f84
+        downloaded: 2026-11-18
+      - name: VisDrone2019-DET-val.zip
+        url: https://github.com/ultralytics/assets/releases/download/v0.0.0/VisDrone2019-DET-val.zip
+        bytes: 81638851
+        sha256: abeea063037e5d20398837deb11084e652402a34ddf4f207bdf541a6f2a35ef9
+        downloaded: 2026-11-18
+  nomad:
+    license: "CC BY 4.0 (Bernal et al., NOMAD, WACV 2024)"
+    drive_folder: https://drive.google.com/drive/folders/1zRiOzedR-PzO1bps5I1vb6jtVoQHFWzg
+    # Bản đủ: 10 zip x 38 GB = ~380 GB > ổ D. Lấy tập con từng ảnh bằng xla/degrade/fetch_nomad.py:
+    # Actor001-100, khoảng cách a10 + a30, 1 ảnh / 4 (ảnh liền nhau gần trùng), hạ mẫu INTER_AREA x2 rồi JPEG q95.
+    # sha256 từng ảnh GỐC nằm trong <root>/fetch_manifest.jsonl (orig_sha256).
+    subset: {actors: "1-100", dist: [a10, a30], stride: 4, downscale: 2.0, saved_jpeg_quality: 95}
+    files:
+      - name: annotations.json
+        bytes: 10140367
+        sha256: ec29299e7f4406237572b086a8bfb7b848b1d234d68cf0ef9987eea7c1f0ad13
+      - name: metadata.json
+        bytes: 89102
+        sha256: c51b140879918b86399b2a5e93cea2e626104ec37e4ef45c1efa0c04961afd06
+    downloaded: 2026-11-18
+    # Thực tế 18/11 03:40–04:05: Drive báo "Quota exceeded" sau 420 ảnh (Actor001–009, a10 + a30; ~3,5 GB tải,
+    # 1,1 GB lưu). Phần còn lại chưa tải; chạy lại cùng lệnh sau khi hạn mức Drive hồi (thường ~24 h), lệnh tự bỏ
+    # qua ảnh đã có. Chỉ 9 diễn viên nên tập val NOMAD (diễn viên chia hết cho 10) đang rỗng.
+    fetched_images: 420
+  pog:
+    status: failed
+    reason: >-
+      2026-11-18 03:36: cloud.cs.uni-tuebingen.de không trả lời (curl timeout 20 s); datasetninja.com/pog DOWNLOAD.md
+      chỉ trỏ lại trang dự án Tübingen; giấy phép chưa rõ. Bỏ theo phase 05 bước 1 (Deferred 2).
+
+visdrone:
+  root: visdrone
+  subsets:                       # thư mục con → split của tập sinh
+    VisDrone2019-DET-train: train
+    VisDrone2019-DET-val: val
+
+nomad:
+  enabled: true
+  root: nomad
+  min_visibility: 30             # hộp visibility < 30 % coi là vùng bỏ qua (không dương, không âm)
+  val_actor_mod: 10              # diễn viên số chia hết cho 10 → val (tách theo người, tránh rò cảnh)
+
+keep_images_without_person: true  # ảnh nadir không người vẫn dùng cho cửa sổ âm
+
+geometry:                        # hình học chung D0/D1/D2 (xla/degrade/geometry.py); cỡ người đích lấy từ
+  windows_per_image: 2           # camera_profile.yaml person_box_px.short_side (cùng phân bố cho cả ba tập)
+  window:
+    neg_window_frac: 0.2         # 20 % cửa sổ không người
+    min_keep_area_frac: 0.6      # hộp bị cắt còn ≥ 60 % diện tích mới giữ
+    min_box_px: 2.0
+    max_tries: 40
+    allow_upscale: false         # không phóng to ảnh nguồn
+
+nadir:
+  scores_file: nadir_scores.jsonl   # cache điểm (sources.py score), tương đối src_datasets_dir
+  clip_model: ViT-B-32
+  clip_pretrained: laion2b_s34b_b79k
+  metadata: {}                      # source → nadir | oblique khi metadata quyết được; NOMAD chỉ có khoảng cách, không có góc
+  # Ngưỡng chọn 18/11 trên 100 ảnh có người lấy ngẫu nhiên (seed 20261118; 92 VisDrone + 8 NOMAD), agent tự soát
+  # bằng lưới ảnh nhỏ (python -m xla.degrade.sources review-sheet). Nhãn tay "nadir" = nhìn dốc gần thẳng xuống,
+  # không thấy chân trời, mặt tường nhà không chiếm ưu thế: 28/100.
+  # AUC của clip_nadir trên 100 ảnh này = 0,74 (ViT-B-32 laion2b, câu mô tả trong sources.py). Đã thử ViT-L-14
+  # datacomp_xl (0,69) và bộ câu mô tả khác (0,71–0,74): không hơn, giữ ViT-B-32.
+  # Chọn sky ≤ 0,05 và clip ≥ 0,40: giữ 30/100, precision 0,50, recall 0,54 (clip ≥ 0,5: 24 ảnh, 0,54 / 0,46).
+  # Bộ lọc yếu: khoảng một nửa ảnh giữ lại vẫn nhìn xiên — ghi trong báo cáo phase 05, phase 07/10 có thể siết.
+  max_sky_frac: 0.05
+  min_clip_nadir: 0.40
+  review:
+    date: 2026-11-18
+    n: 100
+    seed: 20261118
+    sheet_dir: D:/DevCache/cache/degrade/nadir_review
+    nadir_idx: [15, 21, 24, 25, 26, 27, 31, 34, 36, 50, 52, 56, 57, 61, 62, 65, 66, 68, 74, 78, 83, 84, 86, 87, 89,
+                92, 96, 97]
+    auc_clip: 0.74
+    precision: 0.50
+    recall: 0.54
