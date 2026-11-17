@@ -1,0 +1,240 @@
+"""Sinh tập D0 (sạch) / D1 (ngẫu nhiên Real-ESRGAN) / D2 (bản sao camera) 640×480 + nhãn YOLO + manifest.
+
+Cùng ảnh nguồn + cùng cửa sổ cho cả ba tập: hình học lấy RNG theo (seed, "geom", đơn vị), không theo tập. Mỗi tập ghi
+``<data_root>/<set>/{train,val}/{images,labels}``, ``manifest.jsonl`` (nguồn, seed, tham số, sha256 ảnh ra) và
+``dataset.yaml`` cho Ultralytics. Dựng lại một tập là xoá thư mục tập đó rồi sinh lại (tái lập bằng seed).
+
+    python -m xla.degrade.build --set d2 --seed 20261118 --limit 50 --json
+    python -m xla.degrade.build --set all --profile D:/XLA-wt/data/configs/camera_profile.yaml --workers 8
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import io
+import json
+import shutil
+import sys
+import time
+from concurrent.futures import ProcessPoolExecutor
+from pathlib import Path
+
+import cv2
+import numpy as np
+import yaml
+from PIL import Image
+
+from xla import paths
+from xla.degrade import d1_random, d2_camera, geometry, sources
+
+SETS = ("d0", "d1", "d2")
+DEFAULT_SEED = 20261118
+D0_JPEG_QUALITY = 95                     # D0 "sạch": Pillow q95, 4:4:4
+
+
+def fnv1a(s: str) -> int:
+    """Hash chuỗi ổn định (không phụ thuộc PYTHONHASHSEED), như ``src/data_augmentation.py::hash_str``."""
+    h = 2166136261
+    for ch in s.encode("utf-8"):
+        h = ((h ^ ch) * 16777619) & 0xFFFFFFFF
+    return h
+
+
+def rng_for(seed: int, tag: str, unit: str) -> np.random.Generator:
+    return np.random.default_rng([int(seed), fnv1a(tag), fnv1a(unit)])
+
+
+def _repo_cfg(name: str) -> Path:
+    return paths.repo_root() / "configs" / name
+
+
+def encode_d0(frame_bgr: np.ndarray) -> bytes:
+    buf = io.BytesIO()
+    Image.fromarray(np.ascontiguousarray(frame_bgr[..., ::-1])).save(
+        buf, format="JPEG", quality=D0_JPEG_QUALITY, subsampling=0)
+    return buf.getvalue()
+
+
+def pad_black(win_bgr: np.ndarray) -> np.ndarray:
+    frame = np.zeros((geometry.FRAME_H, geometry.FRAME_W, 3), np.uint8)
+    frame[:, geometry.CROP_LEFT:] = win_bgr
+    return frame
+
+
+# ----------------------------------------------------------------------------- một đơn vị
+
+_W: dict = {}
+
+
+def _init_worker(state: dict) -> None:
+    _W.clear()
+    _W.update(state)
+
+
+def render_unit(set_name: str, item: dict, unit: str, seed: int, ctx: dict) -> dict:
+    """Một đơn vị (ảnh nguồn, chỉ số cửa sổ) → bytes ảnh + nhãn + bản ghi manifest; ``None``-dict khi bỏ."""
+    gcfg = geometry.GeomConfig(**ctx["geometry"])
+    boxes = np.asarray(item["boxes"], np.float32).reshape(-1, 4)
+    ignore = np.asarray(item["ignore"], np.float32).reshape(-1, 4)
+    win = geometry.plan_window(tuple(item["wh"]), boxes, ignore, ctx["person_short_px"],
+                               rng_for(seed, "geom", unit), gcfg)
+    if win is None:
+        return {"unit": unit, "skipped": "no_valid_window"}
+    img = cv2.imread(item["image"], cv2.IMREAD_COLOR)
+    if img is None:
+        raise RuntimeError(f"không đọc được {item['image']}")
+    if (img.shape[1], img.shape[0]) != tuple(item["wh"]):
+        raise ValueError(f"{item['key']}: cỡ ảnh {img.shape[1]}x{img.shape[0]} khác chỉ mục {item['wh']}")
+    window = geometry.apply_window(img, win)
+    rng = rng_for(seed, set_name, unit)
+    extra: dict = {}
+    if set_name == "d0":
+        data, params = encode_d0(pad_black(window)), {"jpeg": {"quality": D0_JPEG_QUALITY, "subsampling": "4:4:4"}}
+    elif set_name == "d1":
+        frame01, q, params = d1_random.degrade(window, rng, ctx["d1"])
+        data = d1_random.encode_final(frame01, q)
+    else:
+        frame, q, params = d2_camera.degrade(window, rng, ctx["d2"], ctx["profile"])
+        data, verified = d2_camera.encode_final(frame, q, ctx["profile"])
+        params["jpeg"]["qtable_verified"] = verified
+        extra = {"profile_id": ctx["profile"].get("profile_id"), "profile_version": ctx["profile"].get("profile_version"),
+                 "d2_config_version": ctx["d2"].get("version")}
+    fboxes = geometry.to_frame_boxes(win.boxes)
+    name = unit.replace("/", "__").replace("#", "_w")
+    return {
+        "unit": unit, "name": name, "split": item["split"], "data": data,
+        "label": geometry.yolo_lines(fboxes),
+        "record": {
+            "name": f"{name}.jpg", "set": set_name, "split": item["split"], "seed": seed, "unit": unit,
+            "source": item["source"], "source_key": item["key"], "source_image": item["image"],
+            "alt_m": item.get("alt_m"),
+            "window": {"kind": win.kind, "scale_x": round(win.scale_x, 6), "scale_y": round(win.scale_y, 6),
+                       "x0": win.x0, "y0": win.y0, "target_short_px": None if win.target_short_px is None
+                       else round(win.target_short_px, 3), "boxes_dropped_partial": win.dropped},
+            "n_boxes": len(fboxes),
+            "boxes_xyxy_640": [[round(float(v), 2) for v in b] for b in fboxes],
+            "params": params, **extra,
+            "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data),
+        },
+    }
+
+
+def _render_chunk(args: tuple) -> list[dict]:
+    set_name, chunk, seed = args
+    return [render_unit(set_name, it, u, seed, _W) for it, u in chunk]
+
+
+# ----------------------------------------------------------------------------- dựng tập
+
+def plan_units(items: list[sources.SourceItem], windows_per_image: int, seed: int, limit: int | None) -> list:
+    units = [(sources.asdict(it), f"{it.key}#{w}") for it in items for w in range(windows_per_image)]
+    units.sort(key=lambda t: (fnv1a(f"{seed}:{t[1]}"), t[1]))       # thứ tự trộn tất định; --limit lấy đầu danh sách
+    return units[:limit] if limit else units
+
+
+def _safe_clear(set_dir: Path) -> None:
+    if set_dir.exists():
+        if any(set_dir.iterdir()) and not (set_dir / "manifest.jsonl").exists():
+            raise RuntimeError(f"{set_dir} có dữ liệu nhưng không có manifest.jsonl — không tự xoá, kiểm tay")
+        shutil.rmtree(set_dir)
+
+
+def build_set(set_name: str, units: list, seed: int, ctx: dict, root: Path, workers: int,
+              limit: int | None = None) -> dict:
+    """Sinh một tập từ danh sách đơn vị đã trộn tất định. ``limit``: dừng khi đủ ``limit`` ảnh ghi được (đơn vị bị bỏ
+    vì không đặt được cửa sổ thì lấy đơn vị kế tiếp, nên cùng seed + limit luôn ra cùng tập)."""
+    set_dir = root / set_name
+    _safe_clear(set_dir)
+    for sp in ("train", "val"):
+        (set_dir / sp / "images").mkdir(parents=True, exist_ok=True)
+        (set_dir / sp / "labels").mkdir(parents=True, exist_ok=True)
+    t0 = time.perf_counter()
+    target = limit or len(units)
+    results: list[dict] = []
+    pos, n_ok = 0, 0
+    ex = ProcessPoolExecutor(workers, initializer=_init_worker, initargs=(ctx,)) if workers > 1 else None
+    if ex is None:
+        _init_worker(ctx)
+    try:
+        while n_ok < target and pos < len(units):
+            need = target - n_ok
+            batch = units[pos:pos + (need if not limit else need + max(4, need // 5))]
+            pos += len(batch)
+            chunk = max(1, min(32, len(batch) // max(1, workers * 4)))
+            jobs = [(set_name, batch[i:i + chunk], seed) for i in range(0, len(batch), chunk)]
+            for part in (map(_render_chunk, jobs) if ex is None else ex.map(_render_chunk, jobs)):
+                for r in part:
+                    if n_ok >= target:
+                        break
+                    results.append(r)
+                    n_ok += "skipped" not in r
+    finally:
+        if ex is not None:
+            ex.shutdown()
+    records, skipped, nbytes = [], 0, 0
+    for r in results:
+        if "skipped" in r:
+            skipped += 1
+            continue
+        d = set_dir / r["split"]
+        (d / "images" / f"{r['name']}.jpg").write_bytes(r["data"])
+        (d / "labels" / f"{r['name']}.txt").write_text(r["label"], encoding="utf-8", newline="\n")
+        records.append(r["record"])
+        nbytes += len(r["data"])
+    records.sort(key=lambda x: x["name"])
+    with (set_dir / "manifest.jsonl").open("w", encoding="utf-8", newline="\n") as f:
+        for rec in records:
+            f.write(json.dumps(rec, ensure_ascii=False, sort_keys=True) + "\n")
+    (set_dir / "dataset.yaml").write_text(yaml.safe_dump({
+        "path": set_dir.as_posix(), "train": "train/images", "val": "val/images", "names": {0: "person"},
+    }, allow_unicode=True, sort_keys=False), encoding="utf-8", newline="\n")
+    dt = time.perf_counter() - t0
+    n = len(records)
+    return {"set": set_name, "written": n, "skipped": skipped, "seconds": round(dt, 2),
+            "sec_per_image_wall": round(dt / max(n, 1), 4), "workers": workers,
+            "bytes": nbytes, "mean_bytes": round(nbytes / max(n, 1)), "out": set_dir.as_posix(),
+            "persons": int(sum(r["n_boxes"] for r in records)),
+            "negative_windows": int(sum(r["window"]["kind"] == "negative" for r in records))}
+
+
+def make_context(set_names: list[str], profile_path: Path, src_cfg: dict, d1_cfg: Path, d2_cfg: Path) -> dict:
+    profile = d2_camera.load_profile(profile_path)
+    ctx = {"geometry": src_cfg["geometry"]["window"],
+           "person_short_px": d2_camera.get_field(profile, "person_box_px.short_side")}
+    if "d1" in set_names:
+        ctx["d1"] = yaml.safe_load(d1_cfg.read_text(encoding="utf-8"))
+    if "d2" in set_names:
+        ctx["d2"] = d2_camera.load_config(d2_cfg)
+        ctx["profile"] = profile
+    return ctx
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--set", required=True, choices=[*SETS, "all"])
+    ap.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    ap.add_argument("--limit", type=int, default=0, help="số ảnh ra tối đa (0 = đủ); chạy thử nhỏ")
+    ap.add_argument("--profile", type=Path, default=_repo_cfg("camera_profile.yaml"))
+    ap.add_argument("--sources", type=Path, default=_repo_cfg("sources.yaml"))
+    ap.add_argument("--d1-config", type=Path, default=_repo_cfg("degrade_d1.yaml"))
+    ap.add_argument("--d2-config", type=Path, default=_repo_cfg("degrade_d2.yaml"))
+    ap.add_argument("--out", type=Path, default=None, help="mặc định data_root() của configs/paths.yaml")
+    ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--json", action="store_true")
+    a = ap.parse_args(argv)
+
+    set_names = list(SETS) if a.set == "all" else [a.set]
+    src_cfg = sources.load_config(a.sources)
+    items = sources.select(src_cfg)
+    units = plan_units(items, int(src_cfg["geometry"]["windows_per_image"]), a.seed, None)
+    ctx = make_context(set_names, a.profile, src_cfg, a.d1_config, a.d2_config)
+    root = a.out or paths.data_root()
+    summary = {"seed": a.seed, "source_images": len(items), "units": len(units), "profile": str(a.profile),
+               "sets": [build_set(s, units, a.seed, ctx, root, a.workers, a.limit or None) for s in set_names]}
+    print(json.dumps(summary, ensure_ascii=False, indent=None if a.json else 2))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
