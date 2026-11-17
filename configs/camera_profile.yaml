@@ -1,7 +1,7 @@
 # Hồ sơ camera — sinh bởi `python -m xla.camera.profile build --split dev`; KHÔNG sửa tay.
 # Đổi số đo = tăng profile_version (hợp đồng docs/hop-dong-model.md §6). Báo cáo: results/camera/profile_report.md
 schema_version: '1.0'
-profile_version: 1.1.0
+profile_version: 1.2.0
 profile_id: ov3660-esp32s3-q12-20261102
 measured_on:
   recording: 20261102-100941
@@ -53,8 +53,8 @@ noise:
 color:
   r_over_g: {p5: 0.96684, p50: 0.9753, p95: 0.98435}
   b_over_g: {p5: 0.94183, p50: 0.96423, p95: 0.98314}
-  wb_gain_r_fit: 0.9753
-  wb_gain_b_fit: 0.96423
+  wb_gain_r_fit: 1.5713
+  wb_gain_b_fit: 1.6202
 magenta:
   rule: R-G>25 and B-G>25
   frac_pixels: {p5: 0.0, p50: 0.0017495, p95: 0.032649}

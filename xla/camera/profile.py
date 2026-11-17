@@ -30,8 +30,12 @@ from xla.camera.split import SPLIT_REL
 from xla.paths import repo_root
 
 SCHEMA_VERSION = "1.0"
-PROFILE_VERSION = "1.1.0"
-"""1.0.0: dev 470 khung (split test 300-400); 1.1.0: dev 1 115 khung sau khi Owner chia lại test 200-400 (18/11/2026)."""
+PROFILE_VERSION = "1.2.0"
+"""1.0.0: dev 470 khung (split test 300-400); 1.1.0: dev 1 115 khung sau khi Owner chia lại test 200-400 (18/11/2026);
+1.2.0: ``color.wb_gain_*_fit`` đo lại thành cận dưới hệ số WB ISP từ điểm hồng đã cắt (trước là p50 r/g, b/g)."""
+WB_MIN_PIXELS = 1000
+WB_MIN_FRAMES = 10
+"""Tối thiểu điểm / khung có điểm để ước ``wb_gain_*_fit``; thiếu thì dừng, không điền số khác."""
 PROFILE_ID = "ov3660-esp32s3-q12-20261102"
 ESP32_QUALITY = 12
 CROP_LEFT_PX = M.CROP_LEFT_DEFAULT
@@ -163,8 +167,30 @@ def person_boxes(prelim_csv: Path, names: set[str]) -> dict[str, float]:
     return {**d, "min": _r(min(short)), "max": _r(max(short)), "n_boxes": len(short)}
 
 
+def wb_gain_fit(frames_dir: Path, names: list[str]) -> dict[str, Any]:
+    """Cận dưới hệ số WB ISP (tương đối G) = trung vị gộp mọi tỉ số ``R_lin/G_lin`` (``B_lin/G_lin``) tại điểm hồng có
+    R (B) ≥ 250 trên khung ``names`` (``measure.clipped_highlight_wb_ratios``). Thiếu điểm → ``RuntimeError``."""
+    rr, bb, fr, fb = [], [], 0, 0
+    for n in names:
+        im = cv2.imdecode(np.frombuffer((frames_dir / n).read_bytes(), np.uint8), cv2.IMREAD_COLOR)
+        r, b = M.clipped_highlight_wb_ratios(im, CROP_LEFT_PX)
+        rr.append(r)
+        bb.append(b)
+        fr += r.size > 0
+        fb += b.size > 0
+    r, b = np.concatenate(rr), np.concatenate(bb)
+    out = {"n_pixels_r": int(r.size), "n_frames_r": fr, "n_pixels_b": int(b.size), "n_frames_b": fb}
+    for ch, a, nf in (("r", r, fr), ("b", b, fb)):
+        if a.size < WB_MIN_PIXELS or nf < WB_MIN_FRAMES:
+            raise RuntimeError(f"không đủ điểm hồng đã cắt để ước wb_gain_{ch}_fit: {a.size} điểm / {nf} khung "
+                               f"(cần ≥ {WB_MIN_PIXELS} / {WB_MIN_FRAMES})")
+        out[f"gain_{ch}"] = _r(float(np.median(a)))
+        out[f"gain_{ch}_p5_p95"] = [_r(float(x)) for x in np.percentile(a, [5, 95])]
+    return out
+
+
 def assemble(rows: list[dict], nlfs: np.ndarray, psds: np.ndarray, refs: np.ndarray, header: dict,
-             person: dict, alts: list[float], measured: str) -> dict:
+             person: dict, alts: list[float], measured: str, wb: dict) -> dict:
     col = {k: np.array([r[k] for r in rows], float) for k in M.MEASURE_KEYS}
     luma, chroma = header["qtable_luma"], header["qtable_chroma"]
     scale = find_annex_k_scale(luma, chroma)
@@ -209,7 +235,7 @@ def assemble(rows: list[dict], nlfs: np.ndarray, psds: np.ndarray, refs: np.ndar
                       "psf_sigma_px_fit": _r(math.sqrt(math.log(2) / (2 * math.pi ** 2)) / mtf["p50"])},
         "noise": {"sigma_immerkaer_0_255": dist(col["sigma_immerkaer"]), "nlf": nlf_curve, "psd_radial": psd_curve},
         "color": {"r_over_g": dist(col["r_over_g"]), "b_over_g": dist(col["b_over_g"]),
-                  "wb_gain_r_fit": dist(col["r_over_g"])["p50"], "wb_gain_b_fit": dist(col["b_over_g"])["p50"]},
+                  "wb_gain_r_fit": wb["gain_r"], "wb_gain_b_fit": wb["gain_b"]},
         "magenta": {"rule": "R-G>25 and B-G>25", "frac_pixels": dist(col["pink_frac"]),
                     "frac_frames_gt_0p5pct": _r(float((col["pink_frac"] > PINK_FRAME_FRAC).mean())),
                     "highlight_y_0_255": dist(col["pink_highlight_y"])},
@@ -294,7 +320,8 @@ _COMPARE_FIELDS = (
     "measured_on.n_frames", "left_strip.width_px", "left_strip.mean_y_strip", "vignette.corner_center_ratio.p50",
     "vignette.focal_px_fit", "haze.dark_channel_15px_0_255.p50", "haze.y_p1_0_255.p50", "haze.saturation_0_255.p50",
     "sharpness.laplacian_var.p50", "sharpness.mtf50_cyc_per_px.p50", "sharpness.psf_sigma_px_fit",
-    "noise.sigma_immerkaer_0_255.p50", "color.r_over_g.p50", "color.b_over_g.p50", "magenta.frac_pixels.p50",
+    "noise.sigma_immerkaer_0_255.p50", "color.r_over_g.p50", "color.b_over_g.p50", "color.wb_gain_r_fit",
+    "color.wb_gain_b_fit", "magenta.frac_pixels.p50",
     "magenta.frac_frames_gt_0p5pct", "magenta.highlight_y_0_255.p50", "blocking.ratio_8x8.p50",
     "motion_blur.sobel_x2_over_y2.p50", "motion_blur.frac_frames_gt_1p5", "person_box_px.short_side.p50",
     "altitude_m.flight_frames.p50",
@@ -319,7 +346,7 @@ def compare_lines(prev: dict, cur: dict) -> list[str]:
 
 
 def write_report(path: Path, rows: list[dict], profile: dict, reenc: list[dict], groups: int, n_test_overlap: int,
-                 person: dict, prev: dict | None = None, prev_path: str = "") -> None:
+                 person: dict, prev: dict | None = None, prev_path: str = "", wb: dict | None = None) -> None:
     ev = _evidence_rows()
     lines = [
         "# Hồ sơ camera v1 — báo cáo đo (phase 04)",
@@ -372,6 +399,13 @@ def write_report(path: Path, rows: list[dict], profile: dict, reenc: list[dict],
         "- `motion_blur.frac_frames_gt_1p5` dùng max(Gx²/Gy², Gy²/Gx²) > 1,5 (bất đẳng hướng, như mẫu 18/11).",
         (f"- `person_box_px`: {person['n_boxes']} hộp YOLO11s @1280 conf ≥ {PERSON_CONF_MIN} trên khung dev, ngoài dải "
         f"mép; nguồn `{PERSON_SOURCE}` (chưa phải nhãn, còn hộp sai do đốm hồng)."),
+        *([(f"- `color.wb_gain_r_fit` {wb['gain_r']} (p5–p95 {wb['gain_r_p5_p95']}, {wb['n_pixels_r']} điểm / "
+              f"{wb['n_frames_r']} khung), `wb_gain_b_fit` {wb['gain_b']} (p5–p95 {wb['gain_b_p5_p95']}, "
+              f"{wb['n_pixels_b']} điểm / {wb['n_frames_b']} khung): hệ số WB ISP tương đối kênh G, là **cận dưới**. "
+              "Cách ước: điểm hồng (R−G>25 và B−G>25) có R (B) ≥ 250 và G < 250; sang sRGB tuyến tính; tỉ số "
+              "R_lin/G_lin (B_lin/G_lin) ≈ 1/G_lin khi kênh đã cắt; lấy trung vị gộp mọi điểm dev. Vì R/B bị cắt ở 255 "
+              "nên hệ số thật ≥ số này. Khác `r_over_g`/`b_over_g` (tỉ số trung bình cả khung, ~0,97). Bản ≤ 1.1.0 ghi "
+              "nhầm hai trường này bằng p50 r/g, b/g.")] if wb else []),
         (f"- NLF: {len(profile['noise']['nlf'])}/{NLF_BINS} bin Y đủ điểm phẳng (≥ {NLF_MIN_FRAME_FRAC:.0%} khung) — ảnh "
         "sáng, mức đen nâng, nên bin tối không có dữ liệu."),
     ]
@@ -400,7 +434,8 @@ def cmd_build(args: argparse.Namespace) -> int:
     rows, nlfs, psds, refs = measure_frames(frames_dir, names)
     person = person_boxes(root / PRELIM_REL, set(names))
     alts = [d["alt_m"] for d in split_doc["frames"] if d["frame"] in set(names)]
-    profile = assemble(rows, nlfs, psds, refs, header, person, alts, args.measured or date.today().isoformat())
+    wb = wb_gain_fit(frames_dir, names)
+    profile = assemble(rows, nlfs, psds, refs, header, person, alts, args.measured or date.today().isoformat(), wb)
     errors = validate(profile)
     meas = root / MEAS_REL
     meas.parent.mkdir(parents=True, exist_ok=True)
@@ -416,13 +451,14 @@ def cmd_build(args: argparse.Namespace) -> int:
     overlap = len(test_names & set(names))
     prev = load_profile(Path(args.previous)) if args.previous else None
     write_report(root / REPORT_REL, rows, profile, reenc, len(groups), overlap, person, prev,
-                 Path(args.previous).as_posix() if args.previous else "")
+                 Path(args.previous).as_posix() if args.previous else "", wb)
     reenc_ok = all(r["dqt_match"] and r["sof_match"] for r in reenc)
-    summary = {"n_frames": len(rows), "dqt_groups": len(groups), "reencode_match": f"{sum(r['dqt_match'] and r['sof_match'] for r in reenc)}/{len(reenc)}",
+    n_ok = sum(r["dqt_match"] and r["sof_match"] for r in reenc)
+    summary = {"n_frames": len(rows), "dqt_groups": len(groups), "reencode_match": f"{n_ok}/{len(reenc)}",
                "schema_errors": errors, "test_overlap": overlap,
                "left_strip_width_px": profile["left_strip"]["width_px"],
                "subsampling": sub, "annex_k_scale": profile["jpeg"]["annex_k_scale"],
-               "person_boxes": person["n_boxes"]}
+               "person_boxes": person["n_boxes"], "wb": wb}
     print(json.dumps(summary, ensure_ascii=False) if args.json else summary)
     return 0 if not errors and reenc_ok and overlap == 0 else 1
 

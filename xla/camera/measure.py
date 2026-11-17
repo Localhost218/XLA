@@ -264,6 +264,35 @@ def psd_radial(img_bgr: np.ndarray, crop_left: int = CROP_LEFT_DEFAULT, n_bins: 
     return out
 
 
+WB_CLIP_LEVEL = 250
+"""Kênh R (hoặc B) coi là đã chạm trần khi ≥ 250 (thang 0–255)."""
+
+
+def srgb_to_linear(v: np.ndarray) -> np.ndarray:
+    """sRGB 0–255 → tuyến tính 0–1 (IEC 61966-2-1)."""
+    c = np.asarray(v, np.float64) / 255.0
+    return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
+
+
+def clipped_highlight_wb_ratios(img_bgr: np.ndarray, crop_left: int = CROP_LEFT_DEFAULT,
+                                clip: int = WB_CLIP_LEVEL) -> tuple[np.ndarray, np.ndarray]:
+    """Tỉ số ``R_lin/G_lin`` (và ``B_lin/G_lin``) tại điểm hồng sáng mà kênh R (B) đã chạm trần — để ước hệ số WB ISP.
+
+    Mô hình: ở vùng sáng, cảm biến bão hoà đều ba kênh (giá trị thô ``s``); ISP nhân hệ số WB tương đối kênh G
+    (``R = gain_r·s``, ``G = s``, ``B = gain_b·s``) rồi cắt ở 1, nên G lộ ``s`` còn R, B dính trần → điểm hồng. Khi
+    R bị cắt, ``R_lin/G_lin = min(1, gain_r·s)/s ≤ gain_r``: mỗi tỉ số là **cận dưới** của ``gain_r`` (bằng đúng khi R
+    vừa chạm trần). Điểm chọn: luật hồng (R − G > 25 và B − G > 25), kênh cần ước ≥ ``clip``, G < ``clip``; bỏ cột
+    ``[0, crop_left)``. Trả hai mảng (có thể rỗng).
+    """
+    _check(img_bgr, crop_left)
+    im = img_bgr[:, crop_left:].astype(np.int16)
+    b, g, r = im[..., 0], im[..., 1], im[..., 2]
+    pink = ((r - g) > PINK_DIFF) & ((b - g) > PINK_DIFF) & (g < clip)
+    gl = srgb_to_linear(g)
+    mr, mb = pink & (r >= clip), pink & (b >= clip)
+    return srgb_to_linear(r[mr]) / gl[mr], srgb_to_linear(b[mb]) / gl[mb]
+
+
 def jpeg_segments(data: bytes) -> dict[str, Any]:
     """Phân tích header JPEG tới SOS: bảng DQT (thứ tự tự nhiên, theo id bảng), SOF (marker, w, h, thành phần)."""
     if data[:2] != b"\xff\xd8":

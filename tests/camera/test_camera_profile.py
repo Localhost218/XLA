@@ -118,6 +118,30 @@ def test_read_jpeg_header_roundtrip_pillow():
         assert h["qtable_luma"] == list(q[0]) and h["qtable_chroma"] == list(q[1])
 
 
+def _linear_to_srgb8(x: float) -> int:
+    c = 12.92 * x if x <= 0.0031308 else 1.055 * x ** (1 / 2.4) - 0.055
+    return round(255 * c)
+
+
+def test_wb_gain_from_clipped_highlights():
+    gain_r, gain_b = 1.8, 1.5
+    im = _gray(90)
+    # mảng A: cảm biến bão hoà s = 1/gain_r → R vừa chạm trần (255), G = s, B dưới trần nhưng vẫn hồng
+    im[50:150, 100:200] = (240, _linear_to_srgb8(1 / gain_r), 255)
+    # mảng B: s = 1/gain_b → B chạm trần, R dưới trần
+    im[250:350, 300:400] = (255, _linear_to_srgb8(1 / gain_b), 245)
+    r, b = M.clipped_highlight_wb_ratios(im)
+    assert r.size == b.size == 100 * 100
+    assert float(np.median(r)) == pytest.approx(gain_r, rel=0.05)
+    assert float(np.median(b)) == pytest.approx(gain_b, rel=0.05)
+    # kênh bị cắt sâu hơn (s lớn hơn 1/gain) → tỉ số chỉ là cận dưới
+    im2 = _gray(90)
+    im2[50:150, 100:200] = (248, _linear_to_srgb8(0.7), 255)
+    r2, _ = M.clipped_highlight_wb_ratios(im2)
+    assert float(np.median(r2)) < gain_r
+    assert all(a.size == 0 for a in M.clipped_highlight_wb_ratios(_gray(200)))
+
+
 def test_annex_k_scale_75():
     assert P.find_annex_k_scale(P.annex_k_scaled(P.ANNEX_K_LUMA, 75), P.annex_k_scaled(P.ANNEX_K_CHROMA, 75)) == 0.75
 
@@ -152,6 +176,8 @@ def test_profile_counts_match_split(profile, split_doc):
     assert profile["profile_version"] == P.PROFILE_VERSION and profile["profile_id"] == P.PROFILE_ID
     assert profile["left_strip"]["crop_left_px"] == 16
     assert 11 <= profile["left_strip"]["width_px"] <= 16
+    # cận dưới hệ số WB (> 1 vì lấy từ điểm hồng), khác hẳn tỉ số cả khung r/g, b/g (~0,97)
+    assert profile["color"]["wb_gain_r_fit"] > 1 and profile["color"]["wb_gain_b_fit"] > 1
 
 
 def test_measured_frames_are_dev_only(split_doc):
