@@ -128,4 +128,5 @@ def test_neg_frames(split_doc):
 def test_split_rebuild_is_byte_identical(tmp_path):
     out, rep = tmp_path / "split.json", tmp_path / "rep.json"
     S.main(["build", "--seed", str(S.SEED_DEFAULT), "--out", str(out), "--report", str(rep)])
-    assert out.read_bytes() == (repo_root() / S.SPLIT_REL).read_bytes()
+    # so sau khi chuẩn hoá xuống dòng: clone Windows với core.autocrlf=true lấy file ra dạng CRLF
+    assert out.read_bytes() == (repo_root() / S.SPLIT_REL).read_bytes().replace(b"\r\n", b"\n")
