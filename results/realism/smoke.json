@@ -1,0 +1,1471 @@
+{
+  "phase": "06",
+  "measured": "2026-11-18",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "encoder": {
+    "name": "dinov2_vitl14_cls_bicubic224",
+    "backend": "torch.hub",
+    "why_not_dgm_eval": "dgm-eval (layer6ai-labs@74c79f7) ghim pillow==9.2.0, numpy==1.23.3, timm==0.8.19.dev0, transformers==4.26.0, xformers: trái pillow>=12 của venv chung, không cài được (D:/DevCache/venvs/xla.READY). Phương án thay Owner đã duyệt: cùng model dinov2_vitl14 qua torch.hub, cùng tiền xử lý dgm-eval (PIL bicubic 224, /255, chuẩn hoá ImageNet, token CLS).",
+    "weights": "D:/DevCache/torch/hub/checkpoints/dinov2_vitl14_pretrain.pth",
+    "weights_sha256": "d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428"
+  },
+  "inputs": {
+    "split_file": "D:/XLA-wt/data/data/real/split.json (lane data, chưa gộp; sha256 caf924696fd5f0327030de00cfc373473d9c57b4d8f3465423b3cbfe693fac6a; dev 470 khung)",
+    "measure_py": "D:/XLA-wt/data/xla/camera/measure.py (lane data, chưa commit; sha256 acb370bff000734f8389d059fea55887b0fed7535631d4ca466867235470b8ba), nạp bằng cách nối thư mục vào xla.camera.__path__ chỉ cho lần chạy smoke",
+    "d2_limit50": "chưa có (D:/DevCache/datasets/xla/d2/manifest.jsonl không tồn tại lúc chạy) -> dùng D0 tạm",
+    "d0_tam": "D:/DevCache/datasets/xla/realism-smoke/d0tam: 470 ảnh VisDrone2019-DET-val chọn có seed 20261118, INTER_AREA về cao ngẫu nhiên 480-960 px (không phóng to), cắt ngẫu nhiên 624x480, dán 16 cột đen trái -> 640x480, lưu PNG. Ảnh sạch, KHÔNG làm xấu: là cận trên của khoảng cách, không phải D2",
+    "dev_halves": "D:/DevCache/datasets/xla/realism-smoke/dev_a (block chẵn, 147 khung) và dev_b (block lẻ, 323 khung): hardlink khung dev, chia theo block 30 s của split.json"
+  },
+  "params": {
+    "seed": 20261118,
+    "n_patches": 1000,
+    "kid_patch": 224,
+    "kid_subsets": 10,
+    "kid_subset_size": 1000,
+    "c2st_patch": 64,
+    "c2st_epochs": 20
+  },
+  "pairs": {
+    "dev_vs_d0tam": {
+      "what": "khung dev thật (split:dev) vs D0 tạm (ảnh sạch VisDrone)",
+      "n_real": 470,
+      "n_synth": 470,
+      "stats_total_w1_over_iqr": 8.28514908492686,
+      "dqt_match": false,
+      "c2st_accuracy": 0.9740484429065744,
+      "c2st_ci95": [
+        0.9584037406123628,
+        0.9861830742659758
+      ],
+      "kid_mean": 7.55065174126658,
+      "kid_se": 0.14994093982958343,
+      "kid_ci95": [
+        7.281868017443427,
+        7.835201354837048
+      ],
+      "timing_s": {
+        "stats": 75.42,
+        "c2st_load": 3.69,
+        "c2st": 23.06,
+        "kid_load": 3.02,
+        "kid_features": 82.14,
+        "kid": 85.18,
+        "total": 186.91
+      },
+      "vram_peak_mb": {
+        "c2st": 368.1,
+        "kid": 1549.1
+      }
+    },
+    "devb_vs_deva": {
+      "what": "nền nhiễu: hai nửa dev cùng camera, chia theo block (khác cảnh/thời điểm, cùng quy trình chụp)",
+      "n_real": 323,
+      "n_synth": 147,
+      "stats_total_w1_over_iqr": 0.8373731814526806,
+      "dqt_match": true,
+      "c2st_accuracy": 0.767402376910017,
+      "c2st_ci95": [
+        0.7199872495446266,
+        0.8069948630371675
+      ],
+      "kid_mean": 1.330286645460699,
+      "kid_se": 0.08821746532243373,
+      "kid_ci95": [
+        1.1848328214880326,
+        1.505499469135466
+      ],
+      "timing_s": {
+        "stats": 28.38,
+        "c2st_load": 0.56,
+        "c2st": 4.28,
+        "kid_load": 0.69,
+        "kid_features": 90.44,
+        "kid": 91.16,
+        "total": 123.93
+      },
+      "vram_peak_mb": {
+        "c2st": 367.8,
+        "kid": 1549.1
+      }
+    },
+    "dev_vs_d0tam_kid_cached": {
+      "what": "chạy lại tầng KID cặp 1, đặc trưng lấy từ cache sha256",
+      "kid_mean": 7.55065174126658,
+      "timing_s": {
+        "kid_load": 2.93,
+        "kid_features": 7.53,
+        "kid": 10.47,
+        "total": 10.64
+      },
+      "features_real": {
+        "n_patches": 1000,
+        "n_cached": 1000,
+        "n_computed": 0,
+        "encoder": "dinov2_vitl14_cls_bicubic224"
+      }
+    }
+  },
+  "notes": [
+    "timing_s.c2st gồm c2st_load + khởi tạo CUDA + chờ khoá GPU + huấn luyện; giây huấn luyện riêng ở runs.*.c2st.seconds. timing_s.kid gồm kid_load + kid_features (nạp model + sha256 + trích) + tính KID.",
+    "KID dùng 10 tập con RỜI NHAU, 1000 patch -> 100 mẫu mỗi tập con.",
+    "Nền nhiễu cùng camera không về 0: C2ST ~0,77, KID ~1,33, thống kê ~0,84. Phase 07 phải so với nền này, không với 0,5/0."
+  ],
+  "runs": {
+    "dev_vs_d0tam": {
+      "protocol": {
+        "real": {
+          "size_wh": [
+            640,
+            480
+          ],
+          "n_images": 470,
+          "exts": [
+            ".jpg"
+          ]
+        },
+        "synth": {
+          "size_wh": [
+            640,
+            480
+          ],
+          "n_images": 470,
+          "exts": [
+            ".png"
+          ]
+        },
+        "crop_left": 16,
+        "decoder": "cv2.imdecode IMREAD_COLOR",
+        "warnings": [
+          "đuôi file khác nhau: thật ['.jpg'], tổng hợp ['.png'] (DQT sẽ báo riêng)"
+        ]
+      },
+      "params": {
+        "seed": 20261118,
+        "n_patches": 1000,
+        "kid_patch": 224,
+        "kid_subsets": 10,
+        "kid_subset_size": 1000,
+        "c2st_patch": 64,
+        "c2st_epochs": 20
+      },
+      "device": "cuda",
+      "timing_s": {
+        "stats": 75.42,
+        "c2st_load": 3.69,
+        "c2st": 23.06,
+        "kid_load": 3.02,
+        "kid_features": 82.14,
+        "kid": 85.18,
+        "total": 186.91
+      },
+      "vram_peak_mb": {
+        "c2st": 368.1,
+        "kid": 1549.1
+      },
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "stats": {
+        "total": 8.28514908492686,
+        "total_kind": "trung bình có trọng số của W1/IQR(thật)",
+        "weights": {
+          "b_over_g": 1.0,
+          "blocking_ratio_8x8": 1.0,
+          "dark_channel_15px": 1.0,
+          "laplacian_var": 1.0,
+          "left_strip_mean_y": 1.0,
+          "left_strip_width_px": 1.0,
+          "mtf50_cyc_per_px": 1.0,
+          "pink_frac": 1.0,
+          "pink_highlight_y": 1.0,
+          "r_over_g": 1.0,
+          "saturation_mean": 1.0,
+          "sigma_immerkaer": 1.0,
+          "sobel_x2_over_y2": 1.0,
+          "vignette_corner_center_ratio": 1.0,
+          "y_p1": 1.0,
+          "y_p99": 1.0,
+          "nlf": 1.0,
+          "psd_radial_log10": 1.0
+        },
+        "excluded_nan": [],
+        "items": {
+          "b_over_g": {
+            "value": 5.336894769654548,
+            "w1": 0.04883671409272132,
+            "scale": 0.009150773286819458,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "blocking_ratio_8x8": {
+            "value": 4.183222420265317,
+            "w1": 1.7213133988228249,
+            "scale": 0.41148024797439575,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "dark_channel_15px": {
+            "value": 8.029489544784369,
+            "w1": 67.97557229865657,
+            "scale": 8.465740184294873,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "laplacian_var": {
+            "value": 40.71621620022506,
+            "w1": 857.9746328090101,
+            "scale": 21.072062015533447,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "left_strip_mean_y": {
+            "value": 7.486085869859655,
+            "w1": 99.06911281829184,
+            "scale": 13.233766555786133,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "left_strip_width_px": {
+            "value": 1.7127659574468082,
+            "w1": 1.7127659574468082,
+            "scale": 1.0,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "mtf50_cyc_per_px": {
+            "value": 1.1289907328667461,
+            "w1": 0.09820538082342546,
+            "scale": 0.0869851079946965,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "pink_frac": {
+            "value": 0.32511677866451366,
+            "w1": 0.004176576138843424,
+            "scale": 0.012846387553418803,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "pink_highlight_y": {
+            "value": 29.99159303053158,
+            "w1": 133.28207470560898,
+            "scale": 4.443981170654297,
+            "scale_kind": "iqr_real",
+            "n_real": 458,
+            "n_synth": 443
+          },
+          "r_over_g": {
+            "value": 5.751882001232073,
+            "w1": 0.041600155830383304,
+            "scale": 0.007232442498207092,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "saturation_mean": {
+            "value": 5.013038961654192,
+            "w1": 32.70671092187216,
+            "scale": 6.524328091613249,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "sigma_immerkaer": {
+            "value": 17.580821572692198,
+            "w1": 1.6603108840102845,
+            "scale": 0.09443875402212143,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "sobel_x2_over_y2": {
+            "value": 0.43333705887945934,
+            "w1": 0.18633566162687665,
+            "scale": 0.4300016760826111,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "vignette_corner_center_ratio": {
+            "value": 2.1859883368625685,
+            "w1": 0.2460459958682669,
+            "scale": 0.11255595088005066,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "y_p1": {
+            "value": 3.5614575693676715,
+            "w1": 77.46170213374685,
+            "scale": 21.75,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "y_p99": {
+            "value": 0.7523153942428035,
+            "w1": 12.789361702127659,
+            "scale": 17.0,
+            "scale_kind": "iqr_real",
+            "n_real": 470,
+            "n_synth": 470
+          },
+          "nlf": {
+            "value": 12.348869927405905,
+            "bins_compared": 6,
+            "bins_only_real": 0,
+            "bins_only_synth": 2,
+            "per_bin": {
+              "2": {
+                "value": 57.2410467282862,
+                "w1": 1.2381112780935144,
+                "scale": 0.021629780530929565,
+                "scale_kind": "iqr_real",
+                "n_real": 45,
+                "n_synth": 367
+              },
+              "3": {
+                "value": 5.812836985037204,
+                "w1": 0.5247260806328118,
+                "scale": 0.09027022123336792,
+                "scale_kind": "iqr_real",
+                "n_real": 418,
+                "n_synth": 446
+              },
+              "4": {
+                "value": 2.5259415952169033,
+                "w1": 0.3616517875193105,
+                "scale": 0.14317503944039345,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 452
+              },
+              "5": {
+                "value": 3.981498753989603,
+                "w1": 0.6736540871836552,
+                "scale": 0.16919610649347305,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 348
+              },
+              "6": {
+                "value": 3.1648572863926847,
+                "w1": 0.6624418282282751,
+                "scale": 0.20931175351142883,
+                "scale_kind": "iqr_real",
+                "n_real": 425,
+                "n_synth": 214
+              },
+              "7": {
+                "value": 1.3670382155128316,
+                "w1": 0.31136699528506256,
+                "scale": 0.22776758670806885,
+                "scale_kind": "iqr_real",
+                "n_real": 173,
+                "n_synth": 205
+              }
+            }
+          },
+          "psd_radial_log10": {
+            "value": 2.594597402048017,
+            "bins_compared": 16,
+            "bins_only_real": 0,
+            "bins_only_synth": 0,
+            "per_bin": {
+              "0.0156": {
+                "value": 1.436075582325917,
+                "w1": 0.6599703414953353,
+                "scale": 0.4595651855777847,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.0469": {
+                "value": 1.489622127955875,
+                "w1": 0.6366660729805337,
+                "scale": 0.42740105764553515,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.0781": {
+                "value": 1.4723387975993054,
+                "w1": 0.6392092202738892,
+                "scale": 0.43414547067301346,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.1094": {
+                "value": 1.765386648831196,
+                "w1": 0.7238580744817957,
+                "scale": 0.41002806663403635,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.1406": {
+                "value": 2.1362462095948125,
+                "w1": 0.8436942717724605,
+                "scale": 0.3949424312530372,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.1719": {
+                "value": 2.3198497540402614,
+                "w1": 0.9866064092517182,
+                "scale": 0.42528892551486996,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.2031": {
+                "value": 2.496475676005414,
+                "w1": 1.1270507327093242,
+                "scale": 0.451456724991091,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.2344": {
+                "value": 2.823059022726163,
+                "w1": 1.2535853976536377,
+                "scale": 0.4440521390314678,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.2656": {
+                "value": 2.9332107722499,
+                "w1": 1.3175365417713603,
+                "scale": 0.4491789523740064,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.2969": {
+                "value": 3.0679615704538024,
+                "w1": 1.3124510815682648,
+                "scale": 0.4277925428427487,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.3281": {
+                "value": 3.2606853250800985,
+                "w1": 1.2919645694877553,
+                "scale": 0.3962248548028836,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.3594": {
+                "value": 3.3923371395098836,
+                "w1": 1.2810495407226965,
+                "scale": 0.3776303734091062,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.3906": {
+                "value": 3.5118590747914396,
+                "w1": 1.2292102311673467,
+                "scale": 0.350016958251762,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.4219": {
+                "value": 3.197176430445614,
+                "w1": 1.108076933433422,
+                "scale": 0.34657985179722506,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.4531": {
+                "value": 3.0781486757868453,
+                "w1": 1.0153957578052402,
+                "scale": 0.3298722267031763,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              },
+              "0.4844": {
+                "value": 3.1331256253717457,
+                "w1": 0.9880400250116819,
+                "scale": 0.31535282754404426,
+                "scale_kind": "iqr_real",
+                "n_real": 470,
+                "n_synth": 470
+              }
+            }
+          }
+        },
+        "dqt": {
+          "match": false,
+          "real": [
+            {
+              "subsampling": "4:2:2",
+              "qtable_luma": [
+                12,
+                8,
+                8,
+                12,
+                18,
+                30,
+                38,
+                46,
+                9,
+                9,
+                11,
+                14,
+                20,
+                44,
+                45,
+                41,
+                11,
+                10,
+                12,
+                18,
+                30,
+                43,
+                52,
+                42,
+                11,
+                13,
+                17,
+                22,
+                38,
+                65,
+                60,
+                47,
+                14,
+                17,
+                28,
+                42,
+                51,
+                82,
+                77,
+                58,
+                18,
+                26,
+                41,
+                48,
+                61,
+                78,
+                85,
+                69,
+                37,
+                48,
+                59,
+                65,
+                77,
+                91,
+                90,
+                76,
+                54,
+                69,
+                71,
+                74,
+                84,
+                75,
+                77,
+                74
+              ],
+              "qtable_chroma": [
+                13,
+                14,
+                18,
+                35,
+                74,
+                74,
+                74,
+                74,
+                14,
+                16,
+                20,
+                50,
+                74,
+                74,
+                74,
+                74,
+                18,
+                20,
+                42,
+                74,
+                74,
+                74,
+                74,
+                74,
+                35,
+                50,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74
+              ],
+              "n": 470
+            }
+          ],
+          "synth": [
+            {
+              "non_jpeg": true,
+              "n": 470
+            }
+          ]
+        },
+        "n_real": 470,
+        "n_synth": 470
+      },
+      "c2st": {
+        "accuracy": 0.9740484429065744,
+        "balanced_accuracy": 0.9741589994249569,
+        "ci95": [
+          0.9584037406123628,
+          0.9861830742659758
+        ],
+        "val_balanced_accuracy": 0.9780487804878049,
+        "best_epoch": 11,
+        "epochs": 20,
+        "n_train": 1029,
+        "n_val": 393,
+        "n_test": 578,
+        "n_test_images": 282,
+        "n_params": 60929,
+        "patch": 64,
+        "residual": "img/255 - GaussianBlur(sigma=2.0)",
+        "seconds": 3.36
+      },
+      "kid": {
+        "mean": 7.55065174126658,
+        "se": 0.14994093982958343,
+        "ci95": [
+          7.281868017443427,
+          7.835201354837048
+        ],
+        "subsets": [
+          6.891255613728681,
+          7.713316065844097,
+          7.379087606680402,
+          6.8260467745496,
+          7.644432919728295,
+          7.58060555019653,
+          7.623730187713442,
+          7.758295474556801,
+          8.524976262193483,
+          7.564770957474466
+        ],
+        "subset_size": 100,
+        "subsets_disjoint": true,
+        "n_x": 1000,
+        "n_y": 1000,
+        "encoder": "dinov2_vitl14_cls_bicubic224",
+        "backend": "torch.hub",
+        "features_real": {
+          "n_patches": 1000,
+          "n_cached": 0,
+          "n_computed": 1000,
+          "encoder": "dinov2_vitl14_cls_bicubic224"
+        },
+        "features_synth": {
+          "n_patches": 1000,
+          "n_cached": 0,
+          "n_computed": 1000,
+          "encoder": "dinov2_vitl14_cls_bicubic224"
+        }
+      },
+      "inputs": {
+        "real": "split:dev",
+        "synth": "D:\\DevCache\\datasets\\xla\\realism-smoke\\d0tam",
+        "split_file": "D:\\XLA-wt\\data\\data\\real\\split.json",
+        "frames_dir": null,
+        "max_images": null
+      },
+      "env": {
+        "python": "3.12.16",
+        "platform": "Windows-11-10.0.26300-SP0"
+      }
+    },
+    "devb_vs_deva": {
+      "protocol": {
+        "real": {
+          "size_wh": [
+            640,
+            480
+          ],
+          "n_images": 323,
+          "exts": [
+            ".jpg"
+          ]
+        },
+        "synth": {
+          "size_wh": [
+            640,
+            480
+          ],
+          "n_images": 147,
+          "exts": [
+            ".jpg"
+          ]
+        },
+        "crop_left": 16,
+        "decoder": "cv2.imdecode IMREAD_COLOR",
+        "warnings": []
+      },
+      "params": {
+        "seed": 20261118,
+        "n_patches": 1000,
+        "kid_patch": 224,
+        "kid_subsets": 10,
+        "kid_subset_size": 1000,
+        "c2st_patch": 64,
+        "c2st_epochs": 20
+      },
+      "device": "cuda",
+      "timing_s": {
+        "stats": 28.38,
+        "c2st_load": 0.56,
+        "c2st": 4.28,
+        "kid_load": 0.69,
+        "kid_features": 90.44,
+        "kid": 91.16,
+        "total": 123.93
+      },
+      "vram_peak_mb": {
+        "c2st": 367.8,
+        "kid": 1549.1
+      },
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "stats": {
+        "total": 0.8373731814526806,
+        "total_kind": "trung bình có trọng số của W1/IQR(thật)",
+        "weights": {
+          "b_over_g": 1.0,
+          "blocking_ratio_8x8": 1.0,
+          "dark_channel_15px": 1.0,
+          "laplacian_var": 1.0,
+          "left_strip_mean_y": 1.0,
+          "left_strip_width_px": 1.0,
+          "mtf50_cyc_per_px": 1.0,
+          "pink_frac": 1.0,
+          "pink_highlight_y": 1.0,
+          "r_over_g": 1.0,
+          "saturation_mean": 1.0,
+          "sigma_immerkaer": 1.0,
+          "sobel_x2_over_y2": 1.0,
+          "vignette_corner_center_ratio": 1.0,
+          "y_p1": 1.0,
+          "y_p99": 1.0,
+          "nlf": 1.0,
+          "psd_radial_log10": 1.0
+        },
+        "excluded_nan": [],
+        "items": {
+          "b_over_g": {
+            "value": 0.49606214722252984,
+            "w1": 0.0037722797892016883,
+            "scale": 0.007604449987411499,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "blocking_ratio_8x8": {
+            "value": 1.3274606878325284,
+            "w1": 0.6837903531684656,
+            "scale": 0.5151115655899048,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "dark_channel_15px": {
+            "value": 0.6936230619141223,
+            "w1": 5.00250391380405,
+            "scale": 7.21213608440172,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "laplacian_var": {
+            "value": 0.918649860311333,
+            "w1": 21.684133789035748,
+            "scale": 23.604351043701172,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "left_strip_mean_y": {
+            "value": 1.0575572269447027,
+            "w1": 10.91600335539875,
+            "scale": 10.321903228759766,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "left_strip_width_px": {
+            "value": 0.932014911227649,
+            "w1": 0.932014911227649,
+            "scale": 1.0,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "mtf50_cyc_per_px": {
+            "value": 1.019181263994616,
+            "w1": 0.07945005448408127,
+            "scale": 0.07795478320773072,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "pink_frac": {
+            "value": 0.4577686844322644,
+            "w1": 0.006551997696852023,
+            "scale": 0.014312900641025642,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "pink_highlight_y": {
+            "value": 0.47390854603560756,
+            "w1": 1.8104389702886932,
+            "scale": 3.8202285766601562,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 135
+          },
+          "r_over_g": {
+            "value": 0.21649317680916563,
+            "w1": 0.0012782894870329595,
+            "scale": 0.005904525518417358,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "saturation_mean": {
+            "value": 1.2392025306495806,
+            "w1": 4.6578471335959035,
+            "scale": 3.758745659722221,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "sigma_immerkaer": {
+            "value": 0.6810065624334993,
+            "w1": 0.06983227082426471,
+            "scale": 0.10254272818565369,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "sobel_x2_over_y2": {
+            "value": 0.9649962536634576,
+            "w1": 0.299691180599657,
+            "scale": 0.31056201457977295,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "vignette_corner_center_ratio": {
+            "value": 0.5958185649182628,
+            "w1": 0.0637641066169807,
+            "scale": 0.1070193350315094,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "y_p1": {
+            "value": 0.9543709919580123,
+            "w1": 15.747121367307203,
+            "scale": 16.5,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "y_p99": {
+            "value": 1.6759389799106836,
+            "w1": 13.407511839285469,
+            "scale": 8.0,
+            "scale_kind": "iqr_real",
+            "n_real": 323,
+            "n_synth": 147
+          },
+          "nlf": {
+            "value": 0.43240019099675625,
+            "bins_compared": 5,
+            "bins_only_real": 1,
+            "bins_only_synth": 0,
+            "per_bin": {
+              "3": {
+                "value": 0.8365162334847904,
+                "w1": 0.06924261604924253,
+                "scale": 0.08277498185634613,
+                "scale_kind": "iqr_real",
+                "n_real": 311,
+                "n_synth": 107
+              },
+              "4": {
+                "value": 0.40163571508912554,
+                "w1": 0.05775532868471948,
+                "scale": 0.1438002809882164,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "5": {
+                "value": 0.3728209540346507,
+                "w1": 0.06277532546514107,
+                "scale": 0.1683792844414711,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "6": {
+                "value": 0.2650153769267145,
+                "w1": 0.05339579406829688,
+                "scale": 0.2014818713068962,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 102
+              },
+              "7": {
+                "value": 0.2860126754485,
+                "w1": 0.07163324375592528,
+                "scale": 0.25045478716492653,
+                "scale_kind": "iqr_real",
+                "n_real": 140,
+                "n_synth": 33
+              }
+            }
+          },
+          "psd_radial_log10": {
+            "value": 0.9362636248934793,
+            "bins_compared": 16,
+            "bins_only_real": 0,
+            "bins_only_synth": 0,
+            "per_bin": {
+              "0.0156": {
+                "value": 0.862826607220163,
+                "w1": 0.330194602676392,
+                "scale": 0.38268940701794785,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.0469": {
+                "value": 0.6007138757482157,
+                "w1": 0.3006250275799214,
+                "scale": 0.5004462851894,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.0781": {
+                "value": 0.6232182394033923,
+                "w1": 0.33271072951888075,
+                "scale": 0.5338591018089991,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.1094": {
+                "value": 0.7840435463978888,
+                "w1": 0.36306406990223505,
+                "scale": 0.46306620540434396,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.1406": {
+                "value": 1.0479642413475776,
+                "w1": 0.41851347345666995,
+                "scale": 0.39935854387407654,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.1719": {
+                "value": 1.1898970042136827,
+                "w1": 0.4713508394288098,
+                "scale": 0.3961274276342024,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.2031": {
+                "value": 1.1310837080665002,
+                "w1": 0.47024869227978244,
+                "scale": 0.41575056640470587,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.2344": {
+                "value": 1.1196852804269197,
+                "w1": 0.45500267430370434,
+                "scale": 0.40636657662429787,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.2656": {
+                "value": 1.124061384301862,
+                "w1": 0.4381620524098166,
+                "scale": 0.3898026020010932,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.2969": {
+                "value": 1.015267609358746,
+                "w1": 0.3783784019723668,
+                "scale": 0.37268834195484146,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.3281": {
+                "value": 0.971130176113201,
+                "w1": 0.3420479496228683,
+                "scale": 0.3522163743195197,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.3594": {
+                "value": 1.0051220852870046,
+                "w1": 0.3425462257414432,
+                "scale": 0.340800615920833,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.3906": {
+                "value": 1.0195762641029262,
+                "w1": 0.325359481633695,
+                "scale": 0.31911245199491023,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.4219": {
+                "value": 0.8195088205233075,
+                "w1": 0.27866860885677736,
+                "scale": 0.3400434527096732,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.4531": {
+                "value": 0.772419040231979,
+                "w1": 0.2581584019977584,
+                "scale": 0.3342206607442331,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              },
+              "0.4844": {
+                "value": 0.8937001155522994,
+                "w1": 0.27571232191167033,
+                "scale": 0.30850653044985044,
+                "scale_kind": "iqr_real",
+                "n_real": 323,
+                "n_synth": 147
+              }
+            }
+          }
+        },
+        "dqt": {
+          "match": true,
+          "real": [
+            {
+              "subsampling": "4:2:2",
+              "qtable_luma": [
+                12,
+                8,
+                8,
+                12,
+                18,
+                30,
+                38,
+                46,
+                9,
+                9,
+                11,
+                14,
+                20,
+                44,
+                45,
+                41,
+                11,
+                10,
+                12,
+                18,
+                30,
+                43,
+                52,
+                42,
+                11,
+                13,
+                17,
+                22,
+                38,
+                65,
+                60,
+                47,
+                14,
+                17,
+                28,
+                42,
+                51,
+                82,
+                77,
+                58,
+                18,
+                26,
+                41,
+                48,
+                61,
+                78,
+                85,
+                69,
+                37,
+                48,
+                59,
+                65,
+                77,
+                91,
+                90,
+                76,
+                54,
+                69,
+                71,
+                74,
+                84,
+                75,
+                77,
+                74
+              ],
+              "qtable_chroma": [
+                13,
+                14,
+                18,
+                35,
+                74,
+                74,
+                74,
+                74,
+                14,
+                16,
+                20,
+                50,
+                74,
+                74,
+                74,
+                74,
+                18,
+                20,
+                42,
+                74,
+                74,
+                74,
+                74,
+                74,
+                35,
+                50,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74
+              ],
+              "n": 323
+            }
+          ],
+          "synth": [
+            {
+              "subsampling": "4:2:2",
+              "qtable_luma": [
+                12,
+                8,
+                8,
+                12,
+                18,
+                30,
+                38,
+                46,
+                9,
+                9,
+                11,
+                14,
+                20,
+                44,
+                45,
+                41,
+                11,
+                10,
+                12,
+                18,
+                30,
+                43,
+                52,
+                42,
+                11,
+                13,
+                17,
+                22,
+                38,
+                65,
+                60,
+                47,
+                14,
+                17,
+                28,
+                42,
+                51,
+                82,
+                77,
+                58,
+                18,
+                26,
+                41,
+                48,
+                61,
+                78,
+                85,
+                69,
+                37,
+                48,
+                59,
+                65,
+                77,
+                91,
+                90,
+                76,
+                54,
+                69,
+                71,
+                74,
+                84,
+                75,
+                77,
+                74
+              ],
+              "qtable_chroma": [
+                13,
+                14,
+                18,
+                35,
+                74,
+                74,
+                74,
+                74,
+                14,
+                16,
+                20,
+                50,
+                74,
+                74,
+                74,
+                74,
+                18,
+                20,
+                42,
+                74,
+                74,
+                74,
+                74,
+                74,
+                35,
+                50,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74,
+                74
+              ],
+              "n": 147
+            }
+          ]
+        },
+        "n_real": 323,
+        "n_synth": 147
+      },
+      "c2st": {
+        "accuracy": 0.767402376910017,
+        "balanced_accuracy": 0.7658963536981942,
+        "ci95": [
+          0.7199872495446266,
+          0.8069948630371675
+        ],
+        "val_balanced_accuracy": 0.7122916666666668,
+        "best_epoch": 19,
+        "epochs": 20,
+        "n_train": 1019,
+        "n_val": 392,
+        "n_test": 589,
+        "n_test_images": 141,
+        "n_params": 60929,
+        "patch": 64,
+        "residual": "img/255 - GaussianBlur(sigma=2.0)",
+        "seconds": 3.7
+      },
+      "kid": {
+        "mean": 1.330286645460699,
+        "se": 0.08821746532243373,
+        "ci95": [
+          1.1848328214880326,
+          1.505499469135466
+        ],
+        "subsets": [
+          1.1279221932193142,
+          1.5298897601193335,
+          1.1461952670838738,
+          1.3790564498066455,
+          1.2710800773871984,
+          1.3156360593814505,
+          1.3458848205575258,
+          1.240306011157367,
+          1.98837403538991,
+          0.9585217805043715
+        ],
+        "subset_size": 100,
+        "subsets_disjoint": true,
+        "n_x": 1000,
+        "n_y": 1000,
+        "encoder": "dinov2_vitl14_cls_bicubic224",
+        "backend": "torch.hub",
+        "features_real": {
+          "n_patches": 1000,
+          "n_cached": 5,
+          "n_computed": 995,
+          "encoder": "dinov2_vitl14_cls_bicubic224"
+        },
+        "features_synth": {
+          "n_patches": 1000,
+          "n_cached": 0,
+          "n_computed": 1000,
+          "encoder": "dinov2_vitl14_cls_bicubic224"
+        }
+      },
+      "inputs": {
+        "real": "D:\\DevCache\\datasets\\xla\\realism-smoke\\dev_b",
+        "synth": "D:\\DevCache\\datasets\\xla\\realism-smoke\\dev_a",
+        "split_file": null,
+        "frames_dir": null,
+        "max_images": null
+      },
+      "env": {
+        "python": "3.12.16",
+        "platform": "Windows-11-10.0.26300-SP0"
+      }
+    }
+  }
+}
