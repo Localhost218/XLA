@@ -1,0 +1,74 @@
+# BẢN LƯU TRỮ: hồ sơ v1.0.0 (commit ee60021, dev 470 khung), đã thay bằng configs/camera_profile.yaml v1.1.0 ngày 18/11/2026.
+# Hồ sơ camera — sinh bởi `python -m xla.camera.profile build --split dev`; KHÔNG sửa tay.
+# Đổi số đo = tăng profile_version (hợp đồng docs/hop-dong-model.md §6). Báo cáo: results/camera/profile_report.md
+schema_version: '1.0'
+profile_version: 1.0.0
+profile_id: ov3660-esp32s3-q12-20261102
+measured_on:
+  recording: 20261102-100941
+  split_file: data/real/split.json
+  n_frames: 470
+  measured: '2026-11-18'
+sensor:
+  model: OV3660
+  board: ESP32-S3 N16R8
+  xclk_mhz: 10
+  mount: nadir
+frame:
+  width_px: 640
+  height_px: 480
+  format: MJPEG
+jpeg:
+  esp32_quality: 12
+  baseline: true
+  subsampling: '4:2:2'
+  qtable_luma: [12, 8, 8, 12, 18, 30, 38, 46, 9, 9, 11, 14, 20, 44, 45, 41, 11, 10, 12, 18, 30, 43, 52, 42, 11, 13, 17, 22,
+    38, 65, 60, 47, 14, 17, 28, 42, 51, 82, 77, 58, 18, 26, 41, 48, 61, 78, 85, 69, 37, 48, 59, 65, 77, 91, 90, 76, 54, 69,
+    71, 74, 84, 75, 77, 74]
+  qtable_chroma: [13, 14, 18, 35, 74, 74, 74, 74, 14, 16, 20, 50, 74, 74, 74, 74, 18, 20, 42, 74, 74, 74, 74, 74, 35, 50,
+    74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74,
+    74, 74, 74, 74, 74, 74, 74, 74]
+  annex_k_scale: 0.75
+  other_qualities:
+    rule: annex_k * q / 16
+    verified: false
+left_strip: {width_px: 14.0, crop_left_px: 16, mean_y_strip: 98.36, mean_y_ref: 145.96}
+vignette:
+  corner_center_ratio: {p5: 0.65977, p50: 0.80699, p95: 0.93459}
+  model: cos4
+  focal_px_fit: 1003.5
+haze:
+  dark_channel_15px_0_255: {p5: 115.04, p50: 144.78, p95: 154.3}
+  y_p1_0_255: {p5: 92.0, p50: 112.0, p95: 132.0}
+  saturation_0_255: {p5: 7.3329, p50: 16.725, p95: 21.062}
+sharpness:
+  laplacian_var: {p5: 8.1512, p50: 34.977, p95: 80.252}
+  mtf50_cyc_per_px: {p5: 0.1367, p50: 0.25061, p95: 0.33316}
+  psf_sigma_px_fit: 0.74774
+noise:
+  sigma_immerkaer_0_255: {p5: 0.21347, p50: 0.35741, p95: 0.49507}
+  nlf: [[121.83, 0.2994], [148.49, 0.28579], [173.99, 0.26661], [203.97, 0.23377], [228.45, 0.16595]]
+  psd_radial: [[0.015625, 22.549], [0.046875, 87.04], [0.078125, 136.41], [0.10938, 117.88], [0.14062, 87.5], [0.17188, 53.54],
+    [0.20312, 27.416], [0.23438, 14.32], [0.26562, 8.6951], [0.29688, 6.1952], [0.32812, 4.5441], [0.35938, 3.2445], [0.39062,
+      2.5876], [0.42188, 2.2633], [0.45312, 1.9852], [0.48438, 1.6919]]
+color:
+  r_over_g: {p5: 0.96824, p50: 0.97646, p95: 0.98339}
+  b_over_g: {p5: 0.95038, p50: 0.96485, p95: 0.98147}
+  wb_gain_r_fit: 0.97646
+  wb_gain_b_fit: 0.96485
+magenta:
+  rule: R-G>25 and B-G>25
+  frac_pixels: {p5: 4.1567e-05, p50: 0.0035089, p95: 0.022731}
+  frac_frames_gt_0p5pct: 0.37234
+  highlight_y_0_255: {p5: 217.28, p50: 223.0, p95: 231.83}
+blocking:
+  ratio_8x8: {p5: 1.9282, p50: 2.6564, p95: 4.3784}
+motion_blur:
+  sobel_x2_over_y2: {p5: 0.53717, p50: 0.82461, p95: 1.224}
+  frac_frames_gt_1p5: 0.38936
+person_box_px:
+  short_side: {p5: 24.214, p50: 53.24, p95: 67.57, min: 13.89, max: 73.78}
+  source: yolo11s-so-bo
+altitude_m:
+  flight_frames: {p5: 4.433, p50: 11.785, p95: 15.743}
+  filter: rel_alt_m > 3, bỏ điểm vọt
