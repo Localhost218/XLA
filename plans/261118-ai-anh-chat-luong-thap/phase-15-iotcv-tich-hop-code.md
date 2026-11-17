@@ -40,6 +40,11 @@ OpenCV Q81. **IOT-CV chỉ ghi file, không commit/push/PR** (D13).
 2. **Runtime trước** (Deferred 12): thêm `onnxruntime-gpu` + `pillow` vào nhóm `vision`, `onnx` + `onnxruntime` + `pillow` vào
    `dev`; `uv sync --extra vision --extra dev` (cache ở `D:\DevCache\uv`); kiểm `CUDAExecutionProvider` nạp được trên Python
    3.13 với bundle giả, đo ms. Không được: thử `onnxruntime-directml`; vẫn không: CPU + ghi rõ, báo lead (rủi ro Forecast #2).
+   **Bẫy đã gặp ở XLA (phase 01, 18/11/2026):** `onnxruntime-gpu` 1.32 đòi CUDA 13 (`cublasLt64_13.dll`), không tạo được
+   CUDA EP trên máy này; 1.24.4 tạo được **chỉ khi đã `import torch` trước** (mượn DLL CUDA 12.4 + cuDNN 9 của torch), không
+   import thì session lặng lẽ lùi về CPU. Backend IOT-CV không có torch: phải có CUDA 12 + cuDNN 9 riêng (gói pip
+   `nvidia-cudnn-cu12`, `nvidia-cublas-cu12` … + `onnxruntime.preload_dlls()` nếu bản ORT có) hoặc rơi sang directml. Kiểm
+   `session.get_providers()` sau khi tạo session, đừng tin `get_available_providers()`.
 3. **`model_bundle.py`:** `load_bundle(onnx_path, sha256, kind)` thực hiện bốn kiểm của hợp đồng §5; lỗi → ném
    `BundleRejected(reason)`; tạo `InferenceSession` theo `VISION_ORT_PROVIDERS`; trả về đối tượng giữ session + meta.
 4. **`detector.py`:** hiện thực `PersonDetector` trên `model_bundle` (bỏ ultralytics, bỏ `YOLO_WEIGHTS`/`DETECTION_IMGSZ`

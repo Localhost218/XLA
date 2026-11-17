@@ -2,7 +2,7 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 04 | M (~1,5 ngày agent), ~0,5 giờ GPU cho smoke (chưa xác minh) | Không |
+| xong 18/11/2026 | phase 04 | M (~1,5 ngày agent), ~0,5 giờ GPU cho smoke (chưa xác minh) | Không |
 
 Lane: realism
 Depends-on: 04

@@ -2,7 +2,7 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 01 | M (~1 ngày agent), ~0,3 giờ GPU (đếm người sơ bộ, chưa xác minh) | Không |
+| xong 18/11/2026 | phase 01 | M (~1 ngày agent), ~0,3 giờ GPU (đếm người sơ bộ, chưa xác minh) | Không |
 
 Lane: data
 Depends-on: 01

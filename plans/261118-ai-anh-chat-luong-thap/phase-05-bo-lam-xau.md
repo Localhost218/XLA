@@ -2,7 +2,7 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 02, 04 | L (~2–3 ngày agent + thời gian tải), 0 giờ GPU (CPU) | Không |
+| xong 18/11/2026 | phase 02, 04 | L (~2–3 ngày agent + thời gian tải), 0 giờ GPU (CPU) | Không |
 
 Lane: degrade
 Depends-on: 02, 04
