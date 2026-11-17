@@ -10,6 +10,8 @@
 
     python -m xla.degrade.sources score   --config configs/sources.yaml      # tính sky_frac + clip_nadir → cache
     python -m xla.degrade.sources review-sheet --n 100 --out <thư mục>        # lưới ảnh nhỏ để soát tay
+    python -m xla.degrade.sources seq-sheet --per-sheet 24 --out <thư mục>   # lưới soát nhãn chuỗi VisDrone
+    python -m xla.degrade.sources fit-probe        # probe CLIP trên nhãn soát tay → probe_scores_file
     python -m xla.degrade.sources stats   --config configs/sources.yaml --json
 """
 
@@ -55,6 +57,7 @@ class SourceItem:
     alt_m: float | None = None                    # độ cao/khoảng cách theo metadata (NOMAD)
     sky_frac: float | None = None
     clip_nadir: float | None = None
+    probe_nadir: float | None = None              # xác suất "nhận" của probe tuyến tính trên đặc trưng CLIP
 
     def boxes_np(self) -> np.ndarray:
         return np.asarray(self.boxes, np.float32).reshape(-1, 4)
@@ -200,16 +203,72 @@ class ClipScorer:
             return logits.softmax(dim=-1)[:, 0].cpu().tolist()
 
 
-def is_nadir(item: SourceItem, rule: dict) -> bool:
-    """Metadata thắng; không có thì cần cả hai: ``sky_frac ≤ max_sky_frac`` và ``clip_nadir ≥ min_clip_nadir``."""
+VIEW_CLASSES = ("nadir", "near", "oblique", "mixed")
+
+
+def visdrone_seq(item: SourceItem) -> str:
+    """Mã chuỗi VisDrone theo split: ``train/0000002`` (số chuỗi trùng giữa train và val nên kèm split)."""
+    return f"{item.split}/{Path(item.image).stem.split('_')[0]}"
+
+
+def load_view_labels(path: str | Path) -> dict[str, dict[str, str]]:
+    """Nhãn góc nhìn soát tay (``configs/visdrone_view.yaml``): ``{"sequences": {"train/0000002": lớp},
+    "images": {"visdrone/<stem>": lớp}}``. Nhãn ảnh thắng nhãn chuỗi; ảnh không mang lớp ``mixed``."""
+    data = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    out = {"sequences": {str(k): str(v) for k, v in (data.get("sequences") or {}).items()},
+           "images": {str(k): str(v) for k, v in (data.get("images") or {}).items()}}
+    bad = {k: v for k, v in out["sequences"].items() if v not in VIEW_CLASSES}
+    bad |= {k: v for k, v in out["images"].items() if v not in VIEW_CLASSES[:3]}
+    if bad:
+        raise ValueError(f"{path}: nhãn không hợp lệ (chuỗi: {VIEW_CLASSES}, ảnh: {VIEW_CLASSES[:3]}): {bad}")
+    return out
+
+
+def view_of(item: SourceItem, labels: dict[str, dict[str, str]]) -> str:
+    """Lớp góc nhìn soát tay của một ảnh VisDrone: nhãn ảnh nếu có, không thì nhãn chuỗi (thiếu → lỗi)."""
+    if item.key in labels["images"]:
+        return labels["images"][item.key]
+    seq = visdrone_seq(item)
+    if seq not in labels["sequences"]:
+        raise KeyError(f"chuỗi {seq} chưa có nhãn góc nhìn (configs/visdrone_view.yaml)")
+    return labels["sequences"][seq]
+
+
+def _score_pass(item: SourceItem, rule: dict) -> bool:
+    if item.sky_frac is None or item.clip_nadir is None:
+        raise ValueError(f"{item.key}: chưa có điểm nadir (chạy `python -m xla.degrade.sources score`)")
+    return item.sky_frac <= rule["max_sky_frac"] and item.clip_nadir >= rule["min_clip_nadir"]
+
+
+def is_nadir(item: SourceItem, rule: dict, view_labels: dict | None = None) -> bool:
+    """Thứ tự quyết: (1) nguồn bị loại cả bộ (``exclude_sources``); (2) metadata nguồn; (3) nhãn soát tay VisDrone
+    (ảnh, rồi chuỗi): lớp trong ``accept_views`` → nhận; ``mixed`` → probe (``probe_nadir ≥ min_probe_nadir``) nếu
+    cấu hình có ngưỡng probe, không thì sky + CLIP; lớp khác → loại; (4) không có bảng nhãn → sky + CLIP.
+    Chuỗi VisDrone thiếu nhãn khi đã có bảng nhãn là lỗi (bảng phải đủ)."""
+    if item.source in rule.get("exclude_sources", {}):
+        return False
     meta = rule.get("metadata", {}).get(item.source)
     if meta == "nadir":
         return True
     if meta == "oblique":
         return False
-    if item.sky_frac is None or item.clip_nadir is None:
-        raise ValueError(f"{item.key}: chưa có điểm nadir (chạy `python -m xla.degrade.sources score`)")
-    return item.sky_frac <= rule["max_sky_frac"] and item.clip_nadir >= rule["min_clip_nadir"]
+    if view_labels is not None and item.source == "visdrone":
+        view = view_of(item, view_labels)
+        if view != "mixed":
+            return view in rule["accept_views"]
+        if rule.get("min_probe_nadir") is not None:
+            if item.probe_nadir is None:
+                raise ValueError(f"{item.key}: chưa có điểm probe (chạy `python -m xla.degrade.sources fit-probe`)")
+            return item.probe_nadir >= float(rule["min_probe_nadir"])
+    return _score_pass(item, rule)
+
+
+def view_labels_for(cfg: dict) -> dict | None:
+    f = cfg["nadir"].get("view_labels_file")
+    if not f:
+        return None
+    p = Path(f)
+    return load_view_labels(p if p.is_absolute() else paths.repo_root() / p)
 
 
 # ----------------------------------------------------------------------------- chỉ mục
@@ -241,6 +300,15 @@ def attach_scores(items: list[SourceItem], cfg: dict) -> None:
         if it.key in sc:
             it.sky_frac = sc[it.key]["sky_frac"]
             it.clip_nadir = sc[it.key]["clip_nadir"]
+    pf = cfg["nadir"].get("probe_scores_file")
+    if pf and _resolve(pf).exists():
+        pr = {}
+        for line in _resolve(pf).read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                r = json.loads(line)
+                pr[r["key"]] = r["probe_nadir"]
+        for it in items:
+            it.probe_nadir = pr.get(it.key)
 
 
 def select(cfg: dict) -> list[SourceItem]:
@@ -248,7 +316,8 @@ def select(cfg: dict) -> list[SourceItem]:
     items = collect(cfg)
     attach_scores(items, cfg)
     rule = cfg["nadir"]
-    out = [it for it in items if is_nadir(it, rule)]
+    views = view_labels_for(cfg)
+    out = [it for it in items if is_nadir(it, rule, views)]
     if not cfg.get("keep_images_without_person", True):
         out = [it for it in out if it.boxes]
     return sorted(out, key=lambda i: i.key)
@@ -328,10 +397,125 @@ def cmd_review_sheet(cfg: dict, n: int, seed: int, out_dir: Path, per_sheet: int
     return 0
 
 
+def clip_embeddings(items: list[SourceItem], model_name: str, pretrained: str, cache: Path,
+                    batch: int = 64) -> dict[str, np.ndarray]:
+    """Đặc trưng ảnh CLIP (chuẩn hoá L2), cache ``.npz`` theo khoá; chỉ tính ảnh chưa có."""
+    have: dict[str, np.ndarray] = {}
+    if cache.exists():
+        z = np.load(cache, allow_pickle=False)
+        have = dict(zip(z["keys"].tolist(), z["emb"], strict=True))
+    todo = [it for it in items if it.key not in have]
+    if todo:
+        from contextlib import nullcontext
+
+        import torch
+        from PIL import Image
+
+        from xla.gpu_lock import gpu_lock
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        with gpu_lock("degrade:clip-emb") if device == "cuda" else nullcontext():
+            scorer = ClipScorer(model_name, pretrained, device)
+            for i in range(0, len(todo), batch):
+                chunk = todo[i:i + batch]
+                imgs = [cv2.imread(it.image, cv2.IMREAD_REDUCED_COLOR_2) for it in chunk]
+                with torch.no_grad():
+                    b = torch.stack([scorer.preprocess(Image.fromarray(np.ascontiguousarray(im[..., ::-1])))
+                                     for im in imgs]).to(device)
+                    f = scorer.model.encode_image(b).float()
+                    f = (f / f.norm(dim=-1, keepdim=True)).cpu().numpy()
+                have.update(zip((it.key for it in chunk), f, strict=True))
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        keys = sorted(have)
+        np.savez(cache, keys=np.array(keys), emb=np.stack([have[k] for k in keys]))
+    return have
+
+
+def cmd_fit_probe(cfg: dict, cache: Path) -> int:
+    """Probe tuyến tính (logistic, C=1, cân lớp) trên đặc trưng CLIP: nhãn = lớp soát tay (chuỗi nadir/near/oblique +
+    nhãn từng ảnh), dương = ``accept_views``. Chấm mọi ảnh VisDrone → ``probe_scores_file``; in kiểm chéo 5 phần trên
+    ảnh có nhãn riêng (ảnh chuỗi mixed) để chọn ``min_probe_nadir``."""
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import StratifiedKFold
+
+    nd = cfg["nadir"]
+    labels = view_labels_for(cfg)
+    if labels is None:
+        raise ValueError("fit-probe cần nadir.view_labels_file")
+    items = [it for it in collect(cfg) if it.source == "visdrone"]
+    emb = clip_embeddings(items, nd["clip_model"], nd["clip_pretrained"], cache)
+    accept = set(nd["accept_views"])
+    seq_tr = [(it.key, labels["sequences"][visdrone_seq(it)] in accept) for it in items
+              if it.key not in labels["images"] and labels["sequences"][visdrone_seq(it)] != "mixed"]
+    img_tr = [(k, v in accept) for k, v in sorted(labels["images"].items())]
+    xs = np.stack([emb[k] for k, _ in seq_tr])
+    ys = np.array([v for _, v in seq_tr])
+    xi = np.stack([emb[k] for k, _ in img_tr])
+    yi = np.array([v for _, v in img_tr])
+    cv = np.zeros(len(img_tr))
+    for tr, te in StratifiedKFold(5, shuffle=True, random_state=0).split(xi, yi):
+        c = LogisticRegression(C=1.0, class_weight="balanced", max_iter=3000)
+        c.fit(np.vstack([xs, xi[tr]]), np.concatenate([ys, yi[tr]]))
+        cv[te] = c.predict_proba(xi[te])[:, 1]
+    table = []
+    for t in (0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9):
+        sel = cv >= t
+        tp = int((sel & yi).sum())
+        table.append({"t": t, "selected": int(sel.sum()), "precision": round(tp / max(int(sel.sum()), 1), 3),
+                      "recall": round(tp / max(int(yi.sum()), 1), 3)})
+    clf = LogisticRegression(C=1.0, class_weight="balanced", max_iter=3000)
+    clf.fit(np.vstack([xs, xi]), np.concatenate([ys, yi]))
+    keys = sorted(emb)
+    prob = clf.predict_proba(np.stack([emb[k] for k in keys]))[:, 1]
+    out = _resolve(nd["probe_scores_file"])
+    with out.open("w", encoding="utf-8", newline="\n") as f:
+        for k, p in zip(keys, prob, strict=True):
+            f.write(json.dumps({"key": k, "probe_nadir": round(float(p), 5)}) + "\n")
+    print(json.dumps({"accept_views": sorted(accept), "train_seq_images": len(seq_tr), "train_image_labels": len(img_tr),
+                      "positives_image_labels": int(yi.sum()), "cv_on_image_labels": table, "out": str(out)},
+                     ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_seq_sheet(cfg: dict, out_dir: Path, per_sheet: int) -> int:
+    """Lưới soát nhãn góc nhìn theo chuỗi VisDrone: mỗi hàng một chuỗi, 3 khung (đầu / giữa / cuối) có ghi mã chuỗi."""
+    by_seq: dict[str, list[SourceItem]] = {}
+    for it in collect(cfg):
+        if it.source == "visdrone":
+            by_seq.setdefault(visdrone_seq(it), []).append(it)
+    seqs = sorted(by_seq)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    tw, th, per_row = 260, 160, 2
+    rows_csv = ["seq,n_images,frames"]
+    for s in range(0, len(seqs), per_sheet):
+        tiles = []
+        for seq in seqs[s:s + per_sheet]:
+            its = sorted(by_seq[seq], key=lambda i: i.key)
+            pick = [its[0], its[len(its) // 2], its[-1]]
+            rows_csv.append(f"{seq},{len(its)},{'|'.join(Path(i.image).stem for i in pick)}")
+            for k, it in enumerate(pick):
+                im = cv2.imread(it.image, cv2.IMREAD_REDUCED_COLOR_4)
+                t = cv2.resize(im, (tw, th), interpolation=cv2.INTER_AREA)
+                cv2.rectangle(t, (0, 0), (tw, 16), (0, 0, 0), -1)
+                cv2.putText(t, f"{seq} n{len(its)} [{k}]", (3, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.4,
+                            (255, 255, 255), 1, cv2.LINE_AA)
+                tiles.append(t)
+        sep = np.full((th, 8, 3), 255, np.uint8)
+        groups = [np.hstack(tiles[i:i + 3]) for i in range(0, len(tiles), 3)]
+        while len(groups) % per_row:
+            groups.append(np.zeros_like(groups[0]))
+        grid = np.vstack([np.hstack([groups[r], sep, groups[r + 1]]) for r in range(0, len(groups), per_row)])
+        cv2.imwrite(str(out_dir / f"seq_{s // per_sheet:02d}.jpg"), grid, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    (out_dir / "sequences.csv").write_text("\n".join(rows_csv) + "\n", encoding="utf-8", newline="\n")
+    print(f"[sources] {len(seqs)} chuỗi → {out_dir}")
+    return 0
+
+
 def cmd_stats(cfg: dict, as_json: bool) -> int:
     items = collect(cfg)
     attach_scores(items, cfg)
     rule = cfg["nadir"]
+    views = view_labels_for(cfg)
     st: dict = {}
     for it in items:
         d = st.setdefault(f"{it.source}/{it.split}", {"images": 0, "with_person": 0, "persons": 0, "scored": 0,
@@ -341,17 +525,18 @@ def cmd_stats(cfg: dict, as_json: bool) -> int:
         d["persons"] += len(it.boxes)
         if it.clip_nadir is not None:
             d["scored"] += 1
-            if is_nadir(it, rule):
-                d["nadir_images"] += 1
-                d["nadir_with_person"] += bool(it.boxes)
-                d["nadir_persons"] += len(it.boxes)
+        scored = it.source in rule.get("exclude_sources", {}) or it.clip_nadir is not None
+        if scored and is_nadir(it, rule, views):
+            d["nadir_images"] += 1
+            d["nadir_with_person"] += bool(it.boxes)
+            d["nadir_persons"] += len(it.boxes)
     print(json.dumps(st, ensure_ascii=False, indent=None if as_json else 2))
     return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=["score", "review-sheet", "stats"])
+    ap.add_argument("cmd", choices=["score", "review-sheet", "seq-sheet", "fit-probe", "stats"])
     ap.add_argument("--config", default=str(paths.repo_root() / "configs" / "sources.yaml"))
     ap.add_argument("--batch", type=int, default=64)
     ap.add_argument("--device", default="auto")
@@ -366,6 +551,10 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_score(cfg, a.batch, a.device)
     if a.cmd == "review-sheet":
         return cmd_review_sheet(cfg, a.n, a.seed, a.out, a.per_sheet)
+    if a.cmd == "seq-sheet":
+        return cmd_seq_sheet(cfg, a.out, a.per_sheet)
+    if a.cmd == "fit-probe":
+        return cmd_fit_probe(cfg, paths.cache_dir() / "degrade" / f"clip_emb_{cfg['nadir']['clip_model']}.npz")
     return cmd_stats(cfg, a.json)
 
 

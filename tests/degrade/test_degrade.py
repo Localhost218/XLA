@@ -265,3 +265,36 @@ def test_build_set_writes_manifest_and_dataset_yaml(source_item, ctx, tmp_path) 
     assert hashlib.sha256(img.read_bytes()).hexdigest() == rec["sha256"]
     ds = yaml.safe_load((tmp_path / "d2" / "dataset.yaml").read_text(encoding="utf-8"))
     assert ds["names"] == {0: "person"} and ds["train"] == "train/images"
+
+
+def _vd_item(stem: str, split: str = "train", probe: float | None = None) -> sources.SourceItem:
+    return sources.SourceItem(f"visdrone/{stem}", "visdrone", f"D:/x/{stem}.jpg", split, (1360, 765),
+                              sky_frac=0.0, clip_nadir=0.99, probe_nadir=probe)
+
+
+def test_nadir_rule_uses_hand_view_labels_then_probe() -> None:
+    labels = {"sequences": {"train/0000001": "nadir", "train/0000002": "near", "train/0000003": "oblique",
+                            "train/9999999": "mixed"},
+              "images": {"visdrone/9999999_00000_d_0000002": "oblique"}}
+    rule = {"accept_views": ["nadir", "near"], "min_probe_nadir": 0.8, "max_sky_frac": 0.05, "min_clip_nadir": 0.4,
+            "exclude_sources": {"nomad": "nhìn xiên"}}
+    assert sources.is_nadir(_vd_item("0000001_00001_d_0000001"), rule, labels)
+    assert sources.is_nadir(_vd_item("0000002_00001_d_0000001"), rule, labels)
+    assert not sources.is_nadir(_vd_item("0000003_00001_d_0000001"), rule, labels)  # CLIP 0,99 không cứu được
+    assert sources.is_nadir(_vd_item("9999999_00000_d_0000001", probe=0.85), rule, labels)
+    assert not sources.is_nadir(_vd_item("9999999_00000_d_0000001", probe=0.79), rule, labels)
+    assert not sources.is_nadir(_vd_item("9999999_00000_d_0000002", probe=0.99), rule, labels)  # nhãn ảnh thắng
+    with pytest.raises(ValueError):
+        sources.is_nadir(_vd_item("9999999_00000_d_0000003"), rule, labels)  # mixed mà chưa có điểm probe
+    with pytest.raises(KeyError):
+        sources.is_nadir(_vd_item("0000004_00001_d_0000001"), rule, labels)  # chuỗi chưa soát
+    nomad = sources.SourceItem("nomad/a", "nomad", "x.jpg", "train", (10, 10), sky_frac=0.0, clip_nadir=0.99)
+    assert not sources.is_nadir(nomad, rule, labels)
+    assert sources.visdrone_seq(_vd_item("0000001_00001_d_0000001", split="val")) == "val/0000001"
+
+
+def test_repo_view_labels_are_complete_and_valid() -> None:
+    labels = sources.load_view_labels(REPO / "configs" / "visdrone_view.yaml")
+    assert len(labels["sequences"]) == 284
+    assert set(labels["sequences"].values()) <= set(sources.VIEW_CLASSES)
+    assert set(labels["images"].values()) <= {"nadir", "near", "oblique"}
