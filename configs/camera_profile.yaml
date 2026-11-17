@@ -1,12 +1,12 @@
 # Hồ sơ camera — sinh bởi `python -m xla.camera.profile build --split dev`; KHÔNG sửa tay.
 # Đổi số đo = tăng profile_version (hợp đồng docs/hop-dong-model.md §6). Báo cáo: results/camera/profile_report.md
 schema_version: '1.0'
-profile_version: 1.0.0
+profile_version: 1.1.0
 profile_id: ov3660-esp32s3-q12-20261102
 measured_on:
   recording: 20261102-100941
   split_file: data/real/split.json
-  n_frames: 470
+  n_frames: 1115
   measured: '2026-11-18'
 sensor:
   model: OV3660
@@ -31,43 +31,43 @@ jpeg:
   other_qualities:
     rule: annex_k * q / 16
     verified: false
-left_strip: {width_px: 14.0, crop_left_px: 16, mean_y_strip: 98.36, mean_y_ref: 145.96}
+left_strip: {width_px: 14.0, crop_left_px: 16, mean_y_strip: 100.89, mean_y_ref: 152.3}
 vignette:
-  corner_center_ratio: {p5: 0.65977, p50: 0.80699, p95: 0.93459}
+  corner_center_ratio: {p5: 0.62455, p50: 0.81105, p95: 0.92974}
   model: cos4
-  focal_px_fit: 1003.5
+  focal_px_fit: 1016.1
 haze:
-  dark_channel_15px_0_255: {p5: 115.04, p50: 144.78, p95: 154.3}
-  y_p1_0_255: {p5: 92.0, p50: 112.0, p95: 132.0}
-  saturation_0_255: {p5: 7.3329, p50: 16.725, p95: 21.062}
+  dark_channel_15px_0_255: {p5: 134.61, p50: 143.73, p95: 152.1}
+  y_p1_0_255: {p5: 89.0, p50: 113.0, p95: 129.0}
+  saturation_0_255: {p5: 7.4521, p50: 16.159, p95: 22.679}
 sharpness:
-  laplacian_var: {p5: 8.1512, p50: 34.977, p95: 80.252}
-  mtf50_cyc_per_px: {p5: 0.1367, p50: 0.25061, p95: 0.33316}
-  psf_sigma_px_fit: 0.74774
+  laplacian_var: {p5: 13.447, p50: 34.101, p95: 67.412}
+  mtf50_cyc_per_px: {p5: 0.17016, p50: 0.24702, p95: 0.33332}
+  psf_sigma_px_fit: 0.75861
 noise:
-  sigma_immerkaer_0_255: {p5: 0.21347, p50: 0.35741, p95: 0.49507}
-  nlf: [[121.83, 0.2994], [148.49, 0.28579], [173.99, 0.26661], [203.97, 0.23377], [228.45, 0.16595]]
-  psd_radial: [[0.015625, 22.549], [0.046875, 87.04], [0.078125, 136.41], [0.10938, 117.88], [0.14062, 87.5], [0.17188, 53.54],
-    [0.20312, 27.416], [0.23438, 14.32], [0.26562, 8.6951], [0.29688, 6.1952], [0.32812, 4.5441], [0.35938, 3.2445], [0.39062,
-      2.5876], [0.42188, 2.2633], [0.45312, 1.9852], [0.48438, 1.6919]]
+  sigma_immerkaer_0_255: {p5: 0.24783, p50: 0.35324, p95: 0.47416}
+  nlf: [[87.759, 0.24641], [121.17, 0.30604], [147.51, 0.2808], [174.86, 0.27081], [203.02, 0.22081], [228.75, 0.20367]]
+  psd_radial: [[0.015625, 18.648], [0.046875, 68.669], [0.078125, 109.53], [0.10938, 109.11], [0.14062, 78.801], [0.17188,
+      47.274], [0.20312, 24.428], [0.23438, 12.715], [0.26562, 7.7226], [0.29688, 5.281], [0.32812, 3.8481], [0.35938, 2.8293],
+    [0.39062, 2.2199], [0.42188, 1.9236], [0.45312, 1.7106], [0.48438, 1.4856]]
 color:
-  r_over_g: {p5: 0.96824, p50: 0.97646, p95: 0.98339}
-  b_over_g: {p5: 0.95038, p50: 0.96485, p95: 0.98147}
-  wb_gain_r_fit: 0.97646
-  wb_gain_b_fit: 0.96485
+  r_over_g: {p5: 0.96684, p50: 0.9753, p95: 0.98435}
+  b_over_g: {p5: 0.94183, p50: 0.96423, p95: 0.98314}
+  wb_gain_r_fit: 0.9753
+  wb_gain_b_fit: 0.96423
 magenta:
   rule: R-G>25 and B-G>25
-  frac_pixels: {p5: 4.1567e-05, p50: 0.0035089, p95: 0.022731}
-  frac_frames_gt_0p5pct: 0.37234
-  highlight_y_0_255: {p5: 217.28, p50: 223.0, p95: 231.83}
+  frac_pixels: {p5: 0.0, p50: 0.0017495, p95: 0.032649}
+  frac_frames_gt_0p5pct: 0.31211
+  highlight_y_0_255: {p5: 217.29, p50: 222.23, p95: 235.0}
 blocking:
-  ratio_8x8: {p5: 1.9282, p50: 2.6564, p95: 4.3784}
+  ratio_8x8: {p5: 2.1512, p50: 2.6792, p95: 3.5234}
 motion_blur:
-  sobel_x2_over_y2: {p5: 0.53717, p50: 0.82461, p95: 1.224}
-  frac_frames_gt_1p5: 0.38936
+  sobel_x2_over_y2: {p5: 0.45984, p50: 0.85424, p95: 1.1757}
+  frac_frames_gt_1p5: 0.31928
 person_box_px:
-  short_side: {p5: 24.214, p50: 53.24, p95: 67.57, min: 13.89, max: 73.78}
+  short_side: {p5: 26.707, p50: 53.545, p95: 64.73, min: 13.89, max: 82.56}
   source: yolo11s-so-bo
 altitude_m:
-  flight_frames: {p5: 4.433, p50: 11.785, p95: 15.743}
+  flight_frames: {p5: 4.5284, p50: 12.291, p95: 18.034}
   filter: rel_alt_m > 3, bỏ điểm vọt

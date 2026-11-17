@@ -1,5 +1,41 @@
 {
  "seed": 20261118,
+ "decision": {
+  "by": "Owner (phiên chính), chủ dự án ngủ, giao quyền",
+  "date": "2026-11-18",
+  "decision": "test 200-400 khung (plan: 300-400); bỏ ngưỡng >= 150 khung test có người, thay bằng >= 40 cấu hình được",
+  "why": "test là thước đo cuối của mọi claim M2-M4: 45 khung có người tốt hơn 32; dev vẫn còn 224 khung có người cho hiệu chỉnh, self-training, dev-val (dev-val phase 08 đổi sang khung cách nhau >= 1 s)",
+  "trial_runs_same_seed": [
+   {
+    "test_min": 100,
+    "test": 103,
+    "test_person": 23,
+    "dev": 1877,
+    "dev_person": 367
+   },
+   {
+    "test_min": 150,
+    "test": 154,
+    "test_person": 32,
+    "dev": 1410,
+    "dev_person": 317
+   },
+   {
+    "test_min": 200,
+    "test": 198,
+    "test_person": 45,
+    "dev": 1115,
+    "dev_person": 224
+   },
+   {
+    "test_min": 300,
+    "test": 283,
+    "test_person": 62,
+    "dev": 470,
+    "dev_person": 74
+   }
+  ]
+ },
  "rules": {
   "block_s": 30.0,
   "alt_bins": [
@@ -10,21 +46,22 @@
   "test_spacing_s": 1.0,
   "dev_buffer_s": 5.0,
   "test_target": [
-   300,
+   200,
    400
   ],
-  "test_person_min": 150,
+  "test_person_min": 40,
   "person": "YOLO11s COCO @1280 conf>=0.25, bỏ hộp x1<16"
  },
  "counts": {
-  "dev": 470,
+  "dev": 1115,
   "neg": 300,
-  "test": 283
+  "test": 198
  },
+ "test_block_candidates": 200,
  "flight_frames_in_manifest": 2915,
  "excluded": {
-  "dev_buffer_5s": 301,
-  "test_block_not_spaced": 1861
+  "dev_buffer_5s": 366,
+  "test_block_not_spaced": 1236
  },
  "flight_frames_with_person_prelim": 572,
  "feasibility": {
@@ -39,18 +76,18 @@
  },
  "test_person_frames_by_alt_bin": {
   "3-8": 3,
-  "8-14": 13,
-  ">14": 46
+  "8-14": 11,
+  ">14": 31
  },
  "dev_person_frames_by_alt_bin": {
-  "3-8": 16,
-  "8-14": 18,
-  ">14": 40
+  "3-8": 18,
+  "8-14": 38,
+  ">14": 168
  },
- "test_person_frames": 62,
+ "test_person_frames": 45,
  "checks": {
-  "test_in_range": false,
-  "test_person_ge_min": false,
+  "test_block_candidates_in_range": true,
+  "test_person_ge_min": true,
   "test_person_bins_ge_2": true
  },
  "blocks": {
@@ -62,18 +99,12 @@
    4,
    6,
    7,
-   8,
    9,
    10,
-   11,
-   12,
-   13,
    14,
    15,
    16,
-   19,
    20,
-   22,
    23
   ],
   "skipped_over_max": [],
@@ -301,31 +332,49 @@
    }
   },
   "20261102-102319": {
+   "dev": {
+    "8-14": {
+     "no_person": 24
+    },
+    ">14": {
+     "no_person": 59,
+     "person": 10
+    }
+   },
    "test": {
     "3-8": {
      "no_person": 6
     },
     "8-14": {
-     "no_person": 16,
+     "no_person": 11,
      "person": 5
     },
     ">14": {
-     "no_person": 8,
-     "person": 3
+     "person": 1
     }
    }
   },
   "20261102-102636": {
-   "test": {
+   "dev": {
     "3-8": {
-     "no_person": 10
+     "no_person": 113,
+     "person": 2
     },
     "8-14": {
-     "no_person": 18
+     "no_person": 73,
+     "person": 14
     },
     ">14": {
-     "no_person": 9,
-     "person": 3
+     "no_person": 2,
+     "person": 13
+    }
+   },
+   "test": {
+    "8-14": {
+     "no_person": 4
+    },
+    ">14": {
+     "no_person": 6
     }
    }
   },
@@ -357,24 +406,25 @@
   "20261102-104039": {
    "dev": {
     "8-14": {
-     "no_person": 147
+     "no_person": 244,
+     "person": 6
     },
     ">14": {
-     "no_person": 63,
-     "person": 8
+     "no_person": 190,
+     "person": 113
     }
    },
    "test": {
     "3-8": {
-     "no_person": 9
+     "no_person": 6
     },
     "8-14": {
-     "no_person": 21,
-     "person": 3
+     "no_person": 11,
+     "person": 1
     },
     ">14": {
-     "no_person": 19,
-     "person": 12
+     "no_person": 4,
+     "person": 2
     }
    }
   }

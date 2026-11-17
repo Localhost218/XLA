@@ -18,10 +18,13 @@ Quy tắc:
 - Khung dev: mọi khung của khối dev, trừ khung cách khoảng thời gian của một khối test < ``DEV_BUFFER_S``.
 - Mẫu âm: ``split = "neg"``, ``alt_m = null`` khi lần ghi không có độ cao.
 
-``--test-min/--test-max`` (mặc định 300/400 theo plan) chỉ để Owner chia lại có chủ đích; báo cáo ghi giá trị đã dùng
-và trần khả thi (``feasibility``: số khung test tối đa nếu mọi khung bay vào test).
+Mặc định 200/400 khung test và ≥ 40 khung test có người: **Owner quyết 18/11/2026** (chủ dự án ngủ, giao quyền) sau
+khi phase 03 cho thấy mục tiêu 300–400 / ≥ 150 của plan vượt trần khả thi (362 khung / 74 khung có người nếu MỌI khung
+bay vào test; ``feasibility`` trong báo cáo). ``--test-min/--test-max/--test-person-min`` chỉ để chia lại có chủ đích;
+báo cáo ghi giá trị đã dùng.
 
-Exit 1 khi số khung test ngoài ``[TEST_MIN, TEST_MAX]`` hoặc số khung test có người sơ bộ < ``TEST_PERSON_MIN``
+Exit 1 khi tổng ứng viên test của các khối test (cách ≥ 1 s trong từng khối — thứ quy tắc dừng điều khiển; số chọn thật
+xuyên biên khối có thể ít hơn vài khung, ghi ở ``counts.test``) ngoài ``[TEST_MIN, TEST_MAX]`` hoặc số khung test có người sơ bộ < ``TEST_PERSON_MIN``
 (file vẫn được ghi để Owner xem; không tự nới quy tắc).
 """
 
@@ -46,9 +49,23 @@ BLOCK_S = 30.0
 ALT_BINS = ((3.0, 8.0, "3-8"), (8.0, 14.0, "8-14"), (14.0, math.inf, ">14"))
 TEST_SPACING_S = 1.0
 DEV_BUFFER_S = 5.0
-TEST_MIN = 300
+TEST_MIN = 200
 TEST_MAX = 400
-TEST_PERSON_MIN = 150
+TEST_PERSON_MIN = 40
+"""Ngưỡng khung test có người sơ bộ; plan ghi 150 nhưng trần khả thi là 74 (Owner quyết 18/11/2026)."""
+DECISION = {
+    "by": "Owner (phiên chính), chủ dự án ngủ, giao quyền",
+    "date": "2026-11-18",
+    "decision": "test 200-400 khung (plan: 300-400); bỏ ngưỡng >= 150 khung test có người, thay bằng >= 40 cấu hình được",
+    "why": "test là thước đo cuối của mọi claim M2-M4: 45 khung có người tốt hơn 32; dev vẫn còn 224 khung có người cho "
+           "hiệu chỉnh, self-training, dev-val (dev-val phase 08 đổi sang khung cách nhau >= 1 s)",
+    "trial_runs_same_seed": [
+        {"test_min": 100, "test": 103, "test_person": 23, "dev": 1877, "dev_person": 367},
+        {"test_min": 150, "test": 154, "test_person": 32, "dev": 1410, "dev_person": 317},
+        {"test_min": 200, "test": 198, "test_person": 45, "dev": 1115, "dev_person": 224},
+        {"test_min": 300, "test": 283, "test_person": 62, "dev": 470, "dev_person": 74},
+    ],
+}
 MIN_DEV_BLOCKS_PER_STRATUM = 1
 SPLIT_REL = Path("data/real/split.json")
 REPORT_REL = Path("results/data/split_report.json")
@@ -82,7 +99,8 @@ def _interval_distance(t: float, a: float, b: float) -> float:
 
 
 def build(seed: int, manifest: list[dict[str, str]], person_frames: set[str], events_text: str,
-          test_min: int = TEST_MIN, test_max: int = TEST_MAX) -> tuple[dict, dict]:
+          test_min: int = TEST_MIN, test_max: int = TEST_MAX,
+          test_person_min: int = TEST_PERSON_MIN) -> tuple[dict, dict]:
     """Trả (nội dung ``split.json`` theo hợp đồng §7, báo cáo). Không đọc/ghi file; tất định theo ``seed``."""
     flights = {f.flight_id: f for f in parse_flight_events(events_text)}
     fly = sorted((r for r in manifest if r["kind"] == "flight"), key=lambda r: float(r["t_unix"]))
@@ -175,7 +193,8 @@ def build(seed: int, manifest: list[dict[str, str]], person_frames: set[str], ev
                            "block": neg_keys[k], "split": "neg"})
     frames_out.sort(key=lambda d: (d["t_unix"], d["frame"]))
     split_doc = {"seed": seed, "block_s": int(BLOCK_S), "frames": frames_out}
-    report = _report(seed, frames_out, person_frames, info, test_blocks, skipped, excluded, fly, test_min, test_max)
+    report = _report(seed, frames_out, person_frames, info, test_blocks, skipped, excluded, fly, test_min, test_max,
+                     test_person_min)
     return split_doc, report
 
 
@@ -189,7 +208,8 @@ def _feasibility(fly: list[dict[str, str]], person_frames: set[str]) -> dict:
             "max_frames_2s_apart_if_all_flight": len(greedy_spaced(t, 2.0))}
 
 
-def _report(seed, frames_out, person_frames, info, test_blocks, skipped, excluded, fly, test_min, test_max) -> dict:
+def _report(seed, frames_out, person_frames, info, test_blocks, skipped, excluded, fly, test_min, test_max,
+            test_person_min) -> dict:
     fid = {r["frame"]: r["flight_id"] for r in fly}
     table: dict[str, Any] = {}
     cnt = Counter()
@@ -205,19 +225,23 @@ def _report(seed, frames_out, person_frames, info, test_blocks, skipped, exclude
                           if d["split"] == "test" and d["frame"] in person_frames)
     dev_person = Counter(alt_bin(d["alt_m"]) for d in frames_out
                          if d["split"] == "dev" and d["frame"] in person_frames)
-    n_test = by_split.get("test", 0)
     n_test_person = sum(test_person.values())
+    # Quy tắc dừng đếm ứng viên cách ≥ 1 s TRONG từng khối; chọn thật thì tham lam xuyên biên hai khối test kề nhau nên
+    # có thể ít hơn vài khung. Kiểm dải theo tổng ứng viên (cái quy tắc điều khiển); số thật ghi ở counts.test.
+    n_cand = sum(info[b]["n_test_cand"] for b in test_blocks)
     checks = {
-        "test_in_range": test_min <= n_test <= test_max,
-        "test_person_ge_min": n_test_person >= TEST_PERSON_MIN,
+        "test_block_candidates_in_range": test_min <= n_cand <= test_max,
+        "test_person_ge_min": n_test_person >= test_person_min,
         "test_person_bins_ge_2": sum(1 for v in test_person.values() if v > 0) >= 2,
     }
     return {
         "seed": seed,
+        "decision": DECISION,
         "rules": {"block_s": BLOCK_S, "alt_bins": [b[2] for b in ALT_BINS], "test_spacing_s": TEST_SPACING_S,
                   "dev_buffer_s": DEV_BUFFER_S, "test_target": [test_min, test_max],
-                  "test_person_min": TEST_PERSON_MIN, "person": "YOLO11s COCO @1280 conf>=0.25, bỏ hộp x1<16"},
+                  "test_person_min": test_person_min, "person": "YOLO11s COCO @1280 conf>=0.25, bỏ hộp x1<16"},
         "counts": dict(sorted(by_split.items())),
+        "test_block_candidates": n_cand,
         "flight_frames_in_manifest": len(fly),
         "excluded": dict(sorted(excluded.items())),
         "flight_frames_with_person_prelim": sum(1 for r in fly if r["frame"] in person_frames),
@@ -241,7 +265,8 @@ def dumps(obj: Any) -> str:
 def cmd_build(args: argparse.Namespace) -> int:
     root = repo_root()
     doc, report = build(args.seed, read_manifest(), read_person_frames(root / PRELIM_REL),
-                        (root / EVENTS_REL).read_text(encoding="utf-8"), args.test_min, args.test_max)
+                        (root / EVENTS_REL).read_text(encoding="utf-8"), args.test_min, args.test_max,
+                        args.test_person_min)
     out = Path(args.out) if args.out else root / SPLIT_REL
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(dumps(doc), encoding="utf-8", newline="\n")
@@ -264,8 +289,10 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--seed", type=int, default=SEED_DEFAULT)
     b.add_argument("--out", help="đường dẫn split.json (mặc định data/real/split.json)")
     b.add_argument("--report", help="đường dẫn báo cáo (mặc định results/data/split_report.json)")
-    b.add_argument("--test-min", type=int, default=TEST_MIN, help="số khung test tối thiểu cần đạt (plan: 300)")
+    b.add_argument("--test-min", type=int, default=TEST_MIN, help="số khung test tối thiểu cần đạt (Owner 18/11: 200; plan gốc 300)")
     b.add_argument("--test-max", type=int, default=TEST_MAX, help="số khung test tối đa (plan: 400)")
+    b.add_argument("--test-person-min", type=int, default=TEST_PERSON_MIN,
+                   help="số khung test có người sơ bộ tối thiểu (Owner 18/11: 40; trần khả thi 74)")
     b.add_argument("--json", action="store_true")
     args = ap.parse_args(argv)
     return {"build": cmd_build}[args.cmd](args)

@@ -30,7 +30,8 @@ from xla.camera.split import SPLIT_REL
 from xla.paths import repo_root
 
 SCHEMA_VERSION = "1.0"
-PROFILE_VERSION = "1.0.0"
+PROFILE_VERSION = "1.1.0"
+"""1.0.0: dev 470 khung (split test 300-400); 1.1.0: dev 1 115 khung sau khi Owner chia lại test 200-400 (18/11/2026)."""
 PROFILE_ID = "ov3660-esp32s3-q12-20261102"
 ESP32_QUALITY = 12
 CROP_LEFT_PX = M.CROP_LEFT_DEFAULT
@@ -289,8 +290,36 @@ _REPORT_ROWS = (
 )
 
 
+_COMPARE_FIELDS = (
+    "measured_on.n_frames", "left_strip.width_px", "left_strip.mean_y_strip", "vignette.corner_center_ratio.p50",
+    "vignette.focal_px_fit", "haze.dark_channel_15px_0_255.p50", "haze.y_p1_0_255.p50", "haze.saturation_0_255.p50",
+    "sharpness.laplacian_var.p50", "sharpness.mtf50_cyc_per_px.p50", "sharpness.psf_sigma_px_fit",
+    "noise.sigma_immerkaer_0_255.p50", "color.r_over_g.p50", "color.b_over_g.p50", "magenta.frac_pixels.p50",
+    "magenta.frac_frames_gt_0p5pct", "magenta.highlight_y_0_255.p50", "blocking.ratio_8x8.p50",
+    "motion_blur.sobel_x2_over_y2.p50", "motion_blur.frac_frames_gt_1p5", "person_box_px.short_side.p50",
+    "altitude_m.flight_frames.p50",
+)
+
+
+def _get(d: dict, dotted: str) -> Any:
+    for k in dotted.split("."):
+        d = d[k]
+    return d
+
+
+def compare_lines(prev: dict, cur: dict) -> list[str]:
+    """Bảng so các đại lượng chính giữa hồ sơ trước và hồ sơ mới (Δ theo %)."""
+    a, b = prev["profile_version"], cur["profile_version"]
+    out = [f"## So v{a} → v{b}", "", f"| Trường | v{a} | v{b} | Δ |", "|---|---|---|---|"]
+    for f in _COMPARE_FIELDS:
+        x, y = float(_get(prev, f)), float(_get(cur, f))
+        delta = f"{(y - x) / x * 100:+.0f} %" if x else "–"
+        out.append(f"| `{f}` | {_r(x)} | {_r(y)} | {delta} |")
+    return [*out, ""]
+
+
 def write_report(path: Path, rows: list[dict], profile: dict, reenc: list[dict], groups: int, n_test_overlap: int,
-                 person: dict) -> None:
+                 person: dict, prev: dict | None = None, prev_path: str = "") -> None:
     ev = _evidence_rows()
     lines = [
         "# Hồ sơ camera v1 — báo cáo đo (phase 04)",
@@ -324,6 +353,7 @@ def write_report(path: Path, rows: list[dict], profile: dict, reenc: list[dict],
     j = profile["jpeg"]
     lines += [
         "",
+        *([f"Hồ sơ trước để so: `{prev_path}`.", "", *compare_lines(prev, profile)] if prev else []),
         "## JPEG",
         "",
         (f"- Mọi khung dev cùng **{groups}** bộ (DQT luma, DQT chroma, lấy mẫu, baseline): `{j['subsampling']}`, baseline "
@@ -384,7 +414,9 @@ def cmd_build(args: argparse.Namespace) -> int:
         "# Đổi số đo = tăng profile_version (hợp đồng docs/hop-dong-model.md §6). Báo cáo: "
         f"{REPORT_REL.as_posix()}\n" + _Dumper.dump(profile), encoding="utf-8", newline="\n")
     overlap = len(test_names & set(names))
-    write_report(root / REPORT_REL, rows, profile, reenc, len(groups), overlap, person)
+    prev = load_profile(Path(args.previous)) if args.previous else None
+    write_report(root / REPORT_REL, rows, profile, reenc, len(groups), overlap, person, prev,
+                 Path(args.previous).as_posix() if args.previous else "")
     reenc_ok = all(r["dqt_match"] and r["sof_match"] for r in reenc)
     summary = {"n_frames": len(rows), "dqt_groups": len(groups), "reencode_match": f"{sum(r['dqt_match'] and r['sof_match'] for r in reenc)}/{len(reenc)}",
                "schema_errors": errors, "test_overlap": overlap,
@@ -410,6 +442,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     b = sub.add_parser("build", help="đo khung dev, ghi configs/camera_profile.yaml + báo cáo")
     b.add_argument("--split", default="dev", choices=["dev"])
+    b.add_argument("--previous", help="hồ sơ phiên bản trước (yaml) để báo cáo in bảng so sánh")
     b.add_argument("--measured", help="ngày đo ghi vào hồ sơ (YYYY-MM-DD), mặc định hôm nay")
     b.add_argument("--json", action="store_true")
     c = sub.add_parser("check", help="kiểm hồ sơ theo configs/camera_profile.schema.json")

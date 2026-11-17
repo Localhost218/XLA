@@ -46,34 +46,42 @@ YOLO11s COCO (`D:\IOT_Tools\downloads\yolo-weights\yolo11s.pt`) @1280, conf ≥ 
 `xla.gpu_lock`; bỏ hộp có `x1 < 16` (chạm dải tối mép trái — 521 hộp bị bỏ). Còn 769 hộp; 572/2 915 khung bay có ít nhất
 một hộp; 0/300 khung âm. **Không phải nhãn**: theo duyệt tay 18/11, khoảng 40 % hộp ở ngưỡng này là đốm hồng/trắng.
 
-## Chia dev/test (`python -m xla.camera.split build --seed 20261118 --json`)
+## Chia dev/test (`python -m xla.camera.split build --seed 20261118 --json`, exit 0)
 
 Khối 30 s từ giờ bắt đầu chuyến (24 khối bay); tầng = (bin độ cao theo trung vị khối 3–8 / 8–14 / > 14 m, khối có người
 sơ bộ); seed 20261118; khung test chọn tham lam cách nhau ≥ 1 s; khối dev giữ mọi khung, trừ khung cách khối test < 5 s.
+Mặc định CLI: lấy khối test tới khi tổng ứng viên (cách ≥ 1 s trong từng khối) đạt **200–400**, test có người sơ bộ
+**≥ 40** (cờ `--test-min/--test-max/--test-person-min`).
 
 | | Khung | Có người sơ bộ (3–8 / 8–14 / > 14 m) |
 |---|---|---|
-| dev | 470 | 16 / 18 / 40 |
-| test | 283 | 3 / 13 / 46 (= 62) |
+| dev | 1 115 | 18 / 38 / 168 (= 224) |
+| test | 198 (13/24 khối; tổng ứng viên 200) | 3 / 11 / 31 (= 45) |
 | neg | 300 | 0 |
-| không thuộc tập nào | 1 861 khung khối test không được chọn (cách < 1 s) + 301 khung dev trong đệm 5 s | |
+| không thuộc tập nào | 1 236 khung khối test không được chọn (cách < 1 s) + 366 khung dev trong đệm 5 s | |
 
-**Lệnh thoát 1: hai kiểm của plan không đạt — test 283 < 300 và test có người 62 < 150.** Nguyên nhân là kỳ vọng
-trong plan, không phải lỗi chia: nếu đưa **toàn bộ** 2 915 khung bay vào test, chọn cách nhau ≥ 1 s chỉ được **362**
-khung, trong đó **74** khung có người sơ bộ (`split_report.json` → `feasibility`). Ước "~370 khung có người" của báo cáo
-18/11 đếm khung liên tiếp ~5 khung/s, không phải khung cách nhau 1 s. Camera chỉ phủ ~420 s trong 6 chuyến (49 % thời
-gian bay nằm trong khoảng mất hình > 1 s).
+Số chọn thật (198) ít hơn tổng ứng viên từng khối (200) vì chọn tham lam xuyên biên hai khối test kề nhau; kiểm dải
+200–400 tính theo tổng ứng viên, thứ quy tắc dừng điều khiển.
 
-Vì mục tiêu 300 khung test gần bằng trần 362, thuật toán (đúng quy tắc plan: lấy khối tới khi đủ 300, mỗi tầng chừa ít
-nhất một khối cho dev) đưa 19/24 khối vào test và dev chỉ còn 470 khung. Phase 08 cần dev-val 100 khung cách nhau ≥ 2 s
-— dev này không đủ. Đây là quyết định của Owner; chia lại bằng `--test-min/--test-max` (chỉ trước phase 08), các mốc
-đã chạy thử cùng seed:
+### Quyết định: Owner chia lại, 18/11/2026 (chủ dự án ngủ, giao quyền cho Owner)
+
+Lần chia đầu theo đúng plan (test 300–400, test có người ≥ 150) ra dev 470 / test 283 / test có người 62 và exit 1. Hai
+kỳ vọng đó vượt trần khả thi: nếu đưa **toàn bộ** 2 915 khung bay vào test, chọn cách nhau ≥ 1 s chỉ được **362** khung,
+trong đó **74** khung có người sơ bộ (3–8 m: 6, 8–14 m: 16, > 14 m: 52); cách nhau ≥ 2 s chỉ được 209 khung
+(`split_report.json` → `feasibility`). Ước "~370 khung có người" của báo cáo 18/11 đếm khung liên tiếp ~5 khung/s, không
+phải khung cách nhau 1 s; camera chỉ phủ ~420 s trong 6 chuyến (49 % thời gian bay nằm trong khoảng mất hình > 1 s).
+
+Owner chọn **test 200–400**, bỏ ngưỡng ≥ 150 (thay bằng ≥ 40 cấu hình được). Lý do: test là thước đo cuối của mọi claim
+M2–M4, 45 khung có người tốt hơn rõ so với 32; dev vẫn còn 224 khung có người cho hiệu chỉnh, self-training và dev-val
+(dev-val phase 08 đổi sang khung cách nhau ≥ 1 s, Owner sửa file phase). Các mốc đã chạy thử cùng seed:
 
 | `--test-min` | test | test có người | dev | dev có người | khối test |
 |---|---|---|---|---|---|
 | 100 | 103 | 23 | 1 877 | 367 | 7 |
 | 150 | 154 | 32 | 1 410 | 317 | 11 |
-| 200 | 198 | 45 | 1 115 | 224 | 13 |
-| 300 (plan, đang dùng) | 283 | 62 | 470 | 74 | 19 |
+| **200 (đang dùng)** | 198 | 45 | 1 115 | 224 | 13 |
+| 300 (plan gốc) | 283 | 62 | 470 | 74 | 19 |
 
-Chia lại thì phải dựng lại hồ sơ camera (`python -m xla.camera.profile build --split dev`, tăng `profile_version`).
+Hồ sơ camera đã đo lại trên dev mới: `configs/camera_profile.yaml` **v1.1.0** (v1.0.0 đo trên dev 470 khung, lưu ở
+`results/camera/history/camera_profile-v1.0.0.yaml`). Chia lại lần nữa (chỉ trước phase 08) thì dựng lại hồ sơ và tăng
+`profile_version`.
