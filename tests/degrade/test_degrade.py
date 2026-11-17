@@ -192,19 +192,29 @@ def test_hypothesis_q_tables_are_annex_k_times_q_over_16() -> None:
     assert _ijg(d2_camera.ANNEX_K_LUMA, s) == SYN_PROFILE["jpeg"]["qtable_luma"]
 
 
-def test_tone_stage_turns_white_pink_not_gray(cfgs) -> None:
+def _repo_profile() -> dict:
+    return d2_camera.load_profile(Path(__file__).resolve().parents[2] / "configs" / "camera_profile.yaml")
+
+
+@pytest.mark.parametrize("which", ["synthetic", "repo"])
+def test_tone_stage_turns_white_pink_not_gray(cfgs, which) -> None:
+    """Hồ sơ thật v1.1.0 có color.wb_gain_*_fit < 1 (= p50 r/g, b/g): vùng trắng vẫn phải ra hồng, không ra xanh lá."""
+    prof = SYN_PROFILE if which == "synthetic" else _repo_profile()
     img = np.zeros((40, 80, 3), np.float32)
     img[:, :40] = 1.0                    # trắng
     img[:, 40:] = 128 / 255.0            # xám trung bình
     lin = d2_camera.srgb_to_linear(img)
     cfg = dict(cfgs["d2"]["tone"], brightness=[1.0, 1.0])
-    out = d2_camera.stage_tone(lin, np.random.default_rng(0), cfg, SYN_PROFILE, {})
+    out = d2_camera.stage_tone(lin, np.random.default_rng(0), cfg, prof, {})
     bgr = np.round(d2_camera.linear_to_srgb(out) * 255).astype(int)
     b, g, r = bgr[:, :40, 0].mean(), bgr[:, :40, 1].mean(), bgr[:, :40, 2].mean()
     assert r - g > 25 and b - g > 25, (b, g, r)
     b2, g2, r2 = bgr[:, 40:, 0].mean(), bgr[:, 40:, 1].mean(), bgr[:, 40:, 2].mean()
     assert not (r2 - g2 > 25 and b2 - g2 > 25)
-    assert max(abs(r2 - g2), abs(b2 - g2)) <= 2, (b2, g2, r2)
+    # xám chưa bão hoà mang đúng ám màu p50 của hồ sơ (miền tuyến tính)
+    lr = d2_camera.srgb_to_linear(np.array([r2, g2, b2]) / 255.0)
+    assert abs(lr[0] / lr[1] - prof["color"]["r_over_g"]["p50"]) < 0.02, (b2, g2, r2)
+    assert abs(lr[2] / lr[1] - prof["color"]["b_over_g"]["p50"]) < 0.02, (b2, g2, r2)
 
 
 def test_d1_does_not_read_camera_profile(cfgs, source_item, ctx, monkeypatch) -> None:

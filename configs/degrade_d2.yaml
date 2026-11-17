@@ -18,12 +18,17 @@ lens:                            # (b) PSF Gauss + tối góc cos⁴ (tâm khung
   vignette_focal_scale: [0.95, 1.05]
 
 tone:                            # (c) phơi sáng → cắt từng kênh ở 1,0 → nhân WB R/B + hệ số ra k → hồng ở vùng sáng
-  matches: [color.wb_gain_r_fit, color.wb_gain_b_fit, color.r_over_g, color.b_over_g,
-            magenta.highlight_y_0_255, magenta.frac_pixels, magenta.frac_frames_gt_0p5pct]
+  matches: [color.r_over_g, color.b_over_g, magenta.highlight_y_0_255, magenta.frac_pixels,
+            magenta.frac_frames_gt_0p5pct]
   brightness: [0.9, 1.15]        # độ sáng tông trung tính (= phơi sáng × k)
   highlight_gain_scale: 1.0      # nhân k suy từ magenta.highlight_y p50
-  cast_r: 1.0                    # lệch WB còn lại (r_over_g), phase 07 chỉnh
-  cast_b: 1.0
+  # Hệ số WB của ISP so với G (> 1). Không đo được từ khung JPEG nên không có trong hồ sơ; color.wb_gain_*_fit của
+  # hồ sơ v1.1.0 = p50 r_over_g/b_over_g (< 1), không phải hệ số ISP. Chỉ cần đủ lớn để R/B không cắt ở miền cảm biến
+  # (> brightness/k ≈ 2,0 ở hồ sơ v1.1.0); giá trị cụ thể gần như không đổi ảnh ra. Giả định, phase 07 chỉnh.
+  isp_wb_gain_r: 2.2
+  isp_wb_gain_b: 2.2
+  cast_r: 1.0                    # nhân p50 color.r_over_g của hồ sơ (ám màu tông chưa bão hoà), phase 07 chỉnh
+  cast_b: 1.0                    # nhân p50 color.b_over_g
 
 isp:                             # (d) làm mềm + nhiễu sau ISP theo NLF, phổ theo PSD
   matches: [noise.nlf, noise.psd_radial, noise.sigma_immerkaer_0_255, sharpness.laplacian_var]

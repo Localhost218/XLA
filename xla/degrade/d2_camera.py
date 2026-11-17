@@ -31,7 +31,7 @@ ANNEX_K_CHROMA = [17, 18, 24, 47, 99, 99, 99, 99, 18, 21, 26, 66, 99, 99, 99, 99
 REQUIRED_PROFILE_FIELDS = (
     "jpeg.qtable_luma", "jpeg.qtable_chroma", "jpeg.esp32_quality", "jpeg.subsampling",
     "left_strip.width_px", "vignette.corner_center_ratio", "haze.dark_channel_15px_0_255",
-    "sharpness.psf_sigma_px_fit", "noise.nlf", "noise.psd_radial", "color.wb_gain_r_fit", "color.wb_gain_b_fit",
+    "sharpness.psf_sigma_px_fit", "noise.nlf", "noise.psd_radial", "color.r_over_g", "color.b_over_g",
     "magenta.highlight_y_0_255", "person_box_px.short_side",
 )
 LUMA_W = np.array([0.114, 0.587, 0.299], np.float32)  # BGR
@@ -148,22 +148,30 @@ def highlight_gain(profile: dict) -> float:
 
 
 def stage_tone(lin: np.ndarray, rng, cfg: dict, profile: dict, p: dict) -> np.ndarray:
-    """(c) về miền cảm biến (bỏ cân bằng trắng), nhân phơi sáng, cắt từng kênh ở 1,0, rồi nhân hệ số WB + hệ số ra k.
+    """(c) về miền cảm biến (bỏ hệ số WB của ISP), nhân phơi sáng, cắt từng kênh ở 1,0, nhân lại hệ số WB, hệ số ra k
+    và ám màu còn lại.
 
-    Điểm bão hoà (1,1,1) → (g_b·k, k, g_r·k) → cắt → B = R = 1, G = k < 1: hồng/tím. Tông xám chưa bão hoà giữ trung
-    tính, độ sáng nhân ``brightness``.
+    Hệ số WB của ISP (``isp_wb_gain_r/b`` trong cấu hình, > 1) KHÔNG đo được từ khung JPEG sau ISP nên không lấy từ hồ
+    sơ: ``color.wb_gain_*_fit`` của hồ sơ v1.1.0 chính là p50 của ``r_over_g``/``b_over_g`` (< 1), dùng làm hệ số ISP
+    thì vùng bão hoà ra xanh lá thay vì hồng. G bão hoà trước (lin ≥ k/brightness) và dừng ở k, R/B còn tăng →
+    R−G, B−G > 0: hồng/tím. Tông chưa bão hoà = ``lin·brightness·cast``; cast = p50 ``r_over_g``/``b_over_g`` của hồ sơ ×
+    ``cast_r``/``cast_b``.
     """
-    gr = float(get_field(profile, "color.wb_gain_r_fit"))
-    gb = float(get_field(profile, "color.wb_gain_b_fit"))
+    gr = float(cfg["isp_wb_gain_r"])
+    gb = float(cfg["isp_wb_gain_b"])
+    if min(gr, gb) <= 1.0:
+        raise ValueError(f"isp_wb_gain_r/b phải > 1 (hệ số ISP so với G), cấu hình ghi {gr}, {gb}")
+    cr = float(get_field(profile, "color.r_over_g")["p50"]) * cfg["cast_r"]
+    cb = float(get_field(profile, "color.b_over_g")["p50"]) * cfg["cast_b"]
     k = highlight_gain(profile) * cfg["highlight_gain_scale"]
     bright = float(rng.uniform(*cfg["brightness"]))
     e = bright / k
     raw = lin * np.array([1 / gb, 1.0, 1 / gr], np.float32) * e
     sat = float((raw.max(axis=2) >= 1.0).mean())
     raw = np.minimum(raw, 1.0)
-    out = raw * np.array([gb * cfg["cast_b"], 1.0, gr * cfg["cast_r"]], np.float32) * k
-    p.update(wb_gain_r=round(gr, 4), wb_gain_b=round(gb, 4), k_out=round(k, 4), exposure=round(e, 4),
-             brightness=round(bright, 4), sat_frac=round(sat, 5))
+    out = raw * np.array([gb * cb, 1.0, gr * cr], np.float32) * k
+    p.update(isp_wb_gain_r=round(gr, 4), isp_wb_gain_b=round(gb, 4), cast_r=round(cr, 4), cast_b=round(cb, 4),
+             k_out=round(k, 4), exposure=round(e, 4), brightness=round(bright, 4), sat_frac=round(sat, 5))
     return np.clip(out, 0.0, 1.0)
 
 
