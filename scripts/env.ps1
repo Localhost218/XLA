@@ -12,8 +12,11 @@ $env:HF_HOME = 'D:\DevCache\hf'
 $env:YOLO_CONFIG_DIR = 'D:\DevCache\ultralytics'
 $env:XLA_DATA_ROOT = 'D:\DevCache\datasets\xla'
 $env:PYTHONUTF8 = '1'
+# file tạm (pytest tmp_path, tempfile) cũng ở ổ D
+$env:TMP = 'D:\DevCache\tmp'
+$env:TEMP = 'D:\DevCache\tmp'
 
 foreach ($d in @($env:UV_CACHE_DIR, $env:UV_TOOL_DIR, $env:PIP_CACHE_DIR, $env:TORCH_HOME, $env:HF_HOME,
-        $env:YOLO_CONFIG_DIR, $env:XLA_DATA_ROOT, 'D:\DevCache\locks')) {
+        $env:YOLO_CONFIG_DIR, $env:XLA_DATA_ROOT, 'D:\DevCache\locks', $env:TMP)) {
     if (-not (Test-Path $d)) { New-Item -ItemType Directory -Force -Path $d | Out-Null }
 }

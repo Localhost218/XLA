@@ -96,11 +96,16 @@ def gpu_lock(label: str = "", timeout_s: float | None = None, poll_s: float = 2.
             time.sleep(sleep)
         try:
             cmd = " ".join(sys.argv)
-            _write_info(fd, f"pid={os.getpid()} label={label} since={datetime.now().isoformat(timespec='seconds')} cmd={cmd}")
+            _write_info(
+                fd, f"pid={os.getpid()} label={label} since={datetime.now().isoformat(timespec='seconds')} cmd={cmd}"
+            )
             yield path
         finally:
             try:
-                _write_info(fd, f"free (lần cuối: pid={os.getpid()} label={label} released={datetime.now().isoformat(timespec='seconds')})")
+                _write_info(
+                    fd,
+                    f"free (lần cuối: pid={os.getpid()} label={label} released={datetime.now().isoformat(timespec='seconds')})",
+                )
             finally:
                 _unlock(fd)
     finally:

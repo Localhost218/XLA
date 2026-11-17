@@ -1,3 +1,10 @@
+> **Đang tái cấu trúc (18/11/2026).** Camera thật của drone là **ESP32-S3 N16R8 + OV3660 nhìn thẳng xuống**
+> (MJPEG 640×480), không phải ESP32-CAM/OV2640 như phần mô tả cũ bên dưới. Repo đang làm lại theo plan
+> `plans/261118-ai-anh-chat-luong-thap/plan.md`: package mới ở `xla/`, hợp đồng model ở `docs/hop-dong-model.md`.
+> Phần v2 cũ của nhóm còn ở `src/` (mã, notebook) và `archive/` (dữ liệu và bảng kết luận sai, xem
+> `archive/README.md`). Môi trường: `. scripts\env.ps1` rồi `uv sync` (venv ở `D:\DevCache\venvs\xla`).
+> README đầy đủ được viết lại ở phase 18.
+
 # ĐỒ ÁN XỬ LÝ ẢNH (IMAGE PROCESSING) — PTIT
 ## Đề tài: Xây dựng Pipeline Khôi phục Màu sắc, Khử nhiễu và Nâng cao Chất lượng Ảnh thu nhận từ UAV sử dụng Camera giá rẻ ESP32-CAM (OV2640)
 

@@ -1,0 +1,104 @@
+[project]
+name = "xla"
+version = "0.1.0"
+description = "Xử lý ảnh chất lượng thấp cho camera drone ESP32-S3 + OV3660: làm rõ ảnh và nhận diện người"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+# D8: khai một lần đủ phụ thuộc cho cả plan 261118. Lane cần gói mới thì báo Owner, không tự sửa file này.
+dependencies = [
+    # ảnh, số học
+    "numpy",
+    "opencv-python-headless",
+    "pillow>=12",            # Image.save(qtables=..., subsampling=...)
+    "scipy",
+    "scikit-image",
+    "PyWavelets",
+    "pandas",
+    "pyyaml",
+    "jsonschema",
+    "matplotlib",
+    "scikit-learn",
+    "tqdm",
+    "requests",
+    # học sâu (torch/torchvision: xem [tool.uv.sources])
+    "torch==2.6.0",          # cu124 cuối cùng; CI Linux dùng 2.6.0+cpu cho cùng bản
+    "torchvision==0.21.0",
+    "timm",
+    "open_clip_torch",
+    "huggingface_hub",
+    "ultralytics",
+    "sahi",
+    "ensemble-boxes",
+    "pycocotools",
+    # ONNX
+    "onnx",
+    # 1.32.0 đòi CUDA 13 (cublasLt64_13.dll); 1.24.4 chạy CUDA EP bằng DLL CUDA 12.4/cuDNN 9 của torch
+    # (phải `import torch` trước khi tạo session). 1.25–1.31 chưa thử.
+    "onnxruntime-gpu==1.24.4; sys_platform == 'win32'",
+    "onnxruntime; sys_platform == 'linux'",  # CI: bản CPU
+    "onnxsim",
+    # chấm điểm
+    "pyiqa",
+    "cma",
+    # dgm-eval KHÔNG cài: bản git (layer6ai-labs/dgm-eval@74c79f7) ghim cứng pillow==9.2.0, numpy==1.23.3 (không có
+    # wheel Py3.12), timm==0.8.19.dev0, transformers==4.26.0, xformers; trái pillow>=12. uv lock báo:
+    # "dgm-eval==0.0.0 depends on pillow==9.2.0 ... your project's requirements are unsatisfiable".
+    # Phương án thay Owner đã duyệt (phase 06): DINOv2 ViT-L/14 qua torch.hub + KID tự viết.
+    # dữ liệu
+    "gdown",
+    # mã v2 cũ của nhóm còn giữ chỗ (src/, web/, notebooks/), lấy từ requirements.txt
+    "fastapi",
+    "uvicorn",
+    "nbformat",
+    "imageio-ffmpeg",
+]
+
+[dependency-groups]
+dev = ["pytest", "ruff"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["xla"]
+
+[tool.uv]
+package = true
+environments = ["sys_platform == 'win32'", "sys_platform == 'linux' and platform_machine == 'x86_64'"]
+# ultralytics kéo opencv-python (bản có GUI) và một số gói kéo onnxruntime (CPU): cả hai trùng module với
+# opencv-python-headless / onnxruntime-gpu ở trên, cài chồng thì module nào thắng tuỳ thứ tự. Loại hẳn hai gói đó.
+override-dependencies = [
+    "opencv-python; sys_platform == 'never'",
+    "onnxruntime; sys_platform == 'linux'",
+]
+
+# torch bản CUDA 12.4 trên Windows (máy RTX 4060, khớp venv vidstats), bản CPU trên Linux (CI).
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu124", marker = "sys_platform == 'win32'" },
+    { index = "pytorch-cpu", marker = "sys_platform != 'win32'" },
+]
+torchvision = [
+    { index = "pytorch-cu124", marker = "sys_platform == 'win32'" },
+    { index = "pytorch-cpu", marker = "sys_platform != 'win32'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["archive", "notebooks", "src", "web"]
