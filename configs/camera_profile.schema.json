@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Localhost218/XLA/configs/camera_profile.schema.json",
+  "title": "Hồ sơ camera XLA (configs/camera_profile.yaml), schema_version 1.x",
+  "description": "Đúng §6 docs/hop-dong-model.md. Đơn vị nằm trong tên trường (_px, _0_255, _cyc_per_px, _m, _mhz). Khoá mở rộng x-ordered: các khoá liệt kê phải tăng dần (p5 ≤ p50 ≤ p95); JSON Schema không so được hai trường nên xla.contract.validate_camera_profile kiểm phần này.",
+  "type": "object",
+  "required": [
+    "schema_version", "profile_version", "profile_id", "measured_on", "sensor", "frame", "jpeg", "left_strip",
+    "vignette", "haze", "sharpness", "noise", "color", "magenta", "blocking", "motion_blur", "person_box_px",
+    "altitude_m"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "pattern": "^1\\.[0-9]+$"},
+    "profile_version": {"$ref": "#/$defs/semver"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "measured_on": {
+      "type": "object",
+      "required": ["recording", "split_file", "n_frames", "measured"],
+      "properties": {
+        "recording": {"type": "string", "minLength": 1},
+        "split_file": {"type": "string", "minLength": 1},
+        "n_frames": {"type": "integer", "minimum": 1},
+        "measured": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"}
+      }
+    },
+    "sensor": {
+      "type": "object",
+      "required": ["model", "board", "xclk_mhz", "mount"],
+      "properties": {
+        "model": {"type": "string", "minLength": 1},
+        "board": {"type": "string", "minLength": 1},
+        "xclk_mhz": {"type": "number", "exclusiveMinimum": 0},
+        "mount": {"type": "string", "minLength": 1}
+      }
+    },
+    "frame": {
+      "type": "object",
+      "required": ["width_px", "height_px", "format"],
+      "properties": {
+        "width_px": {"const": 640},
+        "height_px": {"const": 480},
+        "format": {"const": "MJPEG"}
+      }
+    },
+    "jpeg": {
+      "type": "object",
+      "required": ["esp32_quality", "baseline", "subsampling", "qtable_luma", "qtable_chroma", "annex_k_scale", "other_qualities"],
+      "properties": {
+        "esp32_quality": {"type": "integer", "minimum": 0, "maximum": 63},
+        "baseline": {"type": "boolean"},
+        "subsampling": {"enum": ["4:2:0", "4:2:2", "4:4:4"]},
+        "qtable_luma": {"$ref": "#/$defs/qtable"},
+        "qtable_chroma": {"$ref": "#/$defs/qtable"},
+        "annex_k_scale": {"type": "number", "exclusiveMinimum": 0},
+        "other_qualities": {
+          "type": "object",
+          "required": ["rule", "verified"],
+          "properties": {
+            "rule": {"type": "string"},
+            "verified": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "left_strip": {
+      "type": "object",
+      "required": ["width_px", "crop_left_px", "mean_y_strip", "mean_y_ref"],
+      "properties": {
+        "width_px": {"type": "number", "minimum": 0},
+        "crop_left_px": {"type": "integer", "minimum": 0, "maximum": 639},
+        "mean_y_strip": {"$ref": "#/$defs/level_0_255"},
+        "mean_y_ref": {"$ref": "#/$defs/level_0_255"}
+      }
+    },
+    "vignette": {
+      "type": "object",
+      "required": ["corner_center_ratio", "model", "focal_px_fit"],
+      "properties": {
+        "corner_center_ratio": {"$ref": "#/$defs/dist"},
+        "model": {"type": "string"},
+        "focal_px_fit": {"type": "number"}
+      }
+    },
+    "haze": {
+      "type": "object",
+      "required": ["dark_channel_15px_0_255", "y_p1_0_255", "saturation_0_255"],
+      "properties": {
+        "dark_channel_15px_0_255": {"$ref": "#/$defs/dist"},
+        "y_p1_0_255": {"$ref": "#/$defs/dist"},
+        "saturation_0_255": {"$ref": "#/$defs/dist"}
+      }
+    },
+    "sharpness": {
+      "type": "object",
+      "required": ["laplacian_var", "mtf50_cyc_per_px", "psf_sigma_px_fit"],
+      "properties": {
+        "laplacian_var": {"$ref": "#/$defs/dist"},
+        "mtf50_cyc_per_px": {"$ref": "#/$defs/dist"},
+        "psf_sigma_px_fit": {"type": "number"}
+      }
+    },
+    "noise": {
+      "type": "object",
+      "required": ["sigma_immerkaer_0_255", "nlf", "psd_radial"],
+      "properties": {
+        "sigma_immerkaer_0_255": {"$ref": "#/$defs/dist"},
+        "nlf": {"$ref": "#/$defs/curve", "description": "[[y_level_0_255, sigma_0_255], ...]"},
+        "psd_radial": {"$ref": "#/$defs/curve", "description": "[[f_cyc_per_px, power], ...]"}
+      }
+    },
+    "color": {
+      "type": "object",
+      "required": ["r_over_g", "b_over_g", "wb_gain_r_fit", "wb_gain_b_fit"],
+      "properties": {
+        "r_over_g": {"$ref": "#/$defs/dist"},
+        "b_over_g": {"$ref": "#/$defs/dist"},
+        "wb_gain_r_fit": {"type": "number"},
+        "wb_gain_b_fit": {"type": "number"}
+      }
+    },
+    "magenta": {
+      "type": "object",
+      "required": ["rule", "frac_pixels", "frac_frames_gt_0p5pct", "highlight_y_0_255"],
+      "properties": {
+        "rule": {"type": "string"},
+        "frac_pixels": {"$ref": "#/$defs/dist"},
+        "frac_frames_gt_0p5pct": {"$ref": "#/$defs/fraction"},
+        "highlight_y_0_255": {"$ref": "#/$defs/dist"}
+      }
+    },
+    "blocking": {
+      "type": "object",
+      "required": ["ratio_8x8"],
+      "properties": {"ratio_8x8": {"$ref": "#/$defs/dist"}}
+    },
+    "motion_blur": {
+      "type": "object",
+      "required": ["sobel_x2_over_y2", "frac_frames_gt_1p5"],
+      "properties": {
+        "sobel_x2_over_y2": {"$ref": "#/$defs/dist"},
+        "frac_frames_gt_1p5": {"$ref": "#/$defs/fraction"}
+      }
+    },
+    "person_box_px": {
+      "type": "object",
+      "required": ["short_side", "source"],
+      "properties": {
+        "short_side": {
+          "type": "object",
+          "required": ["p5", "p50", "p95", "min", "max"],
+          "properties": {
+            "p5": {"type": "number"}, "p50": {"type": "number"}, "p95": {"type": "number"},
+            "min": {"type": "number"}, "max": {"type": "number"}
+          },
+          "x-ordered": ["min", "p5", "p50", "p95", "max"]
+        },
+        "source": {"type": "string", "minLength": 1}
+      }
+    },
+    "altitude_m": {
+      "type": "object",
+      "required": ["flight_frames", "filter"],
+      "properties": {
+        "flight_frames": {"$ref": "#/$defs/dist"},
+        "filter": {"type": "string"}
+      }
+    }
+  },
+  "$defs": {
+    "semver": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "dist": {
+      "type": "object",
+      "description": "Phân bố {p5, p50, p95}, p5 ≤ p50 ≤ p95 (x-ordered).",
+      "required": ["p5", "p50", "p95"],
+      "properties": {
+        "p5": {"type": "number"},
+        "p50": {"type": "number"},
+        "p95": {"type": "number"}
+      },
+      "x-ordered": ["p5", "p50", "p95"]
+    },
+    "qtable": {
+      "type": "array",
+      "description": "64 số nguyên 1–255, thứ tự tự nhiên (hàng-cột), không zigzag.",
+      "items": {"type": "integer", "minimum": 1, "maximum": 255},
+      "minItems": 64,
+      "maxItems": 64
+    },
+    "curve": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "array",
+        "prefixItems": [{"type": "number"}, {"type": "number"}],
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "level_0_255": {"type": "number", "minimum": 0, "maximum": 255},
+    "fraction": {"type": "number", "minimum": 0, "maximum": 1}
+  }
+}
