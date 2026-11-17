@@ -1,0 +1,432 @@
+{
+ "seed": 20261118,
+ "decision": {
+  "by": "Owner (phiên chính), chủ dự án ngủ, giao quyền",
+  "date": "2026-11-18",
+  "decision": "test 200-400 khung (plan: 300-400); bỏ ngưỡng >= 150 khung test có người, thay bằng >= 40 cấu hình được",
+  "why": "test là thước đo cuối của mọi claim M2-M4: 45 khung có người tốt hơn 32; dev vẫn còn 224 khung có người cho hiệu chỉnh, self-training, dev-val (dev-val phase 08 đổi sang khung cách nhau >= 1 s)",
+  "trial_runs_same_seed": [
+   {
+    "test_min": 100,
+    "test": 103,
+    "test_person": 23,
+    "dev": 1877,
+    "dev_person": 367
+   },
+   {
+    "test_min": 150,
+    "test": 154,
+    "test_person": 32,
+    "dev": 1410,
+    "dev_person": 317
+   },
+   {
+    "test_min": 200,
+    "test": 198,
+    "test_person": 45,
+    "dev": 1115,
+    "dev_person": 224
+   },
+   {
+    "test_min": 300,
+    "test": 283,
+    "test_person": 62,
+    "dev": 470,
+    "dev_person": 74
+   }
+  ]
+ },
+ "rules": {
+  "block_s": 30.0,
+  "alt_bins": [
+   "3-8",
+   "8-14",
+   ">14"
+  ],
+  "test_spacing_s": 1.0,
+  "dev_buffer_s": 5.0,
+  "test_target": [
+   200,
+   400
+  ],
+  "test_person_min": 40,
+  "person": "YOLO11s COCO @1280 conf>=0.25, bỏ hộp x1<16"
+ },
+ "counts": {
+  "dev": 1115,
+  "neg": 300,
+  "test": 198
+ },
+ "test_block_candidates": 200,
+ "flight_frames_in_manifest": 2915,
+ "excluded": {
+  "dev_buffer_5s": 366,
+  "test_block_not_spaced": 1236
+ },
+ "flight_frames_with_person_prelim": 572,
+ "feasibility": {
+  "max_test_frames_if_all_flight": 362,
+  "max_test_person_frames_if_all_flight": 74,
+  "max_test_person_by_alt_bin": {
+   "3-8": 6,
+   "8-14": 16,
+   ">14": 52
+  },
+  "max_frames_2s_apart_if_all_flight": 209
+ },
+ "test_person_frames_by_alt_bin": {
+  "3-8": 3,
+  "8-14": 11,
+  ">14": 31
+ },
+ "dev_person_frames_by_alt_bin": {
+  "3-8": 18,
+  "8-14": 38,
+  ">14": 168
+ },
+ "test_person_frames": 45,
+ "checks": {
+  "test_block_candidates_in_range": true,
+  "test_person_ge_min": true,
+  "test_person_bins_ge_2": true
+ },
+ "blocks": {
+  "total_flight": 24,
+  "test": [
+   0,
+   1,
+   3,
+   4,
+   6,
+   7,
+   9,
+   10,
+   14,
+   15,
+   16,
+   20,
+   23
+  ],
+  "skipped_over_max": [],
+  "by_stratum": {
+   "3-8|no_person": 3,
+   "3-8|person": 4,
+   "8-14|no_person": 1,
+   "8-14|person": 7,
+   ">14|person": 9
+  },
+  "detail": {
+   "0": {
+    "bin": ">14",
+    "person": true,
+    "n": 86,
+    "n_test_cand": 19,
+    "alt_median": 17.99
+   },
+   "1": {
+    "bin": ">14",
+    "person": true,
+    "n": 235,
+    "n_test_cand": 25,
+    "alt_median": 14.79
+   },
+   "2": {
+    "bin": "3-8",
+    "person": false,
+    "n": 50,
+    "n_test_cand": 5,
+    "alt_median": 4.23
+   },
+   "3": {
+    "bin": ">14",
+    "person": true,
+    "n": 12,
+    "n_test_cand": 7,
+    "alt_median": 17.98
+   },
+   "4": {
+    "bin": "8-14",
+    "person": true,
+    "n": 287,
+    "n_test_cand": 26,
+    "alt_median": 9.57
+   },
+   "5": {
+    "bin": "8-14",
+    "person": true,
+    "n": 267,
+    "n_test_cand": 26,
+    "alt_median": 9.66
+   },
+   "6": {
+    "bin": "3-8",
+    "person": false,
+    "n": 50,
+    "n_test_cand": 5,
+    "alt_median": 4.23
+   },
+   "7": {
+    "bin": "8-14",
+    "person": true,
+    "n": 10,
+    "n_test_cand": 10,
+    "alt_median": 9.91
+   },
+   "8": {
+    "bin": ">14",
+    "person": true,
+    "n": 123,
+    "n_test_cand": 15,
+    "alt_median": 15.35
+   },
+   "9": {
+    "bin": "3-8",
+    "person": true,
+    "n": 108,
+    "n_test_cand": 13,
+    "alt_median": 7.57
+   },
+   "10": {
+    "bin": ">14",
+    "person": true,
+    "n": 75,
+    "n_test_cand": 10,
+    "alt_median": 14.97
+   },
+   "11": {
+    "bin": ">14",
+    "person": true,
+    "n": 33,
+    "n_test_cand": 5,
+    "alt_median": 16.08
+   },
+   "12": {
+    "bin": "8-14",
+    "person": true,
+    "n": 138,
+    "n_test_cand": 18,
+    "alt_median": 10.04
+   },
+   "13": {
+    "bin": "3-8",
+    "person": true,
+    "n": 77,
+    "n_test_cand": 7,
+    "alt_median": 4.98
+   },
+   "14": {
+    "bin": "8-14",
+    "person": true,
+    "n": 63,
+    "n_test_cand": 20,
+    "alt_median": 9.56
+   },
+   "15": {
+    "bin": "3-8",
+    "person": true,
+    "n": 72,
+    "n_test_cand": 17,
+    "alt_median": 4.9
+   },
+   "16": {
+    "bin": ">14",
+    "person": true,
+    "n": 248,
+    "n_test_cand": 24,
+    "alt_median": 15.0
+   },
+   "17": {
+    "bin": "3-8",
+    "person": true,
+    "n": 147,
+    "n_test_cand": 14,
+    "alt_median": 6.49
+   },
+   "18": {
+    "bin": ">14",
+    "person": true,
+    "n": 210,
+    "n_test_cand": 21,
+    "alt_median": 14.45
+   },
+   "19": {
+    "bin": ">14",
+    "person": true,
+    "n": 174,
+    "n_test_cand": 19,
+    "alt_median": 17.88
+   },
+   "20": {
+    "bin": "8-14",
+    "person": true,
+    "n": 124,
+    "n_test_cand": 15,
+    "alt_median": 13.67
+   },
+   "21": {
+    "bin": "8-14",
+    "person": false,
+    "n": 97,
+    "n_test_cand": 16,
+    "alt_median": 12.91
+   },
+   "22": {
+    "bin": "8-14",
+    "person": true,
+    "n": 165,
+    "n_test_cand": 21,
+    "alt_median": 11.02
+   },
+   "23": {
+    "bin": "3-8",
+    "person": false,
+    "n": 64,
+    "n_test_cand": 9,
+    "alt_median": 4.75
+   }
+  }
+ },
+ "table_flight_split_bin_person": {
+  "20261102-101046": {
+   "test": {
+    "3-8": {
+     "no_person": 2,
+     "person": 1
+    },
+    "8-14": {
+     "no_person": 4,
+     "person": 2
+    },
+    ">14": {
+     "no_person": 20,
+     "person": 14
+    }
+   }
+  },
+  "20261102-101435": {
+   "dev": {
+    "3-8": {
+     "person": 5
+    },
+    "8-14": {
+     "no_person": 72,
+     "person": 18
+    },
+    ">14": {
+     "no_person": 45,
+     "person": 32
+    }
+   },
+   "test": {
+    "3-8": {
+     "no_person": 18
+    },
+    "8-14": {
+     "no_person": 7,
+     "person": 1
+    },
+    ">14": {
+     "no_person": 9,
+     "person": 2
+    }
+   }
+  },
+  "20261102-102319": {
+   "dev": {
+    "8-14": {
+     "no_person": 24
+    },
+    ">14": {
+     "no_person": 59,
+     "person": 10
+    }
+   },
+   "test": {
+    "3-8": {
+     "no_person": 6
+    },
+    "8-14": {
+     "no_person": 11,
+     "person": 5
+    },
+    ">14": {
+     "person": 1
+    }
+   }
+  },
+  "20261102-102636": {
+   "dev": {
+    "3-8": {
+     "no_person": 113,
+     "person": 2
+    },
+    "8-14": {
+     "no_person": 73,
+     "person": 14
+    },
+    ">14": {
+     "no_person": 2,
+     "person": 13
+    }
+   },
+   "test": {
+    "8-14": {
+     "no_person": 4
+    },
+    ">14": {
+     "no_person": 6
+    }
+   }
+  },
+  "20261102-103039": {
+   "dev": {
+    "3-8": {
+     "no_person": 60,
+     "person": 11
+    },
+    "8-14": {
+     "no_person": 9
+    }
+   },
+   "test": {
+    "3-8": {
+     "no_person": 22,
+     "person": 2
+    },
+    "8-14": {
+     "no_person": 20,
+     "person": 2
+    },
+    ">14": {
+     "no_person": 3,
+     "person": 12
+    }
+   }
+  },
+  "20261102-104039": {
+   "dev": {
+    "8-14": {
+     "no_person": 244,
+     "person": 6
+    },
+    ">14": {
+     "no_person": 190,
+     "person": 113
+    }
+   },
+   "test": {
+    "3-8": {
+     "no_person": 6
+    },
+    "8-14": {
+     "no_person": 11,
+     "person": 1
+    },
+    ">14": {
+     "no_person": 4,
+     "person": 2
+    }
+   }
+  }
+ }
+}
