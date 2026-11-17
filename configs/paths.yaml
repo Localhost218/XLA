@@ -1,0 +1,13 @@
+# Đường dẫn dùng chung của XLA. Đọc bằng xla/paths.py; không gõ cứng đường dẫn ở code khác.
+#
+# Định dạng: ánh xạ PHẲNG "khoá: giá trị" (một dòng một khoá, không lồng), để xla.paths đọc được bằng thư viện chuẩn
+# (lane nào cũng import được, kể cả trước khi venv có pyyaml).
+# Ghi đè từng khoá bằng biến môi trường XLA_<KHOÁ VIẾT HOA>, ví dụ XLA_DATA_ROOT, XLA_GPU_LOCK_FILE.
+# Đường dẫn tương đối tính từ gốc repo. Không để gì ở ổ C.
+
+data_root: D:/DevCache/datasets/xla          # tập sinh D0/D1/D2
+src_datasets_dir: D:/DevCache/datasets/src   # dataset nguồn đã giải nén
+downloads_dir: D:/IOT_Tools/downloads        # file tải về, installer
+cache_dir: D:/DevCache/cache                 # cache tính toán
+iotcv_root: d:/Coding/IOT-CV                 # repo IOT-CV (chỉ đọc từ XLA)
+gpu_lock_file: D:/DevCache/locks/gpu.lock    # khoá GPU dùng chung (D9)

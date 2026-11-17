@@ -1,0 +1,365 @@
+[
+ {
+  "rec": "20261101-175552",
+  "start_local": "01/11 17:55:52",
+  "end_local": "18:36:16",
+  "dur_s": 2424.6,
+  "frames": 3177,
+  "segments": 36,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 1.31,
+  "dt_median": 0.254,
+  "gaps_gt1s": 142,
+  "gaps_gt5s": 5,
+  "gap_total_s": 1507.5,
+  "max_gap_s": 1221.4,
+  "frame_id_skipped": 0,
+  "jpeg_kb_mean": 11.9,
+  "jpeg_kb_p10_p90": [
+   9.2,
+   14.2
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 3173,
+  "armed_frames": 0,
+  "flying_frames": 0,
+  "fly_fps": null,
+  "alt_max": 1.1
+ },
+ {
+  "rec": "20261101-183704",
+  "start_local": "01/11 18:37:04",
+  "end_local": "18:54:32",
+  "dur_s": 1048.4,
+  "frames": 1237,
+  "segments": 128,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 1.18,
+  "dt_median": 0.482,
+  "gaps_gt1s": 313,
+  "gaps_gt5s": 17,
+  "gap_total_s": 720.3,
+  "max_gap_s": 7.3,
+  "frame_id_skipped": 2,
+  "jpeg_kb_mean": 11.7,
+  "jpeg_kb_p10_p90": [
+   10.9,
+   12.6
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 1229,
+  "armed_frames": 0,
+  "flying_frames": 0,
+  "fly_fps": null,
+  "alt_max": 0.2
+ },
+ {
+  "rec": "20261101-185436",
+  "start_local": "01/11 18:54:36",
+  "end_local": "18:58:16",
+  "dur_s": 220.3,
+  "frames": 509,
+  "segments": 15,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 2.31,
+  "dt_median": 0.248,
+  "gaps_gt1s": 37,
+  "gaps_gt5s": 1,
+  "gap_total_s": 76.3,
+  "max_gap_s": 8.6,
+  "frame_id_skipped": 1,
+  "jpeg_kb_mean": 11.0,
+  "jpeg_kb_p10_p90": [
+   10.8,
+   11.2
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 506,
+  "armed_frames": 0,
+  "flying_frames": 0,
+  "fly_fps": null,
+  "alt_max": -3.4
+ },
+ {
+  "rec": "20261101-185822",
+  "start_local": "01/11 18:58:22",
+  "end_local": "19:05:20",
+  "dur_s": 418.1,
+  "frames": 402,
+  "segments": 69,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 0.96,
+  "dt_median": 0.711,
+  "gaps_gt1s": 140,
+  "gaps_gt5s": 5,
+  "gap_total_s": 315.5,
+  "max_gap_s": 6.0,
+  "frame_id_skipped": 0,
+  "jpeg_kb_mean": 11.0,
+  "jpeg_kb_p10_p90": [
+   10.8,
+   11.1
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 401,
+  "armed_frames": 0,
+  "flying_frames": 0,
+  "fly_fps": null,
+  "alt_max": -4.0
+ },
+ {
+  "rec": "20261101-190530",
+  "start_local": "01/11 19:05:30",
+  "end_local": "19:12:25",
+  "dur_s": 414.5,
+  "frames": 246,
+  "segments": 75,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 0.59,
+  "dt_median": 0.954,
+  "gaps_gt1s": 115,
+  "gaps_gt5s": 14,
+  "gap_total_s": 362.7,
+  "max_gap_s": 10.0,
+  "frame_id_skipped": 4,
+  "jpeg_kb_mean": 10.9,
+  "jpeg_kb_p10_p90": [
+   10.7,
+   11.1
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 244,
+  "armed_frames": 0,
+  "flying_frames": 0,
+  "fly_fps": null,
+  "alt_max": -4.9
+ },
+ {
+  "rec": "20261101-191230",
+  "start_local": "01/11 19:12:30",
+  "end_local": "19:45:33",
+  "dur_s": 1982.7,
+  "frames": 2976,
+  "segments": 223,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 1.5,
+  "dt_median": 0.273,
+  "gaps_gt1s": 478,
+  "gaps_gt5s": 31,
+  "gap_total_s": 1221.6,
+  "max_gap_s": 21.6,
+  "frame_id_skipped": 11,
+  "jpeg_kb_mean": 10.6,
+  "jpeg_kb_p10_p90": [
+   10.5,
+   11.1
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 2971,
+  "armed_frames": 1,
+  "flying_frames": 0,
+  "fly_fps": null,
+  "alt_max": 1.8
+ },
+ {
+  "rec": "20261102-033719",
+  "start_local": "02/11 03:37:19",
+  "end_local": "04:01:17",
+  "dur_s": 1437.6,
+  "frames": 2631,
+  "segments": 5,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 1.83,
+  "dt_median": 0.423,
+  "gaps_gt1s": 340,
+  "gaps_gt5s": 8,
+  "gap_total_s": 577.1,
+  "max_gap_s": 12.1,
+  "frame_id_skipped": 2,
+  "jpeg_kb_mean": 15.4,
+  "jpeg_kb_p10_p90": [
+   14.8,
+   15.7
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 2624,
+  "armed_frames": 0,
+  "flying_frames": 0,
+  "fly_fps": null,
+  "alt_max": 0.3
+ },
+ {
+  "rec": "20261102-040317",
+  "start_local": "02/11 04:03:17",
+  "end_local": "04:29:25",
+  "dur_s": 1567.2,
+  "frames": 4785,
+  "segments": 6,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 3.05,
+  "dt_median": 0.268,
+  "gaps_gt1s": 94,
+  "gaps_gt5s": 2,
+  "gap_total_s": 177.1,
+  "max_gap_s": 7.9,
+  "frame_id_skipped": 0,
+  "jpeg_kb_mean": 14.8,
+  "jpeg_kb_p10_p90": [
+   14.3,
+   15.0
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 0,
+  "armed_frames": 0,
+  "flying_frames": 0,
+  "fly_fps": null,
+  "alt_max": null
+ },
+ {
+  "rec": "20261102-042928",
+  "start_local": "02/11 04:29:28",
+  "end_local": "04:29:28",
+  "dur_s": 0.5,
+  "frames": 2,
+  "segments": 1,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 3.72,
+  "dt_median": 0.538,
+  "gaps_gt1s": 0,
+  "gaps_gt5s": 0,
+  "gap_total_s": 0.0,
+  "max_gap_s": 0.5,
+  "frame_id_skipped": 0,
+  "jpeg_kb_mean": 14.3,
+  "jpeg_kb_p10_p90": [
+   14.3,
+   14.3
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 0,
+  "armed_frames": 0,
+  "flying_frames": 0,
+  "fly_fps": null,
+  "alt_max": null
+ },
+ {
+  "rec": "20261102-043054",
+  "start_local": "02/11 04:30:54",
+  "end_local": "05:35:10",
+  "dur_s": 3855.7,
+  "frames": 13096,
+  "segments": 13,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 3.4,
+  "dt_median": 0.205,
+  "gaps_gt1s": 210,
+  "gaps_gt5s": 6,
+  "gap_total_s": 833.5,
+  "max_gap_s": 458.4,
+  "frame_id_skipped": 3,
+  "jpeg_kb_mean": 14.2,
+  "jpeg_kb_p10_p90": [
+   14.0,
+   14.4
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 13094,
+  "armed_frames": 0,
+  "flying_frames": 0,
+  "fly_fps": null,
+  "alt_max": -1.8
+ },
+ {
+  "rec": "20261102-100941",
+  "start_local": "02/11 10:09:41",
+  "end_local": "10:45:16",
+  "dur_s": 2135.2,
+  "frames": 11908,
+  "segments": 8,
+  "res": [
+   [
+    "640",
+    "480"
+   ]
+  ],
+  "fps_mean": 5.58,
+  "dt_median": 0.096,
+  "gaps_gt1s": 411,
+  "gaps_gt5s": 13,
+  "gap_total_s": 802.1,
+  "max_gap_s": 14.8,
+  "frame_id_skipped": 10,
+  "jpeg_kb_mean": 25.3,
+  "jpeg_kb_p10_p90": [
+   17.5,
+   29.7
+  ],
+  "zero_or_missing": 0,
+  "quality_values": "không có cột/trống",
+  "alt_filled": 11890,
+  "armed_frames": 3623,
+  "flying_frames": 2788,
+  "fly_fps": 3.72,
+  "alt_max": 57.8
+ }
+]

@@ -443,4 +443,4 @@ async def get_job_file(job_id: str, filename: str) -> FileResponse:
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8000"))
-    uvicorn.run("web.server:app", host="0.0.0.0", port=port, reload=False)
+    uvicorn.run("web.server:app", host="127.0.0.1", port=port, reload=False)

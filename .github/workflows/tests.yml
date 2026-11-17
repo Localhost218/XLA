@@ -1,0 +1,35 @@
+name: tests
+
+# Deferred 18: pytest CPU trên mọi push + pull_request. Không dùng `paths:` (check bắt buộc mà bị lọc thì PR kẹt chờ).
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pytest-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      # uv.lock ghim torch 2.6.0+cpu cho Linux ([tool.uv.sources] trong pyproject.toml)
+      - name: Cài môi trường từ uv.lock
+        run: uv sync --locked
+
+      - name: Kiểm torch là bản CPU
+        run: uv run --no-sync python -c "import torch; print(torch.__version__); assert not torch.cuda.is_available()"
+
+      - name: pytest (không GPU, không dữ liệu local)
+        run: uv run --no-sync pytest -m "not gpu and not data"

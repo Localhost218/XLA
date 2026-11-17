@@ -4,3 +4,13 @@ __pycache__/
 .venv/
 .tmp/
 .pip_cache/
+# plan 261118 (phase 01)
+# file model .onnx đi qua GitHub Release (Deferred 21), meta.json + golden/ vẫn commit
+models/release/**/*.onnx
+runs/
+results/**/runs/
+*.pt
+!models/**/*.pt
+.pytest_cache/
+.ruff_cache/
+# KHÔNG ignore khung thật: data/real/, results/ab/img/, models/release/**/golden/ (Deferred 14)
