@@ -14,7 +14,7 @@ Accept: `pytest tests/labels/test_testset_labels.py`
 
 ## Mục tiêu
 
-Có nhãn người đáng tin cho **toàn bộ khung test** (300–400) và một tập **dev-val** ~100 khung (để chọn checkpoint, chọn
+Có nhãn người đáng tin cho **toàn bộ khung test** (~200, xem phase 03 "Quyết định chia lại") và một tập **dev-val** ~100 khung (để chọn checkpoint, chọn
 ngưỡng; D10). Nhãn test qua ba lớp: nhiều model khác họ YOLO gán trước → agent soát từng khung → chủ dự án duyệt lần cuối
 trên Label Studio chạy local. Nhãn dev-val chỉ qua hai lớp đầu.
 
@@ -28,7 +28,8 @@ trên Label Studio chạy local. Nhãn dev-val chỉ qua hai lớp đầu.
 
 ## Việc theo thứ tự
 
-1. **Chọn dev-val:** 100 khung dev, cách nhau ≥ 2 s, phân tầng như test; ghi danh sách vào `data/real/labels/manifest.json`
+1. **Chọn dev-val:** 100 khung dev, cách nhau ≥ 1 s (Owner đổi từ 2 s ngày 18/11/2026: dev 1 115 khung cách 2 s chỉ được
+   ~80), phân tầng như test; ghi danh sách vào `data/real/labels/manifest.json`
    (không sửa `split.json` — file đó chỉ đọc).
 2. **Gán trước** (`prelabel.py`, trong `xla.gpu_lock`): RT-DETR-x COCO + SAHI (lát 640, chồng 0,2) làm chính; YOLO11x @1280
    + SAHI làm phiếu thứ hai; hợp bằng WBF (`ensemble-boxes`); chỉ lớp người; bỏ hộp nằm trọn trong 16 px mép trái; ghi
