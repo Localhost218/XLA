@@ -145,3 +145,12 @@ Mọi thứ đã commit + push; trọng số, nhãn giả, run ở `D:\DevCache\
    abeval, classic, phase 10 đã gộp), chép `detector.onnx`/`enhancer.onnx` từ worktree vào bundle của nhánh tích hợp,
    `validate` từng bundle, `pytest -m "not gpu"`, rồi chạy các lệnh ở `results/ab/README.md` (enhance_eval all, ab_page
    build), mở `results/ab/ab-test.html` cho chủ dự án chấm (~10 phút), ab_score, README kết luận, PR #2 → CI xanh → merge.
+
+## 9. Quyết định Owner trong lúc chạy phase 11 (18/11 tối)
+
+- **Mốc cổng parity của detector = `.pt` với `rect=False`** (cùng letterbox vuông 1280×1280 như graph theo
+  `docs/hop-dong-model.md` §2), không phải `.pt` mặc định (`rect=True`, 1280×992). Bản ONNX của trò r1 khớp mốc này Δ 0,0000;
+  so với `rect=True` lệch −0,034, đổi dấu giữa các model (E1 D2 +0,021, r2 −0,016, thầy −0,005) nên là nhiễu của 100 khung
+  dev-val. Hợp đồng không đổi; `.pt rect=True` và `full_edge16` giữ trong `parity.json` làm số tham khảo.
+- Phase 11 dừng ở vòng 2 (r2 kém r1 trên dev-val), model ship = trò r1.
+- Từ 23:05 mọi lần train còn lại chạy 4 worker (chủ dự án yêu cầu đẩy nhanh); lỗi bộ nhớ thật mới quay về 2.
