@@ -9,7 +9,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 import pytest
 
@@ -101,9 +101,13 @@ def test_best_matches_contract_and_is_chosen_on_devval(e1):
     assert isinstance(b["devval_map50"], float) and isinstance(b["conf_threshold"], float)
     assert b["devval_map50"] == max(e1["sets"][s]["devval_map50"] for s in SETS)
     assert b["conf_threshold"] == e1["sets"][b["set"]]["test"]["conf_threshold"]
-    w = Path(b["weights"])
-    assert w.is_absolute() and w.suffix == ".pt"
-    assert ROOT.resolve() not in w.resolve().parents, "trọng số không được nằm trong repo"
+    # Đường dẫn ghi trên máy Windows (D:/…) mà CI chạy Linux: kiểm theo cả hai kiểu đường dẫn, không theo OS đang chạy.
+    raw = b["weights"]
+    assert PureWindowsPath(raw).is_absolute() or PurePosixPath(raw).is_absolute(), f"không tuyệt đối: {raw}"
+    assert PurePosixPath(raw.replace("\\", "/")).suffix == ".pt"
+    w = Path(raw)
+    if w.is_absolute():  # chỉ so với repo khi đường dẫn thuộc đúng OS này
+        assert ROOT.resolve() not in w.resolve().parents, "trọng số không được nằm trong repo"
 
 
 def test_paired_compares_present(e1):
