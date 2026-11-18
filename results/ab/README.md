@@ -115,3 +115,9 @@ Kết luận câu hỏi 2 và quyết định ship enhancer (hoặc không ship 
    E4 ghi kèm để đối chiếu.
 7. **Ảnh thử mù** cắt bỏ dải mép (thay vì lặp cột) và hiển thị co giãn vừa cột (~810 px CSS ở 1707×900), JPEG q95 4:4:4 —
    giống nhau cho mọi biến thể.
+8. **Ô E4 chấm toàn tập test** bằng `prepare`/`bootstrap` của `xla.eval.detection` (không tách bin độ cao/hard như
+   `evaluate`, nhanh hơn ~6 lần; vẫn đối chiếu pycocotools); chênh ghép cặp dùng `compare` nguyên vẹn. Chấm lại không suy
+   luận: `enhance_eval e4 --score-only` (đọc CSV ở `--pred-dir`, mặc định `results/e4/preds/`).
+
+Kiểm chéo lần chạy giả (18/11): ô mốc COCO × khung gốc ra mAP50 0,1265 [0,0296; 0,2242], khớp `results/baseline/baseline.json`
+biến thể `edge16` (0,1265 [0,0296; 0,2243]) — đường suy luận mốc của E4 đúng như phase 09.

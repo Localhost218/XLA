@@ -429,9 +429,9 @@ def cmd_physical(a: argparse.Namespace, ctx: Ctx, vs: VariantSet) -> dict[str, A
         drops[key] = {}
         for v in ("classic", "net"):
             ch, (lo, hi) = metrics[key][v]["change_vs_raw"], metrics[key][v]["change_ci95"]
-            drop = None if ch is None else -ch
-            drops[key][v] = {"drop": _num(drop), "ci95": [_num(-hi) if hi is not None else None,
-                                                          _num(-lo) if lo is not None else None],
+            drop = None if ch is None else -ch + 0.0  # + 0.0: tránh in -0.0
+            drops[key][v] = {"drop": _num(drop), "ci95": [_num(-hi + 0.0) if hi is not None else None,
+                                                          _num(-lo + 0.0) if lo is not None else None],
                              "criterion_min": crit, "status": _status(None if drop is None else drop >= crit)}
     return {"n_frames": len(rows), "n_blocks": len({r["block"] for r in rows}), "crop_left": vs.crop_left,
             "metrics": metrics, "drops": drops, "gpu": lock,
@@ -582,69 +582,92 @@ def cmd_iqa(a: argparse.Namespace, ctx: Ctx, vs: VariantSet) -> dict[str, Any]:
 # ---------------------------------------------------------------- bước 6: E4
 
 
-def _pick(m: dict[str, Any], prefix: str) -> dict[str, Any] | None:
-    for k, v in m.items():
-        if k == prefix or k.startswith(prefix + "@"):
-            return v
-    return None
+def score_cell(csv_path: Path, op: float, a: argparse.Namespace, boot: int, seed: int) -> dict[str, Any]:
+    """mAP50 (+ mAP50-95, AR-small, báo nhầm/khung âm ở ``op``) + CI theo khối, chỉ trên toàn tập test.
+
+    Dùng ``prepare``/``bootstrap`` của ``xla.eval.detection`` (SSOT) nhưng không tách bin độ cao/hard như ``evaluate``
+    — E4 chỉ cần toàn tập, nhanh hơn ~6 lần; vẫn đối chiếu pycocotools như ``evaluate``."""
+    from xla.eval.detection import _check_against_pycocotools, _subset_metrics, bootstrap, prepare, resample
+
+    pr = prepare(csv_path, "test", a.labels_dir, a.manifest, a.split_json, [op], a.allow_missing_labels,
+                 f1_from_devval=False)
+    point = _subset_metrics(pr.s, pr.all_frames, None, pr.thresholds)
+    _check_against_pycocotools(point, pr.stats)
+    ci = bootstrap(pr.s, {"all": None}, pr.thresholds, resample(pr.s, boot, seed))["all"] if boot else {}
+
+    def pack(k: str) -> dict[str, Any]:
+        return {"value": _num(point[k]), "ci95": [_num(x) for x in ci.get(k, (np.nan, np.nan))]}
+
+    fp_key = next(k for k in point if k.startswith("fp_per_neg_frame@"))
+    ms = list(pr.ms.values())
+    return {"mAP50": pack("mAP50"), "mAP50_95": pack("mAP50_95"), "AR_small": pack("AR_small"),
+            "fp_per_neg_frame@op": pack(fp_key), "csv": str(csv_path), "official": pr.official,
+            "n": {"frames": len(pr.frames), "frames_with_person": sum(len(pr.gt[f]) > 0 for f in pr.frames),
+                  "negative_frames": len(pr.s.neg_frames), "labels_missing": len(pr.missing)},
+            "ms_per_frame": ({"median": _num(np.median(ms)), "mean": _num(np.mean(ms)), "n_frames": len(ms),
+                              "note": "cột ms của CSV (khung có ≥ 1 hộp)"} if ms else None)}
 
 
 def cmd_e4(a: argparse.Namespace, ctx: Ctx, vs: VariantSet) -> dict[str, Any]:
     from xla.detect.baseline import WEIGHTS_REL, drop_edge, write_csv
-    from xla.eval.detection import compare, evaluate
+    from xla.eval.detection import compare
     from xla.paths import downloads_dir
 
     det_b = open_bundle(a.detector or ctx.root / DETECTOR_REL, "detector")
     if det_b.meta.get("input_variant", "raw") != "raw":
         raise EvalError("E4 cần detector chấm trên khung gốc (input_variant raw)")
-    providers = parse_providers(a.providers)
-    bundle_det = BundleDetector(det_b, providers)
-    coco = CocoDetector(a.coco_weights or downloads_dir() / WEIGHTS_REL, a.coco_device)
-    dets: dict[str, Callable[[np.ndarray], list[tuple[float, float, float, float, float]]]] = {
-        "coco": coco, "bundle": bundle_det}
     ops = {"coco": COCO_OP_THR, "bundle": float(det_b.meta["conf_threshold"])}
-    rows = ctx.frames("test") + ctx.frames("neg")
-    per: dict[str, dict[str, dict[str, tuple[list[Any], float]]]] = {d: {v: {} for v in VARIANTS} for d in dets}
-    need_gpu = vs.uses_gpu or "CUDAExecutionProvider" in bundle_det.active or a.coco_device != "cpu"
-    with maybe_gpu(need_gpu, "e4", ctx.lock_timeout) as lock:
-        for i, r in enumerate(rows):
-            progress("e4", i, len(rows), every=50)
-            img = ctx.load(r["frame"])
-            for v in VARIANTS:
-                x = vs.fns[v](img)
-                for d, det in dets.items():
-                    t0 = time.perf_counter()
-                    boxes = drop_edge(det(x))
-                    per[d][v][r["frame"]] = (boxes, (time.perf_counter() - t0) * 1000)
     pred_dir = a.pred_dir or ctx.root / E4_PRED_REL
-    csvs = {d: {v: pred_dir / f"{d}_{v}.csv" for v in VARIANTS} for d in dets}
-    for d in dets:
-        for v in VARIANTS:
-            write_csv(csvs[d][v], per[d][v])
+    csvs = {d: {v: pred_dir / f"{d}_{v}.csv" for v in VARIANTS} for d in ops}
+    coco_w = a.coco_weights or downloads_dir() / WEIGHTS_REL
+    lock: dict[str, Any] = {"gpu_lock": False, "wait_s": 0.0, "score_only": a.score_only}
+    active: list[str] = []
+    if a.score_only:
+        missing = [str(p) for dv in csvs.values() for p in dv.values() if not p.is_file()]
+        if missing:
+            raise EvalError(f"--score-only nhưng thiếu CSV {missing}")
+    else:
+        bundle_det = BundleDetector(det_b, parse_providers(a.providers))
+        active = bundle_det.active
+        dets: dict[str, Callable[[np.ndarray], list[tuple[float, float, float, float, float]]]] = {
+            "coco": CocoDetector(coco_w, a.coco_device), "bundle": bundle_det}
+        rows = ctx.frames("test") + ctx.frames("neg")
+        per: dict[str, dict[str, dict[str, tuple[list[Any], float]]]] = {d: {v: {} for v in VARIANTS} for d in dets}
+        need_gpu = vs.uses_gpu or "CUDAExecutionProvider" in active or a.coco_device != "cpu"
+        with maybe_gpu(need_gpu, "e4", ctx.lock_timeout) as lock:
+            for i, r in enumerate(rows):
+                progress("e4", i, len(rows), every=50)
+                img = ctx.load(r["frame"])
+                for v in VARIANTS:
+                    x = vs.fns[v](img)
+                    for d, det in dets.items():
+                        t0 = time.perf_counter()
+                        boxes = drop_edge(det(x))
+                        per[d][v][r["frame"]] = (boxes, (time.perf_counter() - t0) * 1000)
+        for d in dets:
+            for v in VARIANTS:
+                write_csv(csvs[d][v], per[d][v])
     common = {"split": "test", "labels_dir": a.labels_dir, "manifest_path": a.manifest, "split_json": a.split_json,
               "boot_n": ctx.boot, "seed": ctx.seed, "allow_missing_labels": a.allow_missing_labels}
     cells: dict[str, Any] = {}
     diffs: dict[str, Any] = {}
-    for d in dets:
+    for d, op in ops.items():
         cells[d], diffs[d] = {}, {}
         for v in VARIANTS:
             print(f"[e4] chấm {d} × {v}", file=sys.stderr, flush=True)
-            r = evaluate(csvs[d][v], thresholds=[ops[d]], f1_from_devval=False, **common)
-            m = r["metrics"]
-            cells[d][v] = {"mAP50": m["mAP50"], "mAP50_95": m["mAP50_95"], "AR_small": m["AR_small"],
-                           "fp_per_neg_frame@op": _pick(m, "fp_per_neg_frame"), "csv": str(csvs[d][v]),
-                           "official": r["official"], "n": r["n"], "ms_per_frame": r["ms_per_frame"]}
+            cells[d][v] = score_cell(csvs[d][v], op, a, ctx.boot, ctx.seed)
         for v in ("classic", "net"):
-            c = compare(csvs[d]["raw"], csvs[d][v], thr_a=ops[d], thr_b=ops[d], **common)
+            print(f"[e4] ghép cặp {d}: {v} − raw", file=sys.stderr, flush=True)
+            c = compare(csvs[d]["raw"], csvs[d][v], thr_a=op, thr_b=op, **common)
             diffs[d][v] = {k: c["metrics"][k] for k in ("mAP50", "mAP50_95", "fp_per_neg_frame@op")}
     lo = diffs["bundle"]["net"]["mAP50"]["ci95"][0]
     rec = d5_recommendation(lo)
     return {
         "created": datetime.now(UTC).isoformat(timespec="seconds"),
         "split": "test", "op_threshold": ops,
-        "detectors": {"coco": {"weights": str(coco.weights), "device": a.coco_device,
+        "detectors": {"coco": {"weights": str(coco_w), "device": a.coco_device,
                                "note": "như xla.detect.baseline full + bỏ hộp x1 < 16 (edge16)"},
-                      "bundle": _bundle_info(det_b, bundle_det.active)},
+                      "bundle": _bundle_info(det_b, active)},
         "variants": vs.info, "cells": cells, "paired_diff_vs_raw": diffs,
         "d5": {"recommended_input_variant": rec,
                "basis": "bundle × net: CI 95 % của chênh mAP50 ghép cặp (net − raw)",
@@ -767,6 +790,7 @@ def _parser() -> argparse.ArgumentParser:
             p.add_argument("--allow-missing-labels", action="store_true")
             p.add_argument("--pred-dir", type=Path, default=None, help=f"CSV dự đoán E4, mặc định {E4_PRED_REL}")
             p.add_argument("--e4-out", type=Path, default=None, help=f"mặc định {E4_OUT_REL}")
+            p.add_argument("--score-only", action="store_true", help="không suy luận lại, chấm CSV có sẵn ở --pred-dir")
         if name == "all":
             p.add_argument("--ab-result", type=Path, default=None, help=f"mặc định {AB_RESULT_REL} (nếu có)")
             p.add_argument("--ab-key", type=Path, default=None, help=f"mặc định {AB_KEY_REL}")
