@@ -1,0 +1,40 @@
+# Phase 13: huấn luyện mạng khôi phục riêng camera trên cặp D2 (vào) → D0 (đích). Đọc bằng xla/enhance/train_net.py.
+# Ứng viên chọn theo results/restore/speed.json (nhanh nhất có p95 ≤ 20 ms, ORT CUDA EP fp16, 480×624).
+version: "1.0.0"
+candidate: nafnet              # khoá xla.enhance.net.CANDIDATES
+arch_kwargs: {}                # ghi đè tham số kiến trúc (biến thể thu nhỏ); rỗng = đúng bản công bố
+init: pretrained               # khởi từ trọng số công bố (Deferred 11)
+
+data:
+  input_set: d2                # dưới XLA_DATA_ROOT (configs/paths.yaml: data_root)
+  target_set: d0
+  # crop_left lấy từ configs/camera_profile.yaml (left_strip.crop_left_px); patch không chứa cột [0, crop_left).
+  patch: 256
+  grid: 8                      # gốc patch đặt trên lưới 8 px tính từ crop_left (giữ pha khối JPEG như lúc chạy thật)
+  flip: true                   # lật ngang/dọc cùng lúc cho cả cặp (patch bội 8 nên lưới khối giữ nguyên)
+
+train:
+  batch: 8
+  workers: 4                   # trần 4 (RAM lật bit dưới tải, thuc-thi §3)
+  lr: 1.0e-4                   # fine-tune: 1/10 lr gốc của NAFNet-SIDD (1e-3)
+  lr_min: 1.0e-6
+  betas: [0.9, 0.9]            # như công thức NAFNet
+  weight_decay: 0.0
+  warmup_steps: 100
+  smoke_steps: 500
+  max_steps: 5000              # chốt từ smoke (results/restore/train.json: smoke, budget)
+  ssim_weight: 1.0             # loss = L1 + w·(1 − SSIM)
+  grad_clip: 0.01              # như công thức NAFNet (clip_grad_norm 0.01)
+  amp: bf16
+  ckpt_every: 1000             # checkpoint giữ lại để chọn
+  last_every: 200              # last.pt để resume
+  val_every: 1000
+  val_n: 100                   # số cặp val tổng hợp (khung đủ 480×624) mỗi lần đo giữa chừng; cuối cùng đo hết
+  seed: 20261118
+  budget_gpu_hours: 1.25       # ngân sách phase 13 (thuc-thi §4) gồm đo tốc độ + smoke + huấn luyện
+
+select:                        # chọn checkpoint trên khung DEV thật (không test, không NR-IQA)
+  split: dev
+  stats_every: 3               # thống kê mức thấp trên mỗi khung thứ 3 trong các chuỗi dev liền kề
+  flicker_max: 1.15            # loại checkpoint làm nhấp nháy tăng > 15 % so với khung gốc
+  # điểm = giảm tương đối % hồng + giảm tương đối dark channel + giảm tương đối (blocking − 1); cao hơn tốt hơn
