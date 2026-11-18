@@ -1,0 +1,134 @@
+{
+ "format": "xla-reproduce-v1",
+ "note": "sha256 của mọi bảng/hình báo cáo dùng; dựng lại bằng scripts/reproduce.py --write",
+ "inputs": [
+  "results/baseline/baseline.json",
+  "results/baseline/pred/edge16.csv",
+  "results/e1/e1.json",
+  "results/e1/preds/d0_devval.csv",
+  "results/e1/preds/d0_neg.csv",
+  "results/e1/preds/d0_test.csv",
+  "results/e1/preds/d1_devval.csv",
+  "results/e1/preds/d1_neg.csv",
+  "results/e1/preds/d1_test.csv",
+  "results/e1/preds/d2_devval.csv",
+  "results/e1/preds/d2_neg.csv",
+  "results/e1/preds/d2_test.csv",
+  "results/e1/preds/d2sr_devval.csv",
+  "results/e1/preds/d2sr_neg.csv",
+  "results/e1/preds/d2sr_test.csv",
+  "results/e2/e2.json",
+  "results/e2/eval/r1_test.json",
+  "results/e2/eval/r2_test.json",
+  "results/e2/eval/teacher_test.json",
+  "results/e2/preds/onnx_detector-v1.0.0_all.csv",
+  "results/e2/preds/r1_devval.csv",
+  "results/e2/preds/r1_neg.csv",
+  "results/e2/preds/r1_test.csv",
+  "results/e2/preds/r2_devval.csv",
+  "results/e2/preds/r2_neg.csv",
+  "results/e2/preds/r2_test.csv",
+  "results/e2/preds/teacher_devval.csv",
+  "results/e2/preds/teacher_neg.csv",
+  "results/e2/preds/teacher_test.csv",
+  "results/e4/e4.json",
+  "results/e4/preds/bundle_classic.csv",
+  "results/e4/preds/bundle_net.csv",
+  "results/e4/preds/bundle_raw.csv",
+  "results/e4/preds/coco_classic.csv",
+  "results/e4/preds/coco_net.csv",
+  "results/e4/preds/coco_raw.csv"
+ ],
+ "rescore_tolerance": 1e-06,
+ "outputs": {
+  "results/reproduce/tables/t1_nhan_dien.md": "5343f5db20bebf4f8931f193c15027078a0e9b8be2d099ce740b70f89f0936d8",
+  "results/reproduce/tables/t2_do_giong_that.md": "a83080174482564d85a23d2fc315792b165d7510f7d9d06067ed24b23d4cb54d",
+  "results/reproduce/tables/t3_tieu_chi_anh_ro.md": "987fbd08ac6e7c34a8022ce0eb4d9de499adbcc5e400d415b7d4636e34c3e75d",
+  "results/reproduce/tables/t4_ab.md": "bf49161332c4a05f33e9fb425bcd57b22216d4ab9375f519ed29a93c6d91b056",
+  "results/reproduce/tables/t5_e4.md": "24ea5b9d5232ae546db2995e4b90fb06ca6110ed7472579512096a9df6351699",
+  "results/reproduce/tables/t6_iotcv_ms.md": "fe495bdea2850d43b0ce9af17d9a47ba87b9b7b6e8f57f4748305533a75c8dbe",
+  "results/reproduce/fig/f1_nhan_dien.svg": "ed369ab9f0dac5558aec861ff33a1bd06c55f32fa9e306cf5ef2d4896cc24481",
+  "results/reproduce/fig/f2_ab.svg": "3a188d8f98298138a8b4569e2aee94fd44d8c2083cb8b744da3c08c28b5a113c",
+  "results/reproduce/fig/f3_e4.svg": "8cc4aef3e826eab4b46e30eed3c62bd949700b5bf8e21e8938ddb4c9c1d72665"
+ },
+ "assets": {
+  "results/ab/img/a9e6ccce4250.jpg": "0ca92685d3972827209477ffddc600bbe5e19934b15d9ad63d99bf6108b66883",
+  "results/ab/img/38b61067087f.jpg": "47c86881a39c54f603c20eb7954bc985489ba6152f79ab0095c194c50069498d",
+  "results/iotcv/bench-20261119-022705.json": "bde0b688de7d12335c117d710b16c4bcd006f30747c56672e532840e2c4c7409"
+ },
+ "ab_example": {
+  "frame": "20261102-100941_005_00934.jpg",
+  "net": "results/ab/img/a9e6ccce4250.jpg",
+  "raw": "results/ab/img/38b61067087f.jpg"
+ },
+ "full_steps": [
+  {
+   "cmd": "python -m xla.camera.profile build --split dev --json",
+   "gpu_hours": 0.0
+  },
+  {
+   "cmd": "python -m xla.degrade.calibrate --split dev --budget 155 --workers 4",
+   "gpu_hours": 0.5
+  },
+  {
+   "cmd": "python -m xla.degrade.realism_compare --json",
+   "gpu_hours": 0.1
+  },
+  {
+   "cmd": "python -m xla.detect.baseline time",
+   "gpu_hours": 0.1
+  },
+  {
+   "cmd": "python -m xla.detect.train --config configs/train_e1.yaml --set d0 --json",
+   "gpu_hours": 0.7
+  },
+  {
+   "cmd": "python -m xla.detect.train --config configs/train_e1.yaml --set d1 --json",
+   "gpu_hours": 0.7
+  },
+  {
+   "cmd": "python -m xla.detect.train --config configs/train_e1.yaml --set d2 --json",
+   "gpu_hours": 0.7
+  },
+  {
+   "cmd": "python -m xla.detect.train --config configs/train_e1.yaml --set d2sr --json",
+   "gpu_hours": 0.7
+  },
+  {
+   "cmd": "python -m xla.detect.train --config configs/train_e1.yaml --score --json",
+   "gpu_hours": 0.0
+  },
+  {
+   "cmd": "python -m xla.detect.selftrain --config configs/selftrain_e2.yaml --teacher --json",
+   "gpu_hours": 0.8
+  },
+  {
+   "cmd": "python -m xla.detect.selftrain --config configs/selftrain_e2.yaml --round 1 --json",
+   "gpu_hours": 0.6
+  },
+  {
+   "cmd": "python -m xla.detect.selftrain --config configs/selftrain_e2.yaml --round 2 --json",
+   "gpu_hours": 0.6
+  },
+  {
+   "cmd": "python -m xla.detect.selftrain --config configs/selftrain_e2.yaml --score --json",
+   "gpu_hours": 0.0
+  },
+  {
+   "cmd": "python -m xla.detect.export_onnx --weights D:/DevCache/runs/xla/e2/r1/weights/best_devval.pt --out models/release/detector-v1.0.0 --json",
+   "gpu_hours": 0.1
+  },
+  {
+   "cmd": "python -m xla.enhance.train_net train --config configs/restore.yaml --json",
+   "gpu_hours": 0.7
+  },
+  {
+   "cmd": "python -m xla.enhance.export_onnx --ckpt <best.pt của run trên> --out models/release/enhancer-v1.0.0 --json",
+   "gpu_hours": 0.0
+  },
+  {
+   "cmd": "python -m xla.eval.enhance_eval all --json",
+   "gpu_hours": 0.3
+  }
+ ]
+}

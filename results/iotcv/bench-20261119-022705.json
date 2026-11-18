@@ -1,0 +1,156 @@
+{
+ "machine": {
+  "gpu_util_idle_pct": 6.0,
+  "gpu_temp_c": 72.0,
+  "gpu_clock_mhz": 1890.0,
+  "gpu_clock_max_mhz": 3105.0,
+  "gpu_power_w": 15.84
+ },
+ "detector": {
+  "version": "1.0.0",
+  "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+  "providers": [
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ]
+ },
+ "enhancer": {
+  "version": "1.0.0",
+  "onnx_sha256": "1728de3e976112a208ffb43f57113ba3d31f81aa9e6e9ee43cbcc1cf2fff382e",
+  "providers": [
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ]
+ },
+ "realtime": {
+  "frames_in": 600,
+  "frames_processed": 598,
+  "frames_dropped": 2,
+  "dropped_frac": 0.0033,
+  "input_fps": 7.21,
+  "processed_fps": 7.18,
+  "errors": 0,
+  "ms": {
+   "decode": {
+    "p50": 0.71,
+    "p95": 0.86,
+    "n": 598
+   },
+   "detector": {
+    "p50": 23.63,
+    "p95": 33.44,
+    "n": 598
+   },
+   "enhancer": {
+    "p50": 12.46,
+    "p95": 19.01,
+    "n": 598
+   },
+   "encode": {
+    "p50": 0.56,
+    "p95": 0.64,
+    "n": 598
+   },
+   "total": {
+    "p50": 37.49,
+    "p95": 54.09,
+    "n": 598
+   }
+  }
+ },
+ "maxrate": {
+  "frames": 600,
+  "fps": 23.62,
+  "ms": {
+   "decode": {
+    "p50": 0.61,
+    "p95": 0.73,
+    "n": 600
+   },
+   "detector": {
+    "p50": 26.72,
+    "p95": 28.13,
+    "n": 600
+   },
+   "enhancer": {
+    "p50": 14.62,
+    "p95": 15.68,
+    "n": 600
+   },
+   "encode": {
+    "p50": 0.6,
+    "p95": 0.73,
+    "n": 600
+   },
+   "total": {
+    "p50": 42.54,
+    "p95": 44.92,
+    "n": 600
+   }
+  }
+ },
+ "realtime_detector_only": {
+  "frames_in": 600,
+  "frames_processed": 597,
+  "frames_dropped": 3,
+  "dropped_frac": 0.005,
+  "input_fps": 7.21,
+  "processed_fps": 7.17,
+  "errors": 0,
+  "ms": {
+   "decode": {
+    "p50": 0.71,
+    "p95": 0.88,
+    "n": 597
+   },
+   "detector": {
+    "p50": 35.82,
+    "p95": 67.04,
+    "n": 597
+   },
+   "total": {
+    "p50": 36.56,
+    "p95": 67.88,
+    "n": 597
+   }
+  }
+ },
+ "recording": "20261102-100941",
+ "start": 284,
+ "created": "2026-11-18T19:27:05+00:00",
+ "budget_ms": {
+  "total": {
+   "p95": 54.09,
+   "max": 50.0,
+   "pass": false
+  },
+  "detector": {
+   "p95": 33.44,
+   "max": 30.0,
+   "pass": false
+  },
+  "enhancer": {
+   "p95": 19.01,
+   "max": 30.0,
+   "pass": true
+  }
+ },
+ "golden": {
+  "detector": {
+   "pass": true,
+   "providers": [
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+   ]
+  },
+  "enhancer": {
+   "pass": true,
+   "providers": [
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+   ]
+  }
+ },
+ "gpu": true,
+ "pass": false
+}

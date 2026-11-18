@@ -181,3 +181,19 @@ Mọi thứ đã commit + push; trọng số, nhãn giả, run ở `D:\DevCache\
   dev-val. Hợp đồng không đổi; `.pt rect=True` và `full_edge16` giữ trong `parity.json` làm số tham khảo.
 - Phase 11 dừng ở vòng 2 (r2 kém r1 trên dev-val), model ship = trò r1.
 - Từ 23:05 mọi lần train còn lại chạy 4 worker (chủ dự án yêu cầu đẩy nhanh); lỗi bộ nhớ thật mới quay về 2.
+
+## 10. Phase 15–18 (19/11/2026, một phiên, không sub-agent)
+
+- **15 (IOT-CV code):** `backend/vision/{model_bundle,detector,enhancer,pipeline,runtime,jpeg_tables}.py`, `/api/video/stream?variant=enhanced`
+  (503 `enhancer_unavailable` khi không có model), sự kiện `vision.model_rejected` / `vision.person_detected`, nút "Ảnh rõ" trên web
+  (tắt mặc định), khung giả q12 nén bằng DQT camera thật. ORT CUDA trên Windows cần thêm `site-packages/nvidia/*/bin` vào PATH và đọc
+  provider SAU một lần chạy thử (không thì lặng lẽ về CPU). Backend 411 test, frontend 278 test xanh.
+- **16 (chạy thật):** bench chính thức `results/iotcv/bench-20261119-022705.json` (GPU 72 °C): nhịp thật tổng p50 37,5 / p95 54,1 ms,
+  detector p95 33,4 (vượt 50 / 30), enhancer p95 19,0 (đạt), bỏ 0,3 % khung; hết tốc lực 23,6 khung/s, tổng p95 44,9, detector p95
+  28,1 (đạt). Nguyên nhân vượt: GPU hạ xung giữa hai khung camera; ngân sách giữ nguyên, `tests/integration/test_iotcv_replay.py::test_ngan_sach_ms`
+  đỏ có chủ đích tới khi đo lại sau bước người "Prefer maximum performance" (plan.md Human steps). Golden GPU hai bundle đạt; web kiểm
+  ở 1707×900 cả ba trạng thái (gốc có box, Ảnh rõ, về gốc).
+- **17 (trỏ về XLA):** `plans/ai/ai-phase-0{1..4}*.md` có khối "Đã thay thế", `ml/README.md` mới, 353 tham chiếu phân loại ở
+  `results/iotcv_refs.json`; `ml/scripts/*.py` chưa xoá (chờ chủ dự án duyệt).
+- **18:** `scripts/reproduce.py --check` chấm lại 15 tệp dự đoán (lệch 0) + so sha256 9 bảng/hình; báo cáo, README, slide viết
+  lại; PR #3 + Release `models-v1.0.0`.

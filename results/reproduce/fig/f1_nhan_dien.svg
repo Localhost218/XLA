@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="382" viewBox="0 0 760 382" font-family="sans-serif" font-size="13">
+<rect width="760" height="382" fill="#ffffff"/>
+<text x="12" y="24" font-size="15" font-weight="bold" fill="#111">mAP50 trên 198 khung test thật (râu = CI 95 % bootstrap theo khối)</text>
+<text x="292" y="62" text-anchor="end" fill="#222">Mốc YOLO11n COCO, khung 640 + cắt mép 16 px</text>
+<rect x="300" y="46" width="84.3" height="22" fill="#4a6fa5"/>
+<line x1="319.7" y1="57.0" x2="449.5" y2="57.0" stroke="#111" stroke-width="1.5"/>
+<text x="455.5" y="62" fill="#111">0,126</text>
+<text x="292" y="96" text-anchor="end" fill="#222">E1 D0 ảnh sạch</text>
+<rect x="300" y="80" width="197.7" height="22" fill="#4a6fa5"/>
+<line x1="323.7" y1="91.0" x2="571.7" y2="91.0" stroke="#111" stroke-width="1.5"/>
+<text x="577.7" y="96" fill="#111">0,297</text>
+<text x="292" y="130" text-anchor="end" fill="#222">E1 D1 làm xấu ngẫu nhiên</text>
+<rect x="300" y="114" width="95.5" height="22" fill="#4a6fa5"/>
+<line x1="355.4" y1="125.0" x2="423.1" y2="125.0" stroke="#111" stroke-width="1.5"/>
+<text x="429.1" y="130" fill="#111">0,143</text>
+<text x="292" y="164" text-anchor="end" fill="#222">E1 D2 bản sao camera</text>
+<rect x="300" y="148" width="157.3" height="22" fill="#4a6fa5"/>
+<line x1="345.8" y1="159.0" x2="546.7" y2="159.0" stroke="#111" stroke-width="1.5"/>
+<text x="552.7" y="164" fill="#111">0,236</text>
+<text x="292" y="198" text-anchor="end" fill="#222">E1 D2 + siêu phân giải</text>
+<rect x="300" y="182" width="99.4" height="22" fill="#4a6fa5"/>
+<line x1="307.0" y1="193.0" x2="487.9" y2="193.0" stroke="#111" stroke-width="1.5"/>
+<text x="493.9" y="198" fill="#111">0,149</text>
+<text x="292" y="232" text-anchor="end" fill="#222">E2 thầy YOLO11m</text>
+<rect x="300" y="216" width="145.4" height="22" fill="#4a6fa5"/>
+<line x1="371.6" y1="227.0" x2="532.9" y2="227.0" stroke="#111" stroke-width="1.5"/>
+<text x="538.9" y="232" fill="#111">0,218</text>
+<text x="292" y="266" text-anchor="end" fill="#222">E2 trò vòng 1</text>
+<rect x="300" y="250" width="103.9" height="22" fill="#4a6fa5"/>
+<line x1="324.3" y1="261.0" x2="456.4" y2="261.0" stroke="#111" stroke-width="1.5"/>
+<text x="462.4" y="266" fill="#111">0,156</text>
+<text x="292" y="300" text-anchor="end" fill="#222">E2 trò vòng 2</text>
+<rect x="300" y="284" width="208.9" height="22" fill="#4a6fa5"/>
+<line x1="323.0" y1="295.0" x2="614.7" y2="295.0" stroke="#111" stroke-width="1.5"/>
+<text x="620.7" y="300" fill="#111">0,313</text>
+<text x="292" y="334" text-anchor="end" fill="#222">Bundle detector-v1.0.0</text>
+<rect x="300" y="318" width="79.7" height="22" fill="#4a6fa5"/>
+<line x1="321.4" y1="329.0" x2="431.4" y2="329.0" stroke="#111" stroke-width="1.5"/>
+<text x="437.4" y="334" fill="#111">0,120</text>
+<line x1="384.3" y1="38" x2="384.3" y2="360" stroke="#c0392b" stroke-dasharray="5,4"/>
+<text x="388.3" y="374" fill="#c0392b">mốc</text>
+</svg>

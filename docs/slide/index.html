@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XLA: ảnh camera drone</title>
+<style>
+  :root { --bg: #f6f5f1; --fg: #1d1d1b; --mute: #5d5d58; --accent: #2f5d8a; --bad: #a8322d; --good: #2e7d4f; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+    font-family: "Segoe UI", system-ui, sans-serif; }
+  .slide { display: none; position: absolute; inset: 0; padding: 6vh 7vw; flex-direction: column; gap: 2.2vh; }
+  .slide.on { display: flex; }
+  h1 { font-size: 5.2vh; margin: 0; line-height: 1.15; }
+  h2 { font-size: 4.2vh; margin: 0 0 1vh; color: var(--accent); }
+  p, li { font-size: 2.8vh; line-height: 1.45; margin: 0; }
+  ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 1.1vh; }
+  .mute { color: var(--mute); }
+  .big { font-size: 9vh; font-weight: 700; line-height: 1; }
+  .row { display: flex; gap: 3vw; align-items: flex-start; flex: 1; min-height: 0; }
+  .row > * { flex: 1; min-width: 0; }
+  img { max-width: 100%; max-height: 62vh; object-fit: contain; background: #fff; border-radius: 6px; }
+  img[src$=".svg"] { width: 100%; }
+  figure { margin: 0; display: flex; flex-direction: column; gap: .8vh; }
+  figcaption { font-size: 2.2vh; color: var(--mute); }
+  table { border-collapse: collapse; font-size: 2.5vh; }
+  td, th { padding: .7vh 1.2vw; border-bottom: 1px solid #d6d4cc; text-align: left; }
+  .good { color: var(--good); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+  .nav { position: fixed; right: 2vw; bottom: 2vh; font-size: 2vh; color: var(--mute); }
+</style>
+</head>
+<body>
+
+<section class="slide">
+  <h1>Ảnh chất lượng thấp từ camera giá rẻ trên drone</h1>
+  <p>Làm rõ cho người xem và phát hiện người, chấm trên khung bay thật</p>
+  <p class="mute">Đồ án Xử lý ảnh, PTIT. GVHD: PGS.TS. Phạm Văn Cường. Nhóm 4 sinh viên.</p>
+</section>
+
+<section class="slide">
+  <h2>Camera thật và cái nó làm hỏng</h2>
+  <div class="row">
+    <ul>
+      <li>ESP32-S3 + OV3660, JPEG 640×480 chất lượng 12, qua Wi-Fi tới laptop</li>
+      <li>Ám hồng vùng sáng, mù như sương, vỡ khối JPEG</li>
+      <li>Tối bốn góc, dải đen 16 px mép trái</li>
+      <li>Bản báo cáo trước viết cho ESP32-CAM OV2640 và chấm trên ảnh tự sinh: sai camera, sai thước đo</li>
+    </ul>
+    <figure><img src="../../results/ab/img/38b61067087f.jpg" alt="khung gốc"><figcaption>Khung gốc, chuyến 02/11/2026</figcaption></figure>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Luật của đồ án</h2>
+  <p class="big">Chỉ chấm trên khung bay thật</p>
+  <ul>
+    <li>198 khung test (39 có người), 100 khung dev-val, chia theo khối thời gian</li>
+    <li>Thêm 459 khung không người để đếm báo nhầm</li>
+    <li>CI 95 % bằng bootstrap theo khối; mọi bảng sinh bằng <code>scripts/reproduce.py</code></li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Hai câu hỏi nghiên cứu</h2>
+  <ul>
+    <li><b>Câu 1.</b> Làm xấu ảnh huấn luyện theo số đo của chính camera (D2) có hơn làm xấu ngẫu nhiên (D1) không?</li>
+    <li><b>Câu 2.</b> Làm rõ ảnh trước khi nhận diện có giúp không? Dự đoán: giúp bộ có sẵn, không giúp bộ đã tinh chỉnh.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Bản sao camera D2</h2>
+  <ul>
+    <li>Tối góc theo tiêu cự đo được, mù theo mô hình khí quyển, ám hồng theo ngưỡng bão hoà, dải đen mép trái</li>
+    <li>Nén JPEG bằng đúng bảng lượng tử đọc từ file của camera, lấy mẫu màu 4:2:2</li>
+    <li>Tham số hiệu chỉnh tự động cho khớp thống kê khung dev thật</li>
+    <li>Lệch thống kê: D1 5,93 → D2 <span class="good">0,80</span>. Nhưng C2ST vẫn ~0,95: nội dung ảnh nguồn còn khác bãi bay</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Nhận diện người</h2>
+  <figure><img src="../../results/reproduce/fig/f1_nhan_dien.svg" alt="mAP50"><figcaption>mAP50 trên 198 khung test, râu = CI 95 %</figcaption></figure>
+</section>
+
+<section class="slide">
+  <h2>Đọc kết quả nhận diện</h2>
+  <ul>
+    <li>D2 hơn D1 0,093 mAP50, CI chạm 0: chưa đủ để kết luận</li>
+    <li>Báo nhầm trên khung bay không người: D2 <span class="good">0,30</span> so với D1 0,99, CI nằm trọn một phía</li>
+    <li>Ship trò vòng 1 theo dev-val; trên test nó chỉ 0,120. Vòng 2 đạt 0,313 nhưng dev-val chọn sai</li>
+    <li>Bài học: 100 khung dev-val không đủ để xếp hạng model sát nhau</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Làm rõ ảnh: cổ điển và mạng</h2>
+  <div class="row">
+    <figure><img src="../../results/ab/img/38b61067087f.jpg" alt="gốc"><figcaption>Gốc</figcaption></figure>
+    <figure><img src="../../results/ab/img/a9e6ccce4250.jpg" alt="mạng"><figcaption>Mạng NAFNet enhancer-v1.0.0</figcaption></figure>
+  </div>
+  <p>Cổ điển: 9,2 ms/khung CPU. Mạng: 20,7 ms GPU, xoá 99,9 % điểm hồng, nhưng màu nguội, khử mù yếu, nhấp nháy tăng 1,8 lần.</p>
+</section>
+
+<section class="slide">
+  <h2>Chấm mù A/B</h2>
+  <figure><img src="../../results/reproduce/fig/f2_ab.svg" alt="A/B"><figcaption>Người chấm chọn cổ điển 24/25 lượt. Mạng đạt 3/7 tiêu chí: không bật mặc định.</figcaption></figure>
+</section>
+
+<section class="slide">
+  <h2>E4: làm rõ trước khi nhận diện?</h2>
+  <div class="row">
+    <figure><img src="../../results/reproduce/fig/f3_e4.svg" alt="E4"></figure>
+    <ul>
+      <li>COCO có sẵn + ảnh mạng: +0,069, CI chạm 0</li>
+      <li>Bộ đã tinh chỉnh + ảnh mạng: <span class="bad">−0,085</span>, CI trọn dưới 0</li>
+      <li>Chiều khớp dự đoán; nhận diện luôn chạy trên khung gốc</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Chạy thật trong phần mềm drone</h2>
+  <table>
+    <tr><th>Phát lại chuyến 02/11, đúng nhịp</th><th>p50</th><th>p95</th><th>Ngân sách p95</th></tr>
+    <tr><td>Detector</td><td>23,6 ms</td><td class="bad">33,4 ms</td><td>30 ms</td></tr>
+    <tr><td>Enhancer</td><td>12,5 ms</td><td class="good">19,0 ms</td><td>30 ms</td></tr>
+    <tr><td>Tổng</td><td>37,5 ms</td><td class="bad">54,1 ms</td><td>50 ms</td></tr>
+  </table>
+  <p>Bỏ 0,3 % khung; hết tốc lực 23,6 khung/s và đạt ngân sách. GPU hạ xung khi rảnh giữa hai khung camera: đo lại sau khi khoá chế độ hiệu năng.</p>
+</section>
+
+<section class="slide">
+  <h2>Trả lời</h2>
+  <ul>
+    <li><b>Câu 1.</b> Có, ở độ giống thật mức pixel và ở báo nhầm. Về mAP chưa kết luận được.</li>
+    <li><b>Câu 2.</b> Không giúp bộ đã tinh chỉnh (giảm rõ). Với bộ có sẵn có xu hướng giúp nhưng CI chạm 0.</li>
+    <li>Giới hạn: một bãi, một buổi; 39 khung test có người; bảng lượng tử chỉ đo ở q12.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Việc tiếp và tái lập</h2>
+  <ul>
+    <li>Sửa tận gốc ở cảm biến: phơi sáng, cân bằng trắng, đo bảng lượng tử ở q40</li>
+    <li>Thêm khung bay có người, nhiều buổi, để dev-val chọn đúng model</li>
+    <li>Mạng làm rõ: ràng buộc màu và ràng buộc thời gian</li>
+    <li><code>python scripts/reproduce.py --check</code> chấm lại 15 tệp dự đoán và so sha256 9 bảng/hình</li>
+  </ul>
+  <!-- cite -->
+  <p class="mute">Tham khảo: He 2011 (dark channel), Wang 2021 (Real-ESRGAN), Chen 2022 (NAFNet), Zhu 2022 (VisDrone),
+    Bińkowski 2018 (KID), Lopez-Paz 2017 (C2ST), Oquab 2024 (DINOv2). Danh sách đủ trong BAO_CAO_DO_AN.md.</p>
+  <!-- /cite -->
+</section>
+
+<div class="nav" id="nav"></div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = 0;
+  try { i = Math.min(slides.length - 1, Math.max(0, parseInt(location.hash.slice(1), 10) - 1 || 0)); } catch (e) { i = 0; }
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('on', k === i));
+    document.getElementById('nav').textContent = (i + 1) + ' / ' + slides.length;
+    history.replaceState(null, '', '#' + (i + 1));
+  }
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(slides.length - 1);
+  });
+  document.addEventListener('click', e => show(e.clientX > innerWidth / 2 ? i + 1 : i - 1));
+  show(i);
+</script>
+</body>
+</html>

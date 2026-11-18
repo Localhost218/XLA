@@ -1,336 +1,326 @@
 # HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG (PTIT)
-## KHOA TRÍ TUỆ NHÂN TẠO (FACULTY OF ARTIFICIAL INTELLIGENCE)
-
----
+## KHOA TRÍ TUỆ NHÂN TẠO
 
 # BÁO CÁO ĐỒ ÁN HỌC PHẦN XỬ LÝ ẢNH
 
-**Tên đề tài:** Xây dựng Pipeline Khôi phục Màu sắc, Khử nhiễu Đa miền và Nâng cao Chất lượng Ảnh thu nhận từ UAV sử dụng Camera giá rẻ ESP32-CAM (OV2640)  
-**Loại đề tài:** Lựa chọn 2 – Dự án xử lý ảnh thực tế (kết hợp tích hợp mô hình học sâu mã nguồn mở có sẵn theo Lựa chọn 1 ở bước siêu phân giải)  
-**Giảng viên hướng dẫn:** PGS.TS. Phạm Văn Cường  
-**Nhóm thực hiện:** Nhóm sinh viên (4 thành viên – Đóng góp 25%/thành viên)  
-**Kiến thức học phần áp dụng:** Chương 2, Chương 3, Chương 4, Chương 5, Chương 6 và Chương 9  
-**Công cụ & Thư viện:** Python 3, OpenCV (`cv2`), `scikit-image`, `PyWavelets`, `NumPy`, `ONNX Runtime` (Pretrained ESPCN), `Matplotlib`, `Pandas`
+**Đề tài:** Ảnh chất lượng thấp từ camera giá rẻ trên drone: làm rõ cho người xem và phát hiện người trên khung bay thật
+**Loại đề tài:** Lựa chọn 2, dự án xử lý ảnh thực tế (có dùng mô hình học sâu mã nguồn mở đã huấn luyện sẵn rồi tinh chỉnh)
+**Giảng viên hướng dẫn:** PGS.TS. Phạm Văn Cường
+**Nhóm thực hiện:** 4 sinh viên
+**Kiến thức học phần dùng tới:** chương 2 (biểu diễn ảnh, lấy mẫu), 3 (nâng cao chất lượng), 4 (hệ màu), 5 (biên), 6 (nén JPEG), 8 (nhận dạng), 9 (đạo đức AI)
+
+Mọi bảng và hình trong báo cáo này được sinh bằng `python scripts/reproduce.py --write` từ kết quả đã lưu trong `results/`,
+không gõ tay. `python scripts/reproduce.py --check` chấm lại toàn bộ dự đoán đã lưu trên CPU và so sha256 của từng bảng, hình
+với `results/reproduce/manifest.json`.
 
 ---
 
-## TÓM TẮT ĐỒ ÁN (ABSTRACT)
+## Tóm tắt
 
-Các hệ thống thiết bị bay không người lái (UAV / Drone) cỡ nhỏ phục vụ giám sát giao thông, tuần tra đô thị và nông nghiệp thông minh thường sử dụng module camera vi điều khiển giá rẻ **ESP32-CAM (cảm biến CMOS OV2640)** truyền luồng ảnh tĩnh hoặc MJPEG qua kết nối Wi-Fi với tốc độ $2.5 - 6.5\text{ fps}$. Tuy có ưu thế vượt trội về chi phí và trọng lượng, phần cứng OV2640 tồn tại ba suy giảm chất lượng ảnh đặc trưng gây cản trở nghiêm trọng cho quan sát trực quan và các bài toán thị giác máy tính: **(1)** Hiện tượng lệch màu cháy sáng hồng/tím (*Pink/Magenta Highlight Cast*) tại các bề mặt phản xạ mạnh như mặt đường bê tông, mái tôn, bầu trời do bão hòa kênh Đỏ ($R$) và Xanh dương ($B$) trong khi kênh Xanh lá ($G$) bị sụt giảm phi tuyến; **(2)** Độ tương phản thấp, phủ sương mờ khí quyển (*Atmospheric Haze*) đi kèm nhiễu hạt cảm biến CMOS (*Sensor Speckle Noise*) và nhiễu khối $8 \times 8$ do nén JPEG mạnh; **(3)** Hiện tượng mờ nhòe quang học (*Optical Defocus Blur*) của thấu kính vi hình cố định và độ phân giải gốc thấp (VGA $640 \times 480$ / SVGA $800 \times 600$).
+Drone của nhóm mang camera ESP32-S3 N16R8 + cảm biến OV3660, phát JPEG 640×480 chất lượng 12 qua Wi-Fi. Ảnh thu được ám
+hồng ở vùng sáng, mờ như có sương, vỡ khối JPEG, tối dần ra bốn góc và có một dải đen 16 px ở mép trái. Đồ án làm hai việc
+trên đúng khung bay thật ngày 02/11/2026: phát hiện người để cảnh báo, và làm rõ ảnh cho người xem trên trạm mặt đất.
 
-Báo cáo này trình bày quy trình thiết kế và thực nghiệm một **Pipeline khôi phục và nâng cao chất lượng ảnh đa bước (3 giai đoạn)** vận hành hoàn toàn trên CPU, kết hợp chặt chẽ nền tảng lý thuyết **Chương 2, 3, 4, 5, 6** của học phần *Xử lý ảnh* với các thuật toán mã nguồn mở tiên tiến:
-1. **Giai đoạn 1 (Tiền xử lý – Chương 2, 3, 4, 6):** Phát hiện và nội suy mềm vùng cháy sáng hồng bằng mặt nạ trọng số liên tục $\alpha(x,y) \in [0,1]$, cân bằng trắng tự động có loại trừ vùng bão hòa (*Masked Gray World AWB*), kết hợp **khử nhiễu lai đa miền** gồm phân rã Wavelet ngưỡng thích nghi BayesShrink (`sym4`, 3 mức trên không gian YCbCr), lọc trung bình phi cục bộ (*Fast Non-Local Means*) trên kênh độ chói có mặt nạ bảo vệ tán lá, và lọc trung vị – song phương (*Median–Bilateral Filter*) trên kênh sắc độ.
-2. **Giai đoạn 2 (Xử lý chính – Chương 3, 4):** Chuyển đổi sang không gian màu cảm nhận đồng nhất **CIE $L^*a^*b^*$**, khử màn sương mờ thông qua phép kéo giãn tương phản quanh điểm tựa độ chói khí quyển (*Haze-Pivot Contrast Restoration*, $L_{\text{pivot}} = 172.0$) kết hợp cân bằng lược đồ thích nghi giới hạn tương phản (**CLAHE**, `clipLimit = 1.5`, `tileGridSize = (8,8)`) và phục hồi độ bão hòa sắc độ $(a^*, b^*)$.
-3. **Giai đoạn 3 (Hậu xử lý & Siêu phân giải – Chương 2, 3, 5 + Open-Source Deep Learning):** Khôi phục suy giảm quang học bằng thuật toán **giải chập lặp Richardson-Lucy PSF** ($\sigma_{\text{PSF}} = 0.88$, 4 vòng lặp), làm sắc nét có cổng kiểm soát biên **Sobel** và mặt nạ thực vật (*Structure- & Foliage-Gated Unsharp Masking*), đồng thời tích hợp mạng học sâu tích chập dưới điểm ảnh mã nguồn mở **ESPCN (Efficient Sub-Pixel CNN $3\times$, ONNX)** kết hợp nội suy **Lanczos-4** để nâng chuẩn hiển thị lên **HD 720p ($960 \times 720$ / $1280 \times 720$)** và **Full HD 1080p ($1440 \times 1080$ / $1920 \times 1080$)**.
+Phần nhận diện: một YOLO11n huấn luyện trên ảnh làm xấu theo số đo của chính camera này (D2) đạt mAP50 0,236 trên 198 khung
+test, gần gấp đôi mốc COCO có sẵn (0,126), và báo nhầm trên khung bay không người ít hơn hẳn làm xấu ngẫu nhiên (D1). Bản ship
+`detector-v1.0.0` (trò tự huấn luyện vòng 1, xuất ONNX) chạy 23,6 ms/khung trung vị trong web điều khiển của drone, nhưng mAP50
+trên test chỉ 0,120: chọn model theo tập dev-val đã không dự đoán đúng tập test lần này.
 
-Thực nghiệm định lượng trên **90 ảnh kiểm thử** (gồm **30 cặp ảnh đối chứng có tham chiếu Ground Truth** và **60 ảnh bay UAV thực nghiệm đa nguồn**, cùng **3 video bay FPV thực tế**) cho thấy Pipeline đề xuất đạt **$\text{PSNR} = 27.42\text{ dB}$** (tăng **$+7.07\text{ dB}$** so với ảnh suy giảm đầu vào $20.35\text{ dB}$ và vượt xa đối chứng Global HE RGB $12.53\text{ dB}$ tới **$+14.89\text{ dB}$**), **$\text{SSIM} = 0.8180 - 0.8295$** (so với $0.7015$ của ảnh đầu vào và $0.4155$ của Global HE), giảm gần **$60\%$ sai lệch màu $\Delta E_{ab}^*$** (từ $24.74$ xuống $9.89 - 10.06$), tăng độ sắc nét biên **Laplacian Variance gấp $1.87$ lần** (từ $121.1$ lên $226.5$) và triệt tiêu hiệu quả hiện tượng ám hồng trên ảnh thực tế.
-
----
-
-## 1. ĐỊNH NGHĨA BÀI TOÁN (PROBLEM DEFINITION)
-
-### 1.1. Bối cảnh thực tế và Hệ thống thu nhận ảnh UAV
-Trong các ứng dụng giám sát tầm thấp bằng thiết bị bay không người lái (UAV) tự hành hoặc điều khiển góc nhìn thứ nhất (FPV), module **ESP32-CAM** gắn cảm biến hình ảnh **OmniVision OV2640 ($1/4\text{"}$ CMOS, 2 Megapixel)** được sử dụng rộng rãi nhờ giá thành cực thấp ($\approx 150.000\text{ VNĐ}$), tích hợp sẵn vi điều khiển lõi kép ESP32 và kết nối Wi-Fi $802.11\text{ b/g/n}$. Tuy nhiên, do giới hạn băng thông truyền dẫn không dây và năng lực xử lý của bộ xử lý tín hiệu hình ảnh nội tại (On-chip ISP), luồng dữ liệu thu được tại trạm mặt đất chỉ đạt độ phân giải VGA ($640 \times 480$) hoặc SVGA ($800 \times 600$) với tốc độ khung hình $2.5 - 6.5\text{ fps}$ và chịu sự suy giảm chất lượng nghiêm trọng.
-
-### 1.2. Đầu vào, Đầu ra và Ba khó khăn vật lý cốt lõi
-* **Đầu vào (Input):** Ảnh màu số 3 kênh $I_{\text{in}} \in \mathbb{Z}_{[0, 255]}^{H \times W \times 3}$ (hoặc luồng khung hình video) thu nhận từ camera ESP32-CAM trên UAV ở độ phân giải gốc ($640 \times 480$ hoặc $800 \times 600$).
-* **Đầu ra (Output):** Ảnh đã khôi phục màu sắc trung thực, sạch nhiễu, có độ tương phản và độ sắc nét biên cao ở độ phân giải gốc hoặc nâng cấp siêu phân giải lên chuẩn **HD 720p ($960 \times 720$ / $1280 \times 720$)** và **Full HD 1080p ($1440 \times 1080$ / $1920 \times 1080$)**.
-* **Ba khó khăn kỹ thuật cốt lõi cần giải quyết:**
-  1. **Lệch màu cháy sáng hồng/tím (Pink/Magenta Highlight Cast – Chương 2 & Chương 4):** Khi UAV bay ngoài trời nắng, tại các vùng có suất phản xạ cao (mặt đường nhựa/bê tông, vạch kẻ đường, mái nhà, bầu trời), mạch tự động điều chỉnh độ lợi (AGC) và cân bằng trắng (AWB) thô sơ của cảm biến OV2640 đẩy kênh Đỏ ($R$) và Xanh dương ($B$) chạm ngưỡng bão hòa sớm ($\ge 180 - 255$), trong khi kênh Xanh lá ($G$) bị hụt tương đối ($G \ll \frac{R+B}{2}$). Hệ quả là các bề mặt màu trắng/xám trung tính bị biến dạng thành màu hồng hoặc tím cánh sen (Magenta). Nếu áp dụng các thuật toán tăng tương phản thông thường trực tiếp, sắc hồng giả này sẽ càng bị khuếch đại nặng nề.
-  2. **Suy giảm độ tương phản do sương mờ đi kèm nhiễu hạt CMOS & nhiễu khối JPEG (Low Contrast, Haze & Noise – Chương 3 & Chương 6):** Thấu kính vi hình plastic của OV2640 dễ bị tán xạ ánh sáng ngược (veiling glare) kết hợp với lớp mù khí quyển làm lược đồ mức xám (Histogram) bị co cụm vào dải trung gian. Đồng thời, kích thước điểm ảnh vật lý nhỏ ($2.2\,\mu\text{m} \times 2.2\,\mu\text{m}$) gây nhiễu hạt lốm đốm (CMOS speckle noise) trên các vùng phẳng như mặt đường, kết hợp với nhiễu khối rời rạc $8 \times 8$ (JPEG blocking artifacts) do nén MJPEG tỉ số cao khi truyền qua Wi-Fi. Khó khăn cốt lõi là **nếu dùng bộ lọc làm trơn mạnh để xóa hạt nhiễu trên mặt đường thì sẽ làm bệt hoàn toàn tán lá cây và chi tiết nhỏ; ngược lại nếu kéo giãn tương phản hoặc làm nét toàn cục thì nhiễu hạt sẽ nổi gồ ghề trên mặt đường**.
-  3. **Mờ nhòe quang học và Độ phân giải gốc thấp (Optical PSF Blur & Low Spatial Resolution – Chương 2, Chương 3 & Chương 5):** Tiêu cự cố định của thấu kính giá rẻ và rung động cơ học tần số cao từ cánh quạt UAV làm suy giảm hàm truyền quang học (Point Spread Function – PSF), khiến biên của các phương tiện giao thông, người đi bộ và vạch kẻ đường bị nhòe. Ngoài ra, kích thước khung hình VGA ($640 \times 480$) quá nhỏ khi hiển thị trên màn hình trạm điều khiển mặt đất chuẩn HD/Full HD.
+Phần làm rõ: bộ lọc cổ điển 9 ms/khung trên CPU thắng mạng NAFNet nhỏ ở 24/25 lượt chấm mù. Mạng xoá gần hết ám hồng nhưng
+khử mù yếu, nhấp nháy giữa các khung, và chỉ thắng ảnh gốc 11/25 lượt. Mạng không được bật làm mặc định. Đưa ảnh đã làm rõ vào
+bộ nhận diện đã tinh chỉnh làm mAP giảm rõ, nên hệ thống giữ quy tắc: nhận diện luôn chạy trên khung gốc.
 
 ---
 
-## 2. TẬP DỮ LIỆU THỰC NGHIỆM (DATASET DESCRIPTION)
+## 1. Bài toán và camera thật
 
-Tuân thủ nghiêm ngặt yêu cầu tại **Trang 7 của hướng dẫn Đồ án Xử lý ảnh (`DoAn_XuLyAnh.pdf`)** về việc mô tả rõ nguồn dữ liệu, số lượng ảnh, quy trình tạo nhãn đối chứng và đảm bảo **$\ge 50$ ảnh đánh giá**, nhóm đã xây dựng bộ dữ liệu kiểm thử gồm **90 ảnh tĩnh** và **3 video bay FPV thực tế**, được quản lý minh bạch trong tệp [`data/dataset_manifest.csv`](file:///home/ngtukien/Projects/XLA/data/dataset_manifest.csv):
+### 1.1. Bối cảnh
 
-| Tập dữ liệu | Thư mục lưu trữ | Số lượng | Độ phân giải gốc | Nguồn thu thập & Đặc điểm bối cảnh | Mục đích đánh giá & Độ đo sử dụng |
-| :--- | :--- | :---: | :---: | :--- | :--- |
-| **1. Tập UAV Thực nghiệm (Real UAV Test Set)** | [`data/real_uav/`](file:///home/ngtukien/Projects/XLA/data/real_uav) & [`data/raw_videos/`](file:///home/ngtukien/Projects/XLA/data/raw_videos) | **60 ảnh** + **3 video FPV** | $640 \times 480$ & $800 \times 600$ | Trích xuất từ các chuyến bay UAV thực tế đa góc nhìn (trục đường đô thị, ngã tư giao thông, khu dân cư ngoại ô, thảm cỏ, mái nhà) có áp dụng biến đổi kiểm thử ngẫu nhiên (Data Augmentation: góc nghiêng roll $\pm 7^\circ$, cắt tỷ lệ độ cao, biến thiên phơi sáng). | Đánh giá **không tham chiếu (No-Reference)** trong điều kiện thực tế: **Shannon Entropy ($H$)**, **Laplacian Variance**, **Pink Cast Index (PCI %)**, **Thời gian chạy (ms)** & **FPS**. |
-| **2. Tập Đối chứng có Tham chiếu (Synthetic Reference Set)** | [`data/synthetic_gt/`](file:///home/ngtukien/Projects/XLA/data/synthetic_gt) & [`data/synthetic_degraded/`](file:///home/ngtukien/Projects/XLA/data/synthetic_degraded) | **30 cặp ảnh** (60 file ảnh) | $800 \times 600$ (kèm bản đối chiếu $960 \times 720$ & $1440 \times 1080$) | 30 cảnh bay UAV ngoài trời chất lượng cao, màu sắc chuẩn xác từ 30 chuyến bay độc lập làm **Ground Truth ($I_{\text{GT}}$)**; ảnh suy giảm tương ứng ($I_{\text{deg}}$) được tạo bằng mô hình vật lý 4 bước của cảm biến OV2640. | Đánh giá **có tham chiếu (Full-Reference)** chính xác tuyệt đối: **PSNR (dB)**, **SSIM**, **Sai số màu CIE LAB ($\Delta E_{ab}^*$)**, cùng các độ đo không tham chiếu. |
-| **3. Tập Ảnh mẫu Demo nhanh** | [`data/samples/`](file:///home/ngtukien/Projects/XLA/data/samples) | **6 ảnh mẫu** tiêu biểu | $640 \times 480$ & $800 \times 600$ | Chọn lọc 6 cảnh đặc trưng nhất (mặt đường cháy hồng nặng, bầu trời & mái nhà ám tím, cảnh giao thông đô thị nhiều xe cộ & cây xanh) phục vụ chạy demo trực tiếp. | Kiểm thử trực quan từng bước, vẽ mặt nạ $\alpha(x,y)$, biểu đồ Histogram và xuất ảnh đối sánh **HD 720p / Full HD 1080p**. |
+Drone S500 bay bằng ArduPilot, trạm mặt đất là một web tự viết (FastAPI + React) chạy trên laptop. Camera là bo ESP32-S3
+riêng, nối Mobile Hotspot của laptop, phát MJPEG qua HTTP. Lúc bay ngoài bãi, luồng ảnh đạt 2 đến 9 khung/s tuỳ khoảng cách và
+tình trạng Wi-Fi. Laptop có GPU RTX 4060 Laptop 8 GB, nên mọi xử lý AI chạy trên laptop chứ không chạy trên drone.
 
-### Quy trình tạo cặp ảnh gán nhãn đối chứng ($I_{\text{GT}} \rightarrow I_{\text{deg}}$) và Chống khớp quá mức (Anti-Overfitting)
-Do trong thực tế một thiết bị bay UAV đang di chuyển không thể chụp cùng lúc một khung hình lỗi từ ESP32-CAM và một khung hình chuẩn từ camera chuyên nghiệp tại cùng một tọa độ không gian – thời gian, để tính được các độ đo chuẩn có tham chiếu (**PSNR, SSIM, $\Delta E_{ab}^*$**), nhóm đã xây dựng mô hình suy giảm vật lý 4 bước mô phỏng chính xác đặc tuyến phần cứng OV2640 với tham số ngẫu nhiên hóa trên từng ảnh (ghi log đầy đủ trong [`data/dataset_manifest.csv`](file:///home/ngtukien/Projects/XLA/data/dataset_manifest.csv)):
-1. **Mô phỏng màn sương mờ và nén dải động:** Biến đổi co hẹp dải độ chói về khoảng trung gian kết hợp lớp phủ mù khí quyển $I_{\text{haze}}(x,y) = c \cdot I_{\text{GT}}(x,y) + (1 - c) \cdot A_{\text{sky}}$ với hệ số truyền dẫn $c \in [0.55, 0.72]$.
-2. **Mô phỏng lệch màu cháy sáng hồng phi tuyến (Pink Highlight Cast):** Tại các điểm ảnh có độ chói cao ($Y > T_{\text{sat}}$), đẩy kênh $R$ và $B$ tăng thêm $\Delta_{RB} \in [+25, +50]$ và làm suy giảm kênh $G$ một lượng $\Delta_G \in [-18, -38]$ tỉ lệ thuận với cường độ phơi sáng.
-3. **Mô phỏng suy giảm quang học PSF và nhiễu hạt CMOS:** Tích chập ảnh với nhân mờ Gaussian PSF ($\sigma_{\text{blur}} \in [0.8, 1.3]$) hoặc nhân mờ chuyển động góc $\theta \in [0^\circ, 180^\circ]$, sau đó cộng nhiễu hạt Gaussian/Poisson đặc trưng của cảm biến CMOS kích thước nhỏ.
-4. **Mô phỏng nhiễu khối nén luồng truyền Wi-Fi MJPEG (Chương 6):** Mã hóa và giải mã lại ảnh bằng chuẩn nén JPEG với hệ số chất lượng thấp ngẫu nhiên $Q_{\text{JPEG}} \in [32, 58]$ (`cv2.imencode('.jpg', ...)`), tạo ra đúng hiện tượng nhiễu khối $8 \times 8$ và nhiễu sắc độ của ESP32-CAM.
+Bản báo cáo trước của nhóm (giữ ở `archive/v2-nhom/`) viết cho camera ESP32-CAM OV2640 và chấm trên ảnh tự sinh. Camera thật
+khác loại, và điểm số trên ảnh tự sinh không nói được gì về khung bay. Đồ án được làm lại từ đầu theo một luật: **điểm số chỉ
+chấm trên khung bay thật**.
+
+### 1.2. Đầu vào, đầu ra
+
+- **Đầu vào:** một khung JPEG 640×480 BGR từ camera, chưa qua xử lý gì.
+- **Đầu ra 1 (nhận diện):** các hộp `[x1, y1, x2, y2]` kèm độ tin cậy cho lớp người, trên toạ độ của chính khung đó.
+- **Đầu ra 2 (ảnh rõ):** một khung 640×480 cùng cỡ, dễ nhìn hơn cho người vận hành.
+
+Hai model được giao cho phần mềm drone (repo IOT-CV) qua một hợp đồng cố định (`docs/hop-dong-model.md`): tên và kiểu của
+input/output, sha256 của file ONNX, bộ ảnh golden để kiểm sai số. Repo IOT-CV từ chối nạp model sai hợp đồng và báo lý do lên
+web.
+
+### 1.3. Ảnh camera này hỏng ở đâu (đo trên khung thật, `results/camera/profile_report.md`)
+
+| Lỗi | Đo được | Liên hệ học phần |
+|---|---|---|
+| Ám hồng vùng sáng | kênh G sụt khi điểm ảnh gần bão hoà | chương 4, hệ màu |
+| Mù như sương | dark channel trung vị cao, tương phản thấp | chương 3 |
+| Vỡ khối JPEG | bảng lượng tử (DQT) của camera ở q12 đọc thẳng từ file, lấy mẫu màu 4:2:2 | chương 6 |
+| Tối góc | tỉ lệ sáng góc/tâm < 1 | chương 2 |
+| Dải đen mép trái | 16 px cột đầu gần như 0 | chương 2 |
+
+Hồ sơ camera này (`configs/camera_profile.yaml`) là nền của mọi bước sau: bộ làm xấu D2, bộ lọc cổ điển, và cả việc nén khung
+giả trong web cũng dùng đúng bảng DQT đo được.
 
 ---
 
-## 3. PHƯƠNG PHÁP ĐỀ XUẤT – KIẾN TRÚC PIPELINE ĐA BƯỚC (PROPOSED PIPELINE)
+## 2. Dữ liệu
 
-### 3.1. Sơ đồ khối Tổng thể và Liên kết Kiến thức Học phần
-Bám sát sơ đồ thiết kế chuẩn tại **Trang 7 của `DoAn_XuLyAnh.pdf`**, hệ thống đề xuất được cài đặt trong module [`src/uav_pipeline.py`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py) gồm 5 khối chức năng nối tiếp:
+- **Khung bay thật:** chuyến 02/11/2026, phiên 20261102-100941, một bãi bay, một buổi sáng. Từ 2 944 khung bay chọn khung cách
+  nhau ít nhất 1 s, chia **theo khối thời gian** chứ không chia ngẫu nhiên, để khung test không có "anh em sinh đôi" trong
+  khung huấn luyện.
+- **Tập test:** 198 khung (39 khung có người, 149 hộp người), thêm 300 khung âm chụp trong nhà và 159 khung bay không người để
+  đo báo nhầm. **Tập dev-val** 100 khung, chỉ dùng chọn model và ngưỡng. Vượt mức tối thiểu 50 ảnh đánh giá của đề.
+- **Nhãn:** nhiều model + SAHI gán trước, soát từng khung bằng mắt, chủ dự án duyệt lần cuối trên Label Studio chạy tại máy.
+- **Ảnh nguồn để huấn luyện:** VisDrone (ảnh drone có nhãn người) và NOMAD, đưa qua bộ làm xấu để giống camera. Ảnh VisDrone
+  không bao giờ được commit; repo chỉ chứa khung của chính camera này.
 
+---
+
+## 3. Phương pháp
+
+### 3.1. Hai bộ làm xấu
+
+- **D1, ngẫu nhiên:** chuỗi suy giảm kiểu Real-ESRGAN (mờ, nhiễu, nén, đổi cỡ) với tham số rút ngẫu nhiên. Đây là cách làm
+  phổ biến khi không biết camera đích.
+- **D2, bản sao camera:** chuỗi tất định theo hồ sơ đo được: tối góc theo tiêu cự, mù theo mô hình khí quyển, ám hồng theo
+  ngưỡng bão hoà, dải đen mép trái, rồi nén JPEG bằng đúng bảng DQT của camera. Tham số được hiệu chỉnh tự động (`xla.degrade.calibrate`)
+  để thống kê ảnh làm xấu khớp khung dev thật.
+- **D2 + Real-SR:** D2 cộng nhiễu lấy mẫu từ khung dev thật.
+
+### 3.2. Đo độ giống thật
+
+Ba thước đo, cùng chạy trên patch ảnh: tổng độ lệch của 18 thống kê mức thấp (màu, nhiễu, độ nét, khối JPEG, tối góc); C2ST,
+tức độ chính xác của một bộ phân loại cố phân biệt patch thật với patch làm xấu (0,5 là không phân biệt được); và KID trên đặc
+trưng DINOv2. Hàng "thật với thật" (khung dev so khung dev) cho biết mức sàn của từng thước đo.
+
+### 3.3. Nhận diện (E1, E2)
+
+- **Mốc:** YOLO11n COCO có sẵn, khung 640, bỏ 16 px mép trái.
+- **E1:** tinh chỉnh YOLO11n trên VisDrone qua từng bộ làm xấu D0 (ảnh sạch), D1, D2, D2 + siêu phân giải. Chọn model bằng
+  mAP50 trên dev-val.
+- **E2:** thầy YOLO11m gán nhãn giả cho khung bay chưa nhãn, trò YOLO11n học lại (hai vòng). Ship trò vòng 1 theo dev-val, xuất
+  ONNX có resize trong graph, ngưỡng vận hành chọn bằng F1 tối đa trên dev-val.
+- **Độ đo:** mAP50, mAP50-95, AR cho vật nhỏ, số hộp báo nhầm trên mỗi khung bay không người ở ngưỡng vận hành. CI 95 % bằng
+  bootstrap theo khối thời gian (2 000 mẫu), so hai model bằng bootstrap ghép cặp.
+
+### 3.4. Làm rõ ảnh
+
+- **Cổ điển (`xla.enhance.classic`):** bù tối góc theo tiêu cự đo được, khử mù dark channel (patch 15 px), sửa ám hồng có mặt
+  nạ mềm, cân bằng trắng bỏ qua vùng bão hoà. Phần nhóm làm ở bản trước được giữ ý tưởng mặt nạ hồng và cân bằng trắng có loại
+  trừ; bỏ siêu phân giải và giải chập vì chúng làm nổi khối JPEG trên khung thật.
+- **Mạng (`enhancer-v1.0.0`):** NAFNet bề rộng 16, học từ cặp (ảnh sạch, ảnh làm xấu D2), xuất ONNX.
+- **Đánh giá:** tiêu chí đăng ký trước (giảm điểm hồng, giảm dark channel, không tăng nhấp nháy, thời gian, A/B), rồi chấm mù
+  A/B: người chấm thấy hai ảnh cạnh nhau, trái phải xáo trộn, chọn ảnh dễ nhìn hơn. NR-IQA (MUSIQ, NIQE) chỉ để mô tả, không
+  dùng để chọn gì.
+
+### 3.5. E4: làm rõ trước khi nhận diện
+
+Chạy hai bộ nhận diện (COCO có sẵn, bản đã tinh chỉnh) trên ba biến thể khung test (gốc, cổ điển, mạng), so mAP ghép cặp với
+khung gốc. Luật đã chốt trước: chỉ chuyển nhận diện sang ảnh đã làm rõ khi CI của chênh lệch nằm trọn trên 0.
+
+---
+
+## 4. Kết quả
+
+### 4.1. Độ giống thật
+
+<!-- bang: results/reproduce/tables/t2_do_giong_that.md -->
+| Bộ làm xấu | Lệch thống kê (tổng, nhỏ = giống) | C2ST (0,5 = không phân biệt được) | KID ×100 (nhỏ = giống) |
+|---|---|---|---|
+| D1 (Real-ESRGAN ngẫu nhiên) | 5,928 | 0,936 [0,909; 0,960] | 4,443 [4,291; 4,598] |
+| D2 (bản sao camera, đã hiệu chỉnh) | 0,796 | 0,950 [0,930; 0,966] | 4,409 [4,236; 4,599] |
+| D2 + Real-SR (nhiễu từ khung dev) | 0,663 | 0,923 [0,897; 0,945] | 3,994 [3,824; 4,169] |
+| thật–thật: khung dev | 0,330 | 0,542 [0,494; 0,594] | 0,371 [0,290; 0,468] |
+<!-- /bang -->
+
+D2 giảm độ lệch thống kê từ 5,93 xuống 0,80, tức camera được sao chép đúng ở mức pixel. Nhưng C2ST vẫn khoảng 0,95 và KID gần
+như không đổi: một bộ phân loại vẫn tách được patch thật khỏi patch làm xấu, nhiều khả năng vì nội dung ảnh VisDrone (đường phố đô thị,
+góc nhìn cao) khác bãi bay của nhóm; giả thuyết này chưa được kiểm riêng. Khớp thống kê là cần, chưa đủ.
+
+### 4.2. Nhận diện
+
+<!-- bang: results/reproduce/tables/t1_nhan_dien.md -->
+| Model | mAP50 [CI 95 %] | mAP50-95 | AR nhỏ | FP/khung bay không người | Ngưỡng (F1 dev-val) |
+|---|---|---|---|---|---|
+| Mốc: YOLO11n COCO, khung 640 + cắt mép 16 px | 0,126 [0,030; 0,224] | 0,063 | 0,531 | 0,597 | 0,068 |
+| E1 D0 ảnh sạch | 0,297 [0,036; 0,408] | 0,100 | 0,519 | 1,195 | 0,053 |
+| E1 D1 làm xấu ngẫu nhiên | 0,143 [0,083; 0,185] | 0,047 | 0,444 | 0,994 | 0,023 |
+| E1 D2 bản sao camera | 0,236 [0,069; 0,370] | 0,079 | 0,426 | 0,302 | 0,089 |
+| E1 D2 + siêu phân giải | 0,149 [0,011; 0,282] | 0,048 | 0,440 | 1,956 | 0,059 |
+| E2 thầy YOLO11m | 0,218 [0,107; 0,349] | 0,060 | 0,425 | 0,390 | 0,054 |
+| E2 trò vòng 1 | 0,156 [0,036; 0,235] | 0,052 | 0,419 | 0,868 | 0,075 |
+| E2 trò vòng 2 | 0,313 [0,035; 0,472] | 0,157 | 0,446 | 0,522 | 0,018 |
+| Bundle detector-v1.0.0 (ONNX, ship) | 0,120 [0,032; 0,197] | 0,042 | 0,240 | 0,881 | 0,077 |
+<!-- /bang -->
+
+![mAP50 các model](results/reproduce/fig/f1_nhan_dien.svg)
+
+Đọc bảng:
+
+- D2 hơn D1 0,093 mAP50, CI [−0,073; +0,252] chạm 0, nên chưa đủ để nói D2 hơn D1 về mAP. Chỗ D2 hơn rõ là **báo nhầm**: 0,30
+  hộp sai mỗi khung bay không người so với 0,99 của D1, chênh có CI nằm trọn dưới 0 (−0,692 [−1,238; −0,246]). Với một hệ thống
+  cảnh báo, số báo nhầm quyết định người vận hành có tin cảnh báo hay không.
+- D0 (ảnh sạch) có mAP cao nhất ở E1 nhưng CI rất rộng và báo nhầm cao. Dev-val chọn D2.
+- E2: trò vòng 2 đạt mAP50 test cao nhất (0,313) nhưng dev-val của nó thấp hơn vòng 1 (0,296 so với 0,379), nên theo luật đã
+  chốt nhóm ship vòng 1. Trên test, vòng 1 lại kém cả E1 D2. Dev-val 100 khung quá ít để xếp hạng các model
+  sát nhau; đây là bài học chính của phần nhận diện.
+- Bản ONNX ship (0,120) khớp bản `.pt` trong sai số xuất (−0,003 mAP50).
+
+### 4.3. Làm rõ ảnh
+
+<!-- bang: results/reproduce/tables/t3_tieu_chi_anh_ro.md -->
+| Tiêu chí (mạng enhancer-v1.0.0, khung test) | Giá trị [CI 95 %] | Kết luận |
+|---|---|---|
+| % điểm hồng giảm ≥ 90 % | 0,999 [0,997; 1,000] | đạt |
+| dark channel trung vị giảm ≥ 50 % | 0,368 [0,310; 0,459] | không đạt |
+| nhấp nháy không tăng (≤ 1) | 1,806 [1,738; 1,920] | không đạt |
+| thắng ≥ 70 % lượt A/B so với ảnh gốc | 0,440 [0,267; 0,629] | không đạt |
+| thắng ≥ 55 % lượt A/B so với cổ điển | 0,040 [0,007; 0,195] | không đạt |
+| ≤ 30 ms/khung (mạng, p50) | 20,696 | đạt |
+| không làm giảm mAP nhánh B | -0,085 [-0,139; -0,011] | đạt |
+<!-- /bang -->
+
+<!-- bang: results/reproduce/tables/t4_ab.md -->
+| Lượt chấm | So sánh | Mạng thắng | Tỉ lệ [Wilson 95 %] | Ngưỡng đạt |
+|---|---|---|---|---|
+| Lần 1, cả khung | mạng vs gốc | 11/25 | 0,440 [0,267; 0,629] | 0,700 |
+| Lần 1, cả khung | mạng vs cổ điển | 1/25 | 0,040 [0,007; 0,195] | 0,550 |
+| Lần 2, phóng to 2× | mạng vs gốc | 13/25 | 0,520 [0,335; 0,700] | 0,700 |
+| Lần 2, phóng to 2× | mạng vs cổ điển | 5/25 | 0,200 [0,089; 0,391] | 0,550 |
+<!-- /bang -->
+
+![A/B mù](results/reproduce/fig/f2_ab.svg)
+
+| Khung gốc (20261102-100941_005_00934) | Sau mạng |
+|---|---|
+| ![gốc](results/ab/img/38b61067087f.jpg) | ![mạng](results/ab/img/a9e6ccce4250.jpg) |
+
+Mạng đạt 3/7 tiêu chí. Nó gần như xoá sạch điểm hồng (99,9 %) và nhanh (20,7 ms trung vị), nhưng màu ra nguội và nhạt, mù chỉ
+giảm 37 % (cần 50 %), và độ nhấp nháy giữa hai khung liền nhau tăng 1,8 lần. Người chấm thích bản cổ điển hơn ở 24/25 lượt.
+Lượt chấm lần 2 phóng to 2× cho mạng kết quả khá hơn (13/25 với ảnh gốc), và nếu chỉ đếm các lượt có người trong khung thì mạng
+thắng ảnh gốc 17/21; đó là quan sát hậu kiểm, không phải tiêu chí đăng ký trước, nên không dùng để đổi kết luận.
+
+Bộ cổ điển chạy 9,2 ms/khung trên CPU, giảm hồng 89 % và dark channel 52 %, nhưng nhấp nháy cũng tăng (2,18), nên chưa đạt
+hết tiêu chí.
+
+### 4.4. E4: có nên làm rõ trước khi nhận diện
+
+<!-- bang: results/reproduce/tables/t5_e4.md -->
+| Bộ nhận diện | Khung gốc | Sau cổ điển (chênh [CI]) | Sau mạng (chênh [CI]) |
+|---|---|---|---|
+| YOLO11n COCO (có sẵn) | 0,126 | 0,081 (-0,046 [-0,088; -0,006]) | 0,195 (+0,069 [-0,033; 0,231]) |
+| detector-v1.0.0 (đã fine-tune) | 0,119 | 0,007 (-0,112 [-0,182; -0,028]) | 0,035 (-0,085 [-0,139; -0,011]) |
+<!-- /bang -->
+
+![E4](results/reproduce/fig/f3_e4.svg)
+
+### 4.5. Chạy thật trong phần mềm drone (IOT-CV, phase 16)
+
+Hai model chạy trong backend IOT-CV qua ONNX Runtime CUDA, trên chính JPEG ghi được của chuyến 02/11, phát lại đúng nhịp thời
+gian thật của bản ghi.
+
+<!-- bang: results/reproduce/tables/t6_iotcv_ms.md -->
+| Chế độ | Detector p50 / p95 ms | Enhancer p50 / p95 ms | Tổng p50 / p95 ms | Khung/s xử lý |
+|---|---|---|---|---|
+| Nhịp thật, có người xem Ảnh rõ | 23,6 / 33,4 | 12,5 / 19,0 | 37,5 / 54,1 | 7,2 |
+| Nhịp thật, chỉ detector | 35,8 / 67,0 | – | 36,6 / 67,9 | 7,2 |
+| Hết tốc lực, hai model | 26,7 / 28,1 | 14,6 / 15,7 | 42,5 / 44,9 | 23,6 |
+
+Điều kiện: GPU 72 °C, xung lúc nghỉ 1890/3105 MHz; bản ghi 20261102-100941, khung 284–914; bỏ khung 0,3 %.
+<!-- /bang -->
+
+Pipeline theo kịp camera (bỏ 0,3 % khung) và chạy hết tốc lực được 23,6 khung/s, gấp ba nhịp camera tốt nhất. Ngân sách đặt
+trước là p95 tổng ≤ 50 ms và detector ≤ 30 ms. Ở nhịp thật hai p95 này vượt (54,1 và 33,4 ms), trong khi chạy hết tốc lực lại
+đạt (44,9 và 28,1 ms). Lý do: giữa hai khung camera GPU rảnh khoảng 100 ms và tự hạ xung (1 890 so với 3 105 MHz tối đa), khung
+kế tiếp chạy trên GPU chậm. Hàng "chỉ detector" còn chậm hơn vì GPU rảnh lâu hơn. Nhóm không nới ngân sách: test `pytest -m gpu`
+ở `tests/integration/test_iotcv_replay.py` vẫn báo đỏ, và việc tiếp theo là đặt chế độ hiệu năng tối đa cho python.exe trong
+NVIDIA app rồi đo lại.
+
+---
+
+## 5. Trả lời hai câu hỏi nghiên cứu
+
+**Câu 1. Làm xấu theo số đo của chính camera (D2) có thắng làm xấu ngẫu nhiên (D1) trên khung thật không?**
+
+Có, nhưng không ở chỗ dự đoán. Về độ giống thật ở mức pixel, D2 thắng rõ (lệch thống kê 0,80 so với 5,93). Về mAP50, D2 hơn
+0,093 nhưng CI chạm 0, nên chưa kết luận được. Về báo nhầm trên khung bay không người, D2 thắng rõ với CI nằm trọn một phía. Cả
+D1 lẫn D2 đều vẫn bị C2ST tách được khỏi ảnh thật, nên muốn tiến thêm phải đổi nội dung ảnh nguồn chứ không phải chỉnh tiếp bộ
+làm xấu.
+
+**Câu 2. Khôi phục ảnh trước khi nhận diện có giúp không?** Dự đoán ban đầu: giúp bộ có sẵn, không giúp bộ đã tinh chỉnh.
+
+Chiều của kết quả khớp dự đoán, độ chắc thì chỉ một nửa. Với YOLO COCO có sẵn, ảnh qua mạng tăng mAP50 thêm 0,069 nhưng CI
+[−0,033; +0,231] chạm 0. Với bộ đã tinh chỉnh, ảnh qua mạng làm mAP50 **giảm** 0,085, CI [−0,139; −0,011] nằm trọn dưới 0;
+ảnh qua bộ cổ điển còn tệ hơn (−0,112). Bộ đã tinh chỉnh học trên ảnh xấu kiểu D2, nên ảnh "đẹp lại" là ảnh lạ với nó. Hệ
+thống giữ quy tắc D5: nhận diện chạy trên khung gốc, ảnh rõ chỉ để người xem.
+
+---
+
+## 6. Giới hạn
+
+- **Một bãi, một buổi:** mọi số đo đến từ chuyến 02/11/2026. Ánh sáng, độ cao, nền cỏ khác thì hồ sơ camera và điểm số có thể
+  đổi.
+- **Nhãn máy gán rồi người duyệt:** sai sót kiểu bỏ sót người rất nhỏ ở trên cao vẫn có thể còn.
+- **Tập nhỏ:** 39 khung test có người, CI của mAP rộng (thường ±0,1). Dev-val 100 khung không chọn đúng model ở E2.
+- **Hồ sơ camera khớp 02/11:** bảng DQT chỉ đo ở chất lượng q12. Web IOT-CV hạ chất lượng xuống q40 khi Wi-Fi yếu, và bảng DQT ở
+  các mức đó chưa đo; khung giả ở q ≠ 12 trong IOT-CV vẫn nén theo ước lượng.
+- **Ngân sách ms ở nhịp thật** vượt do GPU hạ xung khi rảnh (mục 4.5), chưa đo lại sau khi khoá chế độ hiệu năng.
+- **NR-IQA** (MUSIQ, NIQE) dùng giấy phép phi thương mại và chỉ để mô tả.
+
+## 7. Việc tiếp
+
+1. Sửa tận gốc ở lần bay tới: hạ ám hồng bằng phơi sáng và cân bằng trắng của chính cảm biến, che dải đen mép trái bằng cửa sổ
+   cảm biến, đo DQT ở q40.
+2. Thu thêm khung bay có người ở nhiều độ cao, nhiều buổi, để dev-val đủ lớn chọn model.
+3. Mạng làm rõ: thêm ràng buộc màu và ràng buộc thời gian (khung liền nhau) khi huấn luyện, chấm lại bằng trang A/B phóng to.
+4. Khoá chế độ hiệu năng GPU cho backend rồi đo lại ngân sách ms.
+
+---
+
+## 8. Tái lập
+
+```powershell
+. .\scripts\env.ps1                                   # cache, venv ở ổ D
+uv sync --locked
+uv run --no-sync python scripts/reproduce.py --check  # CPU, khoảng 10 s: chấm lại 15 tệp dự đoán, so sha256 9 bảng/hình
+uv run --no-sync python scripts/reproduce.py --full --dry-run  # danh sách bước GPU, khoảng 6,6 giờ GPU
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ 1. KHỐI DỮ LIỆU ĐẦU VÀO (DATA INPUT)                                                   │
-│ • 60 ảnh UAV thực tế + 30 cặp ảnh Synthetic (GT & Degraded) + 3 Video FPV ESP32-CAM    │
-└──────────────────────────────────────────┬─────────────────────────────────────────────┘
-                                           ▼
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ 2. GIAI ĐOẠN 1: TIỀN XỬ LÝ — KHÔI PHỤC MÀU CHÁY HỒNG & KHỬ NHIỄU ĐA MIỀN               │
-│ • Bước 1.1 (Chương 2, 4): Mặt nạ trọng số mềm α(x,y) & Nội suy khôi phục vùng cháy hồng│
-│ • Bước 1.2 (Chương 4)   : Cân bằng trắng tự động có mặt nạ (Masked Gray World AWB)     │
-│ • Bước 1.3 (Chương 3, 6): Khử nhiễu lai Wavelet BayesShrink (sym4) + Non-Local Means   │
-│                           trên L* (có cổng bảo vệ tán lá) + Median-Bilateral trên a*,b*│
-└──────────────────────────────────────────┬─────────────────────────────────────────────┘
-                                           ▼
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ 3. GIAI ĐOẠN 2: XỬ LÝ CHÍNH — KHỬ SƯƠNG MỜ HAZE-PIVOT & TƯƠNG PHẢN CỤC BỘ CIE LAB     │
-│ • Bước 2.1 (Chương 4)   : Chuyển đổi không gian màu BGR ──► CIE L*a*b*                 │
-│ • Bước 2.2 (Chương 2, 3): Kéo giãn tương phản quanh điểm tựa sương mờ (Haze-Pivot)     │
-│ • Bước 2.3 (Chương 3, 4): Cân bằng lược đồ cục bộ CLAHE (8×8, clip=1.5) & Bù sắc độ   │
-└──────────────────────────────────────────┬─────────────────────────────────────────────┘
-                                           ▼
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ 4. GIAI ĐOẠN 3: HẬU XỬ LÝ — GIẢI CHẬP PSF, LÀM NÉT CÓ CỔNG BIÊN & SIÊU PHÂN GIẢI      │
-│ • Bước 3.1 (Chương 3)   : Giải chập lặp quang học Richardson-Lucy PSF (σ=0.88, 4 iter) │
-│ • Bước 3.2 (Chương 3, 5): Unsharp Masking có cổng đạo hàm Sobel & mặt nạ tán lá cây    │
-│ • Bước 3.3 (Chương 2 + SOTA): Siêu phân giải mạng học sâu ESPCN (ONNX 3x) + Lanczos-4  │
-│                               nâng chuẩn lên HD 720p (960×720) & Full HD (1440×1080)   │
-└──────────────────────────────────────────┬─────────────────────────────────────────────┘
-                                           ▼
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ 5. KHỐI ĐÁNH GIÁ & ĐỐI CHỨNG (EVALUATION & BASELINES)                                  │
-│ • Đối chứng: Global HE (RGB), Global HE (CIE LAB) và Nghiên cứu cắt giảm (Ablation)    │
-│ • Độ đo    : PSNR, SSIM, ΔE*ab (Synthetic) | Entropy, Laplacian Var, PCI%, FPS (Real)  │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
 
-Bảng dưới đây tổng hợp sự ánh xạ trực tiếp giữa từng bước trong Pipeline với các chương lý thuyết của học phần **Xử lý ảnh**:
+Model đã ship nằm ở `models/release/` và trên GitHub Release `models-v1.0.0` của repo; `python -m xla.contract validate <thư mục>`
+in `[]` khi bundle đúng hợp đồng.
 
-| Giai đoạn / Thành phần | Kỹ thuật & Thuật toán sử dụng | Chương học phần áp dụng | Hàm cài đặt trong [`src/uav_pipeline.py`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py) |
-| :--- | :--- | :--- | :--- |
-| **Giai đoạn 1: Tiền xử lý** | Nội suy mềm vùng cháy sáng hồng ($\alpha$-blending) & Cân bằng trắng Masked Gray World AWB | **Chương 2** (Toán tử điểm) & **Chương 4** (Hệ màu & Cân bằng màu) | [`recover_pink_highlights()`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L41-L70), [`masked_gray_world_awb()`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L72-L110) |
-| **Giai đoạn 1: Tiền xử lý** | Khử nhiễu lai Wavelet BayesShrink (YCbCr) + Fast Non-Local Means ($L^*$) + Lọc Median & Bilateral ($a^*, b^*$) | **Chương 3** (Lọc làm trơn khử nhiễu bảo toàn biên) & **Chương 6** (Khử nhiễu khối nén JPEG) | [`bilateral_denoise()`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L112-L153), [`run_stage1_preprocess()`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L155-L171) |
-| **Giai đoạn 2: Xử lý chính** | Chuyển đổi hệ màu `BGR` $\leftrightarrow$ `CIE L*a*b*`, Khử mù Haze-Pivot, CLAHE cục bộ & Bù bão hòa sắc độ | **Chương 3** (Biến đổi lược đồ mức xám CLAHE) & **Chương 4** (Không gian màu CIE $L^*a^*b^*$) | [`run_stage2_contrast()`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L177-L228) |
-| **Giai đoạn 3: Hậu xử lý** | Giải chập quang học Richardson-Lucy PSF & Làm nét Unsharp Masking có cổng biên đạo hàm **Sobel** | **Chương 3** (Khôi phục ảnh mờ & Làm nét) & **Chương 5** (Phát hiện biên Sobel & Laplacian) | [`run_stage3_sharpen()`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L270-L317) |
-| **Giai đoạn 3: Siêu phân giải** | Nội suy **Lanczos-4** kết hợp mạng học sâu mã nguồn mở **ESPCN (Sub-Pixel CNN $3\times$)** nâng chuẩn 720p/1080p | **Chương 2** (Nội suy nâng độ phân giải) + **Thử nghiệm mã nguồn mở SOTA** | [`_run_espcn_sr_luminance()`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L234-L268), [`upscale_to_hd()`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L319-L345) |
-| **Phương pháp Đối chứng** | Cân bằng lược đồ toàn cục trên RGB (`Global HE RGB`) và trên CIE LAB (`Global HE LAB`) | **Chương 3** (Cân bằng Histogram toàn cục) & **Chương 4** | [`baseline_global_he_rgb()`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L497-L503), [`baseline_global_he_lab()`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L505-L513) |
+## 9. Phân công nhóm
 
----
+Bảng phân công của bản trước (bốn thành viên, mỗi người 25 %, mỗi người một giai đoạn của pipeline cổ điển) giữ nguyên ở
+`archive/v2-nhom/BAO_CAO_DO_AN.md` mục 6. Phần làm lại theo camera thật (đo hồ sơ camera, bộ làm xấu D2, nhãn tập test, E1, E2, E4, A/B, tích hợp vào
+phần mềm drone) do nhóm làm cùng trợ lý AI, chủ dự án duyệt nhãn và chấm A/B.
 
-### 3.2. Giai đoạn 1 (Tiền xử lý): Khôi phục vùng cháy sáng hồng & Khử nhiễu đa miền
+## 10. Khai báo sử dụng AI
 
-#### Bước 1.1: Phát hiện và Nội suy mềm vùng cháy sáng hồng ([`recover_pink_highlights`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L41-L70))
-* **Cơ sở toán học:** Tại các điểm ảnh bị lỗi hồng/tím trên cảm biến OV2640, trung bình cộng của hai kênh Đỏ – Xanh dương $RB_{\text{mean}}(x,y)$ vượt xa giá trị kênh Xanh lá $G(x,y)$ tại các vùng có độ sáng cao. Ta định nghĩa độ dư sắc hồng $D_{\text{pink}}(x,y)$:
-  $$RB_{\text{mean}}(x,y) = \frac{R(x,y) + B(x,y)}{2}, \qquad D_{\text{pink}}(x,y) = \max\Big(0, \; RB_{\text{mean}}(x,y) - G(x,y)\Big)$$
-  Để tránh hiện tượng xuất hiện đường viền giả (halo/contour artifacts) khi dùng ngưỡng nhị phân cứng, nhóm thiết kế **mặt nạ trọng số nội suy mềm $\alpha(x,y) \in [0, 1]$** là tích của cổng độ sáng và cổng độ lệch hồng, sau đó làm trơn bằng bộ lọc Gaussian $G_{\sigma=1.5}$ kích thước $7 \times 7$:
-  $$\alpha_0(x,y) = \text{clip}\left(\frac{RB_{\text{mean}}(x,y) - T_{\text{high}}}{40.0}, \; 0, \; 1\right) \times \text{clip}\left(\frac{D_{\text{pink}}(x,y) - \Delta T}{16.0}, \; 0, \; 1\right)$$
-  $$\alpha(x,y) = G_{7\times 7, \, \sigma=1.5} * \alpha_0(x,y)$$
-  Độ chói trung tính ước lượng trước khi bị bão hòa lệch được tính bởi $Y_{\text{est}}(x,y) = G(x,y) + 0.45 \cdot D_{\text{pink}}(x,y)$. Ba kênh màu được khôi phục tuyến tính theo trọng số $\alpha(x,y)$:
-  $$\begin{aligned}
-  G'(x,y) &= (1 - \alpha(x,y)) \cdot G(x,y) + \alpha(x,y) \cdot Y_{\text{est}}(x,y) \\
-  R'(x,y) &= (1 - \alpha(x,y)) \cdot R(x,y) + \alpha(x,y) \cdot \big[Y_{\text{est}}(x,y) + 0.08(R(x,y) - Y_{\text{est}}(x,y))\big] \\
-  B'(x,y) &= (1 - \alpha(x,y)) \cdot B(x,y) + \alpha(x,y) \cdot \big[Y_{\text{est}}(x,y) + 0.08(B(x,y) - Y_{\text{est}}(x,y))\big]
-  \end{aligned}$$
-* **Tham số & Lý do lựa chọn:**
-  * Ngưỡng độ sáng bắt đầu xét cháy hồng $T_{\text{high}} = 135.0$ và ngưỡng chênh lệch kênh màu $\Delta T = 7.0$: Thực nghiệm trên 60 ảnh ESP32-CAM cho thấy do ảnh gốc bị phủ sương mờ và nén dải động, nhiều vùng mặt đường bê tông bị ám hồng ngay từ mức xám $140 - 175$ chứ không chỉ ở vùng $> 200$. Chọn $T_{\text{high}} = 135.0, \Delta T = 7.0$ giúp bắt trọn các mảng hồng nhạt trên mặt đường trong khi giữ nguyên màu sắc thật của các vật thể tối/trung gian.
-  * Hệ số giữ lại $0.08(R - Y_{\text{est}})$: Tránh làm vùng mặt đường sau khôi phục bị biến thành mảng xám chì hoàn toàn phẳng lì, giữ lại độ chuyển sắc tự nhiên của ánh nắng.
+- **Model mã nguồn mở dùng trong hệ thống:** YOLO11n/YOLO11m (Ultralytics, tinh chỉnh lại), NAFNet (huấn luyện lại từ đầu),
+  DINOv2 (chỉ để đo KID).
+- **Trợ lý AI (Claude Code):** viết phần lớn mã, chạy thí nghiệm, sinh bảng và viết nháp báo cáo này. Mọi số trong báo cáo đến
+  từ file kết quả do mã chạy ra và được `scripts/reproduce.py --check` kiểm lại; nhóm đọc, duyệt và chịu trách nhiệm về kết
+  luận.
+- **Đạo đức (chương 9):** chỉ khung của camera nhóm được công bố; ảnh VisDrone dùng nghiên cứu, không đăng lại; ảnh mẫu trong báo cáo
+  và slide là khung bay của nhóm.
 
-#### Bước 1.2: Cân bằng trắng tự động có mặt nạ loại trừ vùng bão hòa ([`masked_gray_world_awb`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L72-L110))
-* **Cơ sở toán học:** Giả thuyết Gray World cổ điển (Chương 4) giả định trung bình ba kênh $R, G, B$ của toàn cảnh bằng nhau. Tuy nhiên, nếu tính trung bình trên cả các điểm ảnh bầu trời cháy sáng hoặc vùng vừa khử hồng, hệ số khuếch đại sẽ bị chệch. Nhóm chỉ tính trung bình $\mu_c$ trên tập điểm ảnh hợp lệ $\Omega_{\text{valid}} = \{(x,y) \mid 30 < Y(x,y) < 215 \text{ và } \alpha(x,y) < 0.20\}$:
-  $$\mu_{\text{gray}} = \frac{\mu_R + \mu_G + \mu_B}{3}, \qquad k_c = 0.70 + 0.30 \cdot \text{clip}\left(\frac{\mu_{\text{gray}}}{\mu_c}, \; 1 - \delta_{\max}, \; 1 + \delta_{\max}\right), \quad c \in \{B, G, R\}$$
-* **Tham số & Lý do lựa chọn:** Giới hạn dịch chuyển độ lợi $\delta_{\max} = 0.06$ ($\pm 6\%$) kết hợp hệ số làm dịu $0.30$ để ngăn chặn hiện tượng ảnh có nhiều cây xanh bị thuật toán Gray World hiểu nhầm là "thừa xanh lá" rồi đẩy ngược toàn ảnh sang tông tím/hồng.
+## Tài liệu tham khảo
 
-#### Bước 1.3: Khử nhiễu lai đa miền Wavelet BayesShrink + Non-Local Means + Chroma Bilateral ([`bilateral_denoise`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L112-L153))
-* **Cơ sở toán học:** Để giải quyết triệt để bài toán "mặt đường phải mịn sạch nhiễu hạt nhưng tán lá cây không được bệt", nhóm thiết kế kiến trúc lọc 3 tầng:
-  1. **Lọc Wavelet ngưỡng mềm BayesShrink trên không gian YCbCr:** Thực hiện biến đổi Wavelet rời rạc (DWT) 3 mức với họ sóng con đối xứng `sym4` (`skimage.restoration.denoise_wavelet`), tự động ước lượng phương sai nhiễu $\hat{\sigma}_n$ ở từng băng tần cao (HH, HL, LH) và co ngưỡng mềm (soft-thresholding). Bước này loại bỏ nhiễu tần số cao đa tỉ lệ mà không làm nhòe cấu trúc biên mảnh.
-  2. **Lọc trung bình phi cục bộ (Fast Non-Local Means – NLM) kết hợp cổng bảo vệ thực vật trên kênh độ chói $L^*$:** Chuyển ảnh sang không gian CIE $L^*a^*b^*$. Áp dụng `cv2.fastNlMeansDenoising` trên kênh $L^*$ để làm phẳng hoàn toàn nhiễu hạt trên các bề mặt đồng nhất (mặt đường nhựa, bê tông, bầu trời, mặt nước). Đồng thời, tính mặt nạ thực vật mềm $w_{\text{foliage}}(x,y) = G_{5\times5,\sigma=1.2} * \text{clip}\big(\frac{G - \max(R,B) - 6}{14}, 0, 1\big)$ và trộn:
-     $$L_{\text{clean}}^*(x,y) = w_{\text{foliage}}(x,y) \cdot L_{\text{wavelet}}^*(x,y) + \big(1 - w_{\text{foliage}}(x,y)\big) \cdot L_{\text{NLM}}^*(x,y)$$
-  3. **Lọc sắc độ Median + Bilateral trên kênh $a^*, b^*$:** Áp dụng lọc trung vị $3 \times 3$ nối tiếp lọc song phương (`cv2.bilateralFilter`) trên hai kênh màu $a^*, b^*$ để xóa sạch đốm nhiễu màu JPEG (chroma blotches) mà không làm lem màu của các phương tiện nhỏ.
-* **Tham số & Lý do lựa chọn:**
-  * Wavelet `sym4`, `wavelet_levels = 3`, `mode = 'soft'`: Sóng con Symlet bậc 4 gần đối xứng giúp không gây dịch pha biên ảnh; ngưỡng mềm `BayesShrink` tối ưu hóa sai số bình phương trung bình (MSE) tốt hơn `VisuShrink` (vốn làm ảnh quá mờ).
-  * Non-Local Means `h = 4.5`, `templateWindowSize = 7`, `searchWindowSize = 15`: Cường độ lọc $h = 4.5$ vừa đủ triệt tiêu hạt nhiễu dư sau Wavelet trên mặt đường mà không xóa vạch kẻ đường mờ.
-  * Bilateral sắc độ `d = 5`, `sigmaColor = 14.0`, `sigmaSpace = 7.0`: Đường kính nhỏ $d=5$ và $\sigma_{\text{color}}=14.0$ giữ chặt ranh giới màu sắc giữa xe cộ/người đi bộ và nền đường.
-
----
-
-### 3.3. Giai đoạn 2 (Xử lý chính): Khử sương mờ Haze-Pivot & Tăng cường tương phản cục bộ CIE LAB ([`run_stage2_contrast`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L177-L228))
-
-#### Bước 2.1: Chuyển đổi không gian màu `BGR` $\rightarrow$ `CIE L*a*b*` (Chương 4)
-* **Lý do chọn:** Trong mô hình RGB, thông tin độ sáng và màu sắc gắn chặt với nhau trên cả 3 kênh. Nếu kéo giãn lược đồ trực tiếp trên RGB (như đối chứng Global HE RGB), tỷ lệ $R:G:B$ bị phá vỡ gây biến dạng màu nghiêm trọng. Không gian **CIE $L^*a^*b^*$** tách biệt hoàn toàn kênh độ chói cảm nhận $L^*$ khỏi hai trục sắc độ đối kháng $a^*$ (Xanh lá – Đỏ) và $b^*$ (Xanh dương – Vàng), cho phép can thiệp sâu vào dải động sáng tối trên $L^*$ mà bảo toàn nguyên vẹn tông màu.
-
-#### Bước 2.2: Khôi phục tương phản quanh điểm tựa sương mờ (Haze-Pivot Contrast Restoration)
-* **Cơ sở toán học:** Theo mô hình vật lý tán xạ khí quyển, ảnh thu nhận qua lớp mù sương có dạng $I_{\text{deg}}(x) = c \cdot I_{\text{true}}(x) + (1 - c) \cdot A_{\text{haze}}$, trong đó màn sương sáng $A_{\text{haze}}$ kéo các vùng tối và trung gian dịch lên phía mức sáng cao ($\approx 172$ trong thang 8-bit). Để đảo ngược quá trình này, ta thực hiện phép giãn tuyến tính kênh $L^*$ xoay quanh **điểm tựa độ chói sương mờ $L_{\text{pivot}}$**:
-  $$L_{\text{dehaze}}^*(x,y) = \text{clip}\Big( L_{\text{pivot}}^{\text{eff}} + \gamma_{\text{gain}}^{\text{eff}} \cdot \big(L^*(x,y) - L_{\text{pivot}}^{\text{eff}}\big), \; 0, \; 255 \Big)$$
-  Trong đó, nếu độ rộng dải phân vị $S = P_{98}(L^*) - P_2(L^*) < 92.0$ (ảnh bị mù sương đặc), thuật toán tự động kích hoạt chế độ thích nghi: $\gamma_{\text{gain}}^{\text{eff}} = \frac{\min(158.0, \, 2.05 \cdot S)}{S}$ và $L_{\text{pivot}}^{\text{eff}} = 0.5 P_{50}(L^*) + 0.5 L_{\text{pivot}}$. Ngược lại, dùng giá trị chuẩn $\gamma_{\text{gain}}^{\text{eff}} = 1.26, L_{\text{pivot}}^{\text{eff}} = 172.0$.
-* **Tham số & Lý do lựa chọn:** Chọn $L_{\text{pivot}} = 172.0$ và $\text{contrast\_gain} = 1.26$ vì điểm tựa nằm ở vùng sáng trên giúp kéo các vùng tối/trung gian xuống sâu hơn (làm trong trẻo lớp sương mù) trong khi giữ vùng sáng quanh $172$ không bị đẩy vọt lên $255$ (chống cháy sáng thứ cấp).
-
-#### Bước 2.3: Cân bằng lược đồ thích nghi giới hạn tương phản (CLAHE) & Phục hồi bão hòa sắc độ
-* **Cơ sở toán học:** Áp dụng **CLAHE (Chương 3)** trên kênh $L_{\text{dehaze}}^*$ để làm nổi bật chi tiết cục bộ trong vùng bóng râm của tòa nhà và lùm cây, sau đó pha trộn mượt với tỷ lệ $\beta_{\text{CLAHE}} = 0.22$:
-  $$L_{\text{out}}^*(x,y) = (1 - \beta_{\text{CLAHE}}) \cdot L_{\text{dehaze}}^*(x,y) + \beta_{\text{CLAHE}} \cdot \text{CLAHE}\big(L_{\text{dehaze}}^*\big)(x,y)$$
-  Đồng thời, do màn sương mờ làm nhạt màu ảnh gốc, độ bão hòa sắc độ trên hai kênh $a^*, b^*$ (tâm tại $128$) được khôi phục thích nghi theo độ lệch chuẩn căn phương (RMS) hiện tại $\sigma_{\text{chroma}} = \sqrt{\overline{(a^*-128)^2 + (b^*-128)^2}}$:
-  $$c_{\text{gain}} = \text{clip}\left(\frac{16.0}{\max(\sigma_{\text{chroma}}, \, 6.0)}, \; 1.24, \; 1.58\right), \qquad a_{\text{out}}^* = 128 + c_{\text{gain}}(a^* - 128), \quad b_{\text{out}}^* = 128 + c_{\text{gain}}(b^* - 128)$$
-* **Tham số & Lý do lựa chọn:**
-  * `tileGridSize = (8, 8)`, `clipLimit = 1.5`, `clahe_blend = 0.22`: Nếu dùng CLAHE đơn thuần với `clipLimit` cao ($\ge 3.0$) và trộn $100\%$, ảnh UAV sẽ bị hiện tượng giả tạo cục bộ (local halo) và làm giảm chỉ số PSNR/SSIM so với Ground Truth. Pha trộn $22\%$ CLAHE với `clipLimit = 1.5` trên nền ảnh đã khử mù Haze-Pivot mang lại sự cân bằng tối ưu: đạt đỉnh **$\text{PSNR} = 27.66\text{ dB}, \text{SSIM} = 0.8295$** trên tập đối chứng!
-
----
-
-### 3.4. Giai đoạn 3 (Hậu xử lý): Giải chập Richardson-Lucy PSF, Làm nét có cổng cấu trúc Sobel & Siêu phân giải ESPCN
-
-#### Bước 3.1: Giải chập quang học lặp Richardson-Lucy PSF ([`run_stage3_sharpen`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L270-L317))
-* **Cơ sở toán học (Chương 3):** Quá trình mờ quang học của thấu kính OV2640 được mô hình hóa bởi phép tích chập $I_{\text{blur}} = H_{\text{PSF}} * I_{\text{sharp}} + \eta$, với hàm truyền điểm $H_{\text{PSF}}$ là nhân Gaussian $5 \times 5$ có độ lệch chuẩn $\sigma_{\text{PSF}}$. Thuật toán **Richardson-Lucy Deconvolution** khôi phục kênh độ chói $L^*$ theo công thức lặp cực đại hóa hợp lý (Maximum Likelihood):
-  $$\hat{L}^{(t+1)} = \hat{L}^{(t)} \cdot \left( H_{\text{PSF}}^T * \frac{L_{\text{seed}}}{H_{\text{PSF}} * \hat{L}^{(t)}} \right), \qquad t = 0, 1, \dots, N_{\text{iter}}-1$$
-* **Tham số & Lý do lựa chọn:** Kích thước nhân $5 \times 5$, $\sigma_{\text{PSF}} = 0.88$ (ở độ phân giải gốc) và số vòng lặp $N_{\text{iter}} = 4$. Số vòng lặp $N_{\text{iter}} = 4$ đủ để thu hẹp độ rộng biên bị nhòe do thấu kính mà không gây hiện tượng rung viền (ringing artifacts) quanh mép mái nhà hay xe cộ.
-
-#### Bước 3.2: Làm sắc nét Unsharp Masking có cổng kiểm soát biên Sobel & mặt nạ thực vật (Chương 3 & Chương 5)
-* **Cơ sở toán học:** Để chi tiết sắc nét từ Richardson-Lucy và nhánh Unsharp Masking tần số cao $D_{\text{fine}} = \hat{L}_{\text{RL}} - G_{5\times5, \sigma=0.85} * \hat{L}_{\text{RL}}$ **chỉ tác động lên các vật thể có cấu trúc (xe cộ, vạch kẻ đường, tòa nhà, tán cây) và tuyệt đối không chạm vào vùng mặt đường phẳng hay bầu trời**, nhóm sử dụng toán tử đạo hàm bậc nhất **Sobel (Chương 5)** tính biên độ gradient:
-  $$G_x = S_x * (G_{\sigma=1.0} * L_{\text{in}}^*), \quad G_y = S_y * (G_{\sigma=1.0} * L_{\text{in}}^*), \quad \|\nabla L^*\| = G_{5\times5, \sigma=1.0} * \sqrt{G_x^2 + G_y^2}$$
-  Cổng biên cấu trúc $w_{\text{edge}}(x,y) = \text{clip}\big(\frac{\|\nabla L^*\| - 12.0}{22.0}, 0, 1\big)$ được kết hợp với mặt nạ tán lá cây $w_{\text{foliage}}(x,y)$ tạo thành cổng kích hoạt tổng hợp $w_{\text{active}}(x,y) = \max\big(w_{\text{foliage}}(x,y), \, w_{\text{edge}}(x,y)\big)$. Lượng bù chi tiết được nén mềm qua hàm $\tanh$ để chống vọt lố (overshoot):
-  $$\Delta L_{\text{boost}}^* = 24.0 \times \tanh\left( \frac{w_{\text{active}} \cdot \big[(\hat{L}_{\text{RL}} - L_{\text{in}}^*) + 0.65 \cdot D_{\text{fine}}\big]}{24.0} \right), \qquad L_{\text{sharp}}^* = \text{clip}\big(L_{\text{in}}^* + \Delta L_{\text{boost}}^*, \; 0, \; 255\big)$$
-* **Tham số & Lý do lựa chọn:** Ngưỡng gradient Sobel $12.0$ loại bỏ hoàn toàn các dao động mức xám nhỏ trên mặt đường phẳng ($w_{\text{active}} = 0$ tại mặt đường $\Rightarrow \Delta L_{\text{boost}}^* = 0$), giữ mặt đường mịn màng 100% trong khi biên xe và lá cây ($w_{\text{active}} \rightarrow 1$) được tăng độ sắc nét tối đa.
-
-#### Bước 3.3: Nâng cấp Siêu phân giải bằng mạng học sâu mã nguồn mở ESPCN kết hợp Lanczos-4 ([`upscale_to_hd`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L319-L345))
-* **Cơ sở toán học & Tích hợp mã nguồn mở:** Để nâng ảnh đầu ra từ chuẩn VGA ($640 \times 480$) lên chuẩn **HD 720p ($960 \times 720$ / $1280 \times 720$)** và **Full HD 1080p ($1440 \times 1080$ / $1920 \times 1080$)** mà không bị răng cưa hay mờ bệt như nội suy tuyến tính đơn thuần, nhóm tích hợp mô hình học sâu mã nguồn mở **ESPCN (Efficient Sub-Pixel Convolutional Neural Network $3\times$)** lưu tại [`models/espcn_super_res.onnx`](file:///home/ngtukien/Projects/XLA/models/espcn_super_res.onnx) thực thi qua `onnxruntime`:
-  1. Kênh độ chói $L^*$ được chuẩn hóa vào dải động an toàn BT.601 $[16, 235]$ và chia thành các ô chồng lấp (tiled inference $224 \times 224$ với lề phản xạ 12 pixel) đưa qua mạng ESPCN để tái tạo bản đồ đặc trưng siêu phân giải gấp $3\times$ thông qua tầng sắp xếp lại điểm ảnh dưới ô (*Periodic Shuffling / Sub-Pixel Convolution*).
-  2. Để ngăn chặn hiện tượng nhiễu giả của mạng học sâu trên ảnh thực tế, kết quả $L_{\text{ESPCN}}^*$ được kẹp biên an toàn ($\pm 18$ mức xám) và pha trộn với phép **nội suy cổ điển bậc cao Lanczos-4 (`cv2.INTER_LANCZOS4` – Chương 2)** theo tỷ lệ $0.65 \, L_{\text{ESPCN}}^* + 0.35 \, L_{\text{Lanczos4}}^*$, trong khi hai kênh sắc độ $a^*, b^*$ được nội suy bằng Lanczos-4 rồi đi qua bộ làm nét Bước 3.1–3.2.
-
----
-
-### 3.5. Thiết kế các Phương pháp Đối chứng (Baselines) và Nghiên cứu Cắt giảm (Ablation Study)
-Để đánh giá khách quan hiệu quả của Pipeline đề xuất theo đúng yêu cầu của Lựa chọn 2 (`DoAn_XuLyAnh.pdf` Trang 3 & Trang 7), nhóm cài đặt và so sánh **8 cấu hình thực nghiệm** trên cùng tập dữ liệu đầu vào:
-1. **Ảnh gốc / Ảnh suy giảm đầu vào (`Input ESP32-CAM`):** Ảnh chưa qua xử lý.
-2. **Đối chứng 1 (`Baseline 1: Global HE - RGB`):** Cân bằng lược đồ mức xám toàn cục độc lập trên từng kênh $R, G, B$ (Phương pháp cơ sở Chương 3).
-3. **Đối chứng 2 (`Baseline 2: Global HE - CIE LAB`):** Chuyển sang không gian CIE $L^*a^*b^*$ và cân bằng lược đồ toàn cục trên kênh độ chói $L^*$ (Phương pháp cơ sở kết hợp Chương 3 & Chương 4).
-4. **Cấu hình Ablation 1 (`Giai đoạn 1: Wavelet+NLM + Khử hồng`):** Chỉ chạy Tiền xử lý (Khôi phục cháy hồng + Masked Gray World AWB + Khử nhiễu lai Wavelet BayesShrink & Non-Local Means).
-5. **Cấu hình Ablation 2 (`Giai đoạn 1+2: + Haze-Pivot & CLAHE`):** Chạy Tiền xử lý nối tiếp Xử lý chính trong không gian CIE $L^*a^*b^*$.
-6. **Pipeline Đề xuất ở độ phân giải gốc (`Pipeline Đề xuất - 3 Giai đoạn VGA/SVGA`):** Kết hợp đầy đủ cả 3 giai đoạn ở kích thước gốc.
-7. **Pipeline Đề xuất + Siêu phân giải HD 720p (`+ ESPCN HD 720p: 960x720`):** Nâng cấp bằng ESPCN + Lanczos-4 lên chuẩn HD 720p.
-8. **Pipeline Đề xuất + Siêu phân giải Full HD 1080p (`+ ESPCN Full HD 1080p: 1440x1080`):** Nâng cấp siêu phân giải lên chuẩn Full HD 1080p.
-
----
-
-## 4. KẾT QUẢ THỰC NGHIỆM (EXPERIMENTAL RESULTS)
-
-### 4.1. Đánh giá Định tính (Qualitative Evaluation)
-
-Toàn bộ hình ảnh kết quả định tính được xuất tự động ở độ phân giải in ấn (220–300 DPI) trong thư mục [`results/figures/`](file:///home/ngtukien/Projects/XLA/results/figures) và bộ ảnh độ phân giải thực 1:1 (HD 720p & Full HD 1080p) trong thư mục [`results/hd_outputs/`](file:///home/ngtukien/Projects/XLA/results/hd_outputs):
-
-#### (1) Hiệu quả phát hiện mặt nạ mềm $\alpha(x,y)$ và Khôi phục vùng cháy sáng hồng (Giai đoạn 1)
-![Hình 1: Mặt nạ trọng số mềm và kết quả khôi phục vùng cháy sáng hồng Giai đoạn 1](results/figures/fig1_stage1_pink_mask_recovery.png)
-* **Phân tích trực quan ([`fig1_stage1_pink_mask_recovery.png`](file:///home/ngtukien/Projects/XLA/results/figures/fig1_stage1_pink_mask_recovery.png)):** Ở ảnh gốc `(a)`, toàn bộ vùng bầu trời, mặt đường bê tông phía xa và mái nhà bị phủ một lớp màu hồng tím nặng với chỉ số **$\text{PCI} = 44.3\%$**. Bản đồ nhiệt mặt nạ $\alpha(x,y)$ ở hình `(b)` định vị chính xác các vùng bị bão hòa lệch kênh $R, B$ với biên chuyển tiếp mượt mà, hoàn toàn không xâm phạm vào vùng cây xanh hay mặt cỏ ($\alpha = 0$ màu đen). Kết quả sau Giai đoạn 1 ở hình `(c)` cho thấy sắc hồng giả đã được trung hòa triệt để về màu trắng/xám tự nhiên (**$\text{PCI}$ giảm xuống chỉ còn $0.00\%$** trên cảnh này), đồng thời bề mặt đường trở nên mịn sạch nhờ bộ lọc lai Wavelet + Non-Local Means.
-
-#### (2) Hiệu quả khử mù sương CIE LAB CLAHE và Phân tích Biểu đồ Lược đồ màu RGB (Giai đoạn 2)
-![Hình 2: So sánh ảnh đầu vào - đầu ra 720p và Biểu đồ Histogram 3 kênh RGB](results/figures/fig2_stage2_lab_clahe_histograms.png)
-* **Phân tích trực quan ([`fig2_stage2_lab_clahe_histograms.png`](file:///home/ngtukien/Projects/XLA/results/figures/fig2_stage2_lab_clahe_histograms.png)):** Biểu đồ Histogram RGB trước xử lý `(c)` phản ánh rõ bệnh lý của cảm biến OV2640: phân bố mức xám bị co hẹp ở khoảng $[60, 210]$ (gây mờ sương), đồng thời đỉnh của kênh Đỏ (Red) và Xanh dương (Blue) bị tách hẳn sang bên phải so với kênh Xanh lá (Green), tạo ra hiện tượng ám hồng. Sau khi qua Pipeline đề xuất `(d)`, cả 3 kênh $R, G, B$ được căn chỉnh trùng khớp tại vùng sáng và trải rộng đều ra toàn dải động $[0, 255]$, giúp lượng thông tin **Shannon Entropy tăng từ $6.25\text{ bits}$ lên $7.08\text{ bits}$**.
-
-#### (3) So sánh trực quan 4 cột trên các bối cảnh bay UAV đa dạng
-![Hình 3: Lưới so sánh 4 cột giữa Ảnh gốc, Đối chứng Global HE, Bước 1+2 và Pipeline hoàn chỉnh HD](results/figures/fig3_4col_comparison_grid.png)
-* **Phân tích trực quan ([`fig3_4col_comparison_grid.png`](file:///home/ngtukien/Projects/XLA/results/figures/fig3_4col_comparison_grid.png)):**
-  * **Cột (a) – Ảnh gốc ESP32-CAM:** Mờ đục, mặt đường và bầu trời bị ám hồng tím, nhiễu hạt lốm đốm.
-  * **Cột (b) – Đối chứng Global HE (RGB):** Kéo giãn lược đồ toàn cục độc lập trên 3 kênh làm biến dạng màu sắc nghiêm trọng (mặt đường biến thành màu xanh tím/đỏ gắt, vùng sáng bị cháy lóa trắng xóa, hạt nhiễu CMOS và khối JPEG bị phóng đại cực đại).
-  * **Cột (c) – Bước 1+2 (Wavelet+NLM Denoise & CIE LAB Haze-Pivot/CLAHE):** Màu sắc mặt đường, thảm cỏ và mái nhà trở về đúng màu tự nhiên, lớp mù sương được bóc tách hoàn toàn, mặt đường nhựa phẳng mịn không còn hạt nhiễu.
-  * **Cột (d) – Bước 3 (Richardson-Lucy PSF + ESPCN HD 720p/1080p):** Các chi tiết tần số cao như tán lá cây, viền xe ô tô, người đi bộ và vạch kẻ đường trở nên sắc nét, rõ ràng ở độ phân giải cao.
-
-#### (4) Phân tích phóng to chi tiết (Zoom-in ROI) và Siêu phân giải HD 720p / Full HD 1080p (Giai đoạn 3)
-![Hình 4: Phóng to vùng chi tiết ROI so sánh giữa Ảnh gốc 640x480, Bước 1+2 và Bước 3 RL Deconv + ESPCN Full HD 1080p](results/figures/fig4_upscale_720p_zoom.png)
-* **Phân tích trực quan ([`fig4_upscale_720p_zoom.png`](file:///home/ngtukien/Projects/XLA/results/figures/fig4_upscale_720p_zoom.png)):** Khi phóng cận cảnh vùng mặt đường có phương tiện giao thông và tán cây xanh `(d, e, f)`:
-  * Ảnh gốc $640 \times 480$ `(d)` xuất hiện đầy hạt nhiễu màu lốm đốm trên mặt đường nhựa trong khi tán cây và xe cộ bị nhòe mờ.
-  * Sau Bước 1+2 `(e)`, bề mặt đường nhựa hoàn toàn sạch nhiễu và phẳng mịn.
-  * Sau Bước 3 kết hợp giải chập Richardson-Lucy, làm nét có cổng cấu trúc Sobel và siêu phân giải **ESPCN Full HD 1080p ($1440 \times 1080$)** `(f)`, độ sắc nét biên **Laplacian Variance của toàn ảnh tăng vọt từ $145.6$ lên $256.8$**, tái tạo rõ nét từng tán lá và hình khối xe mà mặt đường vẫn giữ nguyên độ mịn sạch tuyệt đối.
-
----
-
-### 4.2. Đánh giá Định lượng (Quantitative Evaluation)
-
-Số liệu định lượng được trích xuất trực tiếp từ kịch bản thực nghiệm tự động [`src/build_notebooks_and_results.py`](file:///home/ngtukien/Projects/XLA/src/build_notebooks_and_results.py) và lưu trữ tại [`results/tables/table1_synthetic_metrics.csv`](file:///home/ngtukien/Projects/XLA/results/tables/table1_synthetic_metrics.csv) cùng [`results/tables/table2_real_uav_metrics.csv`](file:///home/ngtukien/Projects/XLA/results/tables/table2_real_uav_metrics.csv).
-
-#### Bảng 1: Kết quả định lượng trên Tập đối chứng có tham chiếu Ground Truth (30 cặp ảnh Synthetic)
-*Ý nghĩa độ đo:* **PSNR (dB) $\uparrow$** và **SSIM $\uparrow$** càng cao càng gần ảnh chuẩn Ground Truth; **Sai số màu $\Delta E_{ab}^* \downarrow$** và **Pink Cast (%) $\downarrow$** càng thấp màu sắc càng chính xác; **Entropy (bits) $\uparrow$** và **Laplacian Variance $\uparrow$** phản ánh lượng thông tin và độ sắc nét biên.
-
-| Phương pháp / Cấu hình Pipeline | Độ phân giải | PSNR (dB) $\uparrow$ | SSIM $\uparrow$ | $\Delta E_{ab}^*$ $\downarrow$ | Entropy (bits) $\uparrow$ | Laplacian Var $\uparrow$ | Pink Cast (%) $\downarrow$ |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1. Ảnh suy giảm đầu vào (ESP32-CAM)** | $800 \times 600$ | $20.35$ | $0.7015$ | $24.74$ | $6.648$ | $142.2$ | $8.52\%$ |
-| **2. Đối chứng 1: Global HE (RGB)** | $800 \times 600$ | $12.53$ | $0.4155$ | $59.38$ | $7.888^*$ | $1760.8^*$ | $8.98\%$ |
-| **3. Đối chứng 2: Global HE (CIE LAB)** | $800 \times 600$ | $13.09$ | $0.4214$ | $52.17$ | $7.542^*$ | $1782.3^*$ | $8.69\%$ |
-| **4. Giai đoạn 1: Wavelet+NLM + Khử hồng** | $800 \times 600$ | $20.89$ | $0.7639$ | $22.98$ | $6.526$ | $52.4$ | **$2.61\%$** |
-| **5. Giai đoạn 1+2: + Haze-Pivot & CLAHE** | $800 \times 600$ | **$27.66$** | **$0.8295$** | **$9.89$** | $6.884$ | $109.8$ | $5.68\%$ |
-| **6. Pipeline Đề xuất (Đầy đủ 3 Giai đoạn)** | $800 \times 600$ | $\mathbf{27.42}$ | $\mathbf{0.8180}$ | $\mathbf{10.06}$ | $\mathbf{6.917}$ | $\mathbf{186.9}$ | $\mathbf{5.61\%}$ |
-| **7. Pipeline Đề xuất + ESPCN HD 720p** | $960 \times 720$ | $\mathbf{27.40}$ | $\mathbf{0.8051}$ | $\mathbf{10.09}$ | $\mathbf{6.917}$ | $134.1$ | $5.67\%$ |
-| **8. Pipeline Đề xuất + ESPCN Full HD 1080p** | $1440 \times 1080$ | $\mathbf{27.33}$ | $\mathbf{0.7881}$ | $\mathbf{10.16}$ | $\mathbf{6.910}$ | $54.2$ | $5.63\%$ |
-
-*(Chú thích $^*$: Giá trị Entropy và Laplacian Variance cực cao của Global HE RGB/LAB là do thuật toán này khuếch đại toàn bộ nhiễu hạt CMOS và nhiễu khối JPEG $8\times8$ thành các gai nhiễu biên độ lớn, khiến PSNR sụt giảm thảm hại xuống $12.53\text{ dB}$ và SSIM tụt xuống $0.4155$).*
-
-#### Bảng 2: Kết quả định lượng trên Tập 60 ảnh bay UAV thực nghiệm (`data/real_uav/`)
-
-| Phương pháp / Cấu hình Pipeline | Độ phân giải | Entropy (bits) $\uparrow$ | Laplacian Var $\uparrow$ | Pink Cast (%) $\downarrow$ | Thời gian xử lý (ms) | Tốc độ (FPS CPU) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1. Ảnh gốc ESP32-CAM** | $800 \times 600$ | $6.364$ | $121.1$ | $17.45\%$ | $0.00$ | — |
-| **2. Đối chứng 1: Global HE (RGB)** | $800 \times 600$ | $7.461^*$ | $1108.4^*$ | $12.28\%$ | $0.85$ | $1231.3$ |
-| **3. Đối chứng 2: Global HE (CIE LAB)** | $800 \times 600$ | $7.206^*$ | $1303.7^*$ | $17.27\%$ | $1.84$ | $550.9$ |
-| **4. Giai đoạn 1: Wavelet+NLM + Khử hồng** | $800 \times 600$ | $6.320$ | $59.4$ | **$2.55\%$** | $157.51$ | $6.4$ |
-| **5. Giai đoạn 1+2: + Haze-Pivot & CLAHE** | $800 \times 600$ | $6.817$ | $120.0$ | $7.11\%$ | $166.01$ | $6.1$ |
-| **6. Pipeline Đề xuất (Đầy đủ 3 Giai đoạn)** | $800 \times 600$ | $\mathbf{6.850}$ | $\mathbf{226.5}$ | $\mathbf{7.03\%}$ | $436.59$ | $2.3$ |
-| **7. Pipeline Đề xuất + ESPCN HD 720p** | $960 \times 720$ | $\mathbf{6.860}$ | $\mathbf{153.3}$ | $\mathbf{7.05\%}$ | $476.24$ | $2.1$ |
-| **8. Pipeline Đề xuất + ESPCN Full HD 1080p** | $1440 \times 1080$ | $\mathbf{6.853}$ | $56.8$ | $\mathbf{7.01\%}$ | $614.68$ | $1.6$ |
-
-#### Nhận xét và Phân tích Số liệu Thực nghiệm:
-1. **Đột phá về độ chính xác tái tạo ảnh (PSNR & SSIM):**
-   * Ngay ở Giai đoạn 1, việc khử nhiễu lai Wavelet BayesShrink + Non-Local Means và khôi phục vùng cháy hồng đã nâng **SSIM từ $0.7015$ lên $0.7639$** ($+6.24\%$) và đưa tỷ lệ ám hồng từ **$8.52\%$ (Synthetic) / $17.45\%$ (Real UAV) xuống chỉ còn $2.61\%$ / $2.55\%$**.
-   * Khi kết hợp Giai đoạn 2 (Haze-Pivot + CIE LAB CLAHE), **PSNR tăng vọt thêm $+6.77\text{ dB}$ (đạt $27.66\text{ dB}$)** và **SSIM đạt $0.8295$**, đồng thời sai lệch màu **$\Delta E_{ab}^*$ giảm từ $24.74$ xuống $9.89$** (giảm **$60.0\%$** lỗi màu).
-   * Khi kích hoạt thêm Giai đoạn 3 (Giải chập Richardson-Lucy + Làm nét có cổng Sobel + Siêu phân giải ESPCN), độ sắc nét **Laplacian Variance tăng gấp $1.87$ lần trên tập UAV thực tế (từ $121.1$ lên $226.5$)** và tăng từ $109.8$ lên $186.9$ trên tập Synthetic mà vẫn duy trì **$\text{PSNR} = 27.42\text{ dB}$** (ở độ phân giải gốc) và **$27.40\text{ dB}$** (ở độ phân giải HD 720p).
-
----
-
-## 5. THẢO LUẬN (DISCUSSION)
-
-### 5.1. Tại sao các phương pháp Cân bằng Lược đồ Toàn cục (Global HE) thất bại trên ảnh UAV ESP32-CAM?
-Số liệu ở Bảng 1 chứng minh rằng cả `Global HE (RGB)` và `Global HE (CIE LAB)` đều làm chất lượng ảnh suy giảm nghiêm trọng so với ảnh gốc ($\text{PSNR}$ tụt từ $20.35\text{ dB}$ xuống $12.53\text{ dB}$ và $13.09\text{ dB}$; $\Delta E_{ab}^*$ tăng vọt lên $59.38$ và $52.17$). Nguyên nhân cốt lõi nằm ở hai yếu tố lý thuyết:
-1. Hàm phân bố tích lũy toàn cục (Global CDF) ép các mức xám có tần suất lớn (như mặt đường và bầu trời) phải giãn cách mạnh nhất. Do ảnh gốc chưa được khử nhiễu hạt CMOS và nhiễu khối JPEG ở tiền xử lý, phép kéo giãn đạo hàm lớn của Global HE khuếch đại toàn bộ nhiễu nền thành các mảng lốm đốm độ tương phản cao (khiến $\text{Laplacian Variance}$ vọt lên $> 1700$ do nhiễu chứ không phải do biên vật thể).
-2. Trên không gian RGB, việc cân bằng độc lập từng kênh làm thay đổi tỷ số sắc độ tại mọi điểm ảnh; còn trên không gian CIE LAB, nếu không sửa lỗi sụt kênh $G$ ở vùng sáng trước khi tăng tương phản, vùng ám hồng sẽ bị đẩy lên độ chói cao hơn và càng lộ rõ. Điều này khẳng định tính đúng đắn của kiến trúc **Tiền xử lý (Khử hồng + Khử nhiễu đa miền) $\rightarrow$ Xử lý chính (CIE LAB Haze-Pivot + CLAHE pha trộn nhẹ)** mà nhóm đề xuất.
-
-### 5.2. Phân tích sự đánh đổi (Trade-off) giữa Chất lượng Khôi phục Đa tầng và Tốc độ Thực thi
-* Ở cấu hình Giai đoạn 1+2 (bao gồm Khử hồng + Masked AWB + Wavelet BayesShrink + Non-Local Means + CIE LAB Haze-Pivot & CLAHE), thời gian xử lý trung bình trên CPU đạt **$166.01\text{ ms/frame}$ ($\approx 6.1\text{ FPS}$)** trên ảnh $800 \times 600$ (và đạt **$> 10\text{ FPS}$** khi chạy ở khung hình $640 \times 360$ trong hàm xử lý luồng video [`process_uav_video`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py#L405-L495)), hoàn toàn đáp ứng trực tiếp tốc độ truyền Wi-Fi thực tế của phần cứng ESP32-CAM ($2.5 - 6.5\text{ fps}$).
-* Khi bật toàn bộ Giai đoạn 3 với mô hình học sâu **ESPCN $3\times$ (ONNX)** chạy theo cơ chế chia ô (tiled inference) kết hợp **4 vòng lặp giải chập Richardson-Lucy** trên CPU đơn luồng để xuất ảnh chuẩn **HD 720p / Full HD 1080p**, thời gian xử lý tăng lên $436 - 614\text{ ms/frame}$ ($1.6 - 2.3\text{ FPS}$). Đây là sự đánh đổi hợp lý: trong chế độ bay giám sát thời gian thực, trạm mặt đất có thể chạy Giai đoạn 1+2 + Unsharp Masking nhẹ ($\ge 6.1\text{ FPS}$); khi cần trích xuất khung hình tĩnh chất lượng cao để nhận diện biển số/vật thể hoặc kết xuất video báo cáo chuẩn HD/Full HD, toàn bộ nhánh giải chập Richardson-Lucy và siêu phân giải mạng học sâu ESPCN sẽ được kích hoạt.
-
-### 5.3. Hạn chế của Hệ thống và Hướng phát triển
-* **Hạn chế vật lý khi bão hòa trắng cả 3 kênh ($R = G = B = 255$):** Thuật toán nội suy mềm vùng cháy sáng hồng hoạt động hiệu quả khi kênh Xanh lá ($G$) vẫn còn lưu giữ thông tin cấu trúc dưới ngưỡng bão hòa ($G < 220$). Tại tâm các điểm phản chiếu ánh nắng mặt trời trực diện vào ống kính khiến cả 3 kênh cùng bị cắt ngưỡng ở $255$, thông tin gradient không gian bị mất hoàn toàn ($D_{\text{pink}} = 0$).
-* **Hướng phát triển:**
-  1. Tích hợp kỹ thuật nội suy phục hồi vùng mất thông tin (*Image Inpainting* hoặc *Diffusion-based Highlight Hallucination*) cho các vùng cháy trắng hoàn toàn cả 3 kênh.
-  2. Chuyển đổi thực thi mạng siêu phân giải sang tăng tốc phần cứng GPU qua **Vulkan NCNN** (nhóm đã tích hợp thử nghiệm mô hình thực thi nhị phân tại [`models/realesrgan_vulkan/`](file:///home/ngtukien/Projects/XLA/models/realesrgan_vulkan)) hoặc sử dụng TensorRT/OpenVINO để đạt tốc độ $> 30\text{ FPS}$ ở chuẩn Full HD 1080p.
-
----
-
-## 6. PHÂN CÔNG NHIỆM VỤ TRONG NHÓM (TEAM CONTRIBUTION)
-
-Dự án được thực hiện bởi nhóm **4 thành viên** với tỷ lệ đóng góp đồng đều (**25% / thành viên**), mỗi thành viên phụ trách xuyên suốt từ khâu nghiên cứu lý thuyết chương học phần, lập trình module trong [`src/uav_pipeline.py`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py) đến xây dựng Jupyter Notebook thực nghiệm tương ứng:
-
-| Thành viên | Vai trò | Nhiệm vụ chi tiết & Sản phẩm bàn giao | File Code & Notebook phụ trách | Tỷ lệ đóng góp |
-| :--- | :--- | :--- | :--- | :---: |
-| **Thành viên 1** *(Nhóm trưởng)* | Kiến trúc sư Pipeline & Phụ trách Giai đoạn 1 | • Thiết kế kiến trúc tổng thể, quản lý mã nguồn và đồng bộ hóa giao diện hàm.<br>• Nghiên cứu và cài đặt thuật toán **Phát hiện mặt nạ trọng số mềm $\alpha(x,y)$ & Nội suy khôi phục vùng cháy sáng hồng**, **Cân bằng trắng Masked Gray World AWB**, và **Khử nhiễu lai đa miền Wavelet BayesShrink + Non-Local Means + Chroma Bilateral**.<br>• Biênman rà soát tổng thể báo cáo và `README.md`. | • [`src/uav_pipeline.py`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py) (Stage 1)<br>• [`notebooks/02_Stage1_Preprocess_PinkFix.ipynb`](file:///home/ngtukien/Projects/XLA/notebooks/02_Stage1_Preprocess_PinkFix.ipynb)<br>• [`notebooks/00_Full_Pipeline_Master.ipynb`](file:///home/ngtukien/Projects/XLA/notebooks/00_Full_Pipeline_Master.ipynb) | **25%** |
-| **Thành viên 2** | Phụ trách Dữ liệu UAV thực tế, Giai đoạn 3 & Video Demo | • Thu thập, trích xuất và chuẩn hóa **60 ảnh bay UAV thực nghiệm** cùng **3 video bay FPV**. <br>• Nghiên cứu và cài đặt thuật toán **Giải chập lặp quang học Richardson-Lucy PSF**, **Làm sắc nét Unsharp Masking có cổng đạo hàm Sobel**, và **Siêu phân giải học sâu ESPCN (ONNX) + Lanczos-4** nâng chuẩn HD 720p / Full HD 1080p.<br>• Kết xuất 4 video demo thực tế trong [`results/video/`](file:///home/ngtukien/Projects/XLA/results/video). | • [`src/uav_pipeline.py`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py) (Stage 3 & Video)<br>• [`notebooks/01_Data_Prep_and_Degradation.ipynb`](file:///home/ngtukien/Projects/XLA/notebooks/01_Data_Prep_and_Degradation.ipynb)<br>• [`notebooks/04_Stage3_Sharpen_Upscale720p.ipynb`](file:///home/ngtukien/Projects/XLA/notebooks/04_Stage3_Sharpen_Upscale720p.ipynb) | **25%** |
-| **Thành viên 3** | Phụ trách Giai đoạn 2, Phương pháp Đối chứng & Trực quan hóa | • Nghiên cứu lý thuyết không gian màu **CIE $L^*a^*b^*$ (Chương 4)** và biến đổi lược đồ **CLAHE (Chương 3)**.<br>• Cài đặt thuật toán **Khử mù sương Haze-Pivot**, **Local CLAHE pha trộn mượt**, **Bù bão hòa sắc độ $(a^*, b^*)$** và 2 phương pháp đối chứng **Global HE (RGB & CIE LAB)**.<br>• Thiết kế kịch bản vẽ biểu đồ Histogram RGB và bộ 4 hình minh họa chuẩn 300 DPI trong [`results/figures/`](file:///home/ngtukien/Projects/XLA/results/figures). | • [`src/uav_pipeline.py`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py) (Stage 2 & Baselines)<br>• [`notebooks/03_Stage2_LAB_CLAHE_Baselines.ipynb`](file:///home/ngtukien/Projects/XLA/notebooks/03_Stage2_LAB_CLAHE_Baselines.ipynb)<br>• [`results/figures/`](file:///home/ngtukien/Projects/XLA/results/figures) | **25%** |
-| **Thành viên 4** | Phụ trách Mô hình Suy giảm Có tham chiếu & Đánh giá Định lượng | • Xây dựng mô hình suy giảm vật lý 4 bước của cảm biến OV2640 và quy trình Data Augmentation tạo **30 cặp ảnh đối chứng Ground Truth** kèm [`data/dataset_manifest.csv`](file:///home/ngtukien/Projects/XLA/data/dataset_manifest.csv).<br>• Cài đặt bộ 6 hàm độ đo định lượng (**PSNR, SSIM, $\Delta E_{ab}^*$, Shannon Entropy, Laplacian Variance, Pink Cast Index**).<br>• Chạy thực nghiệm 90 ảnh, xuất Bảng 1 & Bảng 2 CSV và tổng hợp phân tích số liệu. | • [`src/uav_pipeline.py`](file:///home/ngtukien/Projects/XLA/src/uav_pipeline.py) (Metrics)<br>• [`src/build_notebooks_and_results.py`](file:///home/ngtukien/Projects/XLA/src/build_notebooks_and_results.py)<br>• [`notebooks/05_Evaluation_50Images_Tables.ipynb`](file:///home/ngtukien/Projects/XLA/notebooks/05_Evaluation_50Images_Tables.ipynb) | **25%** |
-
----
-
-## 7. KHAI BÁO SỬ DỤNG AI (AI USAGE DECLARATION)
-
-Thực hiện nghiêm túc quy định tại **Trang 8 của hướng dẫn Đồ án Xử lý ảnh (`DoAn_XuLyAnh.pdf`)** và các nguyên tắc đạo đức AI trong **Chương 9 (`9_XLA9_Dao duc AI trong XLA.pdf`)**, nhóm xin khai báo minh bạch việc sử dụng các công cụ Trí tuệ Nhân tạo trong quá trình thực hiện đồ án như sau:
-
-1. **Các công cụ & mô hình AI đã sử dụng:**
-   * **Mô hình học sâu mã nguồn mở tích hợp trong Pipeline (Inference Component):** Mạng siêu phân giải **ESPCN (Efficient Sub-Pixel Convolutional Neural Network $3\times$)** định dạng ONNX ([`models/espcn_super_res.onnx`](file:///home/ngtukien/Projects/XLA/models/espcn_super_res.onnx)) và công cụ thực thi mã nguồn mở `realesrgan-ncnn-vulkan` phục vụ thử nghiệm nâng cấp độ phân giải ảnh/video từ chuẩn VGA lên HD 720p và Full HD 1080p.
-   * **Trợ lý lập trình & học thuật AI (Generative AI Assistant):** Hỗ trợ gợi ý cấu trúc mã nguồn chuẩn hóa (modularization), tự động hóa kịch bản xuất biểu đồ `Matplotlib` 300 DPI, định dạng công thức toán học $\LaTeX$ và rà soát lỗi chính tả/trình bày trong báo cáo.
-
-2. **Quy trình kiểm chứng, tinh chỉnh và đóng góp thực chất của nhóm sinh viên:**
-   * Toàn bộ ý tưởng cốt lõi giải quyết bài toán phần cứng ESP32-CAM — bao gồm việc phát hiện quy luật sụt kênh $G$ gây ám hồng để thiết kế mặt nạ $\alpha(x,y)$, cơ chế kết hợp cổng bảo vệ tán lá cây với bộ lọc Wavelet + Non-Local Means, phép kéo giãn tương phản quanh điểm tựa sương mờ Haze-Pivot $L_{\text{pivot}} = 172$, và cổng đạo hàm Sobel chống nổi hạt nhiễu trên mặt đường — đều được nhóm trực tiếp phân tích từ ảnh thực tế, đối chiếu với lý thuyết **Chương 2, 3, 4, 5, 6** và thực nghiệm tinh chỉnh tham số qua nhiều vòng lặp.
-   * Mọi đoạn mã, công thức toán học và bảng số liệu định lượng (**Bảng 1** trên 30 cặp ảnh Synthetic và **Bảng 2** trên 60 ảnh Real UAV) đều được chạy thực tế 100% trên dữ liệu thật trong kho lưu trữ dự án, có thể tái lập hoàn toàn thông qua lệnh `python3 src/build_notebooks_and_results.py` hoặc chạy trực tiếp trên 6 tệp Jupyter Notebook `.ipynb`.
-   * Nhóm hoàn toàn chịu trách nhiệm về tính chính xác, tính trung thực khoa học và hiểu rõ từng dòng mã nguồn cũng như từng công thức toán học trình bày trong báo cáo này.
-
----
-
-## TÀI LIỆU THAM KHẢO (REFERENCES)
-
-1. **PGS.TS. Phạm Văn Cường**, *Bài giảng Học phần Xử lý ảnh (Chương 1 – Chương 9)*, Khoa Trí tuệ Nhân tạo, Học viện Công nghệ Bưu chính Viễn thông (PTIT), 2026.
-2. **Rafael C. Gonzalez, Richard E. Woods**, *Digital Image Processing (4th Edition)*, Pearson, 2018.
-3. **Karel Zuiderveld**, *"Contrast Limited Adaptive Histogram Equalization"*, Graphics Gems IV, Academic Press, pp. 474–485, 1994.
-4. **S. Grace Chang, Bin Yu, Martin Vetterli**, *"Adaptive Wavelet Thresholding for Image Denoising and Compression" (BayesShrink)*, IEEE Transactions on Image Processing, Vol. 9, No. 9, pp. 1532–1546, 2000.
-5. **Antoni Buades, Bartomeu Coll, Jean-Michel Morel**, *"A Non-Local Algorithm for Image Denoising"*, IEEE CVPR, Vol. 2, pp. 60–65, 2005.
-6. **W. H. Richardson**, *"Bayesian-Based Iterative Method of Image Restoration"*, Journal of the Optical Society of America, Vol. 62, No. 1, pp. 55–59, 1972.
-7. **Wenzhe Shi et al.**, *"Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel Convolutional Neural Network" (ESPCN)*, IEEE CVPR, pp. 1874–1883, 2016.
+1. Phạm Văn Cường, *Bài giảng Xử lý ảnh, chương 1 đến 9*, Khoa Trí tuệ Nhân tạo, PTIT, 2026.
+2. R. C. Gonzalez, R. E. Woods, *Digital Image Processing*, 4th ed., Pearson, 2018.
+3. K. He, J. Sun, X. Tang, "Single Image Haze Removal Using Dark Channel Prior", IEEE TPAMI 33(12), 2011.
+4. X. Wang và cộng sự, "Real-ESRGAN: Training Real-World Blind Super-Resolution with Pure Synthetic Data", ICCVW 2021.
+5. L. Chen, X. Chu, X. Zhang, J. Sun, "Simple Baselines for Image Restoration" (NAFNet), ECCV 2022.
+6. P. Zhu và cộng sự, "Detection and Tracking Meet Drones Challenge" (VisDrone), IEEE TPAMI 44(11), 2022.
+7. M. Bińkowski và cộng sự, "Demystifying MMD GANs" (KID), ICLR 2018.
+8. D. Lopez-Paz, M. Oquab, "Revisiting Classifier Two-Sample Tests", ICLR 2017.
+9. M. Oquab và cộng sự, "DINOv2: Learning Robust Visual Features without Supervision", TMLR 2024.
+10. A. RoyChowdhury và cộng sự, "Automatic Adaptation of Object Detectors to New Domains Using Self-Training", CVPR 2019.
+11. ISO/IEC 10918-1 (JPEG), phụ lục K: bảng lượng tử mẫu.
