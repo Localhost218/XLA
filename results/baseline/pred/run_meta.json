@@ -70,5 +70,40 @@
  "weights": {
   "path": "yolo-weights/yolo11s.pt",
   "sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5"
+ },
+ "ms_idle": {
+  "measured": "2026-11-18T02:32:36+00:00",
+  "frames": {
+   "test": 198,
+   "neg": 300,
+   "total": 498
+  },
+  "warmup_frames": 5,
+  "cpu_percent_during": 20.0,
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "note": "đo hai lượt riêng (full rồi SAHI), máy rảnh; edge16 = full",
+  "variants": {
+   "full": {
+    "mean": 20.99,
+    "median": 20.88,
+    "p95": 23.3,
+    "n_frames": 498,
+    "frames_without_box": 0
+   },
+   "edge16": {
+    "mean": 20.99,
+    "median": 20.88,
+    "p95": 23.3,
+    "n_frames": 498,
+    "frames_without_box": 0
+   },
+   "sahi_edge16": {
+    "mean": 470.53,
+    "median": 542.62,
+    "p95": 615.28,
+    "n_frames": 498,
+    "frames_without_box": 0
+   }
+  }
  }
 }
