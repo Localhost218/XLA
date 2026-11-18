@@ -141,6 +141,7 @@ _W: dict = {}
 
 
 def _init(state: dict) -> None:
+    cv2.setNumThreads(1)      # mỗi tiến trình một luồng: 16 tiến trình × luồng cv2 mặc định là tranh nhau CPU
     _W.clear()
     _W.update(state)
     if state.get("pool_needed"):

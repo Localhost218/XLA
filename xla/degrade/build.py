@@ -71,6 +71,8 @@ _W: dict = {}
 
 
 def _init_worker(state: dict) -> None:
+    if state.get("_single_thread"):
+        cv2.setNumThreads(1)  # nhiều tiến trình: mỗi tiến trình một luồng cv2 (không đổi kết quả)
     _W.clear()
     _W.update(state)
 
@@ -211,7 +213,7 @@ def build_set(set_name: str, units: list, seed: int, ctx: dict, root: Path, work
     target = limit or len(units)
     chosen: list[dict] = []
     pos, n_ok = 0, 0
-    ex = ProcessPoolExecutor(workers, initializer=_init_worker, initargs=(ctx,)) if workers > 1 else None
+    ex = ProcessPoolExecutor(workers, initializer=_init_worker, initargs=({**ctx, "_single_thread": True},)) if workers > 1 else None
     if ex is None:
         _init_worker(ctx)
     try:

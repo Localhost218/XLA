@@ -1,40 +1,41 @@
 # D2: "bản sao số" camera ESP32-S3 + OV3660 (phase 05 bước 5; phase 07 hiệu chỉnh). Đọc bằng xla/degrade/d2_camera.py.
 # Số đo nằm ở configs/camera_profile.yaml (contract §6); file này chỉ chứa tham số chuỗi làm xấu.
 # Mỗi khối ghi `matches:` = trường hồ sơ mà khối đọc trực tiếp hoặc phải làm khớp (phase 06 đo, phase 07 chỉnh).
-# Khoảng [a, b] = lấy đều mỗi ảnh. Giá trị khởi đầu: phase 05, chưa hiệu chỉnh.
-version: "0.1.0"
-params_version: 1              # tăng mỗi lần phase 07 ghi tham số hiệu chỉnh (calibrate.py)
+# Khoảng [a, b] = lấy đều mỗi ảnh. Giá trị: phase 07 hiệu chỉnh trên khung dev (params_version 2, calibrate.py; trước đó
+# là giá trị khởi đầu của phase 05).
+version: "0.2.0"
+params_version: 2              # tăng mỗi lần phase 07 ghi tham số hiệu chỉnh (calibrate.py)
 
 haze:                            # (a) I = J·t + A·(1−t), tính trong không gian tuyến tính
   matches: [haze.dark_channel_15px_0_255, haze.y_p1_0_255, haze.saturation_0_255]
-  airlight_0_1: [0.80, 0.95]     # A theo sRGB 0–1
+  airlight_0_1: [0.7532, 0.9032]     # A theo sRGB 0–1
   airlight_tint_bgr: [1.0, 1.0, 1.0]
-  dark_scale: 1.0                # nhân dark channel đích (lấy mẫu từ hồ sơ) — núm cho phase 07
+  dark_scale: 0.9823                # nhân dark channel đích (lấy mẫu từ hồ sơ) — núm cho phase 07
   t_range: [0.2, 1.0]
 
 lens:                            # (b) PSF Gauss + tối góc cos⁴ (tâm khung 640×480)
   matches: [sharpness.psf_sigma_px_fit, sharpness.mtf50_cyc_per_px, sharpness.laplacian_var,
             vignette.focal_px_fit, vignette.corner_center_ratio]
-  psf_sigma_scale: [0.85, 1.15]  # nhân sharpness.psf_sigma_px_fit
-  vignette_focal_scale: [0.95, 1.05]
+  psf_sigma_scale: [0.5418, 0.8418]  # nhân sharpness.psf_sigma_px_fit
+  vignette_focal_scale: [0.5684, 0.6684]
 
 tone:                            # (c) phơi sáng → cắt từng kênh ở 1,0 → nhân WB R/B + hệ số ra k → hồng ở vùng sáng
   matches: [color.r_over_g, color.b_over_g, magenta.highlight_y_0_255, magenta.frac_pixels,
             magenta.frac_frames_gt_0p5pct]
-  brightness: [0.9, 1.15]        # độ sáng tông trung tính (= phơi sáng × k)
+  brightness: [1.201, 1.451]        # độ sáng tông trung tính (= phơi sáng × k)
   highlight_gain_scale: 1.0      # nhân k suy từ magenta.highlight_y p50
   # Hệ số WB của ISP so với G (> 1). Hồ sơ v1.2.0 ghi cận dưới (wb_gain_*_fit); phase 07 tìm từ cận đó trở lên.
   # (Hồ sơ v1.1.0 ghi p50 r/g, b/g < 1 ở trường này.) Nhỏ hơn brightness/k thì R/B cắt ở miền cảm biến, vùng sáng
   # bớt hồng; lớn hơn thì hệ số gần như không đổi ảnh ra.
-  isp_wb_gain_r: 2.2
-  isp_wb_gain_b: 2.2
-  cast_r: 1.0                    # nhân p50 color.r_over_g của hồ sơ (ám màu tông chưa bão hoà), phase 07 chỉnh
-  cast_b: 1.0                    # nhân p50 color.b_over_g
+  isp_wb_gain_r: 1.988
+  isp_wb_gain_b: 2.051
+  cast_r: 0.9602                    # nhân p50 color.r_over_g của hồ sơ (ám màu tông chưa bão hoà), phase 07 chỉnh
+  cast_b: 0.9927                    # nhân p50 color.b_over_g
 
 isp:                             # (d) làm mềm + nhiễu sau ISP theo NLF, phổ theo PSD
   matches: [noise.nlf, noise.psd_radial, noise.sigma_immerkaer_0_255, sharpness.laplacian_var]
-  soften_sigma: [0.3, 0.7]
-  noise_scale: [0.8, 1.2]        # nhân σ của NLF (JPEG cuối còn ăn bớt nhiễu)
+  soften_sigma: [0.2436, 0.6436]
+  noise_scale: [0.4447, 0.8447]        # nhân σ của NLF (JPEG cuối còn ăn bớt nhiễu)
   chroma_noise_frac: 0.3
 
 strip:                           # (e) dải mép trái → 640×480

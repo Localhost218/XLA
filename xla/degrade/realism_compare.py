@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import platform
 import sys
 import time
@@ -45,13 +46,15 @@ def _manifest_sha(name: str) -> str | None:
     return hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else None
 
 
-def run_row(name: str, real: list[Path], n_images: int, n_patches: int, seed: int, tiers: tuple, device: str) -> dict:
+def run_row(name: str, real: list[Path], n_images: int, n_patches: int, seed: int, tiers: tuple, device: str,
+            use_cache: bool = True) -> dict:
     from xla.eval.realism import compute_realism
     from xla.gpu_lock import gpu_lock
 
     synth = synth_paths(name, n_images, seed)
     t0 = time.perf_counter()
-    res = compute_realism(real, synth, tiers=tiers, device=device, cache_dir=paths.cache_dir() / "realism",
+    cache = paths.cache_dir() / "realism" if use_cache else None
+    res = compute_realism(real, synth, tiers=tiers, device=device, cache_dir=cache,
                           lock=lambda: gpu_lock(f"degrade:realism:{name}"), seed=seed, n_patches=n_patches)
     t = res["timing_s"]
     gpu_s = round(t.get("c2st", 0) - t.get("c2st_load", 0) + t.get("kid_features", 0), 2)
@@ -83,16 +86,20 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--n-patches", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--device", default="cuda")
-    ap.add_argument("--smoke", action="store_true", help="chỉ KID cho D2, ghi giờ GPU vào khối smoke")
+    ap.add_argument("--smoke", action="store_true", help="chỉ KID một hàng (--smoke-row), ghi giờ GPU vào khối smoke")
+    ap.add_argument("--smoke-row", default="d2", choices=list(SET_ROWS))
     ap.add_argument("--out", type=Path, default=paths.repo_root() / OUT_REL)
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
+    # trọng số DINOv2 nằm ở D:/DevCache/torch (results/realism/README.md); không để torch.hub tải về ổ C
+    os.environ.setdefault("TORCH_HOME", str(paths.cache_dir().parent / "torch"))
     try:
         real = split_images(_split_file(), "test")
         out = json.loads(a.out.read_text(encoding="utf-8")) if a.out.exists() else {}
         if a.smoke:
-            row = run_row("d2", real, a.n_images, a.n_patches, a.seed, ("kid",), a.device)
-            out["smoke"] = {"what": "1 lần KID (10 tập con) D2 vs test, đặc trưng chưa cache",
+            row = run_row(a.smoke_row, real, a.n_images, a.n_patches, a.seed, ("kid",), a.device, use_cache=False)
+            out["smoke"] = {"what": (f"1 lần KID (10 tập con) {a.smoke_row} vs test, không dùng cache đặc trưng; "
+                                     "trọng số đã có ở TORCH_HOME"), "row": a.smoke_row,
                             "n_patches": a.n_patches, "gpu_seconds": row["gpu_seconds"],
                             "seconds_total": row["seconds_total"], "kid": row["kid"], "gpu": row["gpu"],
                             "measured": time.strftime("%Y-%m-%d %H:%M")}
