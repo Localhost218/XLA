@@ -50,6 +50,7 @@ SAHI_BATCH = 8
 WARMUP = 5
 VARIANTS = ("full", "edge16", "sahi_edge16")
 RUN_SPLITS = ("test", "neg", "dev")
+TIME_SPLITS = ("test", "neg")
 SPLIT_REL = Path("data/real/split.json")
 OUT_REL = Path("results/baseline/pred")
 CSV_FIELDS = ("frame", "x1", "y1", "x2", "y2", "conf", "ms")
@@ -91,7 +92,10 @@ def _sha256(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def run(frames: list[str], frames_dir: Path, out_dir: Path, lock_timeout: float) -> dict[str, Any]:
+def infer(frames: list[str], frames_dir: Path, lock_timeout: float, label: str) -> dict[str, Any]:
+    """Suy luận ``full`` rồi SAHI, hai lượt riêng (mỗi lượt khởi động ``WARMUP`` khung trước), trong ``gpu_lock``.
+
+    Trả ``{"full": {frame: (rows, ms)}, "sahi": {...}, "gpu", "gpu_lock_wait_s", "weights"}``."""
     import cv2
     import torch
     from sahi import AutoDetectionModel
@@ -101,44 +105,53 @@ def run(frames: list[str], frames_dir: Path, out_dir: Path, lock_timeout: float)
     from xla.gpu_lock import gpu_lock
 
     weights = downloads_dir() / WEIGHTS_REL
+    images = {f: cv2.imread(str(frames_dir / f), cv2.IMREAD_COLOR) for f in frames}
+    bad = [f for f, im in images.items() if im is None]
+    if bad:
+        raise FileNotFoundError(f"không đọc được {len(bad)} khung, vd. {bad[:3]}")
+    rgbs = {f: np.ascontiguousarray(im[:, :, ::-1]) for f, im in images.items()}
     full: dict[str, tuple[list[Row], float]] = {}
     sahi: dict[str, tuple[list[Row], float]] = {}
     lock_wait0 = time.perf_counter()
-    with gpu_lock(f"phase09 baseline yolo11s@{IMGSZ} ({len(frames)} khung)", timeout_s=lock_timeout):
+    with gpu_lock(f"{label} ({len(frames)} khung)", timeout_s=lock_timeout):
         lock_wait_s = time.perf_counter() - lock_wait0
         model = YOLO(str(weights))
-        sahi_model = AutoDetectionModel.from_pretrained(model_type="ultralytics", model_path=str(weights),
-                                                        confidence_threshold=CONF, device="cuda:0", image_size=IMGSZ)
-        images = {f: cv2.imread(str(frames_dir / f), cv2.IMREAD_COLOR) for f in frames}
-        bad = [f for f, im in images.items() if im is None]
-        if bad:
-            raise FileNotFoundError(f"không đọc được {len(bad)} khung, vd. {bad[:3]}")
-        first = images[frames[0]]
-        for _ in range(WARMUP):
-            model.predict(first, imgsz=IMGSZ, conf=CONF, classes=[CLASS_PERSON], max_det=MAX_DET, device=0, verbose=False)
-            _sahi_predict(get_sliced_prediction, sahi_model, first[:, :, ::-1])
-        for f in frames:
-            im = images[f]
-            t0 = time.perf_counter()
+
+        def predict_full(im: np.ndarray) -> list[Row]:
             res = model.predict(im, imgsz=IMGSZ, conf=CONF, classes=[CLASS_PERSON], max_det=MAX_DET, device=0,
                                 verbose=False)[0]
-            data = res.boxes.data.cpu().numpy()
-            full[f] = ([(float(x1), float(y1), float(x2), float(y2), float(c)) for x1, y1, x2, y2, c, _ in data],
-                       (time.perf_counter() - t0) * 1000)
-            rgb = np.ascontiguousarray(im[:, :, ::-1])
+            return [(float(x1), float(y1), float(x2), float(y2), float(c))
+                    for x1, y1, x2, y2, c, _ in res.boxes.data.cpu().numpy()]
+
+        for f in frames[:WARMUP]:
+            predict_full(images[f])
+        for f in frames:
             t0 = time.perf_counter()
-            rows = _sahi_predict(get_sliced_prediction, sahi_model, rgb)
+            rows = predict_full(images[f])
+            full[f] = (rows, (time.perf_counter() - t0) * 1000)
+        sahi_model = AutoDetectionModel.from_pretrained(model_type="ultralytics", model_path=str(weights),
+                                                        confidence_threshold=CONF, device="cuda:0", image_size=IMGSZ)
+        for f in frames[:WARMUP]:
+            _sahi_predict(get_sliced_prediction, sahi_model, rgbs[f])
+        for f in frames:
+            t0 = time.perf_counter()
+            rows = _sahi_predict(get_sliced_prediction, sahi_model, rgbs[f])
             sahi[f] = (rows, (time.perf_counter() - t0) * 1000)
         gpu_name = torch.cuda.get_device_name(0)
+    return {"full": full, "sahi": sahi, "gpu": gpu_name, "gpu_lock_wait_s": round(lock_wait_s, 1),
+            "weights": {"path": WEIGHTS_REL.as_posix(), "sha256": _sha256(weights)}}
 
-    outs = {"full": full, "edge16": {f: (drop_edge(r), ms) for f, (r, ms) in full.items()},
-            "sahi_edge16": {f: (drop_edge(r), ms) for f, (r, ms) in sahi.items()}}
+
+def run(frames: list[str], frames_dir: Path, out_dir: Path, lock_timeout: float) -> dict[str, Any]:
+    r = infer(frames, frames_dir, lock_timeout, f"phase09 baseline yolo11s@{IMGSZ}")
+    full, sahi = r.pop("full"), r.pop("sahi")
+    outs = {"full": full, "edge16": {f: (drop_edge(rows), ms) for f, (rows, ms) in full.items()},
+            "sahi_edge16": {f: (drop_edge(rows), ms) for f, (rows, ms) in sahi.items()}}
     summary: dict[str, Any] = {}
     for name, per_frame in outs.items():
         n_rows = write_csv(out_dir / f"{name}.csv", per_frame)
         summary[name] = {"csv": (out_dir / f"{name}.csv").as_posix(), "rows": n_rows, "ms": _ms_stats(per_frame)}
-    return {"variants": summary, "gpu": gpu_name, "gpu_lock_wait_s": round(lock_wait_s, 1),
-            "weights": {"path": WEIGHTS_REL.as_posix(), "sha256": _sha256(weights)}}
+    return {"variants": summary} | r
 
 
 def _sahi_predict(get_sliced_prediction: Any, sahi_model: Any, rgb: np.ndarray) -> list[Row]:
@@ -187,6 +200,34 @@ def cmd_run(a: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_time(a: argparse.Namespace) -> int:
+    """Đo lại ms/khung ``full`` và ``sahi_edge16`` trên test + neg (khi máy rảnh), ghi ``ms_idle`` vào run_meta.json.
+
+    Không ghi lại CSV. ``edge16`` dùng ms của ``full`` (lọc mép sau suy luận). Ghi kèm % CPU toàn máy trong lúc đo để
+    người đọc tự kiểm máy có rảnh thật không."""
+    import psutil
+
+    root = repo_root()
+    by_split = select_frames(a.split_json or root / SPLIT_REL, TIME_SPLITS)
+    frames = [f for sp in TIME_SPLITS for f in by_split[sp]]
+    meta_p = (a.pred_dir or root / OUT_REL) / "run_meta.json"
+    meta = json.loads(meta_p.read_text(encoding="utf-8"))
+    psutil.cpu_percent(interval=None)
+    r = infer(frames, a.frames_dir or root / FRAMES_REL, a.lock_timeout, f"phase09 đo ms yolo11s@{IMGSZ}")
+    cpu = psutil.cpu_percent(interval=None)
+    full, sahi = _ms_stats(r["full"]), _ms_stats(r["sahi"])
+    meta["ms_idle"] = {
+        "measured": datetime.now(UTC).isoformat(timespec="seconds"),
+        "frames": {sp: len(by_split[sp]) for sp in TIME_SPLITS} | {"total": len(frames)},
+        "warmup_frames": WARMUP, "cpu_percent_during": cpu, "gpu": r["gpu"],
+        "note": "đo hai lượt riêng (full rồi SAHI), máy rảnh; edge16 = full",
+        "variants": {"full": full, "edge16": full, "sahi_edge16": sahi},
+    }
+    meta_p.write_text(json.dumps(meta, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
+    print(json.dumps(meta["ms_idle"], ensure_ascii=False))
+    return 0
+
+
 def cmd_score(a: argparse.Namespace) -> int:
     """Chấm ba CSV bằng ``xla.eval.detection`` → một JSON (``baseline.json`` khi nhãn đã duyệt, không thì bản tạm)."""
     from xla.eval.detection import EvalInputError, TestLeakError, evaluate
@@ -205,6 +246,11 @@ def cmd_score(a: argparse.Namespace) -> int:
     except (EvalInputError, TestLeakError, FileNotFoundError) as e:
         print(f"LỖI: {e}", file=sys.stderr)
         return 1
+    ms_idle = (doc["run_meta"] or {}).get("ms_idle")
+    for v, r in doc["variants"].items():
+        r["ms_per_frame_idle"] = ms_idle["variants"][v] if ms_idle else None
+        if r["ms_per_frame"]:
+            r["ms_per_frame"]["note"] = "cột ms của CSV, đo lúc chạy run (có thể máy đang bận); số chuẩn: ms_per_frame_idle"
     official = all(r["official"] for r in doc["variants"].values())
     note = None if official else "SỐ TẠM — nhãn chưa được chủ dự án duyệt hoặc thiếu nhãn; không phải số chính thức"
     doc = {"official": official, "note": note} | doc  # đặt lên đầu file cho dễ thấy
@@ -237,9 +283,14 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--seed", type=int, default=BOOT_SEED)
     s.add_argument("--allow-missing-labels", action="store_true")
     s.add_argument("--out", type=Path, required=True, help="vd. results/baseline/baseline.json")
+    t = sub.add_parser("time", help="đo lại ms/khung full + sahi_edge16 trên test + neg (máy rảnh), ghi run_meta.json")
+    t.add_argument("--split-json", type=Path, default=None, help=f"mặc định {SPLIT_REL}")
+    t.add_argument("--frames-dir", type=Path, default=None, help=f"mặc định {FRAMES_REL}")
+    t.add_argument("--pred-dir", type=Path, default=None, help=f"mặc định {OUT_REL}")
+    t.add_argument("--lock-timeout", type=float, default=6 * 3600.0, help="giây chờ khoá GPU")
     a = ap.parse_args(argv)
     try:
-        return {"run": cmd_run, "score": cmd_score}[a.cmd](a)
+        return {"run": cmd_run, "score": cmd_score, "time": cmd_time}[a.cmd](a)
     except (FileNotFoundError, TimeoutError) as e:
         print(f"LỖI: {e}", file=sys.stderr)
         return 1
