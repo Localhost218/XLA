@@ -12,6 +12,7 @@ AX::
 
     python -m xla.detect.train --config configs/train_e1.yaml --set d2 --smoke --json   # 1 epoch / 10 % D2 → smoke.json
     python -m xla.detect.train --config configs/train_e1.yaml --set d0 --json           # lần đủ (GPU, gpu_lock)
+    python -m xla.detect.train --config configs/train_e1.yaml --time --json             # đo lại ms/khung (B3, GPU)
     python -m xla.detect.train --config configs/train_e1.yaml --score --json            # chấm + so ghép cặp → e1.json
     # exit 0 xong; 1 lỗi dữ liệu / thiếu run / hết giờ chờ khoá; 2 sai tham số
 """
@@ -318,6 +319,47 @@ def smoke_report(cfg: dict[str, Any], res: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _gpu_temp() -> int | None:
+    r = subprocess.run(["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"],
+                       capture_output=True, text=True, check=False)
+    return int(r.stdout.split()[0]) if r.returncode == 0 and r.stdout.strip() else None
+
+
+def time_sets(cfg: dict[str, Any]) -> dict[str, Any]:
+    """Đo lại ms/khung trên test + neg bằng ``best_devval.pt`` mỗi set, tiến trình riêng, một lần giữ khoá (B3).
+
+    ms ghi lúc dự đoán ngay sau train bị phồng (cùng tiến trình với train: cuDNN ``deterministic``, bộ nhớ GPU còn
+    giữ), nên B3 dùng số đo này. Ghi ``<run_dir>/ms_idle.json``; kèm % CPU toàn máy lúc đo."""
+    import psutil
+    import torch
+    from ultralytics import YOLO
+
+    from xla.gpu_lock import gpu_lock
+
+    root = repo_root()
+    by_split = select_frames(root / SPLIT_REL, tuple(cfg["predict"]["splits"]))
+    frames = [f for fs in by_split.values() for f in fs]
+    imgsz, out = int(cfg["train"]["imgsz"]), {}
+    with gpu_lock("phase10 e1 đo ms best_devval (4 set)", timeout_s=float(cfg["lock_timeout_s"])):
+        for s in cfg["sets"]:
+            run_dir = Path(cfg["runs_dir"]) / s
+            model = YOLO(str(run_dir / "weights" / "best_devval.pt"))
+            psutil.cpu_percent(interval=None)
+            temp0 = _gpu_temp()
+            preds = predict(model, frames, root / FRAMES_REL, cfg["predict"], imgsz)
+            cpu = psutil.cpu_percent(interval=None)
+            ms = np.asarray([v[1] for v in preds.values()], dtype=float)
+            out[s] = {"measured": _now(), "mean": round(float(ms.mean()), 2), "median": round(float(np.median(ms)), 2),
+                      "p95": round(float(np.percentile(ms, 95)), 2), "n_frames": int(ms.size), "warmup_frames": WARMUP,
+                      "cpu_percent_during": cpu, "gpu": torch.cuda.get_device_name(0),
+                      "gpu_temp_c": {"start": temp0, "end": _gpu_temp()},
+                      "note": "PyTorch FP32, conf 0,001, test + neg, tiến trình riêng sau train (giống baseline time)"}
+            _dump(run_dir / "ms_idle.json", out[s])
+            del model
+            torch.cuda.empty_cache()
+    return out
+
+
 # ---------------------------------------------------------------- chấm + so ghép cặp → e1.json (CPU)
 
 B1_MAP50 = 0.227  # results/baseline/tieu-chi-sau-m2.md §2
@@ -402,7 +444,8 @@ def score(cfg: dict[str, Any], boot: int, seed: int) -> dict[str, Any]:
                                      / 3600, 4),
             "gpu_hours": round(sum(x["gpu_s"] for x in info["sessions"]) / 3600, 4),
             "epochs": done["epochs"], "batch_effective": done["batch_effective"], "train_data": info["dataset"],
-            "ms_per_frame": pred["ms"], "cpu_percent_during_predict": pred["cpu_percent_during"],
+            "ms_per_frame": _load(run_dir / "ms_idle.json") or pred["ms"],
+            "ms_per_frame_after_train": pred["ms"] | {"cpu_percent_during": pred["cpu_percent_during"]},
             "devval_history": hist, "test": summarize(ev),
         }
     compares = {f"edge16_vs_{s}": compare(base_csv, csvs[s], "test", boot_n=boot, seed=seed) for s in cfg["sets"]}
@@ -435,6 +478,7 @@ def main(argv: list[str] | None = None) -> int:
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--set", choices=("d0", "d1", "d2", "d2sr"))
     g.add_argument("--score", action="store_true", help="chấm mọi set + so ghép cặp → results/e1/e1.json (CPU)")
+    g.add_argument("--time", action="store_true", help="đo lại ms/khung best_devval.pt mỗi set (GPU, gpu_lock)")
     ap.add_argument("--smoke", action="store_true", help="1 epoch trên smoke.fraction ảnh train → results/e1/smoke.json")
     ap.add_argument("--boot", type=int, default=None, help="số mẫu bootstrap (mặc định của xla.eval.detection)")
     ap.add_argument("--seed", type=int, default=None)
@@ -444,7 +488,9 @@ def main(argv: list[str] | None = None) -> int:
 
     cfg = load_config(a.config or repo_root() / CONFIG_REL)
     try:
-        if a.score:
+        if a.time:
+            out = time_sets(cfg)
+        elif a.score:
             doc = score(cfg, a.boot if a.boot is not None else BOOT_N, a.seed if a.seed is not None else BOOT_SEED)
             out: dict[str, Any] = {"e1": (repo_root() / RESULTS_REL / "e1.json").as_posix(), "best": doc["best"],
                                    "gpu_hours_total": doc["gpu_hours_total"]}
