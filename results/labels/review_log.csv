@@ -1,0 +1,653 @@
+frame,split,action,box_id,x1,y1,x2,y2,prelabel_source,reason
+20261102-100941_002_00382.jpg,devval,tighten,4,424,55,443,83,rtdetr,chỉnh cạnh người áo xanh
+20261102-100941_002_00382.jpg,devval,tighten,5,440,52,464,88,rtdetr,thêm chân người áo đen
+20261102-100941_002_00382.jpg,devval,drop,6,,,,,rtdetr,rác cạnh đống rác
+20261102-100941_002_00382.jpg,devval,drop,7,,,,,rtdetr,bóng
+20261102-100941_002_00382.jpg,devval,hard,,,,,,,hộp 3 nghi người cúi áo xanh cầm gậy đứng yên
+20261102-100941_002_00400.jpg,devval,drop,5,,,,,rtdetr,bóng
+20261102-100941_002_00400.jpg,devval,drop,7,,,,,rtdetr,đốm trắng giấy
+20261102-100941_002_00400.jpg,devval,drop,8,,,,,rtdetr,rác cạnh đống rác
+20261102-100941_002_00413.jpg,devval,tighten,2,151,57,177,82,rtdetr,siết khỏi bóng
+20261102-100941_002_00413.jpg,devval,drop,6,,,,,rtdetr,đốm trắng giấy
+20261102-100941_002_00413.jpg,devval,drop,7,,,,,rtdetr,bóng
+20261102-100941_002_00413.jpg,devval,drop,8,,,,,rtdetr,bóng
+20261102-100941_002_00423.jpg,devval,tighten,1,10,183,39,205,rtdetr,người áo hồng bị dải mép che chỉ còn chân
+20261102-100941_002_00423.jpg,devval,drop,2,,,,,rtdetr,đốm trắng giấy
+20261102-100941_002_00423.jpg,devval,drop,3,,,,,yolo,dải mép
+20261102-100941_002_00423.jpg,devval,add,,23,113,57,131,,người áo xanh cúi sót
+20261102-100941_002_00423.jpg,devval,add,,55,99,90,120,,người áo xanh đậm sót
+20261102-100941_002_00423.jpg,devval,add,,75,104,110,136,,người áo đen sót
+20261102-100941_002_00423.jpg,devval,hard,,,,,,,nhóm ba người dính nhau và người bị dải mép che
+20261102-100941_002_00438.jpg,devval,drop,1,,,,,both,dải mép
+20261102-100941_002_00438.jpg,devval,add,,56,87,88,113,,người áo xanh cúi sót
+20261102-100941_002_00438.jpg,devval,add,,93,74,116,100,,người áo xanh đậm sót bị che một phần
+20261102-100941_002_00438.jpg,devval,add,,108,82,144,116,,người áo đen sót
+20261102-100941_002_00438.jpg,devval,hard,,,,,,,nhóm ba người dính nhau; người áo hồng nằm dưới dải mép chỉ lộ vệt chân mảnh không gán
+20261102-100941_002_00460.jpg,devval,drop,1,,,,,both,dải mép
+20261102-100941_002_00460.jpg,devval,add,,55,56,84,75,,người áo xanh cúi sót
+20261102-100941_002_00460.jpg,devval,add,,80,43,117,65,,người áo xanh đậm sót
+20261102-100941_002_00460.jpg,devval,add,,104,51,144,81,,người áo đen sót
+20261102-100941_002_00460.jpg,devval,hard,,,,,,,nhóm ba người dính nhau; bóng người dài ở mép trái người nằm dưới dải mép
+20261102-100941_002_00470.jpg,devval,drop,1,,,,,rtdetr,dải mép
+20261102-100941_002_00470.jpg,devval,drop,2,,,,,rtdetr,đốm trắng giấy
+20261102-100941_002_00470.jpg,devval,add,,56,57,89,74,,người áo xanh cúi sót
+20261102-100941_002_00470.jpg,devval,add,,87,45,114,66,,người áo xanh đậm sót
+20261102-100941_002_00470.jpg,devval,add,,111,46,146,81,,người áo đen sót
+20261102-100941_002_00470.jpg,devval,hard,,,,,,,nhóm ba người dính nhau
+20261102-100941_002_00483.jpg,devval,drop,1,,,,,rtdetr,dải mép
+20261102-100941_002_00483.jpg,devval,add,,71,45,104,66,,người áo xanh cúi sót
+20261102-100941_002_00483.jpg,devval,add,,108,32,133,58,,người áo xanh đậm sót
+20261102-100941_002_00483.jpg,devval,add,,130,30,168,62,,người áo đen sót
+20261102-100941_002_00483.jpg,devval,hard,,,,,,,nhóm ba người dính nhau mờ
+20261102-100941_002_00496.jpg,devval,drop,1,,,,,rtdetr,đốm hồng giấy trên cỏ
+20261102-100941_002_00496.jpg,devval,drop,2,,,,,rtdetr,đốm trắng giấy
+20261102-100941_002_00496.jpg,devval,add,,17,71,54,91,,người áo xanh cúi sót
+20261102-100941_002_00496.jpg,devval,add,,52,42,94,78,,người áo xanh đậm sót
+20261102-100941_002_00496.jpg,devval,add,,89,45,122,85,,người áo đen sót
+20261102-100941_002_00496.jpg,devval,hard,,,,,,,nhóm ba người dính nhau khó tách
+20261102-100941_002_00512.jpg,devval,drop,1,,,,,rtdetr,dải mép
+20261102-100941_002_00512.jpg,devval,drop,2,,,,,rtdetr,đốm trắng giấy
+20261102-100941_002_00512.jpg,devval,add,,0,29,48,76,,người áo đen sót bị cắt ở mép trái
+20261102-100941_002_00512.jpg,devval,hard,,,,,,,người ở mép trái chỉ thấy một phần dính bóng
+20261102-100941_002_00528.jpg,devval,drop,1,,,,,rtdetr,đốm hồng giấy trên cỏ
+20261102-100941_002_00528.jpg,devval,drop,2,,,,,rtdetr,dải mép
+20261102-100941_002_00556.jpg,devval,drop,1,,,,,rtdetr,dải mép
+20261102-100941_002_00556.jpg,devval,drop,2,,,,,yolo,đốm hồng giấy trên cỏ
+20261102-100941_002_00572.jpg,devval,drop,1,,,,,both,đốm hồng giấy trên cỏ đứng yên nhiều khung
+20261102-100941_002_00572.jpg,devval,drop,2,,,,,rtdetr,dải mép
+20261102-100941_002_00572.jpg,devval,drop,3,,,,,yolo,dải mép
+20261102-100941_003_02259.jpg,devval,ok,,,,,,,
+20261102-100941_003_02282.jpg,devval,drop,1,,,,,rtdetr,hộp to trên cỏ trống không có người
+20261102-100941_003_02321.jpg,devval,ok,,,,,,,
+20261102-100941_003_02364.jpg,devval,ok,,,,,,,
+20261102-100941_003_02376.jpg,devval,ok,,,,,,,
+20261102-100941_003_02385.jpg,devval,ok,,,,,,,
+20261102-100941_003_02400.jpg,devval,ok,,,,,,,
+20261102-100941_003_02407.jpg,devval,tighten,1,567,306,608,336,rtdetr,siết người mũ trắng áo đen
+20261102-100941_003_02407.jpg,devval,add,,543,357,584,387,,người áo đen cầm túi trắng sót
+20261102-100941_003_02407.jpg,devval,add,,544,382,580,401,,người áo xanh đậm sót dưới người áo đen
+20261102-100941_003_02407.jpg,devval,add,,626,229,640,247,,người bị cắt ở mép phải
+20261102-100941_003_02407.jpg,devval,hard,,,,,,,nhóm bốn người dính nhau trên cỏ và người ở mép phải chỉ lộ một phần
+20261102-100941_003_02426.jpg,devval,tighten,1,342,224,370,255,rtdetr,ôm cả đầu mũ hồng và thân
+20261102-100941_003_02426.jpg,devval,tighten,3,327,279,354,302,rtdetr,siết người áo đen
+20261102-100941_003_02426.jpg,devval,tighten,4,310,293,345,315,rtdetr,người áo xanh đậm phía dưới
+20261102-100941_003_02426.jpg,devval,drop,5,,,,,rtdetr,rác túi trắng
+20261102-100941_003_02426.jpg,devval,add,,407,146,441,168,,người áo hồng trên đường sót
+20261102-100941_003_02426.jpg,devval,hard,,,,,,,nhóm ba người nối nhau trên cỏ (hộp 3 và 4 là hai người theo khung 02497)
+20261102-100941_004_01674.jpg,devval,ok,,,,,,,
+20261102-100941_004_01692.jpg,devval,ok,,,,,,,
+20261102-100941_004_01703.jpg,devval,ok,,,,,,,
+20261102-100941_004_01727.jpg,devval,ok,,,,,,,
+20261102-100941_004_01750.jpg,devval,drop,1,,,,,both,dải mép
+20261102-100941_004_01750.jpg,devval,drop,2,,,,,rtdetr,bụi cỏ cạnh bờ
+20261102-100941_004_01750.jpg,devval,hard,,,,,,,mép phải có bóng người dài nhưng thân người nằm ngoài khung không gán
+20261102-100941_004_01771.jpg,devval,tighten,1,477,276,520,312,rtdetr,siết khỏi bóng sang người áo đen
+20261102-100941_004_01771.jpg,devval,add,,481,226,516,254,,người áo xanh trên đường sót
+20261102-100941_004_01771.jpg,devval,add,,484,331,514,356,,người áo xanh đậm trên cỏ sót
+20261102-100941_004_01771.jpg,devval,hard,,,,,,,mép phải có người chỉ lộ chân kèm bóng dài không gán
+20261102-100941_004_01820.jpg,devval,tighten,1,526,279,579,323,both,tách khỏi bóng chỉ người áo đen giữa
+20261102-100941_004_01820.jpg,devval,add,,548,254,580,280,,người mũ trắng phía trên sót
+20261102-100941_004_01820.jpg,devval,add,,534,334,567,355,,người áo xanh đậm phía dưới sót
+20261102-100941_004_01820.jpg,devval,hard,,,,,,,nhóm ba người dính nhau lẫn bóng dài
+20261102-100941_004_01839.jpg,devval,tighten,1,528,279,580,323,both,tách khỏi bóng chỉ người áo đen giữa
+20261102-100941_004_01839.jpg,devval,add,,550,254,582,280,,người mũ trắng phía trên sót
+20261102-100941_004_01839.jpg,devval,add,,535,335,569,356,,người áo xanh đậm phía dưới sót
+20261102-100941_004_01839.jpg,devval,hard,,,,,,,nhóm ba người dính nhau lẫn bóng dài
+20261102-100941_004_01851.jpg,devval,drop,1,,,,,rtdetr,bụi cỏ tối đứng yên
+20261102-100941_004_01851.jpg,devval,add,,607,264,640,292,,người mũ xanh bị cắt mép phải sót
+20261102-100941_004_01851.jpg,devval,add,,601,296,640,361,,người áo đen cầm túi trắng bị cắt mép phải sót
+20261102-100941_004_01851.jpg,devval,add,,604,376,640,409,,người áo xanh đậm bị cắt mép phải sót
+20261102-100941_004_01851.jpg,devval,hard,,,,,,,ba người bị cắt ở mép phải lẫn bóng
+20261102-100941_004_01868.jpg,devval,hard,,,,,,,mép phải chỉ có bóng người thân người ngoài khung không gán
+20261102-100941_004_01878.jpg,devval,drop,1,,,,,rtdetr,đốm hồng vật đứng yên nhiều khung
+20261102-100941_004_01878.jpg,devval,drop,2,,,,,rtdetr,dải mép
+20261102-100941_004_01894.jpg,devval,drop,1,,,,,both,đốm hồng túi nilon đứng yên hình không đổi qua các khung
+20261102-100941_004_01894.jpg,devval,drop,2,,,,,rtdetr,dải mép
+20261102-100941_004_01915.jpg,devval,ok,,,,,,,
+20261102-100941_004_01928.jpg,devval,ok,,,,,,,
+20261102-100941_004_01943.jpg,devval,drop,1,,,,,rtdetr,dải mép
+20261102-100941_004_01955.jpg,devval,ok,,,,,,,
+20261102-100941_004_01969.jpg,devval,ok,,,,,,,
+20261102-100941_004_01986.jpg,devval,ok,,,,,,,
+20261102-100941_004_02003.jpg,devval,drop,1,,,,,rtdetr,nền trống không người
+20261102-100941_004_02019.jpg,devval,drop,1,,,,,rtdetr,hộp cả khung không người
+20261102-100941_005_01076.jpg,devval,drop,1,,,,,yolo,đốm hồng (túi rác đứng yên nhiều khung)
+20261102-100941_005_01098.jpg,devval,drop,1,,,,,both,đốm hồng (túi rác đứng yên nhiều khung)
+20261102-100941_005_01118.jpg,devval,drop,1,,,,,rtdetr,đốm hồng
+20261102-100941_005_01137.jpg,devval,drop,1,,,,,rtdetr,đốm hồng
+20261102-100941_005_01207.jpg,devval,ok,,,,,,,
+20261102-100941_005_01217.jpg,devval,ok,,,,,,,
+20261102-100941_007_00525.jpg,devval,ok,,,,,,,
+20261102-100941_007_00534.jpg,devval,ok,,,,,,,
+20261102-100941_007_00546.jpg,devval,ok,,,,,,,
+20261102-100941_007_00559.jpg,devval,ok,,,,,,,
+20261102-100941_007_00576.jpg,devval,ok,,,,,,,
+20261102-100941_007_00594.jpg,devval,ok,,,,,,,
+20261102-100941_007_00604.jpg,devval,ok,,,,,,,
+20261102-100941_007_00625.jpg,devval,ok,,,,,,,
+20261102-100941_007_00638.jpg,devval,ok,,,,,,,
+20261102-100941_007_00666.jpg,devval,drop,1,,,,,rtdetr,đốm hồng (rác trên cỏ)
+20261102-100941_007_00678.jpg,devval,ok,,,,,,,
+20261102-100941_007_00685.jpg,devval,ok,,,,,,,
+20261102-100941_007_00695.jpg,devval,add,,110,0,124,8,,người bị cắt mép trên (chân)
+20261102-100941_007_00695.jpg,devval,add,,117,15,150,42,,người đi bờ cỏ
+20261102-100941_007_00695.jpg,devval,add,,120,46,147,75,,người áo xanh rêu
+20261102-100941_007_00695.jpg,devval,add,,113,78,145,104,,người áo xanh dương
+20261102-100941_007_00695.jpg,devval,hard,,,,,,,nhóm người nhìn xiên mờ nhoè - model sót cả nhóm
+20261102-100941_007_00703.jpg,devval,add,,106,1,144,34,,người tóc đen áo xanh rêu
+20261102-100941_007_00703.jpg,devval,add,,110,37,141,65,,người áo xanh dương
+20261102-100941_007_00703.jpg,devval,hard,,,,,,,nhóm người mờ ở mép trên - có thể dính nhau
+20261102-100941_007_00719.jpg,devval,drop,1,,,,,rtdetr,hộp ô lưới rỗng không có người
+20261102-100941_007_00719.jpg,devval,add,,81,0,104,12,,người bị cắt mép trên
+20261102-100941_007_00719.jpg,devval,add,,72,16,96,37,,người áo trắng tóc đen
+20261102-100941_007_00719.jpg,devval,add,,54,35,80,70,,người áo tối đứng cạnh
+20261102-100941_007_00719.jpg,devval,add,,70,46,102,82,,người áo trắng quần xanh
+20261102-100941_007_00719.jpg,devval,hard,,,,,,,hai người dính nhau - tách theo màu áo
+20261102-100941_007_00743.jpg,devval,add,,56,7,81,24,,người áo trắng tóc đen
+20261102-100941_007_00743.jpg,devval,add,,30,30,56,54,,người áo tối giơ tay
+20261102-100941_007_00743.jpg,devval,add,,48,43,84,72,,người áo trắng quần xanh
+20261102-100941_007_00743.jpg,devval,hard,,,,,,,hai người chồng nhau - tách theo context
+20261102-100941_007_00758.jpg,devval,drop,1,,,,,rtdetr,đốm trắng hồng (rác cố định)
+20261102-100941_007_00758.jpg,devval,drop,2,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_00758.jpg,devval,drop,3,,,,,rtdetr,đốm hồng (rác cố định)
+20261102-100941_007_00758.jpg,devval,add,,26,0,50,24,,người áo tối bị cắt mép trên
+20261102-100941_007_00758.jpg,devval,add,,41,10,80,45,,người áo trắng quần xanh
+20261102-100941_007_00758.jpg,devval,hard,,,,,,,hai người chồng nhau ở mép trên
+20261102-100941_007_00777.jpg,devval,drop,1,,,,,rtdetr,hộp ô lưới rỗng không có người
+20261102-100941_007_00777.jpg,devval,add,,80,0,107,13,,người bị cắt mép trên
+20261102-100941_007_00777.jpg,devval,add,,53,22,78,42,,người áo tối
+20261102-100941_007_00777.jpg,devval,add,,72,25,115,60,,người áo trắng quần xanh
+20261102-100941_007_00777.jpg,devval,hard,,,,,,,hai người chồng nhau - tách theo màu áo
+20261102-100941_007_00795.jpg,devval,add,,56,11,93,40,,người áo tối cạnh người áo xanh
+20261102-100941_007_00795.jpg,devval,drop,2,,,,,rtdetr,đốm hồng (rác cố định)
+20261102-100941_007_00795.jpg,devval,drop,3,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_00813.jpg,devval,tighten,1,80,34,117,64,rtdetr,hộp ôm 3 người - siết vào người áo xanh
+20261102-100941_007_00813.jpg,devval,add,,73,7,100,23,,người áo trắng tóc đen
+20261102-100941_007_00813.jpg,devval,add,,51,41,78,65,,người áo tối
+20261102-100941_007_00813.jpg,devval,drop,2,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_00838.jpg,devval,drop,1,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_00838.jpg,devval,add,,85,13,123,48,,người áo xanh dương
+20261102-100941_007_00838.jpg,devval,add,,51,32,80,59,,người áo tối
+20261102-100941_007_00838.jpg,devval,hard,,,,,,,một người thứ ba chỉ còn mẩu nhỏ ở mép trên x80-90 - không gán
+20261102-100941_007_00897.jpg,devval,add,,70,0,96,15,,người bị cắt mép trên (chân áo xanh)
+20261102-100941_007_00899.jpg,devval,drop,1,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_00899.jpg,devval,drop,2,,,,,rtdetr,hộp ô lưới rỗng
+20261102-100941_007_00899.jpg,devval,add,,80,0,105,11,,người bị cắt mép trên (chân)
+20261102-100941_007_00909.jpg,devval,hard,,,,,,,mẩu chân người cao ~4 px ở mép trên x87-104 - không gán
+20261102-100941_007_00953.jpg,devval,drop,1,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_00953.jpg,devval,add,,60,12,104,45,,người áo xanh dương
+20261102-100941_007_00953.jpg,devval,hard,,,,,,,khối trắng ở mép trên x82-98 y0-14 có thể là áo người bị cắt - không gán
+20261102-100941_007_00966.jpg,devval,drop,1,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_00966.jpg,devval,add,,47,0,91,26,,người áo xanh bị cắt mép trên
+20261102-100941_007_00988.jpg,devval,ok,,,,,,,
+20261102-100941_007_00995.jpg,devval,drop,1,,,,,rtdetr,đốm hồng (rác)
+20261102-100941_007_01405.jpg,devval,ok,,,,,,,
+20261102-100941_007_01426.jpg,devval,ok,,,,,,,
+20261102-100941_007_01445.jpg,devval,ok,,,,,,,
+20261102-100941_007_01455.jpg,devval,ok,,,,,,,
+20261102-100941_007_01480.jpg,devval,ok,,,,,,,
+20261102-100941_007_01502.jpg,devval,ok,,,,,,,
+20261102-100941_007_01524.jpg,devval,ok,,,,,,,
+20261102-100941_007_01537.jpg,devval,ok,,,,,,,
+20261102-100941_007_01552.jpg,devval,ok,,,,,,,
+20261102-100941_007_01588.jpg,devval,drop,1,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_01604.jpg,devval,drop,1,,,,,both,dải mép
+20261102-100941_007_01613.jpg,devval,ok,,,,,,,
+20261102-100941_007_01631.jpg,devval,drop,1,,,,,both,dải mép
+20261102-100941_007_01631.jpg,devval,drop,2,,,,,rtdetr,bụi cỏ sát bó vỉa
+20261102-100941_007_01654.jpg,devval,drop,1,,,,,both,dải mép
+20261102-100941_007_01671.jpg,devval,drop,3,,,,,rtdetr,bóng của người hộp 1
+20261102-100941_007_01671.jpg,devval,drop,5,,,,,rtdetr,bóng của người hộp 2
+20261102-100941_007_01671.jpg,devval,tighten,2,476,274,524,306,rtdetr,thêm phần tay hồng trắng
+20261102-100941_007_01671.jpg,devval,add,,446,347,470,377,,người áo xanh than (model sót)
+20261102-100941_007_01671.jpg,devval,add,,440,382,482,414,,người áo đen đứng sau (model sót)
+20261102-100941_007_01671.jpg,devval,hard,,,,,,,hai người dưới đứng nối nhau chung một vệt bóng dài - tách theo màu áo
+20261102-100941_007_01675.jpg,devval,tighten,1,484,362,514,395,rtdetr,hộp ôm cả nhóm và bóng - siết vào người áo xanh than
+20261102-100941_007_01675.jpg,devval,add,,488,398,529,433,,người áo đen đứng sau người áo xanh than
+20261102-100941_007_01675.jpg,devval,add,,496,313,521,338,,người mũ xanh áo hồng
+20261102-100941_007_01675.jpg,devval,add,,544,310,597,337,,người áo tối tay sáng
+20261102-100941_007_01675.jpg,devval,add,,621,222,640,241,,người bị cắt mép phải (bóng dài phía trên)
+20261102-100941_007_01675.jpg,devval,hard,,,,,,,nhóm 4 người kèm bóng dài - tách theo màu áo; người mép phải chỉ thấy một phần
+20261102-100941_007_01706.jpg,devval,tighten,1,574,283,616,305,rtdetr,siết khỏi bóng - người áo tối
+20261102-100941_007_01706.jpg,devval,drop,2,,,,,both,dải mép
+20261102-100941_007_01706.jpg,devval,tighten,3,478,323,500,358,rtdetr,siết khỏi bóng - người áo xanh than
+20261102-100941_007_01706.jpg,devval,add,,472,358,518,392,,người áo đen đứng sau (model sót)
+20261102-100941_007_01706.jpg,devval,tighten,4,487,276,521,303,rtdetr,siết khỏi bụi cỏ - người mũ xanh áo hồng
+20261102-100941_007_01706.jpg,devval,add,,616,179,640,198,,người bị cắt mép phải
+20261102-100941_007_01706.jpg,devval,hard,,,,,,,hai người nối nhau chung vệt bóng - ranh giới đoán theo khung 01675
+20261102-100941_007_01715.jpg,devval,tighten,1,587,291,629,320,rtdetr,siết khỏi bóng - người áo tối đầu trắng
+20261102-100941_007_01715.jpg,devval,tighten,2,484,371,530,405,rtdetr,siết khỏi bóng - người áo đen đứng sau
+20261102-100941_007_01715.jpg,devval,add,,512,351,540,380,,người áo xanh than (model sót)
+20261102-100941_007_01715.jpg,devval,add,,521,284,555,311,,người mũ xanh áo hồng (model sót)
+20261102-100941_007_01715.jpg,devval,add,,626,198,640,216,,người bị cắt mép phải
+20261102-100941_007_01715.jpg,devval,hard,,,,,,,nhóm người kèm bóng dài - người mép phải chỉ thấy một phần
+20261102-100941_007_01720.jpg,devval,drop,1,,,,,rtdetr,dải mép
+20261102-100941_007_01720.jpg,devval,add,,526,285,560,307,,người mũ xanh áo hồng (model sót)
+20261102-100941_007_01720.jpg,devval,add,,585,291,634,324,,người áo tối đầu trắng (model sót)
+20261102-100941_007_01720.jpg,devval,add,,505,356,540,384,,người áo xanh than (model sót)
+20261102-100941_007_01720.jpg,devval,add,,482,376,537,412,,người áo đen đứng sau (model sót)
+20261102-100941_007_01720.jpg,devval,add,,630,195,640,211,,người bị cắt mép phải
+20261102-100941_007_01720.jpg,devval,hard,,,,,,,model sót cả nhóm 5 người; hai người dưới nối nhau; người mép phải chỉ còn mẩu
+20261102-100941_007_01736.jpg,devval,drop,1,,,,,both,dải mép
+20261102-100941_007_01736.jpg,devval,tighten,2,560,393,614,436,rtdetr,siết khỏi bóng - người áo xanh than
+20261102-100941_007_01736.jpg,devval,add,,538,436,606,470,,người áo đen giày trắng đứng sau (model sót)
+20261102-100941_007_01736.jpg,devval,add,,606,292,640,321,,người bị cắt mép phải (áo tối)
+20261102-100941_007_01736.jpg,devval,hard,,,,,,,hai người dưới chồng nhau; người mép phải có thể gồm hai người
+20261102-100941_007_01750.jpg,devval,add,,594,435,640,480,,người giày trắng quần xám bị cắt góc dưới phải
+20261102-100941_007_01750.jpg,devval,hard,,,,,,,nhóm người đi ra khỏi khung ở góc dưới phải - vệt tối x610-640 y408-428 có thể là tay người áo xanh than chưa gán
+20261102-100941_007_01766.jpg,devval,drop,1,,,,,rtdetr,dải mép
+20261102-100941_007_01766.jpg,devval,hard,,,,,,,mép phải chỉ còn bóng và mẩu giày trắng x620-640 y425-445 - không gán
+20261102-100941_007_01787.jpg,devval,drop,1,,,,,both,đốm hồng (túi rác cố định ven đường)
+20261102-100941_007_01801.jpg,devval,ok,,,,,,,
+20261102-100941_001_00653.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người (đốm hồng)
+20261102-100941_001_00667.jpg,test,ok,,,,,,,
+20261102-100941_001_00678.jpg,test,drop,1,,,,,rtdetr,dải mép
+20261102-100941_001_00687.jpg,test,drop,1,,,,,rtdetr,dải mép
+20261102-100941_001_00687.jpg,test,drop,2,,,,,yolo,đốm trắng
+20261102-100941_001_00706.jpg,test,drop,1,,,,,both,dải mép
+20261102-100941_001_00711.jpg,test,drop,1,,,,,both,hộp lớn không có người
+20261102-100941_001_00711.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_00711.jpg,test,drop,3,,,,,rtdetr,đồ vật (tấm bạt xanh nằm yên)
+20261102-100941_001_00718.jpg,test,drop,1,,,,,both,đồ vật (giấy hồng trắng)
+20261102-100941_001_00718.jpg,test,drop,2,,,,,yolo,hộp lớn không có người
+20261102-100941_001_00732.jpg,test,drop,1,,,,,rtdetr,đồ vật (tấm bạt xanh nằm yên)
+20261102-100941_001_00732.jpg,test,drop,2,,,,,rtdetr,đồ vật (giấy hồng trắng)
+20261102-100941_001_00732.jpg,test,drop,3,,,,,yolo,hộp lớn không có người
+20261102-100941_001_00739.jpg,test,drop,1,,,,,rtdetr,đồ vật (tấm bạt xanh nằm yên)
+20261102-100941_001_00741.jpg,test,ok,,,,,,,
+20261102-100941_001_00751.jpg,test,ok,,,,,,,
+20261102-100941_001_00768.jpg,test,drop,2,,,,,both,dải mép
+20261102-100941_001_00768.jpg,test,drop,1,,,,,both,bao tải trắng (đứng yên không bóng)
+20261102-100941_001_00768.jpg,test,hard,,,,,,,vật trắng cắt hồng hình giống người nằm giơ tay; đứng yên 11 s (00768-00877) không bóng; cùng dáng và cỡ với bao tải trắng ở 002_00050-00092 nên bỏ; nếu là người nằm thì giữ hộp này
+20261102-100941_001_00773.jpg,test,drop,1,,,,,rtdetr,bao tải trắng (như khung 00768)
+20261102-100941_001_00773.jpg,test,drop,2,,,,,yolo,bao tải trắng (như khung 00768)
+20261102-100941_001_00773.jpg,test,hard,,,,,,,vật trắng cắt hồng hình giống người nằm giơ tay; đứng yên 11 s (00768-00877) không bóng; cùng dáng và cỡ với bao tải trắng ở 002_00050-00092 nên bỏ; nếu là người nằm thì giữ hộp này
+20261102-100941_001_00810.jpg,test,drop,1,,,,,rtdetr,bao tải trắng (như khung 00768)
+20261102-100941_001_00810.jpg,test,hard,,,,,,,vật trắng cắt hồng hình giống người nằm giơ tay; đứng yên 11 s (00768-00877) không bóng; cùng dáng và cỡ với bao tải trắng ở 002_00050-00092 nên bỏ; nếu là người nằm thì giữ hộp này
+20261102-100941_001_00833.jpg,test,drop,1,,,,,rtdetr,bao tải trắng (như khung 00768)
+20261102-100941_001_00833.jpg,test,drop,2,,,,,yolo,bao tải trắng (như khung 00768)
+20261102-100941_001_00833.jpg,test,hard,,,,,,,vật trắng cắt hồng hình giống người nằm giơ tay; đứng yên 11 s (00768-00877) không bóng; cùng dáng và cỡ với bao tải trắng ở 002_00050-00092 nên bỏ; nếu là người nằm thì giữ hộp này
+20261102-100941_001_00845.jpg,test,drop,1,,,,,rtdetr,bao tải trắng (như khung 00768)
+20261102-100941_001_00845.jpg,test,hard,,,,,,,vật trắng cắt hồng hình giống người nằm giơ tay; đứng yên 11 s (00768-00877) không bóng; cùng dáng và cỡ với bao tải trắng ở 002_00050-00092 nên bỏ; nếu là người nằm thì giữ hộp này
+20261102-100941_001_00849.jpg,test,drop,1,,,,,rtdetr,bao tải trắng (như khung 00768)
+20261102-100941_001_00849.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_00849.jpg,test,hard,,,,,,,vật trắng cắt hồng hình giống người nằm giơ tay; đứng yên 11 s (00768-00877) không bóng; cùng dáng và cỡ với bao tải trắng ở 002_00050-00092 nên bỏ; nếu là người nằm thì giữ hộp này
+20261102-100941_001_00868.jpg,test,drop,1,,,,,rtdetr,bao tải trắng (như khung 00768)
+20261102-100941_001_00868.jpg,test,drop,2,,,,,yolo,bao tải trắng (như khung 00768)
+20261102-100941_001_00868.jpg,test,hard,,,,,,,vật trắng cắt hồng hình giống người nằm giơ tay; đứng yên 11 s (00768-00877) không bóng; cùng dáng và cỡ với bao tải trắng ở 002_00050-00092 nên bỏ; nếu là người nằm thì giữ hộp này
+20261102-100941_001_00877.jpg,test,drop,1,,,,,rtdetr,bao tải trắng (như khung 00768)
+20261102-100941_001_00877.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_00877.jpg,test,hard,,,,,,,vật trắng cắt hồng hình giống người nằm giơ tay; đứng yên 11 s (00768-00877) không bóng; cùng dáng và cỡ với bao tải trắng ở 002_00050-00092 nên bỏ; nếu là người nằm thì giữ hộp này
+20261102-100941_001_00884.jpg,test,drop,1,,,,,both,dải mép
+20261102-100941_001_00884.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_00890.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_00890.jpg,test,drop,2,,,,,yolo,dải mép
+20261102-100941_001_00902.jpg,test,drop,1,,,,,both,dải mép
+20261102-100941_001_00902.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_00913.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_00928.jpg,test,drop,1,,,,,rtdetr,đốm hồng (không có bóng)
+20261102-100941_001_00928.jpg,test,drop,2,,,,,rtdetr,dải mép
+20261102-100941_001_00928.jpg,test,drop,3,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_00938.jpg,test,drop,1,,,,,rtdetr,bóng (người giữa)
+20261102-100941_001_00938.jpg,test,drop,2,,,,,rtdetr,bóng (người trái)
+20261102-100941_001_00938.jpg,test,tighten,3,421,445,446,480,rtdetr,người áo tối đi cạnh người áo hồng
+20261102-100941_001_00938.jpg,test,drop,4,,,,,rtdetr,dải mép
+20261102-100941_001_00938.jpg,test,tighten,7,425,416,453,447,yolo,người áo hồng (siết khỏi bóng và người áo tối)
+20261102-100941_001_00938.jpg,test,hard,,,,,,,nhóm người nắng xiên: bóng dài hướng lên trên thân ở đầu dưới vệt bóng; ranh thân-bóng phải đoán; bóng người thứ tư (362-385 430-480) mà thân ngoài khung
+20261102-100941_001_00954.jpg,test,drop,1,,,,,rtdetr,bóng (người giữa)
+20261102-100941_001_00954.jpg,test,drop,3,,,,,rtdetr,bóng (người trái)
+20261102-100941_001_00954.jpg,test,drop,9,,,,,rtdetr,bóng (người áo xanh nhạt)
+20261102-100941_001_00954.jpg,test,drop,5,,,,,rtdetr,đốm hồng (không có bóng)
+20261102-100941_001_00954.jpg,test,drop,4,,,,,both,đồ vật trắng cắt hồng (bóng rất ngắn hình không đổi)
+20261102-100941_001_00954.jpg,test,tighten,2,412,339,441,364,both,người áo hồng (siết khỏi bóng và người áo tối)
+20261102-100941_001_00954.jpg,test,add,,411,362,439,394,,người áo tối sót (dính người áo hồng)
+20261102-100941_001_00954.jpg,test,tighten,6,288,358,307,391,rtdetr,siết khỏi bóng
+20261102-100941_001_00954.jpg,test,tighten,8,310,358,333,389,rtdetr,chỉnh cạnh dưới
+20261102-100941_001_00954.jpg,test,hard,,,,,,,nhóm người dính bóng nhau; ranh thân-bóng phải đoán
+20261102-100941_001_00963.jpg,test,drop,1,,,,,rtdetr,bóng (người trái)
+20261102-100941_001_00963.jpg,test,drop,8,,,,,rtdetr,bóng (người áo xanh nhạt)
+20261102-100941_001_00963.jpg,test,drop,6,,,,,rtdetr,đồ vật trắng cắt hồng (như khung 00954)
+20261102-100941_001_00963.jpg,test,drop,7,,,,,rtdetr,đốm trắng
+20261102-100941_001_00963.jpg,test,drop,9,,,,,rtdetr,dải mép
+20261102-100941_001_00963.jpg,test,tighten,3,320,408,345,433,rtdetr,siết khỏi bóng
+20261102-100941_001_00963.jpg,test,tighten,5,295,391,316,426,rtdetr,chỉnh cạnh
+20261102-100941_001_00963.jpg,test,tighten,4,371,440,397,467,rtdetr,siết khỏi bóng
+20261102-100941_001_00963.jpg,test,tighten,2,436,364,459,392,rtdetr,người áo hồng (siết khỏi bóng và người áo tối)
+20261102-100941_001_00963.jpg,test,add,,427,390,455,429,,người áo tối sót (dính người áo hồng)
+20261102-100941_001_00963.jpg,test,hard,,,,,,,nhóm người dính bóng nhau; ranh thân-bóng phải đoán
+20261102-100941_001_00976.jpg,test,drop,2,,,,,rtdetr,bóng (người trái)
+20261102-100941_001_00976.jpg,test,drop,4,,,,,rtdetr,bóng (người giữa)
+20261102-100941_001_00976.jpg,test,drop,8,,,,,rtdetr,bóng (người áo hồng)
+20261102-100941_001_00976.jpg,test,tighten,5,440,350,461,377,rtdetr,người áo hồng (hộp cũ ôm bóng người áo tối)
+20261102-100941_001_00976.jpg,test,tighten,1,367,416,400,448,rtdetr,siết khỏi bóng thêm phần thân dưới
+20261102-100941_001_00976.jpg,test,hard,,,,,,,nhóm người dính bóng nhau; ranh thân-bóng phải đoán
+20261102-100941_001_00978.jpg,test,drop,2,,,,,rtdetr,bóng (người trái)
+20261102-100941_001_00978.jpg,test,drop,7,,,,,rtdetr,bóng (người áo xanh nhạt)
+20261102-100941_001_00978.jpg,test,tighten,6,423,374,448,408,rtdetr,người áo tối đi cạnh người áo hồng
+20261102-100941_001_00978.jpg,test,drop,5,,,,,both,dải mép
+20261102-100941_001_00978.jpg,test,drop,8,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_00978.jpg,test,tighten,1,443,346,466,379,both,người áo hồng (siết khỏi bóng và người áo tối)
+20261102-100941_001_00978.jpg,test,tighten,4,310,396,336,417,rtdetr,siết khỏi bóng
+20261102-100941_001_00978.jpg,test,add,,286,372,311,406,,người trái sót (chỉ có hộp ôm bóng)
+20261102-100941_001_00978.jpg,test,hard,,,,,,,nhóm người dính bóng nhau; ranh thân-bóng phải đoán
+20261102-100941_001_00983.jpg,test,tighten,3,334,399,353,438,rtdetr,chỉnh cạnh dưới hết thân
+20261102-100941_001_00983.jpg,test,add,,350,423,380,442,,người áo tối giữa sót
+20261102-100941_001_00983.jpg,test,add,,414,437,448,469,,người áo hồng nhạt dưới sót
+20261102-100941_001_00983.jpg,test,tighten,1,466,401,493,428,rtdetr,siết khỏi bóng
+20261102-100941_001_00983.jpg,test,tighten,2,500,385,526,422,rtdetr,siết khỏi bóng
+20261102-100941_001_00983.jpg,test,hard,,,,,,,nhóm 5 người dính bóng nhau; ranh thân-bóng phải đoán
+20261102-100941_001_00996.jpg,test,drop,1,,,,,rtdetr,bóng (người áo tối phải)
+20261102-100941_001_00996.jpg,test,drop,6,,,,,rtdetr,bóng (người áo hồng phải)
+20261102-100941_001_00996.jpg,test,tighten,4,407,424,443,454,rtdetr,siết khỏi bóng
+20261102-100941_001_00996.jpg,test,tighten,5,350,404,379,428,rtdetr,siết khỏi bóng
+20261102-100941_001_00996.jpg,test,tighten,7,335,382,354,426,rtdetr,mở rộng hết thân
+20261102-100941_001_00996.jpg,test,hard,,,,,,,nhóm 5 người dính bóng nhau; ranh thân-bóng phải đoán
+20261102-100941_001_01007.jpg,test,drop,5,,,,,rtdetr,bóng (người áo hồng nhạt dưới)
+20261102-100941_001_01007.jpg,test,tighten,2,316,366,338,394,rtdetr,người áo trắng (tách khỏi người áo tối và bóng)
+20261102-100941_001_01007.jpg,test,add,,298,379,321,410,,người áo tối trái sót (dính người áo trắng)
+20261102-100941_001_01007.jpg,test,tighten,3,400,373,422,393,rtdetr,siết khỏi bóng
+20261102-100941_001_01007.jpg,test,tighten,4,419,356,440,378,rtdetr,siết khỏi bóng
+20261102-100941_001_01007.jpg,test,hard,,,,,,,nhóm 5 người dính bóng nhau; hai người trái chồng nhau tách bằng đoán
+20261102-100941_001_01020.jpg,test,drop,3,,,,,rtdetr,bóng
+20261102-100941_001_01020.jpg,test,drop,4,,,,,rtdetr,bóng
+20261102-100941_001_01020.jpg,test,drop,7,,,,,rtdetr,đốm trắng
+20261102-100941_001_01020.jpg,test,drop,8,,,,,yolo,hộp lớn không có người (vệt hồng trên đường)
+20261102-100941_001_01020.jpg,test,tighten,2,311,454,333,478,rtdetr,siết khỏi bóng (thân ở mép dưới)
+20261102-100941_001_01020.jpg,test,tighten,5,350,452,369,480,rtdetr,chỉnh cạnh (thân cắt mép dưới)
+20261102-100941_001_01020.jpg,test,tighten,6,368,452,387,480,rtdetr,chỉnh cạnh (thân cắt mép dưới)
+20261102-100941_001_01020.jpg,test,tighten,1,431,430,458,457,rtdetr,siết khỏi bóng
+20261102-100941_001_01020.jpg,test,add,,456,414,481,441,,người áo trắng phải sót
+20261102-100941_001_01020.jpg,test,hard,,,,,,,nhóm người sát mép dưới dính bóng nhau; ranh thân-bóng phải đoán
+20261102-100941_001_01030.jpg,test,drop,2,,,,,rtdetr,đốm hồng (không có bóng)
+20261102-100941_001_01030.jpg,test,drop,5,,,,,rtdetr,bóng
+20261102-100941_001_01030.jpg,test,drop,3,,,,,rtdetr,bóng
+20261102-100941_001_01030.jpg,test,tighten,1,383,455,407,480,rtdetr,siết khỏi bóng (thân cắt mép dưới)
+20261102-100941_001_01030.jpg,test,tighten,4,453,434,483,461,rtdetr,người áo tối phải (siết khỏi bóng)
+20261102-100941_001_01030.jpg,test,add,,480,406,510,441,,người áo trắng phải sót
+20261102-100941_001_01030.jpg,test,hard,,,,,,,nhóm người sát mép dưới dính bóng nhau; ranh thân-bóng phải đoán
+20261102-100941_001_01043.jpg,test,drop,1,,,,,both,bóng (thân ngoài mép dưới)
+20261102-100941_001_01043.jpg,test,drop,3,,,,,rtdetr,đồ vật hồng trên đường (không có bóng)
+20261102-100941_001_01043.jpg,test,drop,4,,,,,rtdetr,bóng (thân ngoài mép dưới)
+20261102-100941_001_01043.jpg,test,drop,5,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_01043.jpg,test,tighten,2,493,462,528,480,rtdetr,siết khỏi bóng (thân cắt mép dưới)
+20261102-100941_001_01043.jpg,test,add,,524,428,567,480,,người áo xanh nhạt phải sót (cắt mép dưới)
+20261102-100941_001_01043.jpg,test,hard,,,,,,,người sát mép dưới chỉ thấy bóng và một phần thân; phần thân thấy được phải đoán
+20261102-100941_001_01058.jpg,test,drop,1,,,,,both,đồ vật hồng trên đường (túi; không có bóng; đứng yên từ khung 00954)
+20261102-100941_001_01058.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_01058.jpg,test,hard,,,,,,,chỉ thấy bóng người ở mép dưới (thân ngoài khung); không gán
+20261102-100941_001_01072.jpg,test,drop,1,,,,,both,bóng (thân ngoài mép dưới)
+20261102-100941_001_01072.jpg,test,drop,2,,,,,both,đồ vật hồng trên đường (túi; không có bóng)
+20261102-100941_001_01085.jpg,test,drop,1,,,,,rtdetr,bóng (thân ngoài mép dưới)
+20261102-100941_001_01085.jpg,test,drop,2,,,,,rtdetr,đồ vật trắng cắt hồng (như khung 00954; đứng yên)
+20261102-100941_001_01100.jpg,test,drop,1,,,,,rtdetr,bóng (thân ngoài mép dưới)
+20261102-100941_001_01113.jpg,test,drop,1,,,,,both,dải mép
+20261102-100941_001_01125.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_01125.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_01140.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_01140.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_01140.jpg,test,drop,3,,,,,rtdetr,đồ vật trắng cắt hồng (như khung 00954; đứng yên)
+20261102-100941_001_01149.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_001_01149.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_002_00000.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_002_00000.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_002_00000.jpg,test,drop,3,,,,,yolo,bao tải trắng (sọc vàng) nằm yên giữa bãi rác; cùng vật ở khung 002_00050 00064 00077
+20261102-100941_002_00000.jpg,test,hard,,,,,,,bao trắng dài ~1.8 m hình giống người nằm; đã xem cận ở 002_00050 và 00064: đầu phẳng rộng có sọc vàng nên bỏ
+20261102-100941_002_00002.jpg,test,drop,1,,,,,rtdetr,đốm trắng (que/chai quá mảnh)
+20261102-100941_002_00002.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người (đống rác)
+20261102-100941_002_00003.jpg,test,drop,1,,,,,rtdetr,đống rác (cắt màu hồng)
+20261102-100941_002_00003.jpg,test,drop,2,,,,,rtdetr,đống rác (cắt màu hồng)
+20261102-100941_002_00003.jpg,test,drop,3,,,,,rtdetr,dải mép
+20261102-100941_002_00005.jpg,test,drop,1,,,,,rtdetr,đống rác (cắt màu hồng)
+20261102-100941_002_00019.jpg,test,drop,1,,,,,rtdetr,đống rác (cắt màu hồng)
+20261102-100941_002_00022.jpg,test,drop,1,,,,,yolo,đống rác (cắt màu hồng)
+20261102-100941_002_00023.jpg,test,drop,1,,,,,rtdetr,đốm trắng (rác)
+20261102-100941_002_00036.jpg,test,ok,,,,,,,
+20261102-100941_002_00050.jpg,test,drop,1,,,,,rtdetr,bao tải trắng sọc vàng (như khung 002_00000)
+20261102-100941_002_00064.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_002_00064.jpg,test,drop,2,,,,,rtdetr,bao tải trắng sọc vàng (như khung 002_00000)
+20261102-100941_002_00064.jpg,test,drop,3,,,,,yolo,dải mép và bao tải
+20261102-100941_002_00077.jpg,test,drop,1,,,,,rtdetr,bao tải trắng sọc vàng (như khung 002_00000)
+20261102-100941_002_00092.jpg,test,drop,1,,,,,both,bao tải trắng (như khung 002_00000)
+20261102-100941_002_00107.jpg,test,ok,,,,,,,
+20261102-100941_002_00121.jpg,test,drop,1,,,,,both,dải mép
+20261102-100941_002_00121.jpg,test,drop,2,,,,,rtdetr,đốm trắng (rác)
+20261102-100941_002_00136.jpg,test,drop,1,,,,,both,đồ vật (tấm bạt xanh nằm yên)
+20261102-100941_002_00148.jpg,test,drop,1,,,,,rtdetr,đồ vật (tấm bạt xanh nằm yên)
+20261102-100941_002_00162.jpg,test,ok,,,,,,,
+20261102-100941_002_00177.jpg,test,ok,,,,,,,
+20261102-100941_002_00181.jpg,test,ok,,,,,,,
+20261102-100941_002_00192.jpg,test,drop,1,,,,,rtdetr,hộp cả khung không có người
+20261102-100941_002_00203.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_002_00203.jpg,test,drop,2,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_002_00203.jpg,test,drop,3,,,,,yolo,hộp lớn không có người (bờ bê tông)
+20261102-100941_002_00209.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_002_00209.jpg,test,drop,2,,,,,both,dải mép
+20261102-100941_002_00214.jpg,test,ok,,,,,,,
+20261102-100941_002_00223.jpg,test,ok,,,,,,,
+20261102-100941_002_00233.jpg,test,ok,,,,,,,
+20261102-100941_002_00253.jpg,test,ok,,,,,,,
+20261102-100941_002_00262.jpg,test,ok,,,,,,,
+20261102-100941_002_00271.jpg,test,drop,1,,,,,both,dải mép
+20261102-100941_002_00284.jpg,test,ok,,,,,,,
+20261102-100941_002_00299.jpg,test,ok,,,,,,,
+20261102-100941_002_00313.jpg,test,drop,1,,,,,rtdetr,hộp ô ghép 320px không có người
+20261102-100941_002_00327.jpg,test,ok,,,,,,,
+20261102-100941_002_00635.jpg,test,drop,1,,,,,rtdetr,dải mép
+20261102-100941_002_00650.jpg,test,drop,1,,,,,rtdetr,dải mép
+20261102-100941_002_00660.jpg,test,ok,,,,,,,
+20261102-100941_002_00669.jpg,test,ok,,,,,,,
+20261102-100941_002_00680.jpg,test,drop,1,,,,,rtdetr,dải mép
+20261102-100941_003_01994.jpg,test,drop,1,,,,,rtdetr,hộp to trên nền trống không có người
+20261102-100941_003_01994.jpg,test,drop,2,,,,,rtdetr,hộp to trên nền trống không có người
+20261102-100941_003_02004.jpg,test,drop,1,,,,,yolo,đốm trắng rác ở mép trên
+20261102-100941_003_02021.jpg,test,drop,1,,,,,rtdetr,dải mép
+20261102-100941_003_02037.jpg,test,ok,,,,,,,
+20261102-100941_003_02064.jpg,test,ok,,,,,,,
+20261102-100941_003_02078.jpg,test,ok,,,,,,,
+20261102-100941_003_02160.jpg,test,ok,,,,,,,
+20261102-100941_003_02176.jpg,test,ok,,,,,,,
+20261102-100941_003_02186.jpg,test,ok,,,,,,,
+20261102-100941_003_02202.jpg,test,ok,,,,,,,
+20261102-100941_003_02497.jpg,test,tighten,1,403,267,428,294,yolo,chỉ ôm người mũ xanh áo hồng
+20261102-100941_003_02497.jpg,test,add,,386,290,421,314,,người áo đen cầm túi trắng sót
+20261102-100941_003_02497.jpg,test,add,,371,307,402,332,,người áo xanh đậm sót
+20261102-100941_003_02497.jpg,test,add,,446,211,482,249,,người mũ hồng áo đen sót
+20261102-100941_003_02497.jpg,test,add,,507,152,546,176,,người áo hồng trên đường sót
+20261102-100941_003_02497.jpg,test,hard,,,,,,,nhóm ba người nối nhau trên cỏ
+20261102-100941_003_02506.jpg,test,tighten,1,410,270,433,296,yolo,chỉ ôm người mũ xanh áo hồng
+20261102-100941_003_02506.jpg,test,tighten,2,511,151,549,174,yolo,chỉnh cạnh người áo hồng
+20261102-100941_003_02506.jpg,test,add,,390,292,424,314,,người áo đen cầm túi trắng sót
+20261102-100941_003_02506.jpg,test,add,,374,311,408,334,,người áo xanh đậm sót
+20261102-100941_003_02506.jpg,test,add,,448,209,484,248,,người mũ hồng áo đen sót
+20261102-100941_003_02506.jpg,test,hard,,,,,,,nhóm ba người nối nhau trên cỏ
+20261102-100941_003_02520.jpg,test,add,,462,279,488,308,,người mũ xanh áo hồng sót
+20261102-100941_003_02520.jpg,test,add,,504,211,550,253,,người mũ hồng áo đen sót
+20261102-100941_003_02520.jpg,test,add,,597,149,640,176,,người áo hồng sót ở mép phải
+20261102-100941_003_02520.jpg,test,hard,,,,,,,nhóm ba người nối nhau trên cỏ
+20261102-100941_003_02526.jpg,test,tighten,3,496,264,541,310,yolo,siết người mũ xanh áo hồng
+20261102-100941_003_02526.jpg,test,add,,548,194,618,243,,người mũ trắng hồng áo đen sót
+20261102-100941_003_02526.jpg,test,hard,,,,,,,nhóm ba người nối nhau trên cỏ
+20261102-100941_003_02538.jpg,test,tighten,1,560,155,629,208,both,tách: chỉ người mũ trắng áo đen
+20261102-100941_003_02538.jpg,test,add,,520,212,593,256,,người áo xanh trắng tách khỏi hộp 1
+20261102-100941_003_02555.jpg,test,ok,,,,,,,
+20261102-100941_003_02569.jpg,test,tighten,2,532,349,636,405,yolo,tách: chỉ người áo đen cầm túi
+20261102-100941_003_02569.jpg,test,add,,501,379,594,456,,người áo xanh đậm tách khỏi hộp 2
+20261102-100941_003_02595.jpg,test,tighten,1,543,394,640,480,rtdetr,tách: người áo xanh đậm bị cắt mép
+20261102-100941_003_02595.jpg,test,add,,576,359,640,409,,người áo đen cầm túi trắng bị cắt mép phải
+20261102-100941_003_02595.jpg,test,hard,,,,,,,hai người bị cắt ở góc dưới phải
+20261102-100941_003_02607.jpg,test,hard,,,,,,,góc dưới phải có vệt tối nhỏ có thể là tay người vừa ra khỏi khung không gán
+20261102-100941_003_02628.jpg,test,ok,,,,,,,
+20261102-100941_003_02640.jpg,test,ok,,,,,,,
+20261102-100941_003_02657.jpg,test,ok,,,,,,,
+20261102-100941_003_02669.jpg,test,drop,1,,,,,rtdetr,hộp to trên nền đất trống không có người
+20261102-100941_004_01128.jpg,test,ok,,,,,,,
+20261102-100941_004_01135.jpg,test,ok,,,,,,,
+20261102-100941_004_01252.jpg,test,ok,,,,,,,
+20261102-100941_004_01257.jpg,test,drop,1,,,,,rtdetr,đốm trắng vật dài trên cỏ không bóng
+20261102-100941_004_01257.jpg,test,drop,2,,,,,rtdetr,đốm tím nhỏ
+20261102-100941_004_01273.jpg,test,ok,,,,,,,
+20261102-100941_004_01284.jpg,test,ok,,,,,,,
+20261102-100941_004_01294.jpg,test,ok,,,,,,,
+20261102-100941_004_01308.jpg,test,drop,1,,,,,rtdetr,đốm hồng giấy đứng yên trên cỏ
+20261102-100941_004_01320.jpg,test,ok,,,,,,,
+20261102-100941_004_01345.jpg,test,ok,,,,,,,
+20261102-100941_005_00430.jpg,test,drop,1,,,,,rtdetr,đốm hồng rác
+20261102-100941_005_00432.jpg,test,drop,1,,,,,rtdetr,đốm hồng
+20261102-100941_005_00434.jpg,test,drop,1,,,,,rtdetr,cỏ trống không người
+20261102-100941_005_00436.jpg,test,ok,,,,,,,
+20261102-100941_005_00448.jpg,test,ok,,,,,,,
+20261102-100941_005_00450.jpg,test,ok,,,,,,,
+20261102-100941_005_00458.jpg,test,drop,1,,,,,both,đốm hồng
+20261102-100941_005_00461.jpg,test,ok,,,,,,,
+20261102-100941_005_00466.jpg,test,ok,,,,,,,
+20261102-100941_005_00470.jpg,test,ok,,,,,,,
+20261102-100941_005_00474.jpg,test,ok,,,,,,,
+20261102-100941_005_00476.jpg,test,ok,,,,,,,
+20261102-100941_005_00485.jpg,test,ok,,,,,,,
+20261102-100941_005_00487.jpg,test,ok,,,,,,,
+20261102-100941_005_00490.jpg,test,ok,,,,,,,
+20261102-100941_005_00493.jpg,test,ok,,,,,,,
+20261102-100941_005_00501.jpg,test,ok,,,,,,,
+20261102-100941_005_00511.jpg,test,ok,,,,,,,
+20261102-100941_005_00524.jpg,test,ok,,,,,,,
+20261102-100941_005_00534.jpg,test,ok,,,,,,,
+20261102-100941_005_00540.jpg,test,ok,,,,,,,
+20261102-100941_005_00543.jpg,test,ok,,,,,,,
+20261102-100941_005_00553.jpg,test,ok,,,,,,,
+20261102-100941_005_00561.jpg,test,add,,0,0,122,106,,người sót mép trên trái (quần tối + áo/túi trắng)
+20261102-100941_005_00561.jpg,test,hard,,,,,,,người cắt mép chỉ thấy chân và mảng trắng
+20261102-100941_005_00568.jpg,test,tighten,1,490,26,640,157,both,siết đáy theo bàn chân
+20261102-100941_005_00568.jpg,test,tighten,2,116,303,242,480,yolo,bỏ túi hồng bên phải
+20261102-100941_005_00568.jpg,test,drop,3,,,,,rtdetr,trùng hộp 2
+20261102-100941_005_00574.jpg,test,add,,560,441,614,480,,người sót mép dưới chỉ thấy bàn chân + ống quần
+20261102-100941_005_00574.jpg,test,hard,,,,,,,người cắt mép chỉ thấy bàn chân
+20261102-100941_005_00580.jpg,test,ok,,,,,,,
+20261102-100941_005_00610.jpg,test,ok,,,,,,,
+20261102-100941_005_00618.jpg,test,ok,,,,,,,
+20261102-100941_005_00636.jpg,test,drop,1,,,,,rtdetr,đốm hồng
+20261102-100941_005_00636.jpg,test,drop,2,,,,,rtdetr,cỏ trống không người
+20261102-100941_005_00648.jpg,test,drop,1,,,,,rtdetr,đốm hồng
+20261102-100941_005_00655.jpg,test,drop,1,,,,,yolo,đốm hồng
+20261102-100941_005_00668.jpg,test,ok,,,,,,,
+20261102-100941_005_00672.jpg,test,ok,,,,,,,
+20261102-100941_005_00681.jpg,test,drop,1,,,,,rtdetr,đốm hồng
+20261102-100941_005_00688.jpg,test,ok,,,,,,,
+20261102-100941_005_00706.jpg,test,drop,1,,,,,rtdetr,dải mép
+20261102-100941_005_00715.jpg,test,drop,1,,,,,rtdetr,dải mép
+20261102-100941_005_00723.jpg,test,ok,,,,,,,
+20261102-100941_005_00731.jpg,test,ok,,,,,,,
+20261102-100941_005_00764.jpg,test,ok,,,,,,,
+20261102-100941_005_00771.jpg,test,ok,,,,,,,
+20261102-100941_005_00779.jpg,test,ok,,,,,,,
+20261102-100941_005_00791.jpg,test,add,,536,430,580,466,,người áo xanh than sót mép dưới
+20261102-100941_005_00791.jpg,test,add,,521,439,557,475,,người áo tối sót mép dưới
+20261102-100941_005_00791.jpg,test,hard,,,,,,,nhóm 4 người vào khung; người áo trắng chỉ ló vài px ở đáy không gán
+20261102-100941_005_00798.jpg,test,tighten,2,492,377,529,406,rtdetr,người áo xanh than
+20261102-100941_005_00798.jpg,test,tighten,4,478,386,505,411,rtdetr,người áo tối
+20261102-100941_005_00798.jpg,test,tighten,3,463,441,502,473,rtdetr,người áo kẻ
+20261102-100941_005_00798.jpg,test,drop,5,,,,,yolo,hộp gộp cả nhóm
+20261102-100941_005_00798.jpg,test,hard,,,,,,,4 người nhỏ 15 m dính nhau; ranh phải đoán
+20261102-100941_005_00809.jpg,test,tighten,1,432,319,465,338,rtdetr,người áo xanh than
+20261102-100941_005_00809.jpg,test,add,,418,327,441,350,,người áo tối dính người áo xanh than
+20261102-100941_005_00809.jpg,test,add,,403,382,431,408,,người áo kẻ bị sót
+20261102-100941_005_00809.jpg,test,hard,,,,,,,4 người nhỏ dính nhau cạnh vùng hồng cắt màu
+20261102-100941_005_00818.jpg,test,tighten,2,112,84,144,118,rtdetr,người áo tối gồm chân giày trắng
+20261102-100941_005_00818.jpg,test,tighten,5,130,78,163,105,rtdetr,người áo xanh than
+20261102-100941_005_00818.jpg,test,tighten,1,121,113,152,147,rtdetr,người áo hồng gồm chân
+20261102-100941_005_00818.jpg,test,drop,3,,,,,rtdetr,trùng hộp 2 (chân người áo tối)
+20261102-100941_005_00818.jpg,test,drop,6,,,,,yolo,hộp gộp cả nhóm
+20261102-100941_005_00818.jpg,test,hard,,,,,,,4 người dính nhau; ranh phải đoán
+20261102-100941_005_00831.jpg,test,add,,22,0,50,24,,người áo tối cắt mép trên
+20261102-100941_005_00831.jpg,test,add,,48,0,81,23,,người áo xanh than cắt mép trên
+20261102-100941_005_00831.jpg,test,add,,32,23,64,60,,người áo trắng sót
+20261102-100941_005_00831.jpg,test,add,,0,72,40,102,,người áo kẻ sót mép trái
+20261102-100941_005_00831.jpg,test,hard,,,,,,,4 người dính nhau ở góc; hai người mép trên phải đoán ranh
+20261102-100941_005_00846.jpg,test,add,,52,46,90,88,,người áo tối sót gồm chân trắng
+20261102-100941_005_00846.jpg,test,add,,73,42,108,71,,người áo xanh than sót
+20261102-100941_005_00846.jpg,test,hard,,,,,,,4 người dính nhau
+20261102-100941_005_00859.jpg,test,add,,72,45,105,88,,người áo tối sót gồm chân trắng
+20261102-100941_005_00859.jpg,test,add,,47,115,84,141,,người áo kẻ sót
+20261102-100941_005_00859.jpg,test,hard,,,,,,,4 người dính nhau
+20261102-100941_005_00871.jpg,test,add,,63,117,98,143,,người áo kẻ sót
+20261102-100941_005_00871.jpg,test,drop,4,,,,,rtdetr,đốm trắng
+20261102-100941_005_00871.jpg,test,hard,,,,,,,4 người dính nhau
+20261102-100941_005_00879.jpg,test,add,,119,32,153,63,,người áo xanh than sót
+20261102-100941_005_00879.jpg,test,add,,97,47,134,78,,người áo tối sót gồm chân trắng
+20261102-100941_005_00879.jpg,test,tighten,1,85,69,118,92,rtdetr,người áo trắng gồm chân
+20261102-100941_005_00879.jpg,test,add,,73,104,111,130,,người áo kẻ sót
+20261102-100941_005_00879.jpg,test,drop,2,,,,,rtdetr,đốm trắng
+20261102-100941_005_00879.jpg,test,hard,,,,,,,4 người dính nhau
+20261102-100941_005_00892.jpg,test,tighten,1,96,79,128,103,rtdetr,người áo trắng gồm chân
+20261102-100941_005_00892.jpg,test,tighten,4,86,114,123,142,rtdetr,người áo kẻ cả thân trái
+20261102-100941_005_00892.jpg,test,drop,5,,,,,rtdetr,đốm trắng
+20261102-100941_005_00892.jpg,test,hard,,,,,,,4 người dính nhau
+20261102-100941_005_00892.jpg,test,tighten,3,109,48,143,88,rtdetr,người áo tối gồm chân trắng
+20261102-100941_005_00906.jpg,test,add,,107,48,144,74,,người áo xanh than sót
+20261102-100941_005_00906.jpg,test,add,,89,56,122,90,,người áo tối sót gồm chân trắng
+20261102-100941_005_00906.jpg,test,add,,73,82,110,104,,người áo trắng sót
+20261102-100941_005_00906.jpg,test,add,,66,118,99,146,,người áo kẻ sót
+20261102-100941_005_00906.jpg,test,hard,,,,,,,4 người dính nhau
+20261102-100941_005_00920.jpg,test,drop,2,,,,,yolo,hộp gộp cả nhóm
+20261102-100941_005_00920.jpg,test,add,,104,36,144,64,,người áo xanh than
+20261102-100941_005_00920.jpg,test,add,,102,64,143,89,,người áo tối gồm chân trắng
+20261102-100941_005_00920.jpg,test,add,,70,72,106,96,,người áo trắng
+20261102-100941_005_00920.jpg,test,add,,62,112,98,139,,người áo kẻ
+20261102-100941_005_00920.jpg,test,drop,1,,,,,rtdetr,đốm hồng
+20261102-100941_005_00934.jpg,test,add,,51,31,96,60,,người áo trắng sót
+20261102-100941_005_00934.jpg,test,add,,96,56,135,96,,người áo tối sót gồm chân trắng
+20261102-100941_005_00934.jpg,test,add,,43,75,88,106,,người áo kẻ sót
+20261102-100941_005_00934.jpg,test,hard,,,,,,,4 người dính nhau; người áo xanh than cắt mép trên
+20261102-100941_005_00946.jpg,test,tighten,2,0,0,48,34,rtdetr,người áo trắng cắt mép
+20261102-100941_005_00946.jpg,test,tighten,1,0,54,48,90,rtdetr,người áo kẻ
+20261102-100941_005_00946.jpg,test,add,,32,64,62,95,,người áo tối tách khỏi người áo kẻ
+20261102-100941_005_00946.jpg,test,hard,,,,,,,người áo kẻ và áo tối dính nhau ở mép trái; ranh phải đoán
+20261102-100941_005_00958.jpg,test,drop,1,,,,,rtdetr,dải mép
+20261102-100941_005_00958.jpg,test,add,,0,38,32,58,,người áo trắng ra khỏi mép trái
+20261102-100941_005_00958.jpg,test,add,,0,125,31,160,,người áo tối ra khỏi mép trái
+20261102-100941_005_00958.jpg,test,hard,,,,,,,ba người chỉ còn mảnh ở mép trái; người áo kẻ chỉ còn x<15 nên không gán (luật dải mép)
+20261102-100941_005_00971.jpg,test,ok,,,,,,,
+20261102-100941_005_00985.jpg,test,drop,1,,,,,rtdetr,dải mép
+20261102-100941_005_01000.jpg,test,drop,1,,,,,rtdetr,đốm hồng (túi rác đứng yên nhiều khung)
+20261102-100941_007_01031.jpg,test,drop,1,,,,,rtdetr,bóng của người áo hồng
+20261102-100941_007_01031.jpg,test,tighten,6,344,281,370,308,yolo,siết khỏi bóng - người áo hồng trắng (phần xám dưới là bóng người kế)
+20261102-100941_007_01031.jpg,test,tighten,2,271,404,299,440,rtdetr,siết vào người thứ nhất của cặp dưới
+20261102-100941_007_01031.jpg,test,add,,294,430,318,461,,người thứ hai của cặp dưới (áo tối xanh)
+20261102-100941_007_01031.jpg,test,tighten,3,321,362,346,387,rtdetr,siết khỏi bóng và bụi cỏ - người mũ xanh áo hồng
+20261102-100941_007_01031.jpg,test,hard,,,,,,,người nối đuôi bóng nhau - tách theo context; hộp 5 đầu đỏ áo xanh trong bụi cỏ (context -0.4s thấy người) mức tin vừa
+20261102-100941_007_01045.jpg,test,drop,1,,,,,rtdetr,bóng người (giơ tay lên đầu)
+20261102-100941_007_01045.jpg,test,tighten,2,341,399,371,441,yolo,siết khỏi bóng - người quần tối áo xanh nhạt
+20261102-100941_007_01045.jpg,test,add,,358,454,374,480,,người quần sáng áo tối bị cắt mép dưới
+20261102-100941_007_01045.jpg,test,add,,592,463,626,480,,người mũ đỏ áo xanh bị cắt mép dưới (theo khung 01031)
+20261102-100941_007_01045.jpg,test,hard,,,,,,,hai người ở mép dưới chỉ thấy một phần - đoán theo khung trước
+20261102-100941_007_01054.jpg,test,ok,,,,,,,
+20261102-100941_007_01062.jpg,test,drop,1,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_01076.jpg,test,drop,1,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_01087.jpg,test,ok,,,,,,,
+20261102-100941_007_01099.jpg,test,ok,,,,,,,
+20261102-100941_007_01118.jpg,test,drop,1,,,,,rtdetr,tấm bảng trắng hồng trên cỏ (đồ vật cố định)
+20261102-100941_007_01169.jpg,test,drop,1,,,,,rtdetr,hộp ô lưới rỗng chạm dải mép
+20261102-100941_007_01169.jpg,test,drop,2,,,,,rtdetr,hộp ô lưới rỗng
+20261102-100941_007_01184.jpg,test,ok,,,,,,,
+20261102-100941_007_01198.jpg,test,drop,1,,,,,both,dải mép
+20261102-100941_007_01198.jpg,test,drop,2,,,,,rtdetr,hộp ô lưới rỗng
+20261102-100941_007_01198.jpg,test,drop,3,,,,,rtdetr,hộp ô lưới rỗng
+20261102-100941_007_01206.jpg,test,ok,,,,,,,
+20261102-100941_007_01283.jpg,test,ok,,,,,,,
+20261102-100941_007_01292.jpg,test,drop,1,,,,,rtdetr,đốm hồng cam (đống rác)
+20261102-100941_007_01308.jpg,test,ok,,,,,,,
+20261102-100941_007_01853.jpg,test,ok,,,,,,,
+20261102-100941_007_01864.jpg,test,drop,1,,,,,rtdetr,hộp ô lưới rỗng (mặt đường)
+20261102-100941_007_01864.jpg,test,drop,2,,,,,rtdetr,hộp ô lưới rỗng (mặt đường)
+20261102-100941_007_01864.jpg,test,drop,3,,,,,rtdetr,hộp ô lưới rỗng (mặt đường)
+20261102-100941_007_01874.jpg,test,drop,1,,,,,rtdetr,hộp ô lưới rỗng (mặt đường)
+20261102-100941_007_01874.jpg,test,drop,2,,,,,rtdetr,hộp ô lưới rỗng (mặt đường)
+20261102-100941_007_01874.jpg,test,drop,3,,,,,rtdetr,hộp ô lưới rỗng (mặt đường)
+20261102-100941_007_01874.jpg,test,drop,4,,,,,rtdetr,hộp ô lưới rỗng (mặt đường)
+20261102-100941_007_01885.jpg,test,drop,1,,,,,rtdetr,hộp ô lưới rỗng (mặt đường)
+20261102-100941_007_01885.jpg,test,drop,2,,,,,rtdetr,hộp ô lưới rỗng (mặt đường)
+20261102-100941_007_01885.jpg,test,drop,3,,,,,rtdetr,hộp ô lưới rỗng (mặt đường)
+20261102-100941_007_01890.jpg,test,drop,1,,,,,rtdetr,hộp cả khung - mặt đường không có người
+20261102-100941_007_01953.jpg,test,ok,,,,,,,
+20261102-100941_007_01972.jpg,test,drop,1,,,,,rtdetr,hộp ô lưới rỗng (sỏi đá sát đất)
+20261102-100941_007_01981.jpg,test,drop,1,,,,,rtdetr,hộp ô lưới rỗng (sỏi đá sát đất)
+20261102-100941_007_02008.jpg,test,ok,,,,,,,
