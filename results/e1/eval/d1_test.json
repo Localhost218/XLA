@@ -1,0 +1,806 @@
+{
+ "pred": "D:\\DevCache\\runs\\xla\\e1\\score\\d1_all.csv",
+ "split": "test",
+ "labels_dir": "D:\\XLA-wt\\detect\\data\\real\\labels",
+ "labels_sha256": "66859ba3cd724f6630beff301658f9a0de72b6de762d1e8fc987301c24a2a3f8",
+ "devval_labels_dir": "D:\\XLA-wt\\detect\\data\\real\\labels",
+ "manifest": "D:\\XLA-wt\\detect\\data\\real\\labels\\manifest.json",
+ "labels_approved_by_owner": true,
+ "official": true,
+ "note": null,
+ "n": {
+  "frames": 198,
+  "frames_with_person": 39,
+  "gt_boxes": 149,
+  "neg_split_frames": 300,
+  "negative_frames": 459,
+  "negative_frames_flight": 159,
+  "negative_frames_indoor": 300,
+  "labels_missing": 0,
+  "pred_frames_other_splits": 99
+ },
+ "thresholds": [
+  0.25,
+  0.02334
+ ],
+ "f1_threshold_from_devval": {
+  "thr": 0.02334,
+  "f1_devval": 0.23880597014925373,
+  "precision_devval": 0.20915032679738563,
+  "recall_devval": 0.2782608695652174,
+  "n_frames_devval": 100,
+  "devval_labels_missing": 0,
+  "devval_labels_sha256": "53b995882bcbf32d450d4b856d9c106198c9de27232631ad8312c4cda86c4335"
+ },
+ "metrics": {
+  "mAP50": {
+   "value": 0.143322,
+   "ci95": [
+    0.083147,
+    0.184612
+   ]
+  },
+  "mAP50_95": {
+   "value": 0.046939,
+   "ci95": [
+    0.029503,
+    0.059876
+   ]
+  },
+  "AP_small": {
+   "value": 0.063342,
+   "ci95": [
+    0.031324,
+    0.127551
+   ]
+  },
+  "AR_small": {
+   "value": 0.443529,
+   "ci95": [
+    0.410515,
+    0.5
+   ]
+  },
+  "AR": {
+   "value": 0.407383,
+   "ci95": [
+    0.278571,
+    0.454817
+   ]
+  },
+  "precision@0.25": {
+   "value": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  "recall@0.25": {
+   "value": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  "f1@0.25": {
+   "value": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  "fp_per_neg_frame@0.25": {
+   "value": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  "fp_per_neg_flight@0.25": {
+   "value": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  "fp_per_neg_indoor@0.25": {
+   "value": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  "precision@0.02334": {
+   "value": 0.131188,
+   "ci95": [
+    0.020828,
+    0.182878
+   ]
+  },
+  "recall@0.02334": {
+   "value": 0.355705,
+   "ci95": [
+    0.242857,
+    0.413223
+   ]
+  },
+  "f1@0.02334": {
+   "value": 0.191682,
+   "ci95": [
+    0.038421,
+    0.24142
+   ]
+  },
+  "fp_per_neg_frame@0.02334": {
+   "value": 0.557734,
+   "ci95": [
+    0.377722,
+    0.768056
+   ]
+  },
+  "fp_per_neg_flight@0.02334": {
+   "value": 0.993711,
+   "ci95": [
+    0.50326,
+    1.596324
+   ]
+  },
+  "fp_per_neg_indoor@0.02334": {
+   "value": 0.326667,
+   "ci95": [
+    0.262458,
+    0.390591
+   ]
+  }
+ },
+ "by_alt_bin": {
+  "3-8": {
+   "frames": 57,
+   "frames_with_person": 4,
+   "gt_boxes": 7,
+   "metrics": {
+    "mAP50": {
+     "value": 0.00495,
+     "ci95": [
+      0.0,
+      0.024461
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.00198,
+     "ci95": [
+      0.0,
+      0.009785
+     ]
+    },
+    "AP_small": {
+     "value": null,
+     "ci95": [
+      null,
+      null
+     ]
+    },
+    "AR_small": {
+     "value": null,
+     "ci95": [
+      null,
+      null
+     ]
+    },
+    "AR": {
+     "value": 0.057143,
+     "ci95": [
+      0.0,
+      0.08
+     ]
+    },
+    "precision@0.25": {
+     "value": null,
+     "ci95": [
+      null,
+      null
+     ]
+    },
+    "recall@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "f1@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_frame@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_flight@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_indoor@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "precision@0.02334": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "recall@0.02334": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "f1@0.02334": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_frame@0.02334": {
+     "value": 0.31728,
+     "ci95": [
+      0.246941,
+      0.391437
+     ]
+    },
+    "fp_per_neg_flight@0.02334": {
+     "value": 0.264151,
+     "ci95": [
+      0.027778,
+      0.591885
+     ]
+    },
+    "fp_per_neg_indoor@0.02334": {
+     "value": 0.326667,
+     "ci95": [
+      0.262458,
+      0.390591
+     ]
+    }
+   }
+  },
+  "8-14": {
+   "frames": 68,
+   "frames_with_person": 10,
+   "gt_boxes": 36,
+   "metrics": {
+    "mAP50": {
+     "value": 0.107282,
+     "ci95": [
+      0.011424,
+      0.166563
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.037914,
+     "ci95": [
+      0.003522,
+      0.061502
+     ]
+    },
+    "AP_small": {
+     "value": 0.095002,
+     "ci95": [
+      0.003578,
+      0.148947
+     ]
+    },
+    "AR_small": {
+     "value": 0.390909,
+     "ci95": [
+      0.2,
+      0.7
+     ]
+    },
+    "AR": {
+     "value": 0.336111,
+     "ci95": [
+      0.222222,
+      0.5
+     ]
+    },
+    "precision@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "recall@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "f1@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_frame@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_flight@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_indoor@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "precision@0.02334": {
+     "value": 0.107843,
+     "ci95": [
+      0.0,
+      0.1875
+     ]
+    },
+    "recall@0.02334": {
+     "value": 0.305556,
+     "ci95": [
+      0.0,
+      0.4
+     ]
+    },
+    "f1@0.02334": {
+     "value": 0.15942,
+     "ci95": [
+      0.0,
+      0.25104
+     ]
+    },
+    "fp_per_neg_frame@0.02334": {
+     "value": 0.396648,
+     "ci95": [
+      0.289691,
+      0.538275
+     ]
+    },
+    "fp_per_neg_flight@0.02334": {
+     "value": 0.758621,
+     "ci95": [
+      0.23997,
+      1.579019
+     ]
+    },
+    "fp_per_neg_indoor@0.02334": {
+     "value": 0.326667,
+     "ci95": [
+      0.262458,
+      0.390591
+     ]
+    }
+   }
+  },
+  ">14": {
+   "frames": 73,
+   "frames_with_person": 25,
+   "gt_boxes": 106,
+   "metrics": {
+    "mAP50": {
+     "value": 0.17087,
+     "ci95": [
+      0.108565,
+      0.307622
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.056769,
+     "ci95": [
+      0.041755,
+      0.121677
+     ]
+    },
+    "AP_small": {
+     "value": 0.064784,
+     "ci95": [
+      0.036855,
+      0.128583
+     ]
+    },
+    "AR_small": {
+     "value": 0.451351,
+     "ci95": [
+      0.3922,
+      0.515584
+     ]
+    },
+    "AR": {
+     "value": 0.454717,
+     "ci95": [
+      0.374945,
+      0.511111
+     ]
+    },
+    "precision@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "recall@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "f1@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_frame@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_flight@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_indoor@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "precision@0.02334": {
+     "value": 0.146341,
+     "ci95": [
+      0.027759,
+      0.214565
+     ]
+    },
+    "recall@0.02334": {
+     "value": 0.396226,
+     "ci95": [
+      0.333333,
+      0.676923
+     ]
+    },
+    "f1@0.02334": {
+     "value": 0.21374,
+     "ci95": [
+      0.060181,
+      0.273848
+     ]
+    },
+    "fp_per_neg_frame@0.02334": {
+     "value": 0.568966,
+     "ci95": [
+      0.364728,
+      0.7906
+     ]
+    },
+    "fp_per_neg_flight@0.02334": {
+     "value": 2.083333,
+     "ci95": [
+      1.038333,
+      2.909141
+     ]
+    },
+    "fp_per_neg_indoor@0.02334": {
+     "value": 0.326667,
+     "ci95": [
+      0.262458,
+      0.390591
+     ]
+    }
+   }
+  }
+ },
+ "by_hard": {
+  "hard": {
+   "frames": 5,
+   "frames_with_person": 5,
+   "gt_boxes": 18,
+   "metrics": {
+    "mAP50": {
+     "value": 0.314422,
+     "ci95": [
+      0.0,
+      0.552098
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.112198,
+     "ci95": [
+      0.0,
+      0.189234
+     ]
+    },
+    "AP_small": {
+     "value": 0.154469,
+     "ci95": [
+      0.154296,
+      0.216792
+     ]
+    },
+    "AR_small": {
+     "value": 0.461538,
+     "ci95": [
+      0.4375,
+      0.5
+     ]
+    },
+    "AR": {
+     "value": 0.366667,
+     "ci95": [
+      0.0,
+      0.5
+     ]
+    },
+    "precision@0.25": {
+     "value": null,
+     "ci95": [
+      null,
+      null
+     ]
+    },
+    "recall@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "f1@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_frame@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_flight@0.25": {
+     "value": null,
+     "ci95": [
+      null,
+      null
+     ]
+    },
+    "fp_per_neg_indoor@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "precision@0.02334": {
+     "value": 0.28,
+     "ci95": [
+      0.222222,
+      0.3125
+     ]
+    },
+    "recall@0.02334": {
+     "value": 0.388889,
+     "ci95": [
+      0.0,
+      0.5
+     ]
+    },
+    "f1@0.02334": {
+     "value": 0.325581,
+     "ci95": [
+      0.0,
+      0.384615
+     ]
+    },
+    "fp_per_neg_frame@0.02334": {
+     "value": 0.326667,
+     "ci95": [
+      0.262458,
+      0.390591
+     ]
+    },
+    "fp_per_neg_flight@0.02334": {
+     "value": null,
+     "ci95": [
+      null,
+      null
+     ]
+    },
+    "fp_per_neg_indoor@0.02334": {
+     "value": 0.326667,
+     "ci95": [
+      0.262458,
+      0.390591
+     ]
+    }
+   }
+  },
+  "not_hard": {
+   "frames": 193,
+   "frames_with_person": 34,
+   "gt_boxes": 131,
+   "metrics": {
+    "mAP50": {
+     "value": 0.13419,
+     "ci95": [
+      0.002324,
+      0.1787
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.044338,
+     "ci95": [
+      0.000929,
+      0.05849
+     ]
+    },
+    "AP_small": {
+     "value": 0.060304,
+     "ci95": [
+      0.012655,
+      0.133833
+     ]
+    },
+    "AR_small": {
+     "value": 0.440278,
+     "ci95": [
+      0.4,
+      0.5
+     ]
+    },
+    "AR": {
+     "value": 0.412977,
+     "ci95": [
+      0.133333,
+      0.468817
+     ]
+    },
+    "precision@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "recall@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "f1@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_frame@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_flight@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "fp_per_neg_indoor@0.25": {
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "precision@0.02334": {
+     "value": 0.121372,
+     "ci95": [
+      0.0,
+      0.172573
+     ]
+    },
+    "recall@0.02334": {
+     "value": 0.351145,
+     "ci95": [
+      0.0,
+      0.418301
+     ]
+    },
+    "f1@0.02334": {
+     "value": 0.180392,
+     "ci95": [
+      0.0,
+      0.230687
+     ]
+    },
+    "fp_per_neg_frame@0.02334": {
+     "value": 0.557734,
+     "ci95": [
+      0.377722,
+      0.768056
+     ]
+    },
+    "fp_per_neg_flight@0.02334": {
+     "value": 0.993711,
+     "ci95": [
+      0.50326,
+      1.596324
+     ]
+    },
+    "fp_per_neg_indoor@0.02334": {
+     "value": 0.326667,
+     "ci95": [
+      0.262458,
+      0.390591
+     ]
+    }
+   }
+  }
+ },
+ "ms_per_frame": {
+  "mean": 76.75766129032257,
+  "median": 86.32499999999999,
+  "n_frames": 496
+ },
+ "bootstrap": {
+  "n": 2000,
+  "seed": 20261118,
+  "unit": "khối 30 s của split.json",
+  "ci_pct": 95.0,
+  "n_blocks": {
+   "flight": 13,
+   "neg": 213
+  },
+  "note": "subset alt/hard giữ mọi khung neg cho báo nhầm/khung âm"
+ }
+}
