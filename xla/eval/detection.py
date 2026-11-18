@@ -19,7 +19,13 @@ nhanh, và mỗi lần chạy tự đối chiếu với ``COCOeval.accumulate/su
 AX::
 
     python -m xla.eval.detection --pred results/baseline/pred/full.csv --split test --json
-    # exit 0 xong; 1 CSV có khung không có trong split.json / thiếu nhãn / dữ liệu sai; 2 tham số sai
+    python -m xla.eval.detection compare --pred-a <csv A> --pred-b <csv B> --split test --json
+    # exit 0 xong; 1 CSV có khung không có trong split.json / thiếu nhãn / dữ liệu sai; 2 tham số sai (D7)
+
+``compare``: hiệu B − A ghép cặp — cùng một bộ mẫu khối bootstrap cho cả hai model — với CI 95 % và ``p_b_better``;
+ngưỡng vận hành mỗi model là ``--thr-a``/``--thr-b`` hoặc ngưỡng F1 tối đa của chính model đó trên dev-val.
+Báo nhầm/khung âm tách ``fp_per_neg_flight`` (khung bay không người của tập chấm) và ``fp_per_neg_indoor`` (khung
+``neg`` trong nhà) bên cạnh số gộp ``fp_per_neg_frame``.
 """
 
 from __future__ import annotations
@@ -268,18 +274,23 @@ def select_f1_threshold(evals: list[FrameEval], split_of: dict[str, str]) -> dic
 
 # ---------------------------------------------------------------- chỉ số + bootstrap
 
+NEG_KINDS = (("all", "fp_per_neg_frame"), ("flight", "fp_per_neg_flight"), ("indoor", "fp_per_neg_indoor"))
+"""Báo nhầm/khung âm: gộp; khung bay không người của tập chấm; khung ``neg`` (trong nhà)."""
 
-def _metrics(evals: list[FrameEval], neg_fp: dict[float, list[int]], thresholds: list[float]) -> dict[str, float]:
-    """``neg_fp[thr]`` = số hộp ≥ thr trên từng khung âm trong mẫu (đã nhân theo bootstrap)."""
+
+def _metrics(evals: list[FrameEval], neg_fp: dict[float, dict[str, list[int]]], thresholds: list[float],
+             ) -> dict[str, float]:
+    """``neg_fp[thr][kind]`` = số hộp ≥ thr trên từng khung âm loại ``kind`` trong mẫu (đã nhân theo bootstrap)."""
     p_all, r_all = accumulate(evals, "all")
     p_small, r_small = accumulate(evals, "small")
     m = {"mAP50": p_all[0], "mAP50_95": np.mean(p_all), "AP_small": np.mean(p_small), "AR_small": np.mean(r_small),
          "AR": np.mean(r_all)}
     for thr in thresholds:
         prf = prf_at(evals, thr)
-        fp = neg_fp[thr]
-        m |= {f"precision@{thr:g}": prf["precision"], f"recall@{thr:g}": prf["recall"], f"f1@{thr:g}": prf["f1"],
-              f"fp_per_neg_frame@{thr:g}": float(np.mean(fp)) if fp else float("nan")}
+        m |= {f"precision@{thr:g}": prf["precision"], f"recall@{thr:g}": prf["recall"], f"f1@{thr:g}": prf["f1"]}
+        for kind, key in NEG_KINDS:
+            fp = neg_fp[thr][kind]
+            m[f"{key}@{thr:g}"] = float(np.mean(fp)) if fp else float("nan")
     return {k: float(v) for k, v in m.items()}
 
 
@@ -287,6 +298,7 @@ def _metrics(evals: list[FrameEval], neg_fp: dict[float, list[int]], thresholds:
 class EvalSet:
     evals: dict[str, FrameEval]
     neg_frames: list[str]  # khung âm: khung của tập không có gt + khung ``neg``
+    neg_indoor: set[str]  # khung ``neg`` (trong nhà); phần còn lại của neg_frames là khung bay không người
     block_of: dict[str, int]
     raw: dict[str, np.ndarray]  # điểm thô mỗi khung (đếm báo nhầm, không cắt maxDets)
     flight_blocks: list[int]
@@ -304,9 +316,14 @@ class EvalSet:
         return self._fp_cache[key]
 
 
-def _neg_counts(s: EvalSet, frames: list[str], thresholds: list[float]) -> dict[float, list[int]]:
+def _neg_counts(s: EvalSet, frames: list[str], thresholds: list[float]) -> dict[float, dict[str, list[int]]]:
     negs = [f for f in frames if f in s.neg_set]
-    return {thr: [s.fp_count(thr, f) for f in negs] for thr in thresholds}
+    out = {}
+    for thr in thresholds:
+        c = [(f in s.neg_indoor, s.fp_count(thr, f)) for f in negs]
+        out[thr] = {"all": [n for _, n in c], "flight": [n for ind, n in c if not ind],
+                    "indoor": [n for ind, n in c if ind]}
+    return out
 
 
 def _subset_metrics(s: EvalSet, frames: list[str], keep: set[str] | None, thresholds: list[float]) -> dict[str, float]:
@@ -314,50 +331,87 @@ def _subset_metrics(s: EvalSet, frames: list[str], keep: set[str] | None, thresh
     return _metrics([s.evals[f] for f in fs if f in s.evals], _neg_counts(s, fs, thresholds), thresholds)
 
 
-def bootstrap(s: EvalSet, subsets: dict[str, set[str] | None], thresholds: list[float], n: int, seed: int,
-              ) -> dict[str, dict[str, tuple[float, float]]]:
-    """CI 95 % theo khối: mỗi lần lấy lại (có hoàn lại) đúng số khối bay và số khối âm, ghép khung của các khối."""
+def resample(s: EvalSet, n: int, seed: int) -> list[list[str]]:
+    """``n`` mẫu bootstrap theo khối: mỗi mẫu lấy lại (có hoàn lại) đúng số khối bay và số khối âm, trả danh sách khung.
+
+    Mẫu chỉ phụ thuộc tập khối + seed, nên hai model chấm trên cùng nhãn nhận đúng cùng mẫu (so sánh ghép cặp)."""
     rng = np.random.default_rng(seed)
     members: dict[int, list[str]] = {}
     for f, b in s.block_of.items():
         members.setdefault(b, []).append(f)
-    samples: dict[str, list[dict[str, float]]] = {k: [] for k in subsets}
     fb, nb = np.asarray(s.flight_blocks), np.asarray(s.neg_blocks)
+    out = []
     for _ in range(n):
         picked = list(rng.choice(fb, fb.size)) if fb.size else []
         picked += list(rng.choice(nb, nb.size)) if nb.size else []
-        frames = [f for b in picked for f in members[int(b)]]
-        for name, keep in subsets.items():
-            samples[name].append(_subset_metrics(s, frames, keep, thresholds))
-    lo, hi = (100 - CI_PCT) / 2, 100 - (100 - CI_PCT) / 2
-    out: dict[str, dict[str, tuple[float, float]]] = {}
-    for name, rows in samples.items():
-        out[name] = {}
-        for k in rows[0]:
-            v = np.asarray([r[k] for r in rows], dtype=float)
-            v = v[np.isfinite(v)]
-            out[name][k] = (float(np.percentile(v, lo)), float(np.percentile(v, hi))) if v.size else (np.nan, np.nan)
+        out.append([f for b in picked for f in members[int(b)]])
     return out
 
 
-# ---------------------------------------------------------------- điều phối
+def _ci(values: list[float]) -> tuple[float, float]:
+    v = np.asarray(values, dtype=float)
+    v = v[np.isfinite(v)]
+    lo, hi = (100 - CI_PCT) / 2, 100 - (100 - CI_PCT) / 2
+    return (float(np.percentile(v, lo)), float(np.percentile(v, hi))) if v.size else (np.nan, np.nan)
 
 
-def evaluate(pred_csv: Path, split: str = "test", labels_dir: Path | None = None, manifest_path: Path | None = None,
-             split_json: Path | None = None, thresholds: list[float] | None = None, boot_n: int = BOOT_N,
-             seed: int = BOOT_SEED, allow_missing_labels: bool = False, f1_from_devval: bool = True,
-             devval_labels_dir: Path | None = None) -> dict[str, Any]:
-    """Chấm một CSV; ``devval_labels_dir`` mặc định = ``labels_dir`` (nhãn tạm test và dev-val có thể ở hai nơi)."""
+def bootstrap(s: EvalSet, subsets: dict[str, set[str] | None], thresholds: list[float], samples: list[list[str]],
+              ) -> dict[str, dict[str, tuple[float, float]]]:
+    """CI 95 % theo khối trên các mẫu của ``resample``."""
+    rows: dict[str, list[dict[str, float]]] = {k: [] for k in subsets}
+    for frames in samples:
+        for name, keep in subsets.items():
+            rows[name].append(_subset_metrics(s, frames, keep, thresholds))
+    return {name: {k: _ci([r[k] for r in rs]) for k in rs[0]} for name, rs in rows.items() if rs}
+
+
+# ---------------------------------------------------------------- chuẩn bị một model
+
+
+@dataclass
+class Prepared:
+    """Mọi thứ của một CSV trên một tập: kết quả ghép, khung âm, tập con, ngưỡng (đã gồm ngưỡng F1 dev-val nếu có)."""
+
+    s: EvalSet
+    frames: list[str]
+    neg_split: list[str]
+    gt: dict[str, np.ndarray]
+    missing: list[str]
+    labels_sha: str
+    subsets: dict[str, set[str] | None]
+    thresholds: list[float]
+    f1_info: dict[str, Any] | None
+    stats: np.ndarray
+    preds: dict[str, tuple[np.ndarray, np.ndarray]]
+    ms: dict[str, float]
+    manifest: dict[str, Any] | None
+    manifest_path: Path
+    labels_dir: Path
+    devval_labels_dir: Path
+
+    @property
+    def all_frames(self) -> list[str]:
+        return self.frames + self.neg_split
+
+    @property
+    def official(self) -> bool:
+        return bool((self.manifest or {}).get("approved_by_owner", False)) and not self.missing
+
+
+def prepare(pred_csv: Path, split: str = "test", labels_dir: Path | None = None, manifest_path: Path | None = None,
+            split_json: Path | None = None, thresholds: list[float] | None = None, allow_missing_labels: bool = False,
+            f1_from_devval: bool = True, devval_labels_dir: Path | None = None) -> Prepared:
     if split not in EVAL_SPLITS:
         raise ValueError(f"split phải là một trong {EVAL_SPLITS}")
     root = repo_root()
     labels_dir = labels_dir or root / LABELS_REL
+    devval_labels_dir = devval_labels_dir or labels_dir
     manifest_path = manifest_path or labels_dir / "manifest.json"
     split_rows = read_split(split_json or root / SPLIT_REL)
     split_of = {f: r["split"] for f, r in split_rows.items()}
     manifest = read_manifest(manifest_path)
     preds, ms = read_pred_csv(pred_csv, set(split_rows))
-    thresholds = list(thresholds or DEFAULT_THRESHOLDS)
+    thresholds = list(thresholds or [])
 
     devval = list((manifest or {}).get("devval_frames", []))
     bad_dv = [f for f in devval if split_of.get(f) != "dev"]
@@ -369,17 +423,14 @@ def evaluate(pred_csv: Path, split: str = "test", labels_dir: Path | None = None
     frames = test_frames if split == "test" else sorted(devval)
     if not frames:
         raise EvalInputError(f"tập {split} rỗng (dev-val lấy từ manifest {manifest_path})")
-    gt, missing, labels_sha = load_labels(labels_dir if split == "test" else devval_labels_dir or labels_dir, split,
-                                          frames, allow_missing_labels)
+    gt, missing, labels_sha = load_labels(labels_dir if split == "test" else devval_labels_dir, split, frames,
+                                          allow_missing_labels)
     frames = [f for f in frames if f in gt]
 
-    point: dict[str, Any] = {}
     f1_info = None
     if f1_from_devval and devval:
-        dv_gt, dv_missing, dv_sha = load_labels(devval_labels_dir or labels_dir, "devval", sorted(devval),
-                                                allow_missing_labels)
-        dv_frames = sorted(dv_gt)
-        dv_evals, _ = _coco_eval(dv_frames, dv_gt, preds)
+        dv_gt, dv_missing, dv_sha = load_labels(devval_labels_dir, "devval", sorted(devval), allow_missing_labels)
+        dv_evals, _ = _coco_eval(sorted(dv_gt), dv_gt, preds)
         f1_info = select_f1_threshold(dv_evals, split_of) | {"devval_labels_missing": len(dv_missing),
                                                              "devval_labels_sha256": dv_sha}
         if round(f1_info["thr"], 6) not in thresholds:
@@ -388,11 +439,10 @@ def evaluate(pred_csv: Path, split: str = "test", labels_dir: Path | None = None
     evals_list, stats = _coco_eval(frames, gt, preds)
     neg_split = sorted(f for f, sp in split_of.items() if sp == "neg")
     s = EvalSet(evals={fe.frame: fe for fe in evals_list}, neg_frames=[f for f in frames if len(gt[f]) == 0] + neg_split,
-                block_of={f: int(split_rows[f]["block"]) for f in frames + neg_split},
+                neg_indoor=set(neg_split), block_of={f: int(split_rows[f]["block"]) for f in frames + neg_split},
                 raw={f: v[1] for f, v in preds.items()},
                 flight_blocks=sorted({int(split_rows[f]["block"]) for f in frames}),
                 neg_blocks=sorted({int(split_rows[f]["block"]) for f in neg_split}))
-    all_frames = frames + neg_split
 
     hard = set((manifest or {}).get("hard_frames", []))
     bins = {f: alt_bin(float(split_rows[f]["alt_m"])) for f in frames if split_rows[f].get("alt_m") is not None}
@@ -402,44 +452,134 @@ def evaluate(pred_csv: Path, split: str = "test", labels_dir: Path | None = None
     if hard:
         subsets["hard"] = (hard & set(frames)) | set(neg_split)
         subsets["not_hard"] = (set(frames) - hard) | set(neg_split)
+    return Prepared(s, frames, neg_split, gt, missing, labels_sha, subsets, thresholds, f1_info, stats, preds, ms,
+                    manifest, manifest_path, labels_dir, devval_labels_dir)
 
-    for name, keep in subsets.items():
-        point[name] = _subset_metrics(s, all_frames, keep, thresholds)
-    _check_against_pycocotools(point["all"], stats)
-    ci = bootstrap(s, subsets, thresholds, boot_n, seed) if boot_n > 0 else {}
+
+# ---------------------------------------------------------------- chấm một model
+
+
+def evaluate(pred_csv: Path, split: str = "test", labels_dir: Path | None = None, manifest_path: Path | None = None,
+             split_json: Path | None = None, thresholds: list[float] | None = None, boot_n: int = BOOT_N,
+             seed: int = BOOT_SEED, allow_missing_labels: bool = False, f1_from_devval: bool = True,
+             devval_labels_dir: Path | None = None) -> dict[str, Any]:
+    """Chấm một CSV; ``devval_labels_dir`` mặc định = ``labels_dir`` (nhãn tạm test và dev-val có thể ở hai nơi)."""
+    pr = prepare(pred_csv, split, labels_dir, manifest_path, split_json, list(thresholds or DEFAULT_THRESHOLDS),
+                 allow_missing_labels, f1_from_devval, devval_labels_dir)
+    s, thresholds = pr.s, pr.thresholds
+    point = {name: _subset_metrics(s, pr.all_frames, keep, thresholds) for name, keep in pr.subsets.items()}
+    _check_against_pycocotools(point["all"], pr.stats)
+    ci = bootstrap(s, pr.subsets, thresholds, resample(s, boot_n, seed)) if boot_n > 0 else {}
 
     def _pack(name: str) -> dict[str, Any]:
         return {k: {"value": _nan_none(v), "ci95": [_nan_none(x) for x in ci.get(name, {}).get(k, (np.nan, np.nan))]}
                 for k, v in point[name].items()}
 
     def _counts(keep: set[str] | None) -> dict[str, int]:
-        fs = [f for f in frames if keep is None or f in keep]
-        return {"frames": len(fs), "frames_with_person": sum(len(gt[f]) > 0 for f in fs),
-                "gt_boxes": int(sum(len(gt[f]) for f in fs))}
+        fs = [f for f in pr.frames if keep is None or f in keep]
+        return {"frames": len(fs), "frames_with_person": sum(len(pr.gt[f]) > 0 for f in fs),
+                "gt_boxes": int(sum(len(pr.gt[f]) for f in fs))}
 
-    approved = bool((manifest or {}).get("approved_by_owner", False))
-    timed = [ms[f] for f in all_frames if f in ms]
+    timed = [pr.ms[f] for f in pr.all_frames if f in pr.ms]
     return {
-        "pred": str(pred_csv), "split": split, "labels_dir": str(labels_dir), "labels_sha256": labels_sha,
-        "devval_labels_dir": str(devval_labels_dir or labels_dir),
-        "manifest": str(manifest_path) if manifest else None, "labels_approved_by_owner": approved,
-        "official": approved and not missing,
-        "note": None if approved and not missing else "nhãn chưa được chủ dự án duyệt hoặc thiếu nhãn — chưa phải số chính thức",
-        "n": _counts(None) | {"neg_split_frames": len(neg_split), "negative_frames": len(s.neg_frames),
-                              "labels_missing": len(missing), "pred_frames_other_splits": len(set(preds) - set(all_frames))},
-        "thresholds": thresholds, "f1_threshold_from_devval": f1_info,
+        "pred": str(pred_csv), "split": split, "labels_dir": str(pr.labels_dir), "labels_sha256": pr.labels_sha,
+        "devval_labels_dir": str(pr.devval_labels_dir),
+        "manifest": str(pr.manifest_path) if pr.manifest else None,
+        "labels_approved_by_owner": bool((pr.manifest or {}).get("approved_by_owner", False)),
+        "official": pr.official,
+        "note": None if pr.official else "nhãn chưa được chủ dự án duyệt hoặc thiếu nhãn — chưa phải số chính thức",
+        "n": _counts(None) | {"neg_split_frames": len(pr.neg_split), "negative_frames": len(s.neg_frames),
+                              "negative_frames_flight": len(s.neg_frames) - len(pr.neg_split),
+                              "negative_frames_indoor": len(pr.neg_split), "labels_missing": len(pr.missing),
+                              "pred_frames_other_splits": len(set(pr.preds) - set(pr.all_frames))},
+        "thresholds": thresholds, "f1_threshold_from_devval": pr.f1_info,
         "metrics": _pack("all"),
-        "by_alt_bin": {k[4:]: _counts(subsets[k]) | {"metrics": _pack(k)} for k in subsets if k.startswith("alt:")},
-        "by_hard": {k: _counts(subsets[k]) | {"metrics": _pack(k)} for k in ("hard", "not_hard") if k in subsets},
+        "by_alt_bin": {k[4:]: _counts(pr.subsets[k]) | {"metrics": _pack(k)} for k in pr.subsets if k.startswith("alt:")},
+        "by_hard": {k: _counts(pr.subsets[k]) | {"metrics": _pack(k)} for k in ("hard", "not_hard") if k in pr.subsets},
         "ms_per_frame": ({"mean": float(np.mean(timed)), "median": float(np.median(timed)), "n_frames": len(timed)}
                          if timed else None),
-        "bootstrap": {"n": boot_n, "seed": seed, "unit": "khối 30 s của split.json", "ci_pct": CI_PCT,
-                      "n_blocks": {"flight": len(s.flight_blocks), "neg": len(s.neg_blocks)},
-                      "note": "subset alt/hard giữ mọi khung neg cho báo nhầm/khung âm"},
+        "bootstrap": _boot_info(s, boot_n, seed) | {"note": "subset alt/hard giữ mọi khung neg cho báo nhầm/khung âm"},
     }
 
 
-def _nan_none(v: float) -> float | None:
+def _boot_info(s: EvalSet, boot_n: int, seed: int) -> dict[str, Any]:
+    return {"n": boot_n, "seed": seed, "unit": "khối 30 s của split.json", "ci_pct": CI_PCT,
+            "n_blocks": {"flight": len(s.flight_blocks), "neg": len(s.neg_blocks)}}
+
+
+# ---------------------------------------------------------------- so sánh ghép cặp hai model
+
+COMPARE_KEYS = (("mAP50", True), ("mAP50_95", True), ("AP_small", True), ("AR_small", True), ("precision@op", True),
+                ("recall@op", True), ("f1@op", True), ("fp_per_neg_frame@op", False), ("fp_per_neg_flight@op", False),
+                ("fp_per_neg_indoor@op", False))
+"""(chỉ số, cao hơn là tốt hơn). ``@op`` = ở ngưỡng vận hành của từng model."""
+
+
+def _op_metrics(pr: Prepared, frames: list[str], op: float) -> dict[str, float]:
+    m = _subset_metrics(pr.s, frames, None, [op])
+    return {k.replace(f"@{op:g}", "@op"): v for k, v in m.items()}
+
+
+def _op_threshold(pr: Prepared, thr: float | None, name: str) -> tuple[float, str]:
+    if thr is not None:
+        return thr, "tham số"
+    if pr.f1_info is None:
+        raise EvalInputError(f"model {name}: không có dev-val để chọn ngưỡng; truyền --thr-{name}")
+    return round(pr.f1_info["thr"], 6), "F1 tối đa trên dev-val"
+
+
+def compare(pred_a: Path, pred_b: Path, split: str = "test", labels_dir: Path | None = None,
+            manifest_path: Path | None = None, split_json: Path | None = None, thr_a: float | None = None,
+            thr_b: float | None = None, boot_n: int = BOOT_N, seed: int = BOOT_SEED, allow_missing_labels: bool = False,
+            devval_labels_dir: Path | None = None) -> dict[str, Any]:
+    """Hiệu B − A ghép cặp: cùng một bộ mẫu khối bootstrap cho cả hai model; CI 95 % của hiệu và ``p_b_better``.
+
+    ``p_diff_gt_0`` = tỉ lệ mẫu có hiệu > 0; ``p_b_better`` = tỉ lệ mẫu B tốt hơn A theo chiều của chỉ số (báo nhầm thấp
+    hơn là tốt hơn, nên với báo nhầm đó là tỉ lệ hiệu < 0)."""
+    preps, ops = {}, {}
+    for name, pred, thr in (("a", pred_a, thr_a), ("b", pred_b, thr_b)):
+        preps[name] = prepare(pred, split, labels_dir, manifest_path, split_json, [thr] if thr is not None else [],
+                              allow_missing_labels, thr is None, devval_labels_dir)
+        ops[name] = _op_threshold(preps[name], thr, name)
+    pa, pb = preps["a"], preps["b"]
+    if pa.all_frames != pb.all_frames or pa.s.block_of != pb.s.block_of:
+        raise EvalInputError("hai model không chấm trên cùng tập khung/khối — không ghép cặp được")
+    point = {n: _op_metrics(p, p.all_frames, ops[n][0]) for n, p in preps.items()}
+    _check_against_pycocotools(_op_metrics(pa, pa.all_frames, ops["a"][0]), pa.stats)
+    _check_against_pycocotools(_op_metrics(pb, pb.all_frames, ops["b"][0]), pb.stats)
+    diffs: dict[str, list[float]] = {k: [] for k, _ in COMPARE_KEYS}
+    for frames in resample(pa.s, boot_n, seed):
+        ma, mb = _op_metrics(pa, frames, ops["a"][0]), _op_metrics(pb, frames, ops["b"][0])
+        for k, _ in COMPARE_KEYS:
+            diffs[k].append(mb[k] - ma[k])
+    metrics = {}
+    for k, higher in COMPARE_KEYS:
+        d = np.asarray(diffs[k], dtype=float)
+        d = d[np.isfinite(d)]
+        gt0 = float(np.mean(d > 0)) if d.size else float("nan")
+        better = float(np.mean(d > 0 if higher else d < 0)) if d.size else float("nan")
+        metrics[k] = {"a": _nan_none(point["a"][k]), "b": _nan_none(point["b"][k]),
+                      "diff": _nan_none(point["b"][k] - point["a"][k]),
+                      "ci95": [_nan_none(x) for x in _ci(list(d))], "p_diff_gt_0": _nan_none(gt0),
+                      "p_b_better": _nan_none(better), "higher_is_better": higher, "n_valid_samples": int(d.size)}
+    return {
+        "pred_a": str(pred_a), "pred_b": str(pred_b), "split": split, "official": pa.official and pb.official,
+        "labels_sha256": pa.labels_sha,
+        "op_threshold": {n: {"thr": ops[n][0], "source": ops[n][1]} for n in ops},
+        "n": {"frames": len(pa.frames), "frames_with_person": sum(len(pa.gt[f]) > 0 for f in pa.frames),
+              "gt_boxes": int(sum(len(pa.gt[f]) for f in pa.frames)),
+              "negative_frames_flight": len(pa.s.neg_frames) - len(pa.neg_split),
+              "negative_frames_indoor": len(pa.neg_split)},
+        "metrics": metrics,
+        "bootstrap": _boot_info(pa.s, boot_n, seed) | {"paired": True,
+                                                       "note": "hiệu = B − A trên cùng mẫu khối cho cả hai model"},
+    }
+
+
+# ---------------------------------------------------------------- tiện ích + CLI
+
+
+def _nan_none(v: float | None) -> float | None:
     return None if v is None or not np.isfinite(v) else round(float(v), 6)
 
 
@@ -470,28 +610,30 @@ def _print_text(r: dict[str, Any]) -> None:
         print(f"  CHÚ Ý: {r['note']}")
 
 
-def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="python -m xla.eval.detection", description=__doc__.split("\n")[0])
-    ap.add_argument("--pred", type=Path, required=True, help="CSV frame,x1,y1,x2,y2,conf[,ms]")
+def _print_compare(r: dict[str, Any]) -> None:
+    print(f"B − A: B={r['pred_b']} A={r['pred_a']} (ngưỡng A {r['op_threshold']['a']['thr']:g}, "
+          f"B {r['op_threshold']['b']['thr']:g})")
+    for k, d in r["metrics"].items():
+        lo, hi = d["ci95"]
+        ci = f"[{lo:+.3f} … {hi:+.3f}]" if lo is not None else "[n/a]"
+        diff = "n/a" if d["diff"] is None else f"{d['diff']:+.3f}"
+        print(f"  {k:<22} A {d['a']}  B {d['b']}  hiệu {diff} {ci}  P(B tốt hơn) {d['p_b_better']}")
+
+
+def _common_args(ap: argparse.ArgumentParser) -> None:
     ap.add_argument("--split", choices=EVAL_SPLITS, default="test")
     ap.add_argument("--labels-dir", type=Path, default=None, help=f"mặc định {LABELS_REL}")
     ap.add_argument("--manifest", type=Path, default=None, help="mặc định <labels-dir>/manifest.json")
     ap.add_argument("--devval-labels-dir", type=Path, default=None, help="mặc định = --labels-dir")
     ap.add_argument("--split-json", type=Path, default=None, help=f"mặc định {SPLIT_REL}")
-    ap.add_argument("--thr", type=float, action="append", default=None, help="ngưỡng vận hành (lặp được), mặc định 0.25")
-    ap.add_argument("--no-f1-devval", action="store_true", help="không chọn ngưỡng F1 trên dev-val")
     ap.add_argument("--boot", type=int, default=BOOT_N, help="số lần bootstrap (0 = bỏ CI)")
     ap.add_argument("--seed", type=int, default=BOOT_SEED)
     ap.add_argument("--allow-missing-labels", action="store_true", help="chấm trên khung có nhãn (kết quả không chính thức)")
     ap.add_argument("--out", type=Path, default=None, help="ghi JSON ra file")
     ap.add_argument("--json", action="store_true")
-    a = ap.parse_args(argv)
-    try:
-        r = evaluate(a.pred, a.split, a.labels_dir, a.manifest, a.split_json, a.thr, a.boot, a.seed,
-                     a.allow_missing_labels, not a.no_f1_devval, a.devval_labels_dir)
-    except (EvalInputError, TestLeakError, FileNotFoundError) as e:
-        print(f"LỖI: {e}", file=sys.stderr)
-        return 1
+
+
+def _emit(r: dict[str, Any], a: argparse.Namespace, printer: Any) -> None:
     text = json.dumps(r, ensure_ascii=False, indent=1)
     if a.out:
         a.out.parent.mkdir(parents=True, exist_ok=True)
@@ -499,7 +641,45 @@ def main(argv: list[str] | None = None) -> int:
     if a.json:
         print(text)
     else:
-        _print_text(r)
+        printer(r)
+
+
+def main_compare(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="python -m xla.eval.detection compare",
+                                 description="so sánh ghép cặp hai CSV dự đoán (hiệu B − A, CI bootstrap khối)")
+    ap.add_argument("--pred-a", type=Path, required=True)
+    ap.add_argument("--pred-b", type=Path, required=True)
+    ap.add_argument("--thr-a", type=float, default=None, help="ngưỡng vận hành A (mặc định: F1 tối đa trên dev-val)")
+    ap.add_argument("--thr-b", type=float, default=None, help="ngưỡng vận hành B (mặc định: F1 tối đa trên dev-val)")
+    _common_args(ap)
+    a = ap.parse_args(argv)
+    try:
+        r = compare(a.pred_a, a.pred_b, a.split, a.labels_dir, a.manifest, a.split_json, a.thr_a, a.thr_b, a.boot,
+                    a.seed, a.allow_missing_labels, a.devval_labels_dir)
+    except (EvalInputError, TestLeakError, FileNotFoundError) as e:
+        print(f"LỖI: {e}", file=sys.stderr)
+        return 1
+    _emit(r, a, _print_compare)
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv[:1] == ["compare"]:
+        return main_compare(argv[1:])
+    ap = argparse.ArgumentParser(prog="python -m xla.eval.detection", description=__doc__.split("\n")[0])
+    ap.add_argument("--pred", type=Path, required=True, help="CSV frame,x1,y1,x2,y2,conf[,ms]")
+    ap.add_argument("--thr", type=float, action="append", default=None, help="ngưỡng vận hành (lặp được), mặc định 0.25")
+    ap.add_argument("--no-f1-devval", action="store_true", help="không chọn ngưỡng F1 trên dev-val")
+    _common_args(ap)
+    a = ap.parse_args(argv)
+    try:
+        r = evaluate(a.pred, a.split, a.labels_dir, a.manifest, a.split_json, a.thr, a.boot, a.seed,
+                     a.allow_missing_labels, not a.no_f1_devval, a.devval_labels_dir)
+    except (EvalInputError, TestLeakError, FileNotFoundError) as e:
+        print(f"LỖI: {e}", file=sys.stderr)
+        return 1
+    _emit(r, a, _print_text)
     return 0
 
 

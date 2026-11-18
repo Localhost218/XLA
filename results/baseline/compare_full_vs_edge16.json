@@ -1,0 +1,168 @@
+{
+ "pred_a": "results\\baseline\\pred\\full.csv",
+ "pred_b": "results\\baseline\\pred\\edge16.csv",
+ "split": "test",
+ "official": true,
+ "labels_sha256": "73828c4febcc531321bfff53934d242cc070566a78250667ff7134cf3849729b",
+ "op_threshold": {
+  "a": {
+   "thr": 0.18554,
+   "source": "F1 tối đa trên dev-val"
+  },
+  "b": {
+   "thr": 0.06764,
+   "source": "F1 tối đa trên dev-val"
+  }
+ },
+ "n": {
+  "frames": 198,
+  "frames_with_person": 39,
+  "gt_boxes": 149,
+  "negative_frames_flight": 159,
+  "negative_frames_indoor": 300
+ },
+ "metrics": {
+  "mAP50": {
+   "a": 0.067305,
+   "b": 0.126482,
+   "diff": 0.059178,
+   "ci95": [
+    0.013359,
+    0.116673
+   ],
+   "p_diff_gt_0": 1.0,
+   "p_b_better": 1.0,
+   "higher_is_better": true,
+   "n_valid_samples": 1998
+  },
+  "mAP50_95": {
+   "a": 0.034201,
+   "b": 0.062856,
+   "diff": 0.028655,
+   "ci95": [
+    0.009046,
+    0.055122
+   ],
+   "p_diff_gt_0": 1.0,
+   "p_b_better": 1.0,
+   "higher_is_better": true,
+   "n_valid_samples": 1998
+  },
+  "AP_small": {
+   "a": 0.053371,
+   "b": 0.053896,
+   "diff": 0.000525,
+   "ci95": [
+    0.000153,
+    0.001013
+   ],
+   "p_diff_gt_0": 1.0,
+   "p_b_better": 1.0,
+   "higher_is_better": true,
+   "n_valid_samples": 1985
+  },
+  "AR_small": {
+   "a": 0.525882,
+   "b": 0.530588,
+   "diff": 0.004706,
+   "ci95": [
+    0.0,
+    0.013953
+   ],
+   "p_diff_gt_0": 0.647355,
+   "p_b_better": 0.647355,
+   "higher_is_better": true,
+   "n_valid_samples": 1985
+  },
+  "precision@op": {
+   "a": 0.088608,
+   "b": 0.192913,
+   "diff": 0.104306,
+   "ci95": [
+    0.010367,
+    0.167299
+   ],
+   "p_diff_gt_0": 0.99,
+   "p_b_better": 0.99,
+   "higher_is_better": true,
+   "n_valid_samples": 2000
+  },
+  "recall@op": {
+   "a": 0.09396,
+   "b": 0.328859,
+   "diff": 0.234899,
+   "ci95": [
+    0.090909,
+    0.366071
+   ],
+   "p_diff_gt_0": 0.991491,
+   "p_b_better": 0.991491,
+   "higher_is_better": true,
+   "n_valid_samples": 1998
+  },
+  "f1@op": {
+   "a": 0.091205,
+   "b": 0.243176,
+   "diff": 0.151971,
+   "ci95": [
+    0.020346,
+    0.231137
+   ],
+   "p_diff_gt_0": 0.991491,
+   "p_b_better": 0.991491,
+   "higher_is_better": true,
+   "n_valid_samples": 1998
+  },
+  "fp_per_neg_frame@op": {
+   "a": 0.252723,
+   "b": 0.283224,
+   "diff": 0.030501,
+   "ci95": [
+    -0.046186,
+    0.122238
+   ],
+   "p_diff_gt_0": 0.7715,
+   "p_b_better": 0.218,
+   "higher_is_better": false,
+   "n_valid_samples": 2000
+  },
+  "fp_per_neg_flight@op": {
+   "a": 0.54717,
+   "b": 0.597484,
+   "diff": 0.050314,
+   "ci95": [
+    -0.142124,
+    0.326768
+   ],
+   "p_diff_gt_0": 0.665,
+   "p_b_better": 0.3175,
+   "higher_is_better": false,
+   "n_valid_samples": 2000
+  },
+  "fp_per_neg_indoor@op": {
+   "a": 0.096667,
+   "b": 0.116667,
+   "diff": 0.02,
+   "ci95": [
+    -0.034158,
+    0.075349
+   ],
+   "p_diff_gt_0": 0.743,
+   "p_b_better": 0.2225,
+   "higher_is_better": false,
+   "n_valid_samples": 2000
+  }
+ },
+ "bootstrap": {
+  "n": 2000,
+  "seed": 20261118,
+  "unit": "khối 30 s của split.json",
+  "ci_pct": 95.0,
+  "n_blocks": {
+   "flight": 13,
+   "neg": 213
+  },
+  "paired": true,
+  "note": "hiệu = B − A trên cùng mẫu khối cho cả hai model"
+ }
+}
