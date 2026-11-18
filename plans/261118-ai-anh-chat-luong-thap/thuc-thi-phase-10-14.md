@@ -132,7 +132,7 @@ Mọi lane xong và đã gộp vào `feat/ai-anh-chat-luong-thap`; SHA là commi
 | restore (13) | **xong** 18/11 `868d881`, gộp `9650338`: vòng 1 `01a93c9` NAFNet-width32 p95 82,1 ms (Accept FAIL); vòng 2 NAFNet-w16, bundle `enhancer-v1.0.0` p50 15,4 / p95 21,0 ms, Accept 7/7 PASS |
 | detect (11) | **xong** 19/11 `b0eec03`, gộp `5a4a05f`: dừng sau r2 (dev-val 0,296 < r1 0,379), ship trò r1; bundle `detector-v1.0.0` ONNX test mAP50 0,120, B1 B2 không đạt, B3 đạt p95 20,2 ms |
 | 14 gộp + chạy thật | **xong** 19/11 trên nhánh tích hợp: `9fbdbba` (bước 1–7, model thật, E4, trang A/B), `e142767` (trang A/B lần 2 phóng to), `779985a` (bước 9–11, chấm A/B lần 1, tiêu chí §8), `8ed4930` (kết quả A/B lần 2) |
-| PR #2 | `feat/ai-anh-chat-luong-thap` → `main`, **Owner mở**, đang mở (https://github.com/Localhost218/XLA/pull/2). Agent không mở PR, không merge; cổng "PR #2 merge" của phase 14 chờ Owner |
+| PR #2 | `feat/ai-anh-chat-luong-thap` → `main`, **Owner mở** 19/11 (https://github.com/Localhost218/XLA/pull/2), merge khi CI xanh; file này đi trong chính PR đó, có trên `main` là đã merge |
 
 ### Kết quả cuối phase 10–14
 
