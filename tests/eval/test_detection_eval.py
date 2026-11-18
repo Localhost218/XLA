@@ -203,3 +203,86 @@ def test_missing_label_is_error_unless_allowed(toy):
         _run(toy, [], f1_from_devval=False)
     r = _run(toy, [], f1_from_devval=False, allow_missing_labels=True)
     assert r["n"]["labels_missing"] == 1 and r["official"] is False
+
+
+# ---------------------------------------------------------------- tách khung âm + so sánh ghép cặp
+
+
+def test_fp_split_flight_vs_indoor(toy):
+    # khung bay không người: TEST_NEG (2) — 1 hộp ≥ 0,25 → 0,5; khung neg trong nhà (2) — 2 hộp → 1,0; gộp 3/4
+    rows = [(f, *BOX, 0.9) for f in TEST_POS]
+    rows += [(NEG[0], 10, 10, 30, 30, 0.6), (NEG[0], 50, 50, 70, 70, 0.3), (TEST_NEG[0], 10, 10, 30, 30, 0.5)]
+    r = _run(toy, rows, f1_from_devval=False)
+    assert _v(r, "fp_per_neg_flight@0.25") == pytest.approx(0.5)
+    assert _v(r, "fp_per_neg_indoor@0.25") == pytest.approx(1.0)
+    assert _v(r, "fp_per_neg_frame@0.25") == pytest.approx(0.75)
+    assert r["n"]["negative_frames_flight"] == 2 and r["n"]["negative_frames_indoor"] == 2
+
+
+def _cmp(toy, rows_a, rows_b, **kw):
+    a = _csv(toy["dir"] / "a.csv", rows_a)
+    b = _csv(toy["dir"] / "b.csv", rows_b)
+    kw.setdefault("boot_n", 200)
+    return det.compare(a, b, "test", toy["labels"], toy["manifest"], toy["split"], **kw)
+
+
+WEAK = [(TEST_POS[0], 400.0, 300.0, 420.0, 320.0, 0.8), (TEST_POS[1], 400.0, 300.0, 420.0, 320.0, 0.8),
+        (NEG[0], 10, 10, 30, 30, 0.9), (NEG[1], 10, 10, 30, 30, 0.9), (TEST_NEG[0], 10, 10, 30, 30, 0.9)]
+STRONG = [(f, *BOX, 0.9) for f in TEST_POS]
+DV = [(f, *BOX, 0.5) for f in DEVVAL]
+
+
+def test_compare_identical_gives_zero_diff(toy):
+    r = _cmp(toy, STRONG + DV, STRONG + DV)
+    for k in ("mAP50", "mAP50_95", "AP_small", "recall@op", "fp_per_neg_frame@op", "fp_per_neg_flight@op"):
+        assert r["metrics"][k]["diff"] == 0.0
+        assert r["metrics"][k]["ci95"] == [0.0, 0.0]
+        assert r["metrics"][k]["p_diff_gt_0"] == 0.0
+    assert r["bootstrap"]["paired"] is True
+
+
+def test_compare_clearly_better_b(toy):
+    r = _cmp(toy, WEAK + DV, STRONG + DV)
+    m = r["metrics"]["mAP50"]
+    assert m["diff"] == pytest.approx(1.0)
+    assert m["ci95"][0] > 0 and m["p_b_better"] == pytest.approx(1.0) and m["p_diff_gt_0"] == pytest.approx(1.0)
+    fp = r["metrics"]["fp_per_neg_frame@op"]
+    assert fp["diff"] < 0 and fp["ci95"][1] < 0 and fp["p_b_better"] == pytest.approx(1.0)
+    assert fp["p_diff_gt_0"] == 0.0 and fp["higher_is_better"] is False
+
+
+def test_compare_same_seed_same_result(toy):
+    a = _cmp(toy, WEAK + DV, STRONG + DV, seed=3)
+    b = _cmp(toy, WEAK + DV, STRONG + DV, seed=3)
+    assert a["metrics"] == b["metrics"]
+
+
+def test_compare_explicit_thresholds(toy):
+    r = _cmp(toy, STRONG, STRONG, thr_a=0.5, thr_b=0.95)
+    assert r["op_threshold"] == {"a": {"thr": 0.5, "source": "tham số"}, "b": {"thr": 0.95, "source": "tham số"}}
+    assert r["metrics"]["recall@op"]["diff"] == pytest.approx(-1.0)
+
+
+def test_compare_unknown_frame_exits_1(toy, capsys):
+    a = _csv(toy["dir"] / "a.csv", STRONG + DV)
+    b = _csv(toy["dir"] / "b.csv", STRONG + DV + [("la.jpg", *BOX, 0.9)])
+    code = det.main(["compare", "--pred-a", str(a), "--pred-b", str(b), "--labels-dir", str(toy["labels"]),
+                     "--split-json", str(toy["split"]), "--boot", "0", "--json"])
+    assert code == 1
+    assert "không có trong split.json" in capsys.readouterr().err
+
+
+def test_compare_bad_usage_exits_2(toy):
+    with pytest.raises(SystemExit) as e:
+        det.main(["compare", "--pred-a", "x.csv"])
+    assert e.value.code == 2
+
+
+def test_compare_cli_ok(toy, capsys):
+    a = _csv(toy["dir"] / "a.csv", WEAK + DV)
+    b = _csv(toy["dir"] / "b.csv", STRONG + DV)
+    code = det.main(["compare", "--pred-a", str(a), "--pred-b", str(b), "--labels-dir", str(toy["labels"]),
+                     "--split-json", str(toy["split"]), "--boot", "50", "--json"])
+    assert code == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["metrics"]["mAP50"]["diff"] == pytest.approx(1.0)
