@@ -110,14 +110,23 @@ nếu mỗi file < 5 MB.
 - Báo cáo cuối: Status (DONE / DONE_WITH_CONCERNS / BLOCKED), file đã ghi, số đo chính (giờ GPU thật, ms, mAP + CI), quyết
   định đã tự chốt, SHA commit đọc lại bằng `git log -1 --format=%H`.
 
+## 6b. Quyết định Owner sau báo cáo detect-export (cho phase 11)
+
+- `meta.metrics` của bundle detector và số báo cáo cho bundle phải chấm bằng **chính đường ONNX** (cắt mép trong graph,
+  letterbox vuông 1280) trên test/neg, không lấy số của đường `.pt` nguyên khung + bỏ hộp mép: stand-in COCO cho thấy cắt
+  trong graph thấp hơn 0,012 mAP50 trên dev-val. `e2.json` ghi cả hai đường, nói rõ dòng nào là bundle.
+- `ms_per_frame` của bundle thật đo không `--skip-cuda`, khi `% Processor Performance` ≥ 80 % liên tục ~1 phút; ghi
+  `cpu_perf_pct`. Hai test `gpu` của `tests/detect/test_detector_export.py` phải chạy xanh ở phase 11.
+- Thư mục `--out` phải tên đúng `detector-v<version>` (công cụ trả exit 2 nếu sai).
+
 ## 7. Trạng thái (Owner cập nhật)
 
 | Lane | Trạng thái |
 |---|---|
-| detect (10) | đang chạy |
-| detect-export | đang chạy |
+| detect (10) | đang chạy (máy tắt 13:24 vì ổ sạc lỏng; chạy lại 13:35, workers 2 vì hết commit memory lúc 4 worker) |
+| detect-export | **xong** `0934f1e`: parity ORT CPU/CUDA −0,0029 mAP50 so `.pt` (đạt); resize trong graph trùng bit với `LetterBox` |
 | classic (12) | đang chạy |
 | restore (13) | đang chạy |
-| abeval (14 code) | đang chạy |
+| abeval (14 code) | **xong** `fbaf1dc`: chạy giả đầu-cuối đạt; E4 COCO×gốc 0,1265 khớp mốc phase 09; lệnh chạy thật ở `results/ab/README.md` + báo cáo lane |
 | detect (11) | chờ 10 + detect-export |
 | 14 gộp + PR #2 | chờ tất cả |
