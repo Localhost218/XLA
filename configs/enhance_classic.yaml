@@ -1,0 +1,47 @@
+# Đối chứng cổ điển (phase 12), đọc bằng xla/enhance/classic.py (`load_params`). Thang màu 0–255, BGR.
+# Số đo camera (crop_left, tối góc cos⁴) KHÔNG chép vào đây: đọc từ `camera_profile` qua xla.contract.load_profile.
+# Thứ tự bước: (a) cắt mép → (b) bù tối góc → (c) khử màn mờ → (d) khử hồng → (e) khử khối → (f) làm nét → (g) đệm mép.
+version: "1.0.0"
+camera_profile: configs/camera_profile.yaml   # tương đối tính từ gốc repo
+
+vignette:                 # (b) chia cho bản đồ cos⁴ của hồ sơ (vignette.focal_px_fit), tâm = tâm phần đã cắt mép
+  max_gain: 1.35          # trần hệ số bù ở góc: chặn khuếch đại nhiễu góc (rủi ro phase 12)
+
+dehaze:                   # (c) dark channel (He 2009) + guided filter, rồi chặn mức đen
+  patch_px: 15            # cạnh ô dark channel (= xla.camera.measure.DARK_CHANNEL_PATCH)
+  airlight_percentile: 99.9   # A_c = trung bình từng kênh của điểm có dark channel ≥ phân vị này
+  airlight_range: [180.0, 250.0]   # kẹp A (0–255): khung tối/cháy trắng không làm t vô nghĩa
+  stat_stride: 4          # lấy mẫu 1/4 mỗi chiều khi tính phân vị (dark channel đã mịn sau erode)
+  omega: 0.85             # phần màn mờ bị trừ (1 = trừ hết)
+  t_min: 0.4              # sàn độ truyền t: chặn khuếch đại nhiễu ở vùng mờ đặc
+  guided_radius: 24       # bán kính guided filter tinh chỉnh t (px)
+  guided_eps: 0.001       # eps guided filter (ảnh dẫn thang 0–1)
+  guided_scale: 0.25      # tính guided filter ở 1/4 độ phân giải rồi phóng (fast guided filter, He 2015)
+  black_percentile: 0.5   # mức đen = phân vị này của kênh min (theo điểm ảnh)
+  black_target: 8.0       # mức đen ra ≥ min(mức đen vào, black_target): không đẩy chỗ tối về 0
+
+magenta:                  # (d) khử hồng do ISP cắt kênh, chỉ dịch sắc độ, giữ Y (BT.601)
+  sat_level: 230.0        # cổng bão hoà: max(R, B) từ mức này ...
+  sat_ramp: 10.0          # ... đủ 1 ở sat_level + sat_ramp = 240
+  excess_min: 6.0         # cổng hồng: min(R, B) − G từ mức này ...
+  excess_ramp: 14.0       # ... tăng dần tới excess_min + excess_ramp
+  dilate_px: 15           # nở mặt nạ (vuông) phủ viền hồng loang do chroma 4:2:2 + khối 16×8
+  blur_px: 7              # làm mềm mặt nạ bằng box 7×7
+  strength: 0.56          # phần (R+B)/2 − G bị trừ mỗi lượt
+  passes: 2
+  texture_sat_ramp: 15.0  # trọng số bơm chi tiết G: max(R, B) từ sat_level + sat_ramp (240) tới +15
+  texture_sigma: 2.0      # high-pass kênh G = G − Gauss(G, σ)
+  texture_gain: 0.5       # tỉ lệ bơm high-pass G vào vùng R/B đã cắt (G là kênh còn thông tin)
+
+deblock:                  # (e) chỉ sửa trên đường biên lưới 8×8 của JPEG gốc (lưới tính trên khung nguyên)
+  block_px: 8
+  alpha: 10.0             # bậc thang |q0 − p0| ≥ alpha coi là cạnh thật, không sửa
+  beta: 4.0               # chênh lệch trong khối |p1 − p0|, |q1 − q0| ≥ beta coi là có vân, không sửa
+  strength: 0.5           # phần bậc thang được san (0,5 = gặp nhau ở giữa)
+  inner_weight: 0.5       # phần sửa áp cho điểm thứ hai tính từ biên (p1, q1), so với điểm sát biên
+
+sharpen:                  # (f) unsharp trên Y, có ngưỡng theo σ nhiễu (Immerkær, xla.camera.measure)
+  sigma: 1.2              # σ Gauss của phần mịn (px)
+  amount: 0.6             # hệ số chi tiết cộng lại
+  coring_k: 2.0           # bỏ chi tiết |d| ≤ coring_k·σ_nhiễu (không làm nét nhiễu)
+  noise_floor: 0.5        # σ nhiễu tối thiểu dùng cho ngưỡng (0–255)
