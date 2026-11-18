@@ -1,6 +1,8 @@
-# Phase 11 (E2) — trạng thái khi tạm dừng 18/11/2026 ~19:46 (chủ dự án tắt máy)
+# Phase 11 (E2) — trạng thái khi tạm dừng lần 2, 18/11/2026 ~22:16 (chủ dự án tắt máy)
 
-Không job nào của lane detect đang chạy lúc dừng (smoke r1 và lượt chấm sơ bộ đều đã thoát `EXIT 0`). Khoá GPU trống.
+Lần dừng 1: 19:46, chạy tiếp 21:31. Lần dừng 2: 22:16. Lúc dừng lần 2 không job nào của lane detect chạy: tiến trình
+`--round 2` (PID 24112) đang **chờ khoá GPU** (lane restore giữ từ 22:08), chưa bắt đầu nhãn giả vòng 2, đã bị dừng;
+`D:\DevCache\runs\xla\e2\pseudo_r2\` rỗng, `r2\` chưa có.
 
 ## 1. Đã xong
 
@@ -13,15 +15,19 @@ Không job nào của lane detect đang chạy lúc dừng (smoke r1 và lượt
 | Nhãn giả vòng 1 (GPU) | phát hiện thô + TTA của 2 ứng viên thầy trên 1 115 khung dev (47 chuỗi, cách < 1 s) | 0,157 h (405 s + 161 s) |
 | Nhãn giả vòng 1 (CPU) | thầy chọn = **e1_d2** (YOLO11s D2 của E1): τ_cao 0,55, precision nhãn giả dev-val 1,0, recall 0,084 (9/107); YOLO11m: τ 0,45, P 1,0, R 0,075. Tập `D:\DevCache\datasets\xla\e2_r1`: 3 006 ảnh D2 + 578 khung dev ×2 (86 khung có hộp, 87 hộp) + 300 `neg` = 4 462 ảnh | — |
 | Smoke trò r1 (YOLO11s từ E1 D2, batch 4) | 4,30 GB, 0,364 s/batch, 1 116 batch/epoch; ước 480 s/epoch (trung vị batch) hoặc 965 s (ngây thơ, có khởi động) | 0,055 h |
+| **Trò r1 đủ** (YOLO11s từ E1 D2, 4 epoch, batch 4, tập `e2_r1`) | dev-val 0,250 / 0,265 / **0,379** / 0,339: tốt nhất 0,379 (epoch 3) > E1 D2 0,329; trung bình 3 epoch cuối **0,328** > E1 D2 0,229 → **cả hai cách đều tăng → làm vòng 2**. Trọng số `D:\DevCache\runs\xla\e2\r1\weights\best_devval.pt` (sha256 `7e374765…ade5`); CSV `results/e2/preds/r1_{test,neg,devval}.csv` | **0,602 h** (2 167 s) |
 | Chấm sơ bộ (`--score`, CPU) | `results/e2/e2.json` với mốc, E1 D2, thầy; cache bootstrap ở `D:\DevCache\runs\xla\e2\score\cache\` | — |
 
 ## 2. Còn lại (theo thứ tự)
 
-1. **Trò vòng 1 đủ.** Ước thật ~8–9 phút/epoch (train ~406 s + val tổng hợp ~60 s + dev-val) → **4 epoch ≈ 35–40 phút** (≤ 45 phút). `configs/selftrain_e2.yaml` đang `student.epochs: 4` — giữ nguyên. Nhãn giả vòng 1 đã có, lệnh tự bỏ qua bước đó.
-2. So dev-val trò r1 (epoch tốt nhất + trung bình 3 epoch cuối) với E1 D2 (0,329 / 0,229). Tăng → vòng 2 (thầy = r1), rồi vòng 3 nếu vòng 2 tăng; không tăng → dừng.
-3. `--score` (CPU, ~15 phút nhờ cache) → `e2.json` chọn model ship theo dev-val trong {E1 D2, r1..}.
-4. Xuất nháp (`--skip-cuda`) để có `detector.onnx` → `--onnx-score` (metrics đường ONNX + ngưỡng F1 dev-val của đường ONNX) → xuất thật (CUDA, parity) với `metrics_bundle.json`.
-5. Kiểm sha256 `detector.onnx` lần xuất thật = lần chấm ONNX (khác → chạy lại `--onnx-score`), validate `[]`, pytest `tests/detect/` (cả 2 test `gpu`), `-m "not gpu"`, ruff, README, commit, push.
+1. ~~Trò vòng 1~~ XONG (bảng trên).
+2. **Vòng 2**: `--round 2` = nhãn giả bằng r1 + TTA (~3 phút GPU) → tập `e2_r2` → trò r2 4 epoch (~36 phút như r1). Chưa có gì
+   của vòng 2: chạy lại nguyên lệnh (bước xong tự bỏ qua, train resume từ `last.pt` nếu sập giữa chừng).
+3. So r2 với r1 (0,379 / 0,328). Cả hai cách đều tăng → vòng 3 (`--round 3`, vòng cuối); không → dừng.
+4. `--score` (CPU, ~15 phút nhờ cache; chạy SAU khi train xong, không chạy hai job nặng cùng lúc) → `e2.json` chọn model
+   ship theo dev-val trong {E1 D2, r1, r2, ...}.
+5. Xuất nháp (`--skip-cuda`) để có `detector.onnx` → `--onnx-score` (metrics đường ONNX + ngưỡng F1 dev-val của đường ONNX) → xuất thật (CUDA, parity) với `metrics_bundle.json`.
+6. Kiểm sha256 `detector.onnx` lần xuất thật = lần chấm ONNX (khác → chạy lại `--onnx-score`), validate `[]`, pytest `tests/detect/` (cả 2 test `gpu`), `-m "not gpu"`, ruff, README, commit, push.
 
 ## 3. Lệnh chạy tiếp (PowerShell, từ `D:\XLA-wt\detect`)
 
@@ -29,8 +35,9 @@ Không job nào của lane detect đang chạy lúc dừng (smoke r1 và lượt
 . D:\XLA\scripts\env.ps1
 $py = 'D:\DevCache\venvs\xla\Scripts\python.exe'
 # hoặc tách tiến trình + log: D:\DevCache\runs\xla\e2\logs\run.ps1 -Log <log> <tham số selftrain>
-& $py -m xla.detect.selftrain --config configs/selftrain_e2.yaml --round 1 --json   # resume từ last.pt nếu sập
-& $py -m xla.detect.selftrain --config configs/selftrain_e2.yaml --round 2 --json   # chỉ khi r1 tăng dev-val
+# --round 1 ĐÃ XONG. Bước tiếp:
+& $py -m xla.detect.selftrain --config configs/selftrain_e2.yaml --round 2 --json   # r1 đã tăng dev-val: chạy
+& $py -m xla.detect.selftrain --config configs/selftrain_e2.yaml --round 3 --json   # chỉ khi r2 tăng so với r1
 & $py -m xla.detect.selftrain --config configs/selftrain_e2.yaml --score --json
 # SHIP = e2.json["ship"]["weights"], CONF = e2.json["ship"]["conf_threshold_pt"]
 & $py -m xla.detect.export_onnx --weights <SHIP> --out models/release/detector-v1.0.0 --version 1.0.0 `
@@ -53,7 +60,8 @@ File metrics nháp: object có 5 khoá `map50, map50_95, precision, recall, fp_p
 - Nhãn giả vòng 1: `D:\DevCache\runs\xla\e2\pseudo_r1\` (`raw_dets_teacher.json`, `raw_dets_e1_d2.json`, `pseudo.json`); tập `D:\DevCache\datasets\xla\e2_r1\` (`dataset.yaml`, `train.txt`, `train\images|labels`, `labels.cache`).
 - Smoke: `D:\DevCache\runs\xla\e2\teacher_smoke\`, `D:\DevCache\runs\xla\e2\r1_smoke\`.
 - Log: `D:\DevCache\runs\xla\e2\logs\`. Cache chấm: `D:\DevCache\runs\xla\e2\score\`.
-- Trò r1 đủ sẽ ở `D:\DevCache\runs\xla\e2\r1\` (chưa tạo).
+- Trò r1: `D:\DevCache\runs\xla\e2\r1\` (`weights\best_devval.pt`, `last.pt`, `devval_history.jsonl`, `run_info.json`, `train_done.json`, `preds\`).
+- Vòng 2 (chưa tạo): `D:\DevCache\runs\xla\e2\pseudo_r2\` (đang rỗng), `D:\DevCache\datasets\xla\e2_r2\`, `D:\DevCache\runs\xla\e2\r2\`.
 
 ## 5. Quyết định đã tự chốt (ghi lại vào README cuối)
 
