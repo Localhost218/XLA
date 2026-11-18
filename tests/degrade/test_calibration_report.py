@@ -118,7 +118,9 @@ def test_space_center_mode_and_profile_lower_bound() -> None:
                                        "hi": 2.6}]}}
     space = calibrate.resolve_space(cfg, {"color": {"w": 1.57}})
     assert space[0]["x0"] == pytest.approx(1.0) and space[0]["half_width"] == pytest.approx(0.15)
-    assert space[1]["lo"] == pytest.approx(1.57) and space[1]["x0"] == pytest.approx(1.57)
+    assert space[1]["lo"] == pytest.approx(1.57) and space[1]["x0"] == pytest.approx(2.2)   # khởi đầu = config
+    low = calibrate.resolve_space({**cfg, "tone": {"g": 1.2}}, {"color": {"w": 1.57}})
+    assert low[1]["x0"] == pytest.approx(1.57)                                              # kẹp vào cận hồ sơ
     new = calibrate.apply_values(cfg, space, [0.5, 2.0])
     assert new["lens"]["s"] == [0.35, 0.65] and new["tone"]["g"] == 2.0 and cfg["tone"]["g"] == 2.2
     u = calibrate.to_unit(space, [0.5, 2.0])
@@ -197,3 +199,32 @@ def test_repo_val_split_moves_only_train_sequences() -> None:
     assert vs["val_with_person_after"] >= 200 and len(vs["train_to_val"]) == vs["moved_sequences"]
     assert all(s.startswith("train/") for s in vs["train_to_val"])
     assert sources.load_config(ROOT / "configs" / "sources.yaml")["val_split_file"] == "configs/visdrone_valsplit.yaml"
+
+
+def test_merge_write_keeps_rounds(tmp_path) -> None:
+    p = tmp_path / "c.json"
+    r1 = {"history": [1], "improved": True, "written": True, "after": {"params_version": 2}}
+    calibrate._merge_write(p, dict(r1))
+    calibrate._merge_write(p, {"realsr": {"chosen_gain": 0.4}})
+    rej = {"history": [2], "improved": False, "written": False, "after": {"params_version": 2}}
+    calibrate._merge_write(p, dict(rej))
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["history"] == [1] and d["rejected_rounds"][0]["round"] == 2 and d["realsr"]["chosen_gain"] == 0.4
+    ok = {"history": [3], "improved": True, "written": True, "after": {"params_version": 3}}
+    calibrate._merge_write(p, dict(ok))
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["history"] == [3] and d["round"] == 3 and d["previous_rounds"][0]["history"] == [1]
+    assert len(d["rejected_rounds"]) == 1 and d["realsr"]["chosen_gain"] == 0.4
+
+
+def test_black_level_zero_is_identity_and_darkens_shadows() -> None:
+    cfg = d2_camera.load_config(D2_CFG)
+    prof = d2_camera.load_profile(ROOT / "configs" / "camera_profile.yaml")
+    lin = d2_camera.srgb_to_linear(np.linspace(0.05, 0.6, 30 * 3, dtype=np.float32).reshape(1, 30, 3))
+    tone = dict(cfg["tone"], brightness=[1.0, 1.0])
+    a = d2_camera.stage_tone(lin, np.random.default_rng(0), dict(tone, black_level=0.0), prof, {})
+    b = d2_camera.stage_tone(lin, np.random.default_rng(0), {k: v for k, v in tone.items() if k != "black_level"},
+                             prof, {})
+    c = d2_camera.stage_tone(lin, np.random.default_rng(0), dict(tone, black_level=0.05), prof, {})
+    assert np.array_equal(a, b)
+    assert (c[0, :5] < a[0, :5]).all()

@@ -57,7 +57,9 @@ def resolve_space(cfg: dict, profile: dict) -> list[dict]:
     """Khối ``calibration.params`` → danh sách tham số có ``lo``/``hi``/``x0`` cụ thể.
 
     ``mode: center``: tham số là tâm của khoảng [a, b] trong config, nửa bề rộng giữ nguyên (cắt ≥ 0).
-    ``lo_from_profile``: cận dưới (và điểm khởi đầu) lấy từ trường hồ sơ (hệ số WB ISP, v1.2.0: cận dưới thật)."""
+    ``lo_from_profile``: cận dưới lấy từ trường hồ sơ (hệ số WB ISP, v1.2.0: cận dưới thật). Điểm khởi đầu luôn là giá
+    trị hiện có trong config, kẹp vào [lo, hi] (vòng 1, 18/11, config ghi 2,2 nhưng khởi đầu ở cận hồ sơ theo lệnh Owner:
+    ghi ở ``rounds`` của ``calibration.json``)."""
     out = []
     for s in cfg["calibration"]["params"]:
         s = dict(s)
@@ -69,7 +71,6 @@ def resolve_space(cfg: dict, profile: dict) -> list[dict]:
             s["x0"] = float(cur)
         if "lo_from_profile" in s:
             s["lo"] = float(d2_camera.get_field(profile, s["lo_from_profile"]))
-            s["x0"] = s["lo"]
         s["x0"] = float(np.clip(s["x0"], s["lo"], s["hi"]))
         if not s["lo"] < s["hi"]:
             raise ValueError(f"tham số {s['name']}: cận {s['lo']}..{s['hi']} không hợp lệ")
@@ -415,6 +416,7 @@ def main(argv: list[str] | None = None) -> int:
                                                          for s, v in zip(space, best["values"], strict=True)},
                   "total": best["total"], "items": _summary_items(best["res"])},
         "improved": improved,
+        "written": improved and not a.dry_run,
         "history": hist,
     }
     if improved and not a.dry_run:
@@ -427,13 +429,30 @@ def main(argv: list[str] | None = None) -> int:
     return 0 if improved else 1
 
 
+ROUND_KEEP = ("realsr", "previous_rounds", "rejected_rounds")
+
+
 def _merge_write(path: Path, data: dict) -> None:
-    """Ghi ``calibration.json``; giữ khối ``realsr`` của lần chạy E3 trước nếu có."""
+    """Ghi ``calibration.json``. Mức gốc = vòng hiệu chỉnh ĐANG DÙNG (khớp ``params_version`` của config); vòng cũ đã
+    được thay chuyển vào ``previous_rounds``; vòng không giảm khoảng cách (không nhận) vào ``rejected_rounds``. Khối
+    ``realsr`` (E3) giữ nguyên khi chỉ ghi một vòng hiệu chỉnh và ngược lại."""
     old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-    if "realsr" in old and "realsr" not in data:
-        data["realsr"] = old["realsr"]
-    if "realsr" in data and "history" not in data and old:
-        data = {**old, "realsr": data["realsr"]}
+    if "history" not in data:                          # chỉ ghi khối realsr
+        data = {**old, **data} if old else data
+    elif "history" in old:                             # có vòng cũ
+        old_round = {k: v for k, v in old.items() if k not in ROUND_KEEP}
+        keep = {k: old[k] for k in ROUND_KEEP if k in old}
+        keep.setdefault("previous_rounds", [])
+        keep.setdefault("rejected_rounds", [])
+        data["round"] = int(old_round.get("round", 1)) + 1 + len(keep["rejected_rounds"])
+        if data["improved"] and data.get("written"):
+            keep["previous_rounds"].append(old_round)
+            data = {**data, **keep}
+        else:
+            keep["rejected_rounds"].append(data)
+            data = {**old_round, **keep}
+    else:
+        data = {**{k: old[k] for k in ROUND_KEEP if k in old}, **data}
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
 

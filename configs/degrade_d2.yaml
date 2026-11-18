@@ -31,6 +31,9 @@ tone:                            # (c) phơi sáng → cắt từng kênh ở 1,
   isp_wb_gain_b: 2.051
   cast_r: 0.9602                    # nhân p50 color.r_over_g của hồ sơ (ám màu tông chưa bão hoà), phase 07 chỉnh
   cast_b: 0.9927                    # nhân p50 color.b_over_g
+  # Mức đen dư ở miền cảm biến (ISP trừ đen chưa hết + bù flare): raw ← max(raw − b, 0)/(1 − b). Kéo chỗ tối xuống, giữ
+  # điểm trắng. Khớp haze.y_p1_0_255 (vòng 1: D2 p50 124, thật 113). 0 = không trừ (giống params_version ≤ 2).
+  black_level: 0.0
 
 isp:                             # (d) làm mềm + nhiễu sau ISP theo NLF, phổ theo PSD
   matches: [noise.nlf, noise.psd_radial, noise.sigma_immerkaer_0_255, sharpness.laplacian_var]
@@ -63,18 +66,31 @@ realsr:                          # E3 (phase 07 bước 5): D2 + nhiễu lấy t
 
 calibration:                     # phase 07: python -m xla.degrade.calibrate --split dev --budget N
   sources_n: 500                 # số đơn vị nguồn cố định cho mỗi lượt đánh giá
-  sigma0: 0.2                    # bước đầu CMA-ES trong không gian chuẩn hoá [0, 1]
-  # mode center: tham số là tâm khoảng [a, b], nửa bề rộng giữ nguyên. lo_from_profile: cận dưới + điểm khởi đầu từ
-  # hồ sơ (v1.2.0: wb_gain_*_fit = cận dưới hệ số WB ISP, R/B đã cắt ở 255). Không chỉnh DQT (đo đúng).
+  sigma0: 0.12                   # bước đầu CMA-ES, không gian chuẩn hoá [0, 1] (vòng 1: 0,2; vòng 2 tinh chỉnh từ v2)
+  # mode center: tham số là tâm khoảng [a, b], nửa bề rộng giữ nguyên. lo_from_profile: cận dưới lấy từ hồ sơ (v1.2.0:
+  # wb_gain_*_fit = cận dưới hệ số WB ISP, R/B đã cắt ở 255). Điểm khởi đầu = giá trị hiện có ở trên. Không chỉnh DQT.
+  # Vòng 2 (18/11, lệnh Owner) nới các biên vòng 1 chạm/sát; lý do từng biên ghi cạnh dòng.
   params:
     - {name: haze_dark_scale, key: haze.dark_scale, lo: 0.6, hi: 1.3}
     - {name: airlight_mid, key: haze.airlight_0_1, mode: center, lo: 0.55, hi: 0.92}
     - {name: psf_sigma_mid, key: lens.psf_sigma_scale, mode: center, lo: 0.3, hi: 1.6}
-    - {name: vignette_focal_mid, key: lens.vignette_focal_scale, mode: center, lo: 0.6, hi: 1.3}
-    - {name: brightness_mid, key: tone.brightness, mode: center, lo: 0.7, hi: 1.5}
-    - {name: isp_wb_gain_r, key: tone.isp_wb_gain_r, lo_from_profile: color.wb_gain_r_fit, lo: 1.0, hi: 2.6}
-    - {name: isp_wb_gain_b, key: tone.isp_wb_gain_b, lo_from_profile: color.wb_gain_b_fit, lo: 1.0, hi: 2.6}
-    - {name: cast_r, key: tone.cast_r, lo: 0.96, hi: 1.04}
-    - {name: cast_b, key: tone.cast_b, lo: 0.96, hi: 1.04}
+    # vignette: vòng 1 [0,6; 1,3], ra 0,618. Tối góc thật gồm cả che cơ khí + bóng ống kính (lens shading), mạnh hơn
+    # cos⁴ của tiêu cự thật, nên tiêu cự "hiệu dụng" nhỏ hơn được. 0,45 × focal_px_fit 1 016 = 457 px: góc ở mép chéo
+    # (400 px) 41°, cos⁴ 0,33 — dưới p5 thật (0,62) nên không cần thấp hơn.
+    - {name: vignette_focal_mid, key: lens.vignette_focal_scale, mode: center, lo: 0.45, hi: 1.3}
+    - {name: brightness_mid, key: tone.brightness, mode: center, lo: 0.7, hi: 1.6}
+    # WB ISP: vòng 1 [cận hồ sơ; 2,6] ra 1,99 / 2,05 (chưa chạm). hi 3,0: hệ số R/B ánh ngày của cảm biến CMOS
+    # thường 1,3–2,5; 3,0 là dư cho ánh chiều/bóng râm, quá đó thì ám màu khung thật đã lộ (r/g, b/g p95 < 1).
+    - {name: isp_wb_gain_r, key: tone.isp_wb_gain_r, lo_from_profile: color.wb_gain_r_fit, lo: 1.0, hi: 3.0}
+    - {name: isp_wb_gain_b, key: tone.isp_wb_gain_b, lo_from_profile: color.wb_gain_b_fit, lo: 1.0, hi: 3.0}
+    # cast: vòng 1 [0,96; 1,04], cast_r chạm 0,96. Cast bù cả ám màu cảnh VisDrone (r/g, b/g ảnh nguồn ≈ 1,0 khác
+    # cảnh bay thật), không chỉ lệch WB còn lại, nên cần rộng hơn: ±10 % (r/g thật p5–p95 0,967–0,984, cảnh nguồn
+    # lệch tới vài %).
+    - {name: cast_r, key: tone.cast_r, lo: 0.88, hi: 1.08}
+    - {name: cast_b, key: tone.cast_b, lo: 0.88, hi: 1.08}
+    # mức đen dư: 0–0,08 (8 % thang tuyến tính ≈ Y 80/255 sau gamma ở mức đó). Khớp haze.y_p1_0_255.
+    - {name: black_level, key: tone.black_level, lo: 0.0, hi: 0.08}
     - {name: soften_mid, key: isp.soften_sigma, mode: center, lo: 0.0, hi: 1.2}
-    - {name: noise_mid, key: isp.noise_scale, mode: center, lo: 0.5, hi: 3.0}
+    # noise: vòng 1 [0,5; 3] ra 0,645 (gần cận dưới). Hạ lo 0,3 vì làm mềm (soften) và JPEG cuối cũng đổi mức nhiễu
+    # đo được; tham số là hệ số trên NLF hồ sơ, không phải σ cảm biến.
+    - {name: noise_mid, key: isp.noise_scale, mode: center, lo: 0.3, hi: 3.0}
