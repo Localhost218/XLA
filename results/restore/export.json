@@ -1,54 +1,54 @@
 {
-  "ckpt": "D:\\DevCache\\runs\\xla\\restore\\nafnet-train\\step_001500.pt",
+  "ckpt": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_004500.pt",
   "bundle": "D:\\XLA-wt\\restore\\models\\release\\enhancer-v1.0.0",
   "half": true,
   "crop_left": 16,
   "cpu_perf": {
     "gate_before": {
       "ok": true,
-      "min": 140.3,
-      "mean": 163.1,
+      "min": 158.6,
+      "mean": 169.3,
       "window_s": 10,
-      "at": "2026-11-18T10:39:09+00:00",
+      "at": "2026-11-18T16:33:25+00:00",
       "waited_s": 10.5,
       "throttled": false
     },
     "before_ms": {
       "ok": true,
-      "min": 149.2,
-      "mean": 159.0,
+      "min": 156.6,
+      "mean": 165.3,
       "window_s": 10,
-      "at": "2026-11-18T10:39:47+00:00"
+      "at": "2026-11-18T16:33:43+00:00"
     },
     "gpu_before_ms": {
-      "temp_c": 76.0,
-      "power_w": 6.67,
+      "temp_c": 72.0,
+      "power_w": 5.04,
       "sm_mhz": 210.0,
       "sm_max_mhz": 3105.0,
       "throttle_reasons": "0x0000000000000001",
       "pstate": "P8",
-      "at": "2026-11-18T10:39:47+00:00"
+      "at": "2026-11-18T16:33:43+00:00"
     },
     "after_ms": {
       "ok": true,
-      "min": 154.5,
-      "mean": 158.3,
+      "min": 162.0,
+      "mean": 169.2,
       "window_s": 10,
-      "at": "2026-11-18T10:40:23+00:00"
+      "at": "2026-11-18T16:34:00+00:00"
     },
     "gpu_after_ms": {
-      "temp_c": 78.0,
-      "power_w": 7.73,
+      "temp_c": 72.0,
+      "power_w": 4.36,
       "sm_mhz": 210.0,
       "sm_max_mhz": 3105.0,
       "throttle_reasons": "0x0000000000000001",
       "pstate": "P8",
-      "at": "2026-11-18T10:40:23+00:00"
+      "at": "2026-11-18T16:34:00+00:00"
     },
     "throttled": false,
     "cpu_perf_pct": {
-      "before": 159.0,
-      "after": 158.3
+      "before": 165.3,
+      "after": 169.2
     }
   },
   "parity": {
@@ -76,28 +76,28 @@
       "20261102-100941_007_01712.jpg"
     ],
     "reference": "PyTorch fp32 (CUDA, TF32 tắt)",
-    "ort_cpu_vs_torch_mae_mean": 0.02603173828125,
-    "ort_cpu_vs_torch_mae_worst": 0.02911892361111111,
+    "ort_cpu_vs_torch_mae_mean": 0.02661550564236111,
+    "ort_cpu_vs_torch_mae_worst": 0.028910590277777776,
     "ort_cpu_vs_torch_abs_max": 1,
     "mae_max_allowed": 1.0,
-    "ort_cuda_vs_cpu_mae_worst": 0.09999131944444445,
+    "ort_cuda_vs_cpu_mae_worst": 0.071689453125,
     "ort_cuda_vs_cpu_abs_max": 1,
     "cuda_within_golden_tolerance": true
   },
   "ms_per_frame": {
     "device": "RTX 4060 Laptop",
     "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
-    "p50": 75.74754999950528,
-    "p95": 82.05958999924405,
-    "mean": 75.97058366662775,
-    "min": 69.3847000002279,
+    "p50": 15.419849999943835,
+    "p95": 20.969349999995757,
+    "mean": 16.035179333333264,
+    "min": 12.553900000057183,
     "n": 300
   },
-  "gpu_seconds": 73.8,
+  "gpu_seconds": 35.1,
   "wait_lock_seconds": 0.0,
   "errors": [],
   "parity_ok": true,
-  "onnx_sha256": "2ad08ebf6fd7adfbd0b08bcb9e6a5064a8611e7fcc587a243dfb34e9d0f79669",
+  "onnx_sha256": "1728de3e976112a208ffb43f57113ba3d31f81aa9e6e9ee43cbcc1cf2fff382e",
   "golden_sources": [
     "20261102-100941_002_00413.jpg",
     "20261102-100941_004_01932.jpg",

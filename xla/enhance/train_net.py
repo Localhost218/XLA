@@ -296,6 +296,7 @@ def train(cfg: dict[str, Any], run_id: str, smoke: bool, max_steps: int | None) 
         "params": n_params(model),
         "steps": step,
         "batch": batch,
+        "workers": min(4, int(ct["workers"])),  # của lần chạy cuối (resume có thể đổi)
         "lr": ct["lr"],
         "patch": cfg["data"]["patch"],
         "s_per_step": s_per_step,

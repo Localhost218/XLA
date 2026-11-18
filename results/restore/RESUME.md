@@ -1,5 +1,9 @@
 # Phase 13 vòng 2 — trạng thái lúc tạm dừng (lần 2: 18/11/2026 22:15; lần 1: ~19:39; chủ dự án tắt máy)
 
+> **ĐÃ XONG 18/11/2026 23:34.** Đã chạy hết các bước dưới đây: train tới 4 500, select chọn step_004500, bundle
+> `enhancer-v1.0.0` = nafnet_w16 (p95 21,0 ms), validate `[]`, Accept 7/7 exit 0. Kết quả: `README.md` mục 8. Phần dưới
+> giữ làm bản ghi.
+
 Vòng 1 (width32) đã xong, xem `README.md`; bundle `models/release/enhancer-v1.0.0` hiện vẫn là **width32** (p95 82,1 ms,
 Accept FAIL ở `test_bundle_ms_p95`). Bản sao width32 ngoài repo: `D:\DevCache\tmp\enhancer-width32-v1.0.0\` (cả
 `enhancer.onnx` + `export_width32.json`).
