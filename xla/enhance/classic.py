@@ -33,6 +33,7 @@ import json
 import math
 import os
 import platform
+import subprocess
 import sys
 import time
 from collections.abc import Callable
@@ -378,11 +379,17 @@ def sharpen(p: Planes, params: dict) -> Planes:
     det = cv2.GaussianBlur(y, (0, 0), float(s["sigma"]))
     np.subtract(y, det, out=det)
     thr = float(s["coring_k"]) * sigma_n
-    det -= np.clip(det, -thr, thr)
+    coring = np.clip(det, -thr, thr)
+    det -= coring
     det *= float(s["amount"])
     # Chặn vọt lố: Y sau làm nét nằm trong [min, max] lân cận 3×3 của Y trước → không viền đen/trắng ở cạnh mạnh.
+    # min/max lấy trên Y uint8 (rẻ hơn float, lệch ≤ 0,5 mức).
+    y8 = cv2.convertScaleAbs(y)
     box = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    np.clip(det, cv2.erode(y, box) - y, cv2.dilate(y, box) - y, out=det)
+    det += y
+    np.minimum(det, cv2.dilate(y8, box), out=det)
+    np.maximum(det, cv2.erode(y8, box), out=det)
+    det -= y
     b, g, r = (cv2.add(pl, det, dtype=cv2.CV_8U) for pl in p)
     return b, g, r
 
@@ -537,6 +544,21 @@ def _cpu_load_probe() -> Callable[[], float | None]:
     return lambda: float(psutil.cpu_percent(interval=None))
 
 
+def _cpu_perf_pct() -> float | None:
+    """``% Processor Performance`` của Windows (100 = xung danh định; máy hạ xung khi sạc pin yếu/GPU kéo điện thì ms tăng
+    vài lần). Không đọc được (không phải Windows, PowerShell lỗi) → ``None`` kèm cảnh báo."""
+    if sys.platform != "win32":
+        return None
+    cmd = ["powershell.exe", "-NoProfile", "-Command",
+           r"(Get-Counter '\Processor Information(_Total)\% Processor Performance').CounterSamples.CookedValue"]
+    try:
+        out = subprocess.run(cmd, capture_output=True, text=True, timeout=30, check=True).stdout
+        return round(float(out.strip().splitlines()[-1].replace(",", ".")), 1)
+    except (OSError, subprocess.SubprocessError, ValueError, IndexError) as e:
+        print(f"cảnh báo: không đọc được % Processor Performance ({e})", file=sys.stderr)
+        return None
+
+
 def _env() -> dict[str, Any]:
     return {"cpu": _cpu_name(), "logical_cpus": os.cpu_count(), "cv2_threads": cv2.getNumThreads(),
             "numpy": np.__version__, "opencv": cv2.__version__, "python": platform.python_version(),
@@ -599,8 +621,10 @@ def main(argv: list[str] | None = None) -> int:
                               "source": source}
     if args.bench:
         load = _cpu_load_probe()
+        perf_before = _cpu_perf_pct()
         res = bench(frames, params, args.warmup)
         res["cpu_load_pct_during"] = load()
+        res["cpu_perf_pct"] = {"before": perf_before, "after": _cpu_perf_pct()}
         outs = res.pop("outputs")
         report.update({"schema": "classic_bench/1", "generated": datetime.now(UTC).isoformat(timespec="seconds"),
                        "command": "python -m xla.enhance.classic " + " ".join(argv if argv is not None else sys.argv[1:]),

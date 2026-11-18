@@ -25,7 +25,7 @@ magenta:                  # (d) khử hồng do ISP cắt kênh, chỉ dịch s�
   sat_ramp: 10.0          # ... đủ 1 ở sat_level + sat_ramp = 240
   excess_min: 6.0         # cổng hồng: min(R, B) − G từ mức này ...
   excess_ramp: 14.0       # ... tăng dần tới excess_min + excess_ramp
-  dilate_px: 15           # nở mặt nạ (vuông) phủ viền hồng loang do chroma 4:2:2 + khối 16×8
+  dilate_px: 21           # nở mặt nạ (vuông) phủ viền hồng loang do chroma 4:2:2 + khối 16×8 (khử mờ khuếch đại viền)
   blur_px: 7              # làm mềm mặt nạ bằng box 7×7
   strength: 0.56          # phần (R+B)/2 − G bị trừ mỗi lượt
   passes: 2
