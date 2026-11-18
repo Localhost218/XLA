@@ -2,7 +2,7 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 03 | L (~2 ngày agent + 20–30 phút chủ dự án), ~1–2 giờ GPU gán trước (chưa xác minh) | Không |
+| xong 18/11/2026 | phase 03 | L (~2 ngày agent + 20–30 phút chủ dự án), ~1–2 giờ GPU gán trước (chưa xác minh) | Không |
 
 Lane: labels
 Depends-on: 03
