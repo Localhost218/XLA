@@ -1,0 +1,108 @@
+{
+  "contract_version": "1.0",
+  "model": "enhancer",
+  "version": "1.0.0",
+  "onnx_sha256": "1728de3e976112a208ffb43f57113ba3d31f81aa9e6e9ee43cbcc1cf2fff382e",
+  "frame_size": [
+    640,
+    480
+  ],
+  "crop_left": 16,
+  "camera_profile_version": "1.2.0",
+  "train_run": "nafnet_w16-train",
+  "metrics": {
+    "pink_frac_drop": null,
+    "dark_channel_drop": null,
+    "flicker_ratio": null
+  },
+  "ms_per_frame": {
+    "device": "RTX 4060 Laptop",
+    "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
+    "p50": 15.419849999943835,
+    "p95": 20.969349999995757
+  },
+  "created": "2026-11-18T16:34:00+00:00",
+  "metrics_note": "metrics (tập test thật) = null: lane restore không đụng khung test; phase 14 đo",
+  "metrics_dev": {
+    "split": "dev",
+    "pink_frac_drop": 0.9994291074218649,
+    "dark_channel_drop": 0.335945384903776,
+    "flicker_ratio": 1.77937680071577,
+    "blocking_excess_drop": 0.6377381991855724,
+    "checkpoint": "step_004500"
+  },
+  "network": {
+    "candidate": "nafnet",
+    "arch_kwargs": {
+      "width": 16,
+      "middle_blk_num": 1,
+      "enc_blk_nums": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "dec_blk_nums": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "precision": "fp16",
+    "step": 4500
+  },
+  "ms_cpu_perf": {
+    "gate_before": {
+      "ok": true,
+      "min": 158.6,
+      "mean": 169.3,
+      "window_s": 10,
+      "at": "2026-11-18T16:33:25+00:00",
+      "waited_s": 10.5,
+      "throttled": false
+    },
+    "before_ms": {
+      "ok": true,
+      "min": 156.6,
+      "mean": 165.3,
+      "window_s": 10,
+      "at": "2026-11-18T16:33:43+00:00"
+    },
+    "gpu_before_ms": {
+      "temp_c": 72.0,
+      "power_w": 5.04,
+      "sm_mhz": 210.0,
+      "sm_max_mhz": 3105.0,
+      "throttle_reasons": "0x0000000000000001",
+      "pstate": "P8",
+      "at": "2026-11-18T16:33:43+00:00"
+    },
+    "after_ms": {
+      "ok": true,
+      "min": 162.0,
+      "mean": 169.2,
+      "window_s": 10,
+      "at": "2026-11-18T16:34:00+00:00"
+    },
+    "gpu_after_ms": {
+      "temp_c": 72.0,
+      "power_w": 4.36,
+      "sm_mhz": 210.0,
+      "sm_max_mhz": 3105.0,
+      "throttle_reasons": "0x0000000000000001",
+      "pstate": "P8",
+      "at": "2026-11-18T16:34:00+00:00"
+    },
+    "throttled": false,
+    "cpu_perf_pct": {
+      "before": 165.3,
+      "after": 169.2
+    }
+  },
+  "golden_sources": {
+    "000.jpg": "20261102-100941_002_00413.jpg",
+    "001.jpg": "20261102-100941_004_01932.jpg",
+    "002.jpg": "20261102-100941_007_00750.jpg"
+  }
+}
