@@ -169,6 +169,7 @@ class Evaluator:
         self.real, self.units, self.set_name = real_meas, units, set_name
         state = dict(ctx, pool_needed=set_name == "d2sr")
         state.pop("noise_pool", None)
+        build.worker_env()
         self.ex = ProcessPoolExecutor(workers, initializer=_init, initargs=(state,))
         self.chunk = max(1, len(units) // (workers * 2))
 
@@ -210,6 +211,7 @@ def measure_real(frames: list[Path], workers: int) -> dict:
     if cache.exists():
         rows = json.loads(cache.read_text(encoding="utf-8"))
     else:
+        build.worker_env()
         with ProcessPoolExecutor(workers) as ex:
             rows = list(ex.map(_measure_file, [str(p) for p in frames], chunksize=8))
         cache.parent.mkdir(parents=True, exist_ok=True)
