@@ -228,3 +228,29 @@ def test_black_level_zero_is_identity_and_darkens_shadows() -> None:
     c = d2_camera.stage_tone(lin, np.random.default_rng(0), dict(tone, black_level=0.05), prof, {})
     assert np.array_equal(a, b)
     assert (c[0, :5] < a[0, :5]).all()
+
+
+def test_cma_resumes_mid_generation(tmp_path) -> None:
+    space = [{"name": f"p{i}", "key": f"b.p{i}", "lo": 0.0, "hi": 1.0, "x0": 0.9} for i in range(3)]
+    base = {"b": {f"p{i}": 0.9 for i in range(3)}}
+    calls = {"n": 0, "stop_at": None}
+
+    def ev(cfgs):
+        calls["n"] += 1
+        if calls["stop_at"] is not None and calls["n"] > calls["stop_at"]:
+            raise KeyboardInterrupt("sập máy giả")
+        return [{"total": float(sum((c["b"][f"p{i}"] - 0.3) ** 2 for i in range(3))), "items": {}} for c in cfgs]
+
+    def quiet(_):
+        return None
+
+    full = calibrate.run_cma(ev, base, space, 22, 0.2, 5, quiet)
+    ck, pr = tmp_path / "c.pkl", tmp_path / "c.progress.jsonl"
+    calls.update(n=0, stop_at=4)                       # ngắt ở lượt thứ 5, giữa thế hệ 1
+    with pytest.raises(KeyboardInterrupt):
+        calibrate.run_cma(ev, base, space, 22, 0.2, 5, quiet, ck, pr)
+    calls.update(n=0, stop_at=None)
+    resumed = calibrate.run_cma(ev, base, space, 22, 0.2, 5, quiet, ck, pr)
+    assert calls["n"] == 22 - 4                        # 4 lượt đã xong không chạy lại
+    assert [h["total"] for h in resumed[0]] == pytest.approx([h["total"] for h in full[0]])
+    assert len(pr.read_text(encoding="utf-8").splitlines()) == 22

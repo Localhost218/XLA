@@ -297,8 +297,9 @@ def _save_ckpt(path: Path, state: dict) -> None:
 
 def run_cma(ev: Evaluator, base: dict, space: list[dict], budget: int, sigma0: float, seed: int,
             log, ckpt: Path | None = None, progress: Path | None = None) -> tuple[list[dict], dict, dict, float]:
-    """CMA-ES; sau lượt "trước" và sau mỗi thế hệ ghi ``ckpt`` (trạng thái CMA + đường hội tụ) và ``progress`` (jsonl,
-    một dòng mỗi lượt). Có ``ckpt`` cũ cùng khoá thì chạy tiếp từ đó. Trả (đường hội tụ, tốt nhất, trước, giây)."""
+    """CMA-ES; sau lượt "trước" và sau MỖI lượt ghi ``ckpt`` (trạng thái CMA, ứng viên của thế hệ đang dở, đường hội
+    tụ) và ``progress`` (jsonl, một dòng mỗi lượt). Có ``ckpt`` cũ cùng khoá thì chạy tiếp từ đó, không đánh giá lại lượt
+    đã xong. Trả (đường hội tụ, tốt nhất, trước, giây)."""
     import pickle
 
     import cma
@@ -307,6 +308,7 @@ def run_cma(ev: Evaluator, base: dict, space: list[dict], budget: int, sigma0: f
     if ckpt is not None and ckpt.exists():
         st = pickle.loads(ckpt.read_bytes())
         es, hist, best, before, gen, secs = st["es"], st["hist"], st["best"], st["before"], st["gen"], st["secs"]
+        pending = st.get("pending")
         es.opts.set({"maxfevals": budget - 1})  # ngân sách có thể khác lần trước
         log(f"chạy tiếp từ checkpoint {ckpt.name}: {len(hist)} lượt, thế hệ {gen}, tốt nhất {best['total']:.4f}")
     else:
@@ -318,37 +320,47 @@ def run_cma(ev: Evaluator, base: dict, space: list[dict], budget: int, sigma0: f
         es = cma.CMAEvolutionStrategy(to_unit(space, x0).tolist(), sigma0,
                                       {"bounds": [0, 1], "seed": seed, "maxfevals": budget - 1, "verbose": -9})
         gen, secs = 0, time.perf_counter() - t0
+        pending = None
         log(f"trước: {before['total']:.4f}")
         if progress is not None:
             progress.write_text(json.dumps(hist[0]) + "\n", encoding="utf-8", newline="\n")
-    if ckpt is not None:
-        _save_ckpt(ckpt, {"es": es, "hist": hist, "best": best, "before": before, "gen": gen, "secs": secs})
-    while not es.stop() and len(hist) < budget:
-        t0 = time.perf_counter()
-        gen += 1
-        xs = es.ask()
-        xs = xs[:budget - len(hist)]
-        vals = [from_unit(space, x) for x in xs]
-        res = ev([apply_values(base, space, v) for v in vals])
-        totals = [r["total"] for r in res]
-        if len(xs) == es.popsize:
-            es.tell(xs, totals)
-        new = []
-        for v, r in zip(vals, res, strict=True):
-            new.append({"eval": len(hist) + 1, "gen": gen,
-                        "values": {s["name"]: round(x, 5) for s, x in zip(space, v, strict=True)},
-                        "total": r["total"]})
-            hist.append(new[-1])
+
+    def save() -> None:
+        if ckpt is not None:
+            _save_ckpt(ckpt, {"es": es, "hist": hist, "best": best, "before": before, "gen": gen, "secs": secs,
+                              "pending": pending})
+
+    save()
+    while pending is not None or (not es.stop() and len(hist) < budget):
+        if pending is None:                       # thế hệ mới: hỏi CMA, lưu ứng viên trước khi đánh giá
+            gen += 1
+            xs = es.ask()[:budget - len(hist)]
+            pending = {"gen": gen, "xs": [[float(v) for v in x] for x in xs], "full": len(xs) == es.popsize,
+                       "totals": []}
+            save()
+        gen = pending["gen"]
+        for x in pending["xs"][len(pending["totals"]):]:   # chịu ngắt: checkpoint sau MỖI lượt
+            t0 = time.perf_counter()
+            v = from_unit(space, x)
+            r = ev([apply_values(base, space, v)])[0]
+            pending["totals"].append(r["total"])
+            h = {"eval": len(hist) + 1, "gen": gen,
+                 "values": {s["name"]: round(xv, 5) for s, xv in zip(space, v, strict=True)}, "total": r["total"]}
+            hist.append(h)
             if r["total"] < best["total"]:
                 best = {"total": r["total"], "values": v, "res": r}
-        secs += time.perf_counter() - t0
-        if progress is not None:
-            with progress.open("a", encoding="utf-8", newline="\n") as f:
-                f.writelines(json.dumps(h) + "\n" for h in new)
-        if ckpt is not None:
-            _save_ckpt(ckpt, {"es": es, "hist": hist, "best": best, "before": before, "gen": gen, "secs": secs})
+            secs += time.perf_counter() - t0
+            if progress is not None:
+                with progress.open("a", encoding="utf-8", newline="\n") as f:
+                    f.write(json.dumps(h) + "\n")
+            save()
+        full, totals = pending["full"], pending["totals"]
+        if full:
+            es.tell([np.array(x) for x in pending["xs"]], totals)
+        pending = None
+        save()
         log(f"thế hệ {gen}: tốt nhất thế hệ {min(totals):.4f}, tốt nhất {best['total']:.4f} ({len(hist)} lượt)")
-        if len(xs) < es.popsize:
+        if not full:
             break
     return hist, best, before, secs
 
