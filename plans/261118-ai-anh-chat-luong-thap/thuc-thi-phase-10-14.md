@@ -125,7 +125,7 @@ nếu mỗi file < 5 MB.
 |---|---|
 | detect (10) | đang chạy (máy tắt 13:24 vì ổ sạc lỏng; chạy lại 13:35, workers 2 vì hết commit memory lúc 4 worker) |
 | detect-export | **xong** `0934f1e`: parity ORT CPU/CUDA −0,0029 mAP50 so `.pt` (đạt); resize trong graph trùng bit với `LetterBox` |
-| classic (12) | đang chạy |
+| classic (12) | **xong** `e859e22`: hồng −91,6 %, dark channel 142,7→65,3, blocking 2,73→2,08; bench 95 ms lúc máy quá nhiệt (khoẻ 13–18 ms), đo lại ở phase 14 |
 | restore (13) | đang chạy |
 | abeval (14 code) | **xong** `fbaf1dc`: chạy giả đầu-cuối đạt; E4 COCO×gốc 0,1265 khớp mốc phase 09; lệnh chạy thật ở `results/ab/README.md` + báo cáo lane |
 | detect (11) | chờ 10 + detect-export |
