@@ -36,7 +36,16 @@ import torch.nn.functional as F
 import yaml
 from torch.utils.data import DataLoader, Dataset
 
-from xla.enhance.net import RUNS_DIR, EnhancerGraph, build, enhance_frames, load_pretrained, n_params, resolve
+from xla.enhance.net import (
+    RUNS_DIR,
+    EnhancerGraph,
+    build,
+    enhance_frames,
+    load_pretrained,
+    n_params,
+    resolve,
+    variant_init,
+)
 from xla.paths import data_root, repo_root
 
 GPU_LOCK_TIMEOUT_S = 6 * 3600
@@ -215,6 +224,7 @@ def train(cfg: dict[str, Any], run_id: str, smoke: bool, max_steps: int | None) 
     dl = DataLoader(ds, batch_size=batch, num_workers=min(4, int(ct["workers"])), pin_memory=True, drop_last=True,
                     persistent_workers=False)
     meta = {"candidate": cfg["candidate"], "arch_kwargs": cfg.get("arch_kwargs") or {}, "crop_left": crop_left,
+            "init": cfg.get("init", "pretrained"), "variant": cfg.get("variant"),
             "camera_profile_version": profile_version, "config_version": cfg["version"], "run_id": run_id}
     vals: list[dict[str, Any]] = []
     from xla.enhance.net import wait_cpu_perf
@@ -286,6 +296,7 @@ def train(cfg: dict[str, Any], run_id: str, smoke: bool, max_steps: int | None) 
         "params": n_params(model),
         "steps": step,
         "batch": batch,
+        "lr": ct["lr"],
         "patch": cfg["data"]["patch"],
         "s_per_step": s_per_step,
         "hours_per_1000_steps": s_per_step * 1000 / 3600,
@@ -349,10 +360,12 @@ def choose(rows: list[dict[str, Any]]) -> tuple[dict[str, Any] | None, str]:
     return None, "không có checkpoint huấn luyện"
 
 
-def rescore(cfg: dict[str, Any]) -> dict[str, Any]:
+def rescore(cfg: dict[str, Any], run_id: str) -> dict[str, Any]:
     """Áp lại ``SELECT_RULE`` lên kết quả ``select`` đã lưu (không chạy GPU lại)."""
     p = repo_root() / TRAIN_JSON_REL
     sel = json.loads(p.read_text(encoding="utf-8"))["select"]
+    if sel.get("run_id") != run_id:
+        raise ValueError(f"select đã lưu là của {sel.get('run_id')}, không phải {run_id}")
     best, how = choose(sel["checkpoints"])
     sel.update(rule=SELECT_RULE, chosen_how=how, chosen=best["checkpoint"] if best else None,
                chosen_path=best["path"] if best else None)
@@ -381,10 +394,15 @@ def select(cfg: dict[str, Any], run_id: str) -> dict[str, Any]:
     t_wait = time.time()
     with gpu_lock(f"phase13 restore select {run_id}", timeout_s=GPU_LOCK_TIMEOUT_S):
         t0 = time.time()
-        for item in [pre, *({"name": p.stem, "path": p} for p in ckpts)]:
-            model = build(cfg["candidate"], cfg.get("arch_kwargs"))
+        # kiến trúc lấy từ chính checkpoint (biến thể thu nhỏ có arch_kwargs riêng), không từ config
+        ck0 = torch.load(ckpts[0], map_location="cpu", weights_only=False)
+        cand, akw, init = ck0["candidate"], ck0.get("arch_kwargs") or {}, ck0.get("init", "pretrained")
+        del ck0
+        items = [*([pre] if init == "pretrained" else []), *({"name": p.stem, "path": p} for p in ckpts)]
+        for item in items:
+            model = build(cand, akw)
             if item["path"] is None:
-                load_pretrained(model, cfg["candidate"], strict=not cfg.get("arch_kwargs"))
+                load_pretrained(model, cand, strict=not akw)
             else:
                 model.load_state_dict(torch.load(item["path"], map_location="cpu", weights_only=False)["model"])
             graph = EnhancerGraph(model.eval(), crop_left, half=True).half().cuda().eval()
@@ -419,10 +437,13 @@ def select(cfg: dict[str, Any], run_id: str) -> dict[str, Any]:
     }
 
 
-def _write_train_json(update: dict[str, Any]) -> None:
+def _write_train_json(update: dict[str, Any], run_id: str | None = None) -> None:
+    """Ghi khoá ``smoke``/``train``/``select`` (lần mới nhất) và bản sao dưới ``runs.<run_id>`` để giữ mọi vòng."""
     p = repo_root() / TRAIN_JSON_REL
     cur = json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {}
     cur.update(update)
+    if run_id:
+        cur.setdefault("runs", {}).setdefault(run_id, {}).update(update)
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(cur, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
@@ -436,6 +457,9 @@ def main(argv: list[str] | None = None) -> int:
     t.add_argument("--run-id", default=None)
     t.add_argument("--max-steps", type=int, default=None)
     t.add_argument("--candidate", default=None, help="ghi đè candidate của config")
+    t.add_argument("--batch", type=int, default=None, help="ghi đè train.batch")
+    t.add_argument("--lr", type=float, default=None, help="ghi đè train.lr")
+    t.add_argument("--ckpt-every", type=int, default=None, help="ghi đè train.ckpt_every và val_every")
     t.add_argument("--json", action="store_true")
     s = sub.add_parser("select")
     s.add_argument("--config", default="configs/restore.yaml")
@@ -445,16 +469,24 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     cfg = load_config(args.config)
     if args.cmd == "train":
+        if args.batch:
+            cfg["train"]["batch"] = args.batch
+        if args.lr:
+            cfg["train"]["lr"] = args.lr
+        if args.ckpt_every:
+            cfg["train"]["ckpt_every"] = cfg["train"]["val_every"] = args.ckpt_every
         if args.candidate:  # ứng viên hoặc biến thể thu nhỏ (xla.enhance.net.VARIANTS)
             base, kw = resolve(args.candidate)
             cfg["candidate"] = base
+            cfg["init"] = variant_init(args.candidate)
+            cfg["variant"] = args.candidate
             cfg["arch_kwargs"] = {k: list(v) if isinstance(v, tuple) else v for k, v in kw.items()}
         run_id = args.run_id or f"{cfg['candidate']}-{'smoke' if args.smoke else 'train'}"
         out = train(cfg, run_id, args.smoke, args.max_steps)
-        _write_train_json({"smoke" if args.smoke else "train": out})
+        _write_train_json({"smoke" if args.smoke else "train": out}, run_id)
     else:
-        out = rescore(cfg) if args.rescore else select(cfg, args.run_id)
-        _write_train_json({"select": out})
+        out = rescore(cfg, args.run_id) if args.rescore else select(cfg, args.run_id)
+        _write_train_json({"select": out}, args.run_id)
         if out["chosen"] is None:
             print(json.dumps(out, ensure_ascii=False) if args.json else "không checkpoint nào qua", file=sys.stderr)
             return 1

@@ -80,7 +80,18 @@ VARIANTS: dict[str, dict[str, Any]] = {
                                                  "dec_blk_nums": (1, 1, 1, 1)}},
     "nafnet_tiny": {"base": "nafnet", "kwargs": {"middle_blk_num": 1, "enc_blk_nums": (1, 1, 1, 1),
                                                  "dec_blk_nums": (1, 1, 1, 1)}},
+    # Vòng 2 (18/11): nafnet_tiny (width 32) vẫn ~35 ms riêng phần mạng; dò cho thấy width 16 cùng số khối ~16 ms
+    # (chi phí ∝ width ở tầng độ phân giải đủ), còn thêm khối ở tầng thấp (enc 1,1,2,4 + mid 4) lên p95 64 ms.
+    # Khác width → không nạp được trọng số công bố: khởi tạo ngẫu nhiên.
+    "nafnet_w16": {"base": "nafnet", "init": "random",
+                   "kwargs": {"width": 16, "middle_blk_num": 1, "enc_blk_nums": (1, 1, 1, 1),
+                              "dec_blk_nums": (1, 1, 1, 1)}},
 }
+
+
+def variant_init(name: str) -> str:
+    """``pretrained`` (nạp trọng số công bố, biến thể lấy k khối đầu) hoặc ``random``."""
+    return VARIANTS.get(name, {}).get("init", "pretrained")
 
 
 def resolve(name: str) -> tuple[str, dict[str, Any]]:
@@ -295,7 +306,9 @@ def speed_one(name: str, warmup: int, iters: int, out_dir: Path) -> dict[str, An
     import onnxruntime as ort
 
     base, kw = resolve(name)
-    model = load_pretrained(build(base, kw), base, strict=not kw)
+    model = build(base, kw)
+    if variant_init(name) == "pretrained":
+        load_pretrained(model, base, strict=not kw)
     params = n_params(model)
     onnx_path = export_net_fp16(model, out_dir / f"{name}_fp16_{NET_H}x{NET_W}.onnx")
     torch_ms = torch_cuda_ms(model, warmup, min(iters, 100))
@@ -308,7 +321,8 @@ def speed_one(name: str, warmup: int, iters: int, out_dir: Path) -> dict[str, An
     return {
         "candidate": name,
         "base": base,
-        "published_weights": CANDIDATES[base]["published"] + (" — biến thể thu nhỏ, giữ k khối đầu" if kw else ""),
+        "published_weights": (CANDIDATES[base]["published"] + (" — biến thể thu nhỏ, giữ k khối đầu" if kw else ""))
+        if variant_init(name) == "pretrained" else "không (khởi tạo ngẫu nhiên, đo tốc độ không phụ thuộc trọng số)",
         "arch_kwargs": {k: list(v) if isinstance(v, tuple) else v for k, v in {**CANDIDATES[base]["kwargs"], **kw}.items()},
         "params": params,
         "input": [1, 3, NET_H, NET_W],
