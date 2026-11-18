@@ -1,0 +1,121 @@
+{
+  "n": 200,
+  "config_version": "1.0.0",
+  "profile_id": "ov3660-esp32s3-q12-20261102",
+  "source": {
+    "split": "dev",
+    "n_split": 1115,
+    "frames_dir": "data/real/frames",
+    "selection": "cách đều theo tên đã sắp (linspace)"
+  },
+  "schema": "classic_bench/1",
+  "generated": "2026-11-18T07:46:58+00:00",
+  "command": "python -m xla.enhance.classic --split dev --limit 200 --bench --bench-out results/enhance/classic_bench.json --note Máy hạ xung: GPU 87 °C SW thermal slowdown do lane khác huấn luyện, % Processor Performance ~22 % suốt từ 13:45; chủ dự án chọn để nguyên và cho đo luôn (18/11/2026). --note Số tham chiếu lúc máy khoẻ (13:30–13:45, ngay sau khởi động lại, cắm sạc, tải CPU 7 %, chưa ghi % Processor Performance): stepbench min-of-7, trung vị 21 khung dev (cách 55), toàn chuỗi 17,7 ms (cv2 32 luồng) / 13,4 ms (4 luồng); từng bước 32 luồng: deblock 2,95, magenta 3,03, vignette 0,13, dehaze 4,31, sharpen 4,67 ms. Mã lúc đó khác bản này ở dilate 15 px và kẹp vọt lố tính bằng float.",
+  "warmup": 20,
+  "env": {
+    "cpu": "AMD Ryzen 9 7945HX with Radeon Graphics",
+    "logical_cpus": 32,
+    "cv2_threads": 32,
+    "numpy": "2.5.5",
+    "opencv": "5.1.0",
+    "python": "3.12.16",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processes": 1
+  },
+  "step_order": [
+    "crop",
+    "deblock",
+    "magenta",
+    "vignette",
+    "dehaze",
+    "sharpen",
+    "pad"
+  ],
+  "notes": [
+    "Thứ tự chạy: (a) cắt → (e) khử khối → (d) khử hồng → (b) tối góc → (c) khử mờ → (f) làm nét → (g) đệm; lý do ở docstring module (khử mờ nhân sắc độ 1/t: khử hồng sau khử mờ chỉ giảm 46–68 % điểm hồng, trước khử mờ 93 %).",
+    "Cổng khử hồng: min(R, B) − G thay (R+B)/2 − G (vật đỏ bão hoà có (R+B)/2 − G lớn); bão hoà từ 230, đủ ở 240.",
+    "A của khử mờ theo từng kênh (A xám làm ám xanh lá của khung bị khuếch đại 1/t); t có cận dưới từng điểm 1 − omega·min_c(I)/mean(A) để J không âm ở vùng tối sát vùng mờ sáng.",
+    "Mức đen: phân vị 0,5 của kênh min ra ≥ min(phân vị 0,5 vào, black_target); làm nét chặn vọt lố trong [min, max] 3×3.",
+    "Dạng mặt phẳng uint8 giữa các bước: mảng mới > 0,5 MB trên Windows tốn ~0,2 ms/MB cấp trang."
+  ],
+  "ms": {
+    "total": {
+      "p50": 95.458,
+      "p95": 115.96,
+      "mean": 98.443
+    },
+    "steps": {
+      "crop": {
+        "p50": 1.578,
+        "p95": 1.974,
+        "mean": 1.618
+      },
+      "deblock": {
+        "p50": 23.802,
+        "p95": 32.435,
+        "mean": 25.394
+      },
+      "magenta": {
+        "p50": 20.624,
+        "p95": 28.237,
+        "mean": 19.224
+      },
+      "vignette": {
+        "p50": 0.861,
+        "p95": 1.205,
+        "mean": 1.091
+      },
+      "dehaze": {
+        "p50": 28.746,
+        "p95": 36.097,
+        "mean": 30.114
+      },
+      "sharpen": {
+        "p50": 17.554,
+        "p95": 21.396,
+        "mean": 18.653
+      },
+      "pad": {
+        "p50": 2.216,
+        "p95": 2.739,
+        "mean": 2.24
+      }
+    }
+  },
+  "budget_ms": 30.0,
+  "pass": false,
+  "quality": {
+    "pink_px": {
+      "before_mean": 2084.0,
+      "after_mean": 174.115,
+      "reduction_total": 0.916452
+    },
+    "dark_channel_median": {
+      "before_mean": 142.71,
+      "after_mean": 65.25
+    },
+    "black_frac_le3": {
+      "before_mean": 0.0,
+      "after_mean": 0.0,
+      "max_increase": 1e-05
+    },
+    "blocking_ratio_8x8": {
+      "before_mean": 2.726616,
+      "after_mean": 2.084284
+    }
+  },
+  "cpu_load_pct_during": 44.1,
+  "cpu_perf_pct": {
+    "min": 21.7,
+    "mean": 21.9,
+    "max": 22.0,
+    "n_samples": 44,
+    "interval_s": 2
+  },
+  "throttled": true,
+  "run_notes": [
+    "Máy hạ xung: GPU 87 °C SW thermal slowdown do lane khác huấn luyện, % Processor Performance ~22 % suốt từ 13:45; chủ dự án chọn để nguyên và cho đo luôn (18/11/2026).",
+    "Số tham chiếu lúc máy khoẻ (13:30–13:45, ngay sau khởi động lại, cắm sạc, tải CPU 7 %, chưa ghi % Processor Performance): stepbench min-of-7, trung vị 21 khung dev (cách 55), toàn chuỗi 17,7 ms (cv2 32 luồng) / 13,4 ms (4 luồng); từng bước 32 luồng: deblock 2,95, magenta 3,03, vignette 0,13, dehaze 4,31, sharpen 4,67 ms. Mã lúc đó khác bản này ở dilate 15 px và kẹp vọt lố tính bằng float."
+  ],
+  "gate": "over_budget_throttled"
+}

@@ -23,7 +23,8 @@ CLI::
     python -m xla.enhance.classic --in <jpg|dir> --out <dir> [--bench] --json
     python -m xla.enhance.classic --split dev --limit 200 --bench --bench-out results/enhance/classic_bench.json --json
 
-Mã thoát: 0 = xong (``--bench``: p50 ≤ ``BUDGET_MS``); 1 = bench vượt ngân sách; 2 = sai cách gọi / thiếu dữ liệu.
+Mã thoát: 0 = xong (``--bench``: p50 ≤ ``BUDGET_MS``, hoặc vượt nhưng máy hạ xung đo được — mẫu ``% Processor
+Performance`` < ``PERF_OK_PCT`` — và có ``--note`` nêu lý do); 1 = bench vượt ngân sách; 2 = sai cách gọi / thiếu dữ liệu.
 """
 
 from __future__ import annotations
@@ -544,19 +545,52 @@ def _cpu_load_probe() -> Callable[[], float | None]:
     return lambda: float(psutil.cpu_percent(interval=None))
 
 
-def _cpu_perf_pct() -> float | None:
-    """``% Processor Performance`` của Windows (100 = xung danh định; máy hạ xung khi sạc pin yếu/GPU kéo điện thì ms tăng
-    vài lần). Không đọc được (không phải Windows, PowerShell lỗi) → ``None`` kèm cảnh báo."""
-    if sys.platform != "win32":
-        return None
-    cmd = ["powershell.exe", "-NoProfile", "-Command",
-           r"(Get-Counter '\Processor Information(_Total)\% Processor Performance').CounterSamples.CookedValue"]
-    try:
-        out = subprocess.run(cmd, capture_output=True, text=True, timeout=30, check=True).stdout
-        return round(float(out.strip().splitlines()[-1].replace(",", ".")), 1)
-    except (OSError, subprocess.SubprocessError, ValueError, IndexError) as e:
-        print(f"cảnh báo: không đọc được % Processor Performance ({e})", file=sys.stderr)
-        return None
+PERF_OK_PCT = 80.0
+"""``% Processor Performance`` tối thiểu (mọi mẫu trong lúc bench) để coi máy không hạ xung."""
+PERF_SAMPLE_S = 2
+
+
+class _PerfSampler:
+    """Lấy mẫu ``% Processor Performance`` của Windows (100 = xung danh định) mỗi ``PERF_SAMPLE_S`` giây bằng một tiến
+    trình PowerShell chạy song song với bench. Máy hạ xung (quá nhiệt, sạc yếu) thì ms tăng vài lần, nên số này đi kèm
+    kết quả. Không phải Windows / PowerShell lỗi → ``summary()`` trả ``None`` kèm cảnh báo, không đoán."""
+
+    _CMD = (r"Get-Counter '\Processor Information(_Total)\% Processor Performance' -SampleInterval {s} -Continuous | "
+            "ForEach-Object {{ [Console]::Out.WriteLine($_.CounterSamples[0].CookedValue); [Console]::Out.Flush() }}")
+
+    def __init__(self) -> None:
+        self._proc: subprocess.Popen[str] | None = None
+        if sys.platform != "win32":
+            print("cảnh báo: không phải Windows, không ghi % Processor Performance", file=sys.stderr)
+            return
+        try:
+            self._proc = subprocess.Popen(
+                ["powershell.exe", "-NoProfile", "-Command", self._CMD.format(s=PERF_SAMPLE_S)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        except OSError as e:
+            print(f"cảnh báo: không chạy được PowerShell để đo % Processor Performance ({e})", file=sys.stderr)
+        time.sleep(PERF_SAMPLE_S + 1)  # có ít nhất một mẫu trước khi bench bắt đầu
+
+    def summary(self) -> dict[str, Any] | None:
+        if self._proc is None:
+            return None
+        self._proc.terminate()
+        try:
+            out, _err = self._proc.communicate(timeout=15)
+        except subprocess.TimeoutExpired:
+            self._proc.kill()
+            out, _err = self._proc.communicate()
+        vals = []
+        for line in out.splitlines():
+            try:
+                vals.append(float(line.strip().replace(",", ".")))
+            except ValueError:
+                continue
+        if not vals:
+            print("cảnh báo: không đọc được mẫu % Processor Performance nào", file=sys.stderr)
+            return None
+        return {"min": round(min(vals), 1), "mean": round(float(np.mean(vals)), 1), "max": round(max(vals), 1),
+                "n_samples": len(vals), "interval_s": PERF_SAMPLE_S}
 
 
 def _env() -> dict[str, Any]:
@@ -595,6 +629,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--warmup", type=int, default=20)
     ap.add_argument("--bench-out", help=f"ghi JSON bench (vd. {BENCH_REL.as_posix()})")
     ap.add_argument("--threads", type=int, default=0, help="cv2.setNumThreads (0 = mặc định của cv2)")
+    ap.add_argument("--note", action="append", default=[], help="ghi chú của lần đo (vd. lý do máy hạ xung), lặp được")
     ap.add_argument("--json", action="store_true", help="in kết quả dạng JSON")
     args = ap.parse_args(argv)
     if args.limit < 0 or args.warmup < 0 or args.threads < 0:
@@ -620,11 +655,17 @@ def main(argv: list[str] | None = None) -> int:
     report: dict[str, Any] = {"n": len(frames), "config_version": params["version"], "profile_id": params["profile_id"],
                               "source": source}
     if args.bench:
+        sampler = _PerfSampler()
         load = _cpu_load_probe()
-        perf_before = _cpu_perf_pct()
         res = bench(frames, params, args.warmup)
         res["cpu_load_pct_during"] = load()
-        res["cpu_perf_pct"] = {"before": perf_before, "after": _cpu_perf_pct()}
+        perf = sampler.summary()
+        res["cpu_perf_pct"] = perf
+        res["throttled"] = None if perf is None else perf["min"] < PERF_OK_PCT
+        res["run_notes"] = list(args.note)
+        # Cổng pass phase 12: p50 ≤ ngân sách, hoặc "lý do + số đo" — máy hạ xung đo được và có ghi chú lý do.
+        res["gate"] = ("pass" if res["pass"] else
+                       "over_budget_throttled" if res["throttled"] and args.note else "fail")
         outs = res.pop("outputs")
         report.update({"schema": "classic_bench/1", "generated": datetime.now(UTC).isoformat(timespec="seconds"),
                        "command": "python -m xla.enhance.classic " + " ".join(argv if argv is not None else sys.argv[1:]),
@@ -650,7 +691,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.bench:
         t = report["ms"]["total"]
         print(f"{report['n']} khung: p50 {t['p50']} ms, p95 {t['p95']} ms (ngân sách {BUDGET_MS} ms)")
-    if args.bench and not report["pass"]:
+    if args.bench and report["gate"] == "fail":
         return 1
     return 0
 

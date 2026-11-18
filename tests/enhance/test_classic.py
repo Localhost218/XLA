@@ -268,7 +268,15 @@ def test_bench_json_within_budget(require_data):
     assert rep["n"] == 200 and rep["warmup"] == 20 and rep["source"]["split"] == "dev"
     assert {"cpu", "numpy", "opencv"} <= set(rep["env"])
     assert set(rep["ms"]["steps"]) == set(C.STEPS)
-    assert rep["ms"]["total"]["p50"] <= C.BUDGET_MS
+    # Cổng pass phase 12: p50 ≤ 30 ms, hoặc "lý do + số đo": máy hạ xung đo được (mẫu % Processor Performance < 80)
+    # và có ghi chú lý do. Máy không hạ xung mà vẫn vượt → đỏ.
+    p50 = rep["ms"]["total"]["p50"]
+    if p50 > C.BUDGET_MS:
+        assert rep["throttled"] is True and rep["cpu_perf_pct"]["min"] < C.PERF_OK_PCT, f"p50 {p50} ms, máy không hạ xung"
+        assert rep["run_notes"], "vượt ngân sách vì hạ xung phải có ghi chú lý do (--note)"
+        assert rep["gate"] == "over_budget_throttled"
+    else:
+        assert rep["gate"] == "pass"
     q = rep["quality"]
     assert q["black_frac_le3"]["max_increase"] <= 0.001
     assert q["dark_channel_median"]["after_mean"] < q["dark_channel_median"]["before_mean"]
