@@ -55,6 +55,10 @@ nomad:
 
 keep_images_without_person: true  # ảnh nadir không người vẫn dùng cho cửa sổ âm
 
+# Phase 07 (lệnh Owner 18/11): val VisDrone sau lọc chỉ 69 ảnh có người → chuyển 10/75 chuỗi train (seed 20261118)
+# sang val, val còn 238 ảnh có người. Danh sách sinh bằng `python -m xla.degrade.sources pick-val`.
+val_split_file: configs/visdrone_valsplit.yaml
+
 geometry:                        # hình học chung D0/D1/D2 (xla/degrade/geometry.py); cỡ người đích lấy từ
   windows_per_image: 2           # camera_profile.yaml person_box_px.short_side (cùng phân bố cho cả ba tập)
   window:

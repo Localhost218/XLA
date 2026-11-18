@@ -1,0 +1,22 @@
+# Chuỗi VisDrone train chuyển sang val của tập sinh D0/D1/D2 (phase 07, lệnh Owner 18/11: val gốc chỉ 69 ảnh
+# có người). Sinh bằng: python -m xla.degrade.sources pick-val --seed 20261118 --min-val 200 --max-extra 180
+# Chia theo CHUỖI (không theo ảnh) để không rò cảnh giữa train và val. Không sửa tay.
+seed: 20261118
+min_val_with_person: 200
+max_extra: 180
+train_sequences_total: 75
+moved_sequences: 10
+moved_images: 186
+moved_with_person: 169
+val_with_person_after: 238
+train_to_val:
+- train/0000040
+- train/0000257
+- train/0000264
+- train/0000348
+- train/9999940
+- train/9999964
+- train/9999965
+- train/9999974
+- train/9999975
+- train/9999985

@@ -211,10 +211,10 @@ def test_tone_stage_turns_white_pink_not_gray(cfgs, which) -> None:
     assert r - g > 25 and b - g > 25, (b, g, r)
     b2, g2, r2 = bgr[:, 40:, 0].mean(), bgr[:, 40:, 1].mean(), bgr[:, 40:, 2].mean()
     assert not (r2 - g2 > 25 and b2 - g2 > 25)
-    # xám chưa bão hoà mang đúng ám màu p50 của hồ sơ (miền tuyến tính)
+    # xám chưa bão hoà mang đúng ám màu = p50 của hồ sơ × cast của cấu hình (miền tuyến tính)
     lr = d2_camera.srgb_to_linear(np.array([r2, g2, b2]) / 255.0)
-    assert abs(lr[0] / lr[1] - prof["color"]["r_over_g"]["p50"]) < 0.02, (b2, g2, r2)
-    assert abs(lr[2] / lr[1] - prof["color"]["b_over_g"]["p50"]) < 0.02, (b2, g2, r2)
+    assert abs(lr[0] / lr[1] - prof["color"]["r_over_g"]["p50"] * cfg["cast_r"]) < 0.02, (b2, g2, r2)
+    assert abs(lr[2] / lr[1] - prof["color"]["b_over_g"]["p50"] * cfg["cast_b"]) < 0.02, (b2, g2, r2)
 
 
 def test_d1_does_not_read_camera_profile(cfgs, source_item, ctx, monkeypatch) -> None:
@@ -275,6 +275,29 @@ def test_build_set_writes_manifest_and_dataset_yaml(source_item, ctx, tmp_path) 
     assert hashlib.sha256(img.read_bytes()).hexdigest() == rec["sha256"]
     ds = yaml.safe_load((tmp_path / "d2" / "dataset.yaml").read_text(encoding="utf-8"))
     assert ds["names"] == {0: "person"} and ds["train"] == "train/images"
+
+
+def test_build_set_resumes_after_interrupt(source_item, ctx, tmp_path) -> None:
+    import hashlib
+
+    units = [(source_item, f"syn/one#{i}") for i in range(4)]
+    first = build.build_set("d1", units, 20261118, ctx, tmp_path, workers=1)
+    d = tmp_path / "d1"
+    recs = [json.loads(x) for x in (d / "manifest.jsonl").read_text(encoding="utf-8").splitlines()]
+    shas = {r["name"]: r["sha256"] for r in recs}
+    # giả lập ngắt: manifest cuối chưa có, partial mới có 2 bản ghi (dòng cuối ghi dở), 1 ảnh đã có bị hỏng
+    (d / "manifest.jsonl").unlink()
+    (d / build.PARTIAL).write_text("\n".join(json.dumps(r) for r in recs[:2]) + '\n{"unit": "cut', encoding="utf-8")
+    (d / recs[1]["split"] / "images" / recs[1]["name"]).write_bytes(b"hong")
+    second = build.build_set("d1", units, 20261118, ctx, tmp_path, workers=1)
+    assert second["reused_from_previous_run"] == 1 and second["written"] == first["written"]
+    for name, sha in shas.items():
+        img = next(d.glob(f"*/images/{name}"))
+        assert hashlib.sha256(img.read_bytes()).hexdigest() == sha
+    assert not (d / build.PARTIAL).exists()
+    # khoá dựng khác (seed khác) → dựng lại, không dùng ảnh cũ
+    third = build.build_set("d1", units, 1, ctx, tmp_path, workers=1)
+    assert third["reused_from_previous_run"] == 0
 
 
 def _vd_item(stem: str, split: str = "train", probe: float | None = None) -> sources.SourceItem:
