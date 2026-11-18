@@ -107,6 +107,35 @@ def best_weights(cfg: dict[str, Any], name: str) -> Path:
 # ---------------------------------------------------------------- train một model (thầy / trò)
 
 
+def free_virtual_gb() -> float | None:
+    """Bộ nhớ ảo trống (GB) theo ``Win32_OperatingSystem.FreeVirtualMemory``; không đọc được → None."""
+    import subprocess
+
+    r = subprocess.run(["powershell.exe", "-NoProfile", "-Command",
+                        "(Get-CimInstance Win32_OperatingSystem).FreeVirtualMemory"],
+                       capture_output=True, text=True, check=False)
+    try:
+        return round(int(r.stdout.strip()) / 2**20, 2)
+    except ValueError:
+        return None
+
+
+def choose_workers(cfg: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+    """``workers_max`` khi bộ nhớ ảo trống ≥ ``workers_min_free_virtual_gb`` ngay trước train, không thì ``train.workers``
+    (lệnh Owner 18/11 23:00: 4 worker từng làm hết commit memory ở E1)."""
+    base, hi = int(cfg["train"]["workers"]), int(cfg.get("workers_max", cfg["train"]["workers"]))
+    need = float(cfg.get("workers_min_free_virtual_gb", 10.0))
+    free = free_virtual_gb()
+    w = hi if free is not None and free >= need else base
+    return w, {"free_virtual_gb": free, "need_gb": need, "workers": w, "time": _now()}
+
+
+def _is_memory_error(e: BaseException) -> bool:
+    msg = f"{type(e).__name__}: {e}"
+    keys = ("MemoryError", "_ArrayMemoryError", "exception set", "DataLoader worker", "paging file", "out of memory")
+    return isinstance(e, MemoryError) or any(k in msg for k in keys)
+
+
 def train_model(cfg: dict[str, Any], name: str, role: str, weights: str, ds: dict[str, Any],
                 smoke: bool) -> dict[str, Any]:
     """Một lần train ``name`` (``teacher`` / ``r<K>``), giữ ``gpu_lock`` suốt train + dự đoán CSV, rồi nhả."""
@@ -130,8 +159,21 @@ def train_model(cfg: dict[str, Any], name: str, role: str, weights: str, ds: dic
         t0 = time.perf_counter()
         session: dict[str, Any] = {"start": _now(), "lock_wait_s": round(t0 - t_wait, 1), "gpu_temp_c_start": _gpu_temp()}
         if smoke or not done_p.is_file():
-            tracker = EpochTracker(run_dir, dv, root / FRAMES_REL, cfg["predict"], imgsz)
-            fit = _fit(rcfg, ds, run_dir, tracker, smoke)
+            rcfg["train"]["workers"], session["workers_choice"] = choose_workers(cfg)
+            session["workers"] = [rcfg["train"]["workers"]]
+            for attempt in range(2):
+                tracker = EpochTracker(run_dir, dv, root / FRAMES_REL, cfg["predict"], imgsz)
+                try:
+                    fit = _fit(rcfg, ds, run_dir, tracker, smoke)
+                    break
+                except Exception as e:  # chỉ lỗi bộ nhớ của dataloader mới train tiếp, còn lại ném tiếp
+                    if attempt or smoke or not _is_memory_error(e) or not (run_dir / "weights" / "last.pt").is_file():
+                        raise
+                    print(f"[selftrain] lỗi bộ nhớ ({type(e).__name__}: {e}); train tiếp từ last.pt với workers "
+                          f"{cfg['train']['workers']}", file=sys.stderr)
+                    rcfg["train"]["workers"] = int(cfg["train"]["workers"])
+                    session["workers"].append(rcfg["train"]["workers"])
+                    session["memory_error"] = f"{type(e).__name__}: {str(e)[:300]}"
             best = run_dir / "weights" / "best_devval.pt"
             strip_optimizer(best)
             _dump(done_p, fit | {"finished": _now(), "best_devval_sha256": _sha256(best)})

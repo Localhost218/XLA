@@ -4,6 +4,8 @@
 runs_dir: D:/DevCache/runs/xla/e2          # run + trọng số, KHÔNG vào repo: teacher/, r1/, r2/, ...
 datasets_dir: D:/DevCache/datasets/xla     # tập nhãn giả e2_r<K>/ (khung dev thật chép vào, ngoài repo)
 lock_timeout_s: 28800                      # chờ khoá GPU tối đa 8 giờ
+workers_max: 4                             # Owner 18/11 23:00: 4 worker khi bộ nhớ ảo trống ≥ 10 GB ngay trước train,
+workers_min_free_virtual_gb: 10            # không thì train.workers; lỗi bộ nhớ → train tiếp từ last.pt với train.workers
 source_set: d2                             # tập nguồn thắng dev-val ở E1 (results/e1/e1.json khoá best)
 
 train:                                     # tham số chung truyền thẳng cho ultralytics `model.train` (giống E1)
