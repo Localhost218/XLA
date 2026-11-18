@@ -200,12 +200,14 @@ def cmd_score(a: argparse.Namespace) -> int:
     try:
         for v in VARIANTS:
             doc["variants"][v] = evaluate(pred_dir / f"{v}.csv", "test", a.labels_dir, a.manifest, a.split_json,
-                                          a.thr, a.boot, a.seed, a.allow_missing_labels)
+                                          a.thr, a.boot, a.seed, a.allow_missing_labels,
+                                          devval_labels_dir=a.devval_labels_dir)
     except (EvalInputError, TestLeakError, FileNotFoundError) as e:
         print(f"LỖI: {e}", file=sys.stderr)
         return 1
-    doc["official"] = all(r["official"] for r in doc["variants"].values())
-    doc["note"] = None if doc["official"] else "SỐ TẠM — nhãn chưa được chủ dự án duyệt hoặc thiếu nhãn; không phải số chính thức"
+    official = all(r["official"] for r in doc["variants"].values())
+    note = None if official else "SỐ TẠM — nhãn chưa được chủ dự án duyệt hoặc thiếu nhãn; không phải số chính thức"
+    doc = {"official": official, "note": note} | doc  # đặt lên đầu file cho dễ thấy
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
     brief = {v: {k: r["metrics"][k] for k in ("mAP50", "mAP50_95", "AP_small", "AR_small")} | {"n": r["n"]}
@@ -228,6 +230,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--pred-dir", type=Path, default=None, help=f"mặc định {OUT_REL}")
     s.add_argument("--labels-dir", type=Path, default=None, help="mặc định data/real/labels")
     s.add_argument("--manifest", type=Path, default=None, help="mặc định <labels-dir>/manifest.json")
+    s.add_argument("--devval-labels-dir", type=Path, default=None, help="mặc định = --labels-dir")
     s.add_argument("--split-json", type=Path, default=None, help=f"mặc định {SPLIT_REL}")
     s.add_argument("--thr", type=float, action="append", default=None, help="ngưỡng vận hành, mặc định 0.25")
     s.add_argument("--boot", type=int, default=BOOT_N)

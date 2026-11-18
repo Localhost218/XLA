@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import csv
+import hashlib
 import io
 import json
 import sys
@@ -88,20 +89,24 @@ def read_yolo_label(path: Path) -> np.ndarray:
     return np.asarray(boxes, dtype=float).reshape(-1, 4)
 
 
-def load_labels(labels_dir: Path, sub: str, frames: list[str], allow_missing: bool) -> tuple[dict[str, np.ndarray], list[str]]:
+def load_labels(labels_dir: Path, sub: str, frames: list[str], allow_missing: bool,
+                ) -> tuple[dict[str, np.ndarray], list[str], str]:
+    """Trả (gt, khung thiếu nhãn, sha256 của các file nhãn đã đọc — tên + nội dung, theo thứ tự khung)."""
     base = labels_dir / sub if (labels_dir / sub).is_dir() else labels_dir
     gt: dict[str, np.ndarray] = {}
     missing = []
+    digest = hashlib.sha256()
     for f in frames:
         p = base / (Path(f).stem + ".txt")
         if p.is_file():
             gt[f] = read_yolo_label(p)
+            digest.update(p.name.encode() + b"\0" + p.read_bytes() + b"\0")
         else:
             missing.append(f)
     if missing and not allow_missing:
         raise EvalInputError(f"thiếu {len(missing)} file nhãn trong {base} (vd. {missing[:3]}); "
                              "nhãn tạm chưa đủ thì thêm --allow-missing-labels")
-    return gt, missing
+    return gt, missing, digest.hexdigest()
 
 
 def read_manifest(path: Path) -> dict[str, Any] | None:
@@ -340,7 +345,9 @@ def bootstrap(s: EvalSet, subsets: dict[str, set[str] | None], thresholds: list[
 
 def evaluate(pred_csv: Path, split: str = "test", labels_dir: Path | None = None, manifest_path: Path | None = None,
              split_json: Path | None = None, thresholds: list[float] | None = None, boot_n: int = BOOT_N,
-             seed: int = BOOT_SEED, allow_missing_labels: bool = False, f1_from_devval: bool = True) -> dict[str, Any]:
+             seed: int = BOOT_SEED, allow_missing_labels: bool = False, f1_from_devval: bool = True,
+             devval_labels_dir: Path | None = None) -> dict[str, Any]:
+    """Chấm một CSV; ``devval_labels_dir`` mặc định = ``labels_dir`` (nhãn tạm test và dev-val có thể ở hai nơi)."""
     if split not in EVAL_SPLITS:
         raise ValueError(f"split phải là một trong {EVAL_SPLITS}")
     root = repo_root()
@@ -362,16 +369,19 @@ def evaluate(pred_csv: Path, split: str = "test", labels_dir: Path | None = None
     frames = test_frames if split == "test" else sorted(devval)
     if not frames:
         raise EvalInputError(f"tập {split} rỗng (dev-val lấy từ manifest {manifest_path})")
-    gt, missing = load_labels(labels_dir, split, frames, allow_missing_labels)
+    gt, missing, labels_sha = load_labels(labels_dir if split == "test" else devval_labels_dir or labels_dir, split,
+                                          frames, allow_missing_labels)
     frames = [f for f in frames if f in gt]
 
     point: dict[str, Any] = {}
     f1_info = None
     if f1_from_devval and devval:
-        dv_gt, dv_missing = load_labels(labels_dir, "devval", sorted(devval), allow_missing_labels)
+        dv_gt, dv_missing, dv_sha = load_labels(devval_labels_dir or labels_dir, "devval", sorted(devval),
+                                                allow_missing_labels)
         dv_frames = sorted(dv_gt)
         dv_evals, _ = _coco_eval(dv_frames, dv_gt, preds)
-        f1_info = select_f1_threshold(dv_evals, split_of) | {"devval_labels_missing": len(dv_missing)}
+        f1_info = select_f1_threshold(dv_evals, split_of) | {"devval_labels_missing": len(dv_missing),
+                                                             "devval_labels_sha256": dv_sha}
         if round(f1_info["thr"], 6) not in thresholds:
             thresholds.append(round(f1_info["thr"], 6))
 
@@ -410,7 +420,8 @@ def evaluate(pred_csv: Path, split: str = "test", labels_dir: Path | None = None
     approved = bool((manifest or {}).get("approved_by_owner", False))
     timed = [ms[f] for f in all_frames if f in ms]
     return {
-        "pred": str(pred_csv), "split": split, "labels_dir": str(labels_dir),
+        "pred": str(pred_csv), "split": split, "labels_dir": str(labels_dir), "labels_sha256": labels_sha,
+        "devval_labels_dir": str(devval_labels_dir or labels_dir),
         "manifest": str(manifest_path) if manifest else None, "labels_approved_by_owner": approved,
         "official": approved and not missing,
         "note": None if approved and not missing else "nhãn chưa được chủ dự án duyệt hoặc thiếu nhãn — chưa phải số chính thức",
@@ -465,6 +476,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--split", choices=EVAL_SPLITS, default="test")
     ap.add_argument("--labels-dir", type=Path, default=None, help=f"mặc định {LABELS_REL}")
     ap.add_argument("--manifest", type=Path, default=None, help="mặc định <labels-dir>/manifest.json")
+    ap.add_argument("--devval-labels-dir", type=Path, default=None, help="mặc định = --labels-dir")
     ap.add_argument("--split-json", type=Path, default=None, help=f"mặc định {SPLIT_REL}")
     ap.add_argument("--thr", type=float, action="append", default=None, help="ngưỡng vận hành (lặp được), mặc định 0.25")
     ap.add_argument("--no-f1-devval", action="store_true", help="không chọn ngưỡng F1 trên dev-val")
@@ -476,7 +488,7 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     try:
         r = evaluate(a.pred, a.split, a.labels_dir, a.manifest, a.split_json, a.thr, a.boot, a.seed,
-                     a.allow_missing_labels, not a.no_f1_devval)
+                     a.allow_missing_labels, not a.no_f1_devval, a.devval_labels_dir)
     except (EvalInputError, TestLeakError, FileNotFoundError) as e:
         print(f"LỖI: {e}", file=sys.stderr)
         return 1
