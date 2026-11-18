@@ -37,6 +37,10 @@ xấu) — cận trên của khoảng cách, không phải số của D2. Cặp 
 
 KID chạy lại có cache: 10,5 giây (so với 85), cùng giá trị.
 
+Đọc các số smoke này như bản ghi lịch sử, không so trực tiếp với mục phase 07 bên dưới. Chúng đo trên lần chia đầu (dev 470
+khung), trước khi chia lại thành dev 1 115 / test 198, và dùng một bản `xla/camera/measure.py` của lane data lúc chưa gộp.
+Không chạy lại vì phase 07 đã có hàng thật–thật đo trên đúng split hiện tại.
+
 **Nền nhiễu không về 0.** Hai nửa dev cùng camera vẫn cho C2ST 0,77 và KID 1,33: hai nửa khác cảnh và thời điểm bay, phần dư
 cao tần vẫn mang dấu nội dung (độ cao, mặt đất). Phase 07 nên coi D2 "giống thật" khi các số rơi vào vùng nền này, không đặt
 mục tiêu C2ST 0,5 hay KID 0.
@@ -44,7 +48,8 @@ mục tiêu C2ST 0,5 hay KID 0.
 ## Phase 07: hiệu chỉnh D2 và so D1 / D2 / D2+Real-SR (18/11/2026)
 
 Hồ sơ camera `configs/camera_profile.yaml` v1.2.0. Số liệu: `calibration.json` (hiệu chỉnh) và `d1_vs_d2.json` (so sánh).
-Tập sinh nằm ở `D:\DevCache\datasets\xla\{d0,d1,d2,d2sr}`, không commit.
+Tập sinh nằm ở `D:\DevCache\datasets\xla\{d0,d1,d2,d2sr}`, không commit. Tham số hiện hành là **`params_version` 3** (vòng 2,
+mục dưới); mục "Hiệu chỉnh trên khung dev" là vòng 1 (`params_version` 2), giữ làm bản ghi.
 
 ### Hiệu chỉnh trên khung dev
 
@@ -93,6 +98,35 @@ Khoảng cách từng đại lượng, trước → sau:
 
 Cột phase 05 đo theo hồ sơ v1.1.0. Số thật của hai hồ sơ v1.1.0 và v1.2.0 trùng nhau ở các dòng trên.
 
+### Vòng 2: nới cận, thêm mức đen dư (`params_version` 3)
+
+Lệnh: `python -m xla.degrade.calibrate --split dev --budget 80 --workers 4` (khởi đầu từ `params_version` 2).
+
+- **Lý do:** vòng 1 dừng sát cận ở vignette (0,618, cận 0,6) và `cast_r` (0,960 = cận). Vòng 2 nới cận vignette xuống
+  0,45, `cast_r`/`cast_b` ra 0,88–1,08, brightness lên 1,6, `noise_scale` xuống 0,3, hệ số WB ISP lên 3,0, và thêm tham số `tone.black_level` (mức đen dư, khớp y_p1).
+- **Kết quả:** khoảng cách trên dev **0,7359 → 0,7118** sau 80 lượt (12 tham số). Đạt điều kiện nhận (giảm so với vòng 1),
+  nên `params_version` 2 → 3.
+- **Đổi chỗ lệch:** b/g 1,21 → 0,51, pink_frac 0,31 → 0,20, y_p99 0,84 → 0,70 giảm; nhưng r/g 1,07 → 1,91 và vignette
+  0,21 → 0,27 tăng. Tổng giảm nhẹ, không phải mọi đại lượng cùng tốt lên.
+- **Máy:** chạy 16 rồi 8 worker thì máy sập 4 lần (kd đọc minidump: RAM lật bit dưới tải, `MEMORY_CORRUPTION_ONE_BIT`).
+  Checkpoint ghi sau mỗi lượt nên không mất lượt nào; đoạn cuối chạy 4 worker, 37 phút, không sập.
+
+| Tham số | Vòng 1 | Vòng 2 |
+|---|---|---|
+| `haze.dark_scale` | 0,982 | 0,962 |
+| tâm `haze.airlight_0_1` | 0,828 | 0,869 |
+| tâm `lens.psf_sigma_scale` | 0,692 | 0,655 |
+| tâm `lens.vignette_focal_scale` | 0,618 | 0,679 |
+| tâm `tone.brightness` | 1,326 | 1,313 |
+| `tone.isp_wb_gain_r` / `_b` | 1,988 / 2,051 | 2,130 / 1,812 |
+| `tone.cast_r` / `cast_b` | 0,960 / 0,993 | 0,998 / 0,963 |
+| `tone.black_level` | 0 (chưa có) | 0,0017 |
+| tâm `isp.soften_sigma` | 0,444 | 0,534 |
+| tâm `isp.noise_scale` | 0,645 | 0,625 |
+
+Hệ số Real-SR chọn lại với tham số mới (`calibrate --realsr-gains 0.3,0.4,0.5,0.6`): 0,3 → 0,666; **0,4 → 0,657**;
+0,5 → 0,657; 0,6 → 0,673; D2 cùng đơn vị 0,711. Vẫn giữ 0,4.
+
 ### Tập sinh (seed 20261118)
 
 Bốn tập D0, D1, D2, D2+Real-SR dùng **cùng** 3 493 đơn vị: 1 841 ảnh nguồn × 2 cửa sổ, bỏ 189 đơn vị không đặt được
@@ -107,8 +141,11 @@ cửa sổ.
 |---|---|---|
 | D0 | 433 MB | `c49dd534b60acb77` |
 | D1 | 162 MB | `f9a765cd2191852b` |
-| D2 | 78 MB | `c7e2660690161f8c` |
-| D2+Real-SR | 85 MB | `0ee578bd9ea0f840` |
+| D2 (`params_version` 3) | 67 MB | `3ad4511041b070e1` |
+| D2+Real-SR (`params_version` 3) | 74 MB | `1616c6c1f94a69a2` |
+
+D2 và D2+Real-SR sinh lại ngày 18/11 sau vòng 2 (4 worker, 2,6 và 1,6 phút). Bản `params_version` 2 có manifest
+`c7e2660690161f8c` (78 MB) và `0ee578bd9ea0f840` (85 MB), đã bị thay.
 
 ### D1 / D2 / D2+Real-SR so với khung test (`d1_vs_d2.json`)
 
@@ -122,9 +159,12 @@ Lệnh: `python -m xla.degrade.realism_compare --json`.
 | Hàng | Thống kê (W1/IQR) | DQT khớp | C2ST acc [CI95] | KID [CI95] |
 |---|---|---|---|---|
 | D1 (ngẫu nhiên) | 5,93 | không | 0,936 [0,909; 0,960] | 4,44 [4,29; 4,60] |
-| D2 (đã hiệu chỉnh) | 0,81 | không* | 0,960 [0,942; 0,975] | 4,37 [4,19; 4,56] |
-| D2 + Real-SR | **0,66** | không* | 0,953 [0,932; 0,971] | **3,93 [3,75; 4,11]** |
+| D2 (`params_version` 3) | 0,80 | không* | 0,950 [0,930; 0,966] | 4,41 [4,24; 4,60] |
+| D2 + Real-SR (`params_version` 3) | **0,66** | không* | 0,923 [0,897; 0,945] | **3,99 [3,82; 4,17]** |
 | thật–thật (dev vs test) | 0,33 | có | 0,542 [0,494; 0,594] | 0,37 [0,29; 0,47] |
+
+Bảng trên đo lại sau vòng 2. Với `params_version` 2, D2 là 0,81 / C2ST 0,960 / KID 4,37 [4,19; 4,56] và D2+Real-SR là 0,66 /
+0,953 / 3,93 [3,75; 4,11]. Vòng 2 giảm khoảng cách trên dev nhưng trên test gần như không đổi: các kết luận dưới giữ nguyên.
 
 \* 20 % ảnh D2 dùng bảng giả thuyết q 19–40 (`jpeg.real_q_weight` 0,8), nên tập bảng lượng tử khác tập thật.
 
@@ -132,10 +172,10 @@ Lệnh: `python -m xla.degrade.realism_compare --json`.
 
 1. **Thống kê mức thấp:** D2 gần thật hơn D1 rất nhiều (0,81 so với 5,93). Real-SR kéo xuống thêm còn 0,66. Mức thật–thật
    là 0,33.
-2. **KID:** D2 **không** thắng D1, vì CI chồng nhau (4,37 so với 4,44). D2+Real-SR thắng D1, CI không chồng
-   ([3,75; 4,11] so với [4,29; 4,60]).
+2. **KID:** D2 **không** thắng D1, vì CI chồng nhau (4,41 so với 4,44). D2+Real-SR thắng D1, CI không chồng
+   ([3,82; 4,17] so với [4,29; 4,60]).
 3. **Cả ba tập vẫn rất xa nền thật–thật:** KID khoảng 4 so với 0,37. C2ST ≥ 0,93 so với 0,54.
-4. **C2ST không phân biệt ba tập:** D2 0,960 và D1 0,936 chồng CI ở mép. Bộ phân loại tách gần như hoàn toàn mọi tập tổng
+4. **C2ST không phân biệt ba tập:** D2 0,950, D1 0,936, D2+Real-SR 0,923 đều chồng CI. Bộ phân loại tách gần như hoàn toàn mọi tập tổng
    hợp khỏi khung thật.
 5. **Câu hỏi §8 "Dữ liệu"** (KID(D2) < KID(D1), CI không chồng) có câu trả lời **không** với D2, **có** với D2+Real-SR.
    Phase 10 so trên nhận diện vẫn là phép thử chính.
@@ -163,5 +203,6 @@ của Real-SR có thể đến từ việc mang dấu nén thật sang. Phase 10
 |---|---|
 | Smoke: 1 lần KID 1 000 + 1 000 patch, không cache | 123 s (138 s tổng) |
 | Lượt đủ, 4 hàng (C2ST + đặc trưng KID; đặc trưng phía thật dùng cache sau hàng đầu) | 235 s |
+| Đo lại sau vòng 2 (`params_version` 3), 4 hàng | 208 s |
 
-Cộng lại khoảng **0,1 giờ GPU**. VRAM đỉnh: 1,55 GB (KID), 0,37 GB (C2ST). Hiệu chỉnh và sinh tập chỉ chạy CPU.
+Cộng lại khoảng **0,16 giờ GPU**. VRAM đỉnh: 1,55 GB (KID), 0,37 GB (C2ST). Hiệu chỉnh và sinh tập chỉ chạy CPU.
