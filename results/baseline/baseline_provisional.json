@@ -1,0 +1,1990 @@
+{
+ "official": false,
+ "note": "SỐ TẠM — nhãn chưa được chủ dự án duyệt hoặc thiếu nhãn; không phải số chính thức",
+ "phase": "09",
+ "created": "2026-11-18T01:40:16+00:00",
+ "run_meta": {
+  "phase": "09",
+  "created": "2026-11-18T01:29:10+00:00",
+  "frames": {
+   "test": 198,
+   "neg": 300,
+   "dev": 1115,
+   "total": 1613
+  },
+  "imgsz": 1280,
+  "conf": 0.001,
+  "classes": [
+   0
+  ],
+  "max_det": 300,
+  "warmup_frames": 5,
+  "edge_rule": "bỏ hộp x1 < 16 px (CROP_LEFT_PX, phase 03)",
+  "sahi": {
+   "slice": 320,
+   "overlap": 0.2,
+   "batch": 8,
+   "perform_standard_pred": true,
+   "postprocess": "NMS/IOU 0.5 (SAHI tự đổi từ GREEDYNMM/IOS vì conf < 0.1)"
+  },
+  "ms_note": "suy luận + tiền/hậu xử lý + đưa hộp về CPU, không gồm đọc JPEG; edge16 dùng lại ms của full",
+  "versions": {
+   "ultralytics": "8.4.215",
+   "sahi": "0.14.0",
+   "torch": "2.6.0+cu124",
+   "python": "3.12.16"
+  },
+  "wall_s": 2562.2,
+  "variants": {
+   "full": {
+    "csv": "D:/XLA-wt/baseline/results/baseline/pred/full.csv",
+    "rows": 168112,
+    "ms": {
+     "mean": 134.77,
+     "median": 139.1,
+     "p95": 181.66,
+     "n_frames": 1613,
+     "frames_without_box": 0
+    }
+   },
+   "edge16": {
+    "csv": "D:/XLA-wt/baseline/results/baseline/pred/edge16.csv",
+    "rows": 140002,
+    "ms": {
+     "mean": 134.77,
+     "median": 139.1,
+     "p95": 181.66,
+     "n_frames": 1613,
+     "frames_without_box": 3
+    }
+   },
+   "sahi_edge16": {
+    "csv": "D:/XLA-wt/baseline/results/baseline/pred/sahi_edge16.csv",
+    "rows": 198423,
+    "ms": {
+     "mean": 729.29,
+     "median": 737.37,
+     "p95": 920.13,
+     "n_frames": 1613,
+     "frames_without_box": 1
+    }
+   }
+  },
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "gpu_lock_wait_s": 1016.5,
+  "weights": {
+   "path": "yolo-weights/yolo11s.pt",
+   "sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5"
+  }
+ },
+ "variants": {
+  "full": {
+   "pred": "D:\\XLA-wt\\baseline\\results\\baseline\\pred\\full.csv",
+   "split": "test",
+   "labels_dir": "D:\\XLA-wt\\labels\\results\\labels\\agent_reviewed_test",
+   "labels_sha256": "c92660cbc433ba9a45e6834f53424d4631eef4f57ee889c432e92d97eeaaa47a",
+   "devval_labels_dir": "D:\\XLA-wt\\labels\\data\\real\\labels",
+   "manifest": "D:\\XLA-wt\\labels\\data\\real\\labels\\manifest.json",
+   "labels_approved_by_owner": false,
+   "official": false,
+   "note": "nhãn chưa được chủ dự án duyệt hoặc thiếu nhãn — chưa phải số chính thức",
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 151,
+    "neg_split_frames": 300,
+    "negative_frames": 459,
+    "labels_missing": 0,
+    "pred_frames_other_splits": 1115
+   },
+   "thresholds": [
+    0.25,
+    0.18554
+   ],
+   "f1_threshold_from_devval": {
+    "thr": 0.18554,
+    "f1_devval": 0.14,
+    "precision_devval": 0.16470588235294117,
+    "recall_devval": 0.12173913043478261,
+    "n_frames_devval": 100,
+    "devval_labels_missing": 0,
+    "devval_labels_sha256": "53b995882bcbf32d450d4b856d9c106198c9de27232631ad8312c4cda86c4335"
+   },
+   "metrics": {
+    "mAP50": {
+     "value": 0.06736,
+     "ci95": [
+      0.017562,
+      0.131557
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.034876,
+     "ci95": [
+      0.009572,
+      0.072899
+     ]
+    },
+    "AP_small": {
+     "value": 0.053969,
+     "ci95": [
+      0.021046,
+      0.092073
+     ]
+    },
+    "AR_small": {
+     "value": 0.526966,
+     "ci95": [
+      0.49589,
+      0.657143
+     ]
+    },
+    "AR": {
+     "value": 0.560927,
+     "ci95": [
+      0.512739,
+      0.690909
+     ]
+    },
+    "precision@0.25": {
+     "value": 0.097561,
+     "ci95": [
+      0.0,
+      0.192602
+     ]
+    },
+    "recall@0.25": {
+     "value": 0.05298,
+     "ci95": [
+      0.0,
+      0.111789
+     ]
+    },
+    "f1@0.25": {
+     "value": 0.06867,
+     "ci95": [
+      0.0,
+      0.130615
+     ]
+    },
+    "fp_per_neg_frame@0.25": {
+     "value": 0.093682,
+     "ci95": [
+      0.063416,
+      0.127315
+     ]
+    },
+    "precision@0.18554": {
+     "value": 0.088608,
+     "ci95": [
+      0.012346,
+      0.164194
+     ]
+    },
+    "recall@0.18554": {
+     "value": 0.092715,
+     "ci95": [
+      0.033333,
+      0.138889
+     ]
+    },
+    "f1@0.18554": {
+     "value": 0.090615,
+     "ci95": [
+      0.018506,
+      0.140854
+     ]
+    },
+    "fp_per_neg_frame@0.18554": {
+     "value": 0.252723,
+     "ci95": [
+      0.197396,
+      0.309183
+     ]
+    }
+   },
+   "by_alt_bin": {
+    "3-8": {
+     "frames": 57,
+     "frames_with_person": 4,
+     "gt_boxes": 6,
+     "metrics": {
+      "mAP50": {
+       "value": 0.062469,
+       "ci95": [
+        0.036365,
+        0.190476
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.037738,
+       "ci95": [
+        0.011431,
+        0.101372
+       ]
+      },
+      "AP_small": {
+       "value": null,
+       "ci95": [
+        null,
+        null
+       ]
+      },
+      "AR_small": {
+       "value": null,
+       "ci95": [
+        null,
+        null
+       ]
+      },
+      "AR": {
+       "value": 0.733333,
+       "ci95": [
+        0.4,
+        0.9
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.066667,
+       "ci95": [
+        0.0,
+        0.181818
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.166667,
+       "ci95": [
+        0.0,
+        0.25
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.095238,
+       "ci95": [
+        0.0,
+        0.195193
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.050992,
+       "ci95": [
+        0.025157,
+        0.077353
+       ]
+      },
+      "precision@0.18554": {
+       "value": 0.037037,
+       "ci95": [
+        0.0,
+        0.105263
+       ]
+      },
+      "recall@0.18554": {
+       "value": 0.166667,
+       "ci95": [
+        0.0,
+        0.25
+       ]
+      },
+      "f1@0.18554": {
+       "value": 0.060606,
+       "ci95": [
+        0.0,
+        0.139535
+       ]
+      },
+      "fp_per_neg_frame@0.18554": {
+       "value": 0.155807,
+       "ci95": [
+        0.109443,
+        0.203976
+       ]
+      }
+     }
+    },
+    "8-14": {
+     "frames": 68,
+     "frames_with_person": 10,
+     "gt_boxes": 36,
+     "metrics": {
+      "mAP50": {
+       "value": 0.068145,
+       "ci95": [
+        0.000771,
+        0.209425
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.042081,
+       "ci95": [
+        0.000402,
+        0.127423
+       ]
+      },
+      "AP_small": {
+       "value": 0.080732,
+       "ci95": [
+        0.00061,
+        0.163863
+       ]
+      },
+      "AR_small": {
+       "value": 0.636364,
+       "ci95": [
+        0.466667,
+        0.9
+       ]
+      },
+      "AR": {
+       "value": 0.641667,
+       "ci95": [
+        0.544444,
+        0.676
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.0625,
+       "ci95": [
+        0.0,
+        0.181818
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.027778,
+       "ci95": [
+        0.0,
+        0.04
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.038462,
+       "ci95": [
+        0.0,
+        0.0625
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.041899,
+       "ci95": [
+        0.020053,
+        0.065042
+       ]
+      },
+      "precision@0.18554": {
+       "value": 0.073171,
+       "ci95": [
+        0.0,
+        0.230769
+       ]
+      },
+      "recall@0.18554": {
+       "value": 0.083333,
+       "ci95": [
+        0.0,
+        0.12
+       ]
+      },
+      "f1@0.18554": {
+       "value": 0.077922,
+       "ci95": [
+        0.0,
+        0.14876
+       ]
+      },
+      "fp_per_neg_frame@0.18554": {
+       "value": 0.167598,
+       "ci95": [
+        0.109767,
+        0.223883
+       ]
+      }
+     }
+    },
+    ">14": {
+     "frames": 73,
+     "frames_with_person": 25,
+     "gt_boxes": 109,
+     "metrics": {
+      "mAP50": {
+       "value": 0.085648,
+       "ci95": [
+        0.017795,
+        0.161624
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.042529,
+       "ci95": [
+        0.009442,
+        0.092823
+       ]
+      },
+      "AP_small": {
+       "value": 0.06292,
+       "ci95": [
+        0.025101,
+        0.113176
+       ]
+      },
+      "AR_small": {
+       "value": 0.511538,
+       "ci95": [
+        0.445391,
+        0.657143
+       ]
+      },
+      "AR": {
+       "value": 0.524771,
+       "ci95": [
+        0.473986,
+        0.644444
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.117647,
+       "ci95": [
+        0.0,
+        0.255319
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.055046,
+       "ci95": [
+        0.0,
+        0.124352
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.075,
+       "ci95": [
+        0.0,
+        0.162456
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.051724,
+       "ci95": [
+        0.015336,
+        0.096536
+       ]
+      },
+      "precision@0.18554": {
+       "value": 0.111111,
+       "ci95": [
+        0.0,
+        0.212972
+       ]
+      },
+      "recall@0.18554": {
+       "value": 0.091743,
+       "ci95": [
+        0.0,
+        0.169014
+       ]
+      },
+      "f1@0.18554": {
+       "value": 0.100503,
+       "ci95": [
+        0.0,
+        0.176987
+       ]
+      },
+      "fp_per_neg_frame@0.18554": {
+       "value": 0.16954,
+       "ci95": [
+        0.110086,
+        0.234164
+       ]
+      }
+     }
+    }
+   },
+   "by_hard": {
+    "hard": {
+     "frames": 45,
+     "frames_with_person": 34,
+     "gt_boxes": 134,
+     "metrics": {
+      "mAP50": {
+       "value": 0.142154,
+       "ci95": [
+        0.083371,
+        0.220949
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.070583,
+       "ci95": [
+        0.041485,
+        0.126602
+       ]
+      },
+      "AP_small": {
+       "value": 0.091293,
+       "ci95": [
+        0.074136,
+        0.164597
+       ]
+      },
+      "AR_small": {
+       "value": 0.52069,
+       "ci95": [
+        0.494702,
+        0.657143
+       ]
+      },
+      "AR": {
+       "value": 0.546269,
+       "ci95": [
+        0.504505,
+        0.655889
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.136364,
+       "ci95": [
+        0.0,
+        0.333333
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.044776,
+       "ci95": [
+        0.0,
+        0.108108
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.067416,
+       "ci95": [
+        0.0,
+        0.16
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.032154,
+       "ci95": [
+        0.006622,
+        0.065673
+       ]
+      },
+      "precision@0.18554": {
+       "value": 0.148649,
+       "ci95": [
+        0.0,
+        0.290722
+       ]
+      },
+      "recall@0.18554": {
+       "value": 0.08209,
+       "ci95": [
+        0.0,
+        0.129032
+       ]
+      },
+      "f1@0.18554": {
+       "value": 0.105769,
+       "ci95": [
+        0.0,
+        0.175
+       ]
+      },
+      "fp_per_neg_frame@0.18554": {
+       "value": 0.122186,
+       "ci95": [
+        0.07466,
+        0.17485
+       ]
+      }
+     }
+    },
+    "not_hard": {
+     "frames": 153,
+     "frames_with_person": 5,
+     "gt_boxes": 17,
+     "metrics": {
+      "mAP50": {
+       "value": 0.040216,
+       "ci95": [
+        0.007471,
+        0.11773
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.021088,
+       "ci95": [
+        0.004142,
+        0.070431
+       ]
+      },
+      "AP_small": {
+       "value": 0.024482,
+       "ci95": [
+        0.014995,
+        0.07362
+       ]
+      },
+      "AR_small": {
+       "value": 0.8,
+       "ci95": [
+        0.8,
+        0.8
+       ]
+      },
+      "AR": {
+       "value": 0.676471,
+       "ci95": [
+        0.625,
+        1.0
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.052632,
+       "ci95": [
+        0.0,
+        0.148194
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.117647,
+       "ci95": [
+        0.0,
+        0.5
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.072727,
+       "ci95": [
+        0.0,
+        0.148148
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.082589,
+       "ci95": [
+        0.057469,
+        0.109507
+       ]
+      },
+      "precision@0.18554": {
+       "value": 0.035714,
+       "ci95": [
+        0.0,
+        0.114754
+       ]
+      },
+      "recall@0.18554": {
+       "value": 0.176471,
+       "ci95": [
+        0.0,
+        0.5
+       ]
+      },
+      "f1@0.18554": {
+       "value": 0.059406,
+       "ci95": [
+        0.0,
+        0.145833
+       ]
+      },
+      "fp_per_neg_frame@0.18554": {
+       "value": 0.238839,
+       "ci95": [
+        0.183328,
+        0.296972
+       ]
+      }
+     }
+    }
+   },
+   "ms_per_frame": {
+    "mean": 157.63690763052207,
+    "median": 156.53500000000003,
+    "n_frames": 498
+   },
+   "bootstrap": {
+    "n": 2000,
+    "seed": 20261118,
+    "unit": "khối 30 s của split.json",
+    "ci_pct": 95.0,
+    "n_blocks": {
+     "flight": 13,
+     "neg": 213
+    },
+    "note": "subset alt/hard giữ mọi khung neg cho báo nhầm/khung âm"
+   }
+  },
+  "edge16": {
+   "pred": "D:\\XLA-wt\\baseline\\results\\baseline\\pred\\edge16.csv",
+   "split": "test",
+   "labels_dir": "D:\\XLA-wt\\labels\\results\\labels\\agent_reviewed_test",
+   "labels_sha256": "c92660cbc433ba9a45e6834f53424d4631eef4f57ee889c432e92d97eeaaa47a",
+   "devval_labels_dir": "D:\\XLA-wt\\labels\\data\\real\\labels",
+   "manifest": "D:\\XLA-wt\\labels\\data\\real\\labels\\manifest.json",
+   "labels_approved_by_owner": false,
+   "official": false,
+   "note": "nhãn chưa được chủ dự án duyệt hoặc thiếu nhãn — chưa phải số chính thức",
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 151,
+    "neg_split_frames": 300,
+    "negative_frames": 459,
+    "labels_missing": 0,
+    "pred_frames_other_splits": 1112
+   },
+   "thresholds": [
+    0.25,
+    0.06764
+   ],
+   "f1_threshold_from_devval": {
+    "thr": 0.06764,
+    "f1_devval": 0.18604651162790697,
+    "precision_devval": 0.16783216783216784,
+    "recall_devval": 0.20869565217391303,
+    "n_frames_devval": 100,
+    "devval_labels_missing": 0,
+    "devval_labels_sha256": "53b995882bcbf32d450d4b856d9c106198c9de27232631ad8312c4cda86c4335"
+   },
+   "metrics": {
+    "mAP50": {
+     "value": 0.127247,
+     "ci95": [
+      0.033321,
+      0.226383
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.065252,
+     "ci95": [
+      0.020772,
+      0.122653
+     ]
+    },
+    "AP_small": {
+     "value": 0.054533,
+     "ci95": [
+      0.021373,
+      0.09272
+     ]
+    },
+    "AR_small": {
+     "value": 0.531461,
+     "ci95": [
+      0.49589,
+      0.657143
+     ]
+    },
+    "AR": {
+     "value": 0.549007,
+     "ci95": [
+      0.504492,
+      0.645161
+     ]
+    },
+    "precision@0.25": {
+     "value": 0.140351,
+     "ci95": [
+      0.0,
+      0.269231
+     ]
+    },
+    "recall@0.25": {
+     "value": 0.05298,
+     "ci95": [
+      0.0,
+      0.111789
+     ]
+    },
+    "f1@0.25": {
+     "value": 0.076923,
+     "ci95": [
+      0.0,
+      0.151261
+     ]
+    },
+    "fp_per_neg_frame@0.25": {
+     "value": 0.037037,
+     "ci95": [
+      0.019955,
+      0.058936
+     ]
+    },
+    "precision@0.06764": {
+     "value": 0.192913,
+     "ci95": [
+      0.02815,
+      0.288798
+     ]
+    },
+    "recall@0.06764": {
+     "value": 0.324503,
+     "ci95": [
+      0.153846,
+      0.5
+     ]
+    },
+    "f1@0.06764": {
+     "value": 0.241975,
+     "ci95": [
+      0.051588,
+      0.339818
+     ]
+    },
+    "fp_per_neg_frame@0.06764": {
+     "value": 0.283224,
+     "ci95": [
+      0.210635,
+      0.373861
+     ]
+    }
+   },
+   "by_alt_bin": {
+    "3-8": {
+     "frames": 57,
+     "frames_with_person": 4,
+     "gt_boxes": 6,
+     "metrics": {
+      "mAP50": {
+       "value": 0.383897,
+       "ci95": [
+        0.124737,
+        1.0
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.16992,
+       "ci95": [
+        0.098842,
+        0.268092
+       ]
+      },
+      "AP_small": {
+       "value": null,
+       "ci95": [
+        null,
+        null
+       ]
+      },
+      "AR_small": {
+       "value": null,
+       "ci95": [
+        null,
+        null
+       ]
+      },
+      "AR": {
+       "value": 0.566667,
+       "ci95": [
+        0.4,
+        0.65
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.333333,
+       "ci95": [
+        0.0,
+        0.5
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.166667,
+       "ci95": [
+        0.0,
+        0.25
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.222222,
+       "ci95": [
+        0.0,
+        0.333333
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.005666,
+       "ci95": [
+        0.0,
+        0.013298
+       ]
+      },
+      "precision@0.06764": {
+       "value": 0.181818,
+       "ci95": [
+        0.0,
+        0.375
+       ]
+      },
+      "recall@0.06764": {
+       "value": 0.666667,
+       "ci95": [
+        0.5,
+        1.0
+       ]
+      },
+      "f1@0.06764": {
+       "value": 0.285714,
+       "ci95": [
+        0.133333,
+        0.545455
+       ]
+      },
+      "fp_per_neg_frame@0.06764": {
+       "value": 0.141643,
+       "ci95": [
+        0.100295,
+        0.181824
+       ]
+      }
+     }
+    },
+    "8-14": {
+     "frames": 68,
+     "frames_with_person": 10,
+     "gt_boxes": 36,
+     "metrics": {
+      "mAP50": {
+       "value": 0.162401,
+       "ci95": [
+        0.001074,
+        0.340839
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.10328,
+       "ci95": [
+        0.000545,
+        0.205783
+       ]
+      },
+      "AP_small": {
+       "value": 0.08128,
+       "ci95": [
+        0.000655,
+        0.165212
+       ]
+      },
+      "AR_small": {
+       "value": 0.636364,
+       "ci95": [
+        0.466667,
+        0.9
+       ]
+      },
+      "AR": {
+       "value": 0.608333,
+       "ci95": [
+        0.411111,
+        0.676
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.090909,
+       "ci95": [
+        0.0,
+        0.222222
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.027778,
+       "ci95": [
+        0.0,
+        0.04
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.042553,
+       "ci95": [
+        0.0,
+        0.065909
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.01676,
+       "ci95": [
+        0.005952,
+        0.02771
+       ]
+      },
+      "precision@0.06764": {
+       "value": 0.229508,
+       "ci95": [
+        0.0,
+        0.438607
+       ]
+      },
+      "recall@0.06764": {
+       "value": 0.388889,
+       "ci95": [
+        0.0,
+        0.48
+       ]
+      },
+      "f1@0.06764": {
+       "value": 0.28866,
+       "ci95": [
+        0.0,
+        0.447205
+       ]
+      },
+      "fp_per_neg_frame@0.06764": {
+       "value": 0.187151,
+       "ci95": [
+        0.128834,
+        0.244959
+       ]
+      }
+     }
+    },
+    ">14": {
+     "frames": 73,
+     "frames_with_person": 25,
+     "gt_boxes": 109,
+     "metrics": {
+      "mAP50": {
+       "value": 0.128619,
+       "ci95": [
+        0.030026,
+        0.210865
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.062539,
+       "ci95": [
+        0.016155,
+        0.119233
+       ]
+      },
+      "AP_small": {
+       "value": 0.063298,
+       "ci95": [
+        0.025373,
+        0.113894
+       ]
+      },
+      "AR_small": {
+       "value": 0.516667,
+       "ci95": [
+        0.445391,
+        0.657143
+       ]
+      },
+      "AR": {
+       "value": 0.52844,
+       "ci95": [
+        0.473986,
+        0.644444
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.139535,
+       "ci95": [
+        0.0,
+        0.296389
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.055046,
+       "ci95": [
+        0.0,
+        0.124352
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.078947,
+       "ci95": [
+        0.0,
+        0.171429
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.025862,
+       "ci95": [
+        0.0,
+        0.054974
+       ]
+      },
+      "precision@0.06764": {
+       "value": 0.181287,
+       "ci95": [
+        0.0,
+        0.243591
+       ]
+      },
+      "recall@0.06764": {
+       "value": 0.284404,
+       "ci95": [
+        0.0,
+        0.410588
+       ]
+      },
+      "f1@0.06764": {
+       "value": 0.221429,
+       "ci95": [
+        0.0,
+        0.272214
+       ]
+      },
+      "fp_per_neg_frame@0.06764": {
+       "value": 0.238506,
+       "ci95": [
+        0.137637,
+        0.359681
+       ]
+      }
+     }
+    }
+   },
+   "by_hard": {
+    "hard": {
+     "frames": 45,
+     "frames_with_person": 34,
+     "gt_boxes": 134,
+     "metrics": {
+      "mAP50": {
+       "value": 0.182848,
+       "ci95": [
+        0.112193,
+        0.271341
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.089953,
+       "ci95": [
+        0.059752,
+        0.149485
+       ]
+      },
+      "AP_small": {
+       "value": 0.09209,
+       "ci95": [
+        0.074854,
+        0.166148
+       ]
+      },
+      "AR_small": {
+       "value": 0.525287,
+       "ci95": [
+        0.49589,
+        0.657143
+       ]
+      },
+      "AR": {
+       "value": 0.532836,
+       "ci95": [
+        0.492157,
+        0.619608
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.142857,
+       "ci95": [
+        0.0,
+        0.352941
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.044776,
+       "ci95": [
+        0.0,
+        0.108108
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.068182,
+       "ci95": [
+        0.0,
+        0.162162
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.019293,
+       "ci95": [
+        0.0,
+        0.051122
+       ]
+      },
+      "precision@0.06764": {
+       "value": 0.246753,
+       "ci95": [
+        0.058824,
+        0.317786
+       ]
+      },
+      "recall@0.06764": {
+       "value": 0.283582,
+       "ci95": [
+        0.090909,
+        0.428571
+       ]
+      },
+      "f1@0.06764": {
+       "value": 0.263889,
+       "ci95": [
+        0.07685,
+        0.336561
+       ]
+      },
+      "fp_per_neg_frame@0.06764": {
+       "value": 0.154341,
+       "ci95": [
+        0.094764,
+        0.224242
+       ]
+      }
+     }
+    },
+    "not_hard": {
+     "frames": 153,
+     "frames_with_person": 5,
+     "gt_boxes": 17,
+     "metrics": {
+      "mAP50": {
+       "value": 0.135408,
+       "ci95": [
+        0.028561,
+        0.332116
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.072969,
+       "ci95": [
+        0.015928,
+        0.180248
+       ]
+      },
+      "AP_small": {
+       "value": 0.024588,
+       "ci95": [
+        0.015016,
+        0.07418
+       ]
+      },
+      "AR_small": {
+       "value": 0.8,
+       "ci95": [
+        0.8,
+        0.8
+       ]
+      },
+      "AR": {
+       "value": 0.676471,
+       "ci95": [
+        0.625,
+        1.0
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.133333,
+       "ci95": [
+        0.0,
+        0.357143
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.117647,
+       "ci95": [
+        0.0,
+        0.5
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.125,
+       "ci95": [
+        0.0,
+        0.265877
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.024554,
+       "ci95": [
+        0.01307,
+        0.037446
+       ]
+      },
+      "precision@0.06764": {
+       "value": 0.11,
+       "ci95": [
+        0.0,
+        0.28575
+       ]
+      },
+      "recall@0.06764": {
+       "value": 0.647059,
+       "ci95": [
+        0.5,
+        0.727273
+       ]
+      },
+      "f1@0.06764": {
+       "value": 0.188034,
+       "ci95": [
+        0.022278,
+        0.409449
+       ]
+      },
+      "fp_per_neg_frame@0.06764": {
+       "value": 0.261161,
+       "ci95": [
+        0.187206,
+        0.351724
+       ]
+      }
+     }
+    }
+   },
+   "ms_per_frame": {
+    "mean": 157.63690763052207,
+    "median": 156.53500000000003,
+    "n_frames": 498
+   },
+   "bootstrap": {
+    "n": 2000,
+    "seed": 20261118,
+    "unit": "khối 30 s của split.json",
+    "ci_pct": 95.0,
+    "n_blocks": {
+     "flight": 13,
+     "neg": 213
+    },
+    "note": "subset alt/hard giữ mọi khung neg cho báo nhầm/khung âm"
+   }
+  },
+  "sahi_edge16": {
+   "pred": "D:\\XLA-wt\\baseline\\results\\baseline\\pred\\sahi_edge16.csv",
+   "split": "test",
+   "labels_dir": "D:\\XLA-wt\\labels\\results\\labels\\agent_reviewed_test",
+   "labels_sha256": "c92660cbc433ba9a45e6834f53424d4631eef4f57ee889c432e92d97eeaaa47a",
+   "devval_labels_dir": "D:\\XLA-wt\\labels\\data\\real\\labels",
+   "manifest": "D:\\XLA-wt\\labels\\data\\real\\labels\\manifest.json",
+   "labels_approved_by_owner": false,
+   "official": false,
+   "note": "nhãn chưa được chủ dự án duyệt hoặc thiếu nhãn — chưa phải số chính thức",
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 151,
+    "neg_split_frames": 300,
+    "negative_frames": 459,
+    "labels_missing": 0,
+    "pred_frames_other_splits": 1114
+   },
+   "thresholds": [
+    0.25,
+    0.1843
+   ],
+   "f1_threshold_from_devval": {
+    "thr": 0.1843,
+    "f1_devval": 0.19889502762430938,
+    "precision_devval": 0.2727272727272727,
+    "recall_devval": 0.1565217391304348,
+    "n_frames_devval": 100,
+    "devval_labels_missing": 0,
+    "devval_labels_sha256": "53b995882bcbf32d450d4b856d9c106198c9de27232631ad8312c4cda86c4335"
+   },
+   "metrics": {
+    "mAP50": {
+     "value": 0.109286,
+     "ci95": [
+      0.02283,
+      0.182897
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.054048,
+     "ci95": [
+      0.016522,
+      0.096544
+     ]
+    },
+    "AP_small": {
+     "value": 0.053652,
+     "ci95": [
+      0.02108,
+      0.085968
+     ]
+    },
+    "AR_small": {
+     "value": 0.549438,
+     "ci95": [
+      0.500685,
+      0.728571
+     ]
+    },
+    "AR": {
+     "value": 0.572848,
+     "ci95": [
+      0.519712,
+      0.7
+     ]
+    },
+    "precision@0.25": {
+     "value": 0.114943,
+     "ci95": [
+      0.0,
+      0.219524
+     ]
+    },
+    "recall@0.25": {
+     "value": 0.066225,
+     "ci95": [
+      0.0,
+      0.118644
+     ]
+    },
+    "f1@0.25": {
+     "value": 0.084034,
+     "ci95": [
+      0.0,
+      0.142399
+     ]
+    },
+    "fp_per_neg_frame@0.25": {
+     "value": 0.11329,
+     "ci95": [
+      0.068667,
+      0.16894
+     ]
+    },
+    "precision@0.1843": {
+     "value": 0.155405,
+     "ci95": [
+      0.019404,
+      0.244282
+     ]
+    },
+    "recall@0.1843": {
+     "value": 0.152318,
+     "ci95": [
+      0.076923,
+      0.1875
+     ]
+    },
+    "f1@0.1843": {
+     "value": 0.153846,
+     "ci95": [
+      0.035065,
+      0.200511
+     ]
+    },
+    "fp_per_neg_frame@0.1843": {
+     "value": 0.230937,
+     "ci95": [
+      0.173815,
+      0.297265
+     ]
+    }
+   },
+   "by_alt_bin": {
+    "3-8": {
+     "frames": 57,
+     "frames_with_person": 4,
+     "gt_boxes": 6,
+     "metrics": {
+      "mAP50": {
+       "value": 0.143413,
+       "ci95": [
+        0.066855,
+        0.666667
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.076778,
+       "ci95": [
+        0.043228,
+        0.183661
+       ]
+      },
+      "AP_small": {
+       "value": null,
+       "ci95": [
+        null,
+        null
+       ]
+      },
+      "AR_small": {
+       "value": null,
+       "ci95": [
+        null,
+        null
+       ]
+      },
+      "AR": {
+       "value": 0.65,
+       "ci95": [
+        0.65,
+        0.65
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.166667,
+       "ci95": [
+        0.0,
+        0.25
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.166667,
+       "ci95": [
+        0.0,
+        0.25
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.166667,
+       "ci95": [
+        0.0,
+        0.25
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.03966,
+       "ci95": [
+        0.021406,
+        0.061281
+       ]
+      },
+      "precision@0.1843": {
+       "value": 0.1,
+       "ci95": [
+        0.0,
+        0.166667
+       ]
+      },
+      "recall@0.1843": {
+       "value": 0.166667,
+       "ci95": [
+        0.0,
+        0.25
+       ]
+      },
+      "f1@0.1843": {
+       "value": 0.125,
+       "ci95": [
+        0.0,
+        0.1875
+       ]
+      },
+      "fp_per_neg_frame@0.1843": {
+       "value": 0.124646,
+       "ci95": [
+        0.092532,
+        0.159094
+       ]
+      }
+     }
+    },
+    "8-14": {
+     "frames": 68,
+     "frames_with_person": 10,
+     "gt_boxes": 36,
+     "metrics": {
+      "mAP50": {
+       "value": 0.102747,
+       "ci95": [
+        0.002143,
+        0.277831
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.066579,
+       "ci95": [
+        0.000724,
+        0.176513
+       ]
+      },
+      "AP_small": {
+       "value": 0.048816,
+       "ci95": [
+        0.000537,
+        0.149954
+       ]
+      },
+      "AR_small": {
+       "value": 0.663636,
+       "ci95": [
+        0.4,
+        0.8
+       ]
+      },
+      "AR": {
+       "value": 0.613889,
+       "ci95": [
+        0.388889,
+        0.7
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.1,
+       "ci95": [
+        0.0,
+        0.285714
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.055556,
+       "ci95": [
+        0.0,
+        0.08
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.071429,
+       "ci95": [
+        0.0,
+        0.119896
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.069832,
+       "ci95": [
+        0.041932,
+        0.09662
+       ]
+      },
+      "precision@0.1843": {
+       "value": 0.131579,
+       "ci95": [
+        0.0,
+        0.344928
+       ]
+      },
+      "recall@0.1843": {
+       "value": 0.138889,
+       "ci95": [
+        0.0,
+        0.2
+       ]
+      },
+      "f1@0.1843": {
+       "value": 0.135135,
+       "ci95": [
+        0.0,
+        0.243902
+       ]
+      },
+      "fp_per_neg_frame@0.1843": {
+       "value": 0.178771,
+       "ci95": [
+        0.129013,
+        0.22555
+       ]
+      }
+     }
+    },
+    ">14": {
+     "frames": 73,
+     "frames_with_person": 25,
+     "gt_boxes": 109,
+     "metrics": {
+      "mAP50": {
+       "value": 0.12912,
+       "ci95": [
+        0.029445,
+        0.210012
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.060278,
+       "ci95": [
+        0.012924,
+        0.111679
+       ]
+      },
+      "AP_small": {
+       "value": 0.075998,
+       "ci95": [
+        0.02735,
+        0.116552
+       ]
+      },
+      "AR_small": {
+       "value": 0.533333,
+       "ci95": [
+        0.39762,
+        0.728571
+       ]
+      },
+      "AR": {
+       "value": 0.555046,
+       "ci95": [
+        0.456622,
+        0.722222
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.114754,
+       "ci95": [
+        0.0,
+        0.245628
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.06422,
+       "ci95": [
+        0.0,
+        0.15493
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.082353,
+       "ci95": [
+        0.0,
+        0.170213
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.100575,
+       "ci95": [
+        0.039625,
+        0.169123
+       ]
+      },
+      "precision@0.1843": {
+       "value": 0.17,
+       "ci95": [
+        0.0,
+        0.27027
+       ]
+      },
+      "recall@0.1843": {
+       "value": 0.155963,
+       "ci95": [
+        0.0,
+        0.197183
+       ]
+      },
+      "f1@0.1843": {
+       "value": 0.162679,
+       "ci95": [
+        0.0,
+        0.218579
+       ]
+      },
+      "fp_per_neg_frame@0.1843": {
+       "value": 0.212644,
+       "ci95": [
+        0.139679,
+        0.293338
+       ]
+      }
+     }
+    }
+   },
+   "by_hard": {
+    "hard": {
+     "frames": 45,
+     "frames_with_person": 34,
+     "gt_boxes": 134,
+     "metrics": {
+      "mAP50": {
+       "value": 0.195995,
+       "ci95": [
+        0.10949,
+        0.262758
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.093514,
+       "ci95": [
+        0.057412,
+        0.143928
+       ]
+      },
+      "AP_small": {
+       "value": 0.111209,
+       "ci95": [
+        0.096784,
+        0.143618
+       ]
+      },
+      "AR_small": {
+       "value": 0.543678,
+       "ci95": [
+        0.500685,
+        0.728571
+       ]
+      },
+      "AR": {
+       "value": 0.559701,
+       "ci95": [
+        0.501961,
+        0.666708
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.150943,
+       "ci95": [
+        0.0,
+        0.333333
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.059701,
+       "ci95": [
+        0.0,
+        0.112
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.085561,
+       "ci95": [
+        0.0,
+        0.162367
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.073955,
+       "ci95": [
+        0.029703,
+        0.13355
+       ]
+      },
+      "precision@0.1843": {
+       "value": 0.218391,
+       "ci95": [
+        0.0,
+        0.339676
+       ]
+      },
+      "recall@0.1843": {
+       "value": 0.141791,
+       "ci95": [
+        0.0,
+        0.168
+       ]
+      },
+      "f1@0.1843": {
+       "value": 0.171946,
+       "ci95": [
+        0.0,
+        0.220433
+       ]
+      },
+      "fp_per_neg_frame@0.1843": {
+       "value": 0.167203,
+       "ci95": [
+        0.108188,
+        0.243752
+       ]
+      }
+     }
+    },
+    "not_hard": {
+     "frames": 153,
+     "frames_with_person": 5,
+     "gt_boxes": 17,
+     "metrics": {
+      "mAP50": {
+       "value": 0.061821,
+       "ci95": [
+        0.0164,
+        0.175451
+       ]
+      },
+      "mAP50_95": {
+       "value": 0.035549,
+       "ci95": [
+        0.009331,
+        0.099296
+       ]
+      },
+      "AP_small": {
+       "value": 0.018051,
+       "ci95": [
+        0.014094,
+        0.056094
+       ]
+      },
+      "AR_small": {
+       "value": 0.8,
+       "ci95": [
+        0.8,
+        0.8
+       ]
+      },
+      "AR": {
+       "value": 0.676471,
+       "ci95": [
+        0.625,
+        1.0
+       ]
+      },
+      "precision@0.25": {
+       "value": 0.058824,
+       "ci95": [
+        0.0,
+        0.166667
+       ]
+      },
+      "recall@0.25": {
+       "value": 0.117647,
+       "ci95": [
+        0.0,
+        0.5
+       ]
+      },
+      "f1@0.25": {
+       "value": 0.078431,
+       "ci95": [
+        0.0,
+        0.166667
+       ]
+      },
+      "fp_per_neg_frame@0.25": {
+       "value": 0.089286,
+       "ci95": [
+        0.057731,
+        0.1227
+       ]
+      },
+      "precision@0.1843": {
+       "value": 0.065574,
+       "ci95": [
+        0.0,
+        0.2
+       ]
+      },
+      "recall@0.1843": {
+       "value": 0.235294,
+       "ci95": [
+        0.0,
+        0.5
+       ]
+      },
+      "f1@0.1843": {
+       "value": 0.102564,
+       "ci95": [
+        0.0,
+        0.231579
+       ]
+      },
+      "fp_per_neg_frame@0.1843": {
+       "value": 0.205357,
+       "ci95": [
+        0.156651,
+        0.25792
+       ]
+      }
+     }
+    }
+   },
+   "ms_per_frame": {
+    "mean": 842.560562248996,
+    "median": 834.41,
+    "n_frames": 498
+   },
+   "bootstrap": {
+    "n": 2000,
+    "seed": 20261118,
+    "unit": "khối 30 s của split.json",
+    "ci_pct": 95.0,
+    "n_blocks": {
+     "flight": 13,
+     "neg": 213
+    },
+    "note": "subset alt/hard giữ mọi khung neg cho báo nhầm/khung âm"
+   }
+  }
+ }
+}
