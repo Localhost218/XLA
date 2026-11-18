@@ -1,0 +1,13 @@
+<!-- Label Studio, project xla-test-v1 (phase 08): một nhãn person, khung chữ nhật.
+     Hộp ôm người thấy được (đầu, thân, tay chân), không ôm bóng. Khung không người: không vẽ gì, vẫn bấm Submit.
+     Ô "hard": tick khi khung có nhóm người dính nhau hoặc người mờ khó chắc. -->
+<View>
+  <Header value="$frame"/>
+  <Image name="image" value="$image" zoom="true" zoomControl="true" rotateControl="false"/>
+  <RectangleLabels name="label" toName="image" strokeWidth="1">
+    <Label value="person" background="#ff2d55"/>
+  </RectangleLabels>
+  <Choices name="flags" toName="image" choice="multiple" showInLine="true">
+    <Choice value="hard"/>
+  </Choices>
+</View>
