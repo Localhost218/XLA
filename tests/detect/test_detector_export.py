@@ -305,6 +305,9 @@ def test_parity_within_tolerance(require_data: Any) -> None:
     p = json.loads(require_data(repo_root() / E2 / "parity.json", HINT + " --parity-out results/e2/parity.json")
                    .read_text(encoding="utf-8"))
     assert p["onnx_sha256"] == _meta()["onnx_sha256"], "parity.json không phải của detector.onnx trong bundle"
+    # mốc cổng = .pt rect=False (letterbox vuông như graph §2), Owner chốt 18/11/2026; rect=True chỉ là tham khảo
+    assert p["gate_reference"] == p["reference"]["name"] == "pt_crop_square"
+    assert {"pt_crop_rect", "pt_full_edge16"} <= set(p["info"])
     for k in ("ort_cpu", "ort_cuda"):
         c = p["candidates"][k]
         assert c is not None, f"thiếu parity {k}"
