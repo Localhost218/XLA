@@ -17,6 +17,7 @@ import argparse
 import hashlib
 import io
 import json
+import os
 import shutil
 import sys
 import time
@@ -68,6 +69,14 @@ def pad_black(win_bgr: np.ndarray) -> np.ndarray:
 # ----------------------------------------------------------------------------- một đơn vị
 
 _W: dict = {}
+
+
+def worker_env() -> None:
+    """Đặt TRƯỚC khi tạo pool tiến trình con (spawn kế thừa biến môi trường): BLAS một luồng. Mặc định OpenBLAS giữ
+    bộ đệm cho mọi lõi, ~750 MB commit mỗi tiến trình chỉ để import numpy; 16 tiến trình là ~12 GB (18/11: hết commit
+    memory, tràn trang). Phép tính ở đây không dùng BLAS đa luồng nên kết quả không đổi."""
+    for k in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+        os.environ.setdefault(k, "1")
 
 
 def _init_worker(state: dict) -> None:
@@ -213,6 +222,8 @@ def build_set(set_name: str, units: list, seed: int, ctx: dict, root: Path, work
     target = limit or len(units)
     chosen: list[dict] = []
     pos, n_ok = 0, 0
+    if workers > 1:
+        worker_env()
     ex = ProcessPoolExecutor(workers, initializer=_init_worker, initargs=({**ctx, "_single_thread": True},)) if workers > 1 else None
     if ex is None:
         _init_worker(ctx)

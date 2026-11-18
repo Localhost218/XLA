@@ -57,7 +57,9 @@ def resolve_space(cfg: dict, profile: dict) -> list[dict]:
     """Khối ``calibration.params`` → danh sách tham số có ``lo``/``hi``/``x0`` cụ thể.
 
     ``mode: center``: tham số là tâm của khoảng [a, b] trong config, nửa bề rộng giữ nguyên (cắt ≥ 0).
-    ``lo_from_profile``: cận dưới (và điểm khởi đầu) lấy từ trường hồ sơ (hệ số WB ISP, v1.2.0: cận dưới thật)."""
+    ``lo_from_profile``: cận dưới lấy từ trường hồ sơ (hệ số WB ISP, v1.2.0: cận dưới thật). Điểm khởi đầu luôn là giá
+    trị hiện có trong config, kẹp vào [lo, hi] (vòng 1, 18/11, config ghi 2,2 nhưng khởi đầu ở cận hồ sơ theo lệnh Owner:
+    ghi ở ``rounds`` của ``calibration.json``)."""
     out = []
     for s in cfg["calibration"]["params"]:
         s = dict(s)
@@ -69,7 +71,6 @@ def resolve_space(cfg: dict, profile: dict) -> list[dict]:
             s["x0"] = float(cur)
         if "lo_from_profile" in s:
             s["lo"] = float(d2_camera.get_field(profile, s["lo_from_profile"]))
-            s["x0"] = s["lo"]
         s["x0"] = float(np.clip(s["x0"], s["lo"], s["hi"]))
         if not s["lo"] < s["hi"]:
             raise ValueError(f"tham số {s['name']}: cận {s['lo']}..{s['hi']} không hợp lệ")
@@ -168,6 +169,7 @@ class Evaluator:
         self.real, self.units, self.set_name = real_meas, units, set_name
         state = dict(ctx, pool_needed=set_name == "d2sr")
         state.pop("noise_pool", None)
+        build.worker_env()
         self.ex = ProcessPoolExecutor(workers, initializer=_init, initargs=(state,))
         self.chunk = max(1, len(units) // (workers * 2))
 
@@ -209,6 +211,7 @@ def measure_real(frames: list[Path], workers: int) -> dict:
     if cache.exists():
         rows = json.loads(cache.read_text(encoding="utf-8"))
     else:
+        build.worker_env()
         with ProcessPoolExecutor(workers) as ex:
             rows = list(ex.map(_measure_file, [str(p) for p in frames], chunksize=8))
         cache.parent.mkdir(parents=True, exist_ok=True)
@@ -294,8 +297,9 @@ def _save_ckpt(path: Path, state: dict) -> None:
 
 def run_cma(ev: Evaluator, base: dict, space: list[dict], budget: int, sigma0: float, seed: int,
             log, ckpt: Path | None = None, progress: Path | None = None) -> tuple[list[dict], dict, dict, float]:
-    """CMA-ES; sau lượt "trước" và sau mỗi thế hệ ghi ``ckpt`` (trạng thái CMA + đường hội tụ) và ``progress`` (jsonl,
-    một dòng mỗi lượt). Có ``ckpt`` cũ cùng khoá thì chạy tiếp từ đó. Trả (đường hội tụ, tốt nhất, trước, giây)."""
+    """CMA-ES; sau lượt "trước" và sau MỖI lượt ghi ``ckpt`` (trạng thái CMA, ứng viên của thế hệ đang dở, đường hội
+    tụ) và ``progress`` (jsonl, một dòng mỗi lượt). Có ``ckpt`` cũ cùng khoá thì chạy tiếp từ đó, không đánh giá lại lượt
+    đã xong. Trả (đường hội tụ, tốt nhất, trước, giây)."""
     import pickle
 
     import cma
@@ -304,6 +308,7 @@ def run_cma(ev: Evaluator, base: dict, space: list[dict], budget: int, sigma0: f
     if ckpt is not None and ckpt.exists():
         st = pickle.loads(ckpt.read_bytes())
         es, hist, best, before, gen, secs = st["es"], st["hist"], st["best"], st["before"], st["gen"], st["secs"]
+        pending = st.get("pending")
         es.opts.set({"maxfevals": budget - 1})  # ngân sách có thể khác lần trước
         log(f"chạy tiếp từ checkpoint {ckpt.name}: {len(hist)} lượt, thế hệ {gen}, tốt nhất {best['total']:.4f}")
     else:
@@ -315,37 +320,47 @@ def run_cma(ev: Evaluator, base: dict, space: list[dict], budget: int, sigma0: f
         es = cma.CMAEvolutionStrategy(to_unit(space, x0).tolist(), sigma0,
                                       {"bounds": [0, 1], "seed": seed, "maxfevals": budget - 1, "verbose": -9})
         gen, secs = 0, time.perf_counter() - t0
+        pending = None
         log(f"trước: {before['total']:.4f}")
         if progress is not None:
             progress.write_text(json.dumps(hist[0]) + "\n", encoding="utf-8", newline="\n")
-    if ckpt is not None:
-        _save_ckpt(ckpt, {"es": es, "hist": hist, "best": best, "before": before, "gen": gen, "secs": secs})
-    while not es.stop() and len(hist) < budget:
-        t0 = time.perf_counter()
-        gen += 1
-        xs = es.ask()
-        xs = xs[:budget - len(hist)]
-        vals = [from_unit(space, x) for x in xs]
-        res = ev([apply_values(base, space, v) for v in vals])
-        totals = [r["total"] for r in res]
-        if len(xs) == es.popsize:
-            es.tell(xs, totals)
-        new = []
-        for v, r in zip(vals, res, strict=True):
-            new.append({"eval": len(hist) + 1, "gen": gen,
-                        "values": {s["name"]: round(x, 5) for s, x in zip(space, v, strict=True)},
-                        "total": r["total"]})
-            hist.append(new[-1])
+
+    def save() -> None:
+        if ckpt is not None:
+            _save_ckpt(ckpt, {"es": es, "hist": hist, "best": best, "before": before, "gen": gen, "secs": secs,
+                              "pending": pending})
+
+    save()
+    while pending is not None or (not es.stop() and len(hist) < budget):
+        if pending is None:                       # thế hệ mới: hỏi CMA, lưu ứng viên trước khi đánh giá
+            gen += 1
+            xs = es.ask()[:budget - len(hist)]
+            pending = {"gen": gen, "xs": [[float(v) for v in x] for x in xs], "full": len(xs) == es.popsize,
+                       "totals": []}
+            save()
+        gen = pending["gen"]
+        for x in pending["xs"][len(pending["totals"]):]:   # chịu ngắt: checkpoint sau MỖI lượt
+            t0 = time.perf_counter()
+            v = from_unit(space, x)
+            r = ev([apply_values(base, space, v)])[0]
+            pending["totals"].append(r["total"])
+            h = {"eval": len(hist) + 1, "gen": gen,
+                 "values": {s["name"]: round(xv, 5) for s, xv in zip(space, v, strict=True)}, "total": r["total"]}
+            hist.append(h)
             if r["total"] < best["total"]:
                 best = {"total": r["total"], "values": v, "res": r}
-        secs += time.perf_counter() - t0
-        if progress is not None:
-            with progress.open("a", encoding="utf-8", newline="\n") as f:
-                f.writelines(json.dumps(h) + "\n" for h in new)
-        if ckpt is not None:
-            _save_ckpt(ckpt, {"es": es, "hist": hist, "best": best, "before": before, "gen": gen, "secs": secs})
+            secs += time.perf_counter() - t0
+            if progress is not None:
+                with progress.open("a", encoding="utf-8", newline="\n") as f:
+                    f.write(json.dumps(h) + "\n")
+            save()
+        full, totals = pending["full"], pending["totals"]
+        if full:
+            es.tell([np.array(x) for x in pending["xs"]], totals)
+        pending = None
+        save()
         log(f"thế hệ {gen}: tốt nhất thế hệ {min(totals):.4f}, tốt nhất {best['total']:.4f} ({len(hist)} lượt)")
-        if len(xs) < es.popsize:
+        if not full:
             break
     return hist, best, before, secs
 
@@ -415,6 +430,7 @@ def main(argv: list[str] | None = None) -> int:
                                                          for s, v in zip(space, best["values"], strict=True)},
                   "total": best["total"], "items": _summary_items(best["res"])},
         "improved": improved,
+        "written": improved and not a.dry_run,
         "history": hist,
     }
     if improved and not a.dry_run:
@@ -427,13 +443,30 @@ def main(argv: list[str] | None = None) -> int:
     return 0 if improved else 1
 
 
+ROUND_KEEP = ("realsr", "previous_rounds", "rejected_rounds")
+
+
 def _merge_write(path: Path, data: dict) -> None:
-    """Ghi ``calibration.json``; giữ khối ``realsr`` của lần chạy E3 trước nếu có."""
+    """Ghi ``calibration.json``. Mức gốc = vòng hiệu chỉnh ĐANG DÙNG (khớp ``params_version`` của config); vòng cũ đã
+    được thay chuyển vào ``previous_rounds``; vòng không giảm khoảng cách (không nhận) vào ``rejected_rounds``. Khối
+    ``realsr`` (E3) giữ nguyên khi chỉ ghi một vòng hiệu chỉnh và ngược lại."""
     old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-    if "realsr" in old and "realsr" not in data:
-        data["realsr"] = old["realsr"]
-    if "realsr" in data and "history" not in data and old:
-        data = {**old, "realsr": data["realsr"]}
+    if "history" not in data:                          # chỉ ghi khối realsr
+        data = {**old, **data} if old else data
+    elif "history" in old:                             # có vòng cũ
+        old_round = {k: v for k, v in old.items() if k not in ROUND_KEEP}
+        keep = {k: old[k] for k in ROUND_KEEP if k in old}
+        keep.setdefault("previous_rounds", [])
+        keep.setdefault("rejected_rounds", [])
+        data["round"] = int(old_round.get("round", 1)) + 1 + len(keep["rejected_rounds"])
+        if data["improved"] and data.get("written"):
+            keep["previous_rounds"].append(old_round)
+            data = {**data, **keep}
+        else:
+            keep["rejected_rounds"].append(data)
+            data = {**old_round, **keep}
+    else:
+        data = {**{k: old[k] for k in ROUND_KEEP if k in old}, **data}
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
 

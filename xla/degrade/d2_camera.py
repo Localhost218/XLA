@@ -167,11 +167,15 @@ def stage_tone(lin: np.ndarray, rng, cfg: dict, profile: dict, p: dict) -> np.nd
     bright = float(rng.uniform(*cfg["brightness"]))
     e = bright / k
     raw = lin * np.array([1 / gb, 1.0, 1 / gr], np.float32) * e
+    bl = float(cfg.get("black_level", 0.0))
+    if bl > 0:   # trừ mức đen dư (ISP trừ đen + bù flare) ở miền cảm biến: kéo chỗ tối xuống, giữ điểm trắng 1,0
+        raw = np.maximum(raw - bl, 0.0) / (1.0 - bl)
     sat = float((raw.max(axis=2) >= 1.0).mean())
     raw = np.minimum(raw, 1.0)
     out = raw * np.array([gb * cb, 1.0, gr * cr], np.float32) * k
     p.update(isp_wb_gain_r=round(gr, 4), isp_wb_gain_b=round(gb, 4), cast_r=round(cr, 4), cast_b=round(cb, 4),
-             k_out=round(k, 4), exposure=round(e, 4), brightness=round(bright, 4), sat_frac=round(sat, 5))
+             k_out=round(k, 4), exposure=round(e, 4), brightness=round(bright, 4), sat_frac=round(sat, 5),
+             black_level=round(bl, 4))
     return np.clip(out, 0.0, 1.0)
 
 
