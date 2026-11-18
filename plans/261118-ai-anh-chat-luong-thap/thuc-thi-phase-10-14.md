@@ -128,11 +128,11 @@ nếu mỗi file < 5 MB.
 | classic (12) | **xong** `e859e22`: hồng −91,6 %, dark channel 142,7→65,3, blocking 2,73→2,08; bench 95 ms lúc máy quá nhiệt (khoẻ 13–18 ms), đo lại ở phase 14 |
 | restore (13) | vòng 1 `01a93c9`: NAFNet width32 bundle hợp lệ nhưng p95 82 ms (máy không hãm) > 30; % hồng −93 %, flicker 1,65; vòng 2 đang train NAFNet-tiny cho kịp 30 ms |
 | abeval (14 code) | **xong** `fbaf1dc`: chạy giả đầu-cuối đạt; E4 COCO×gốc 0,1265 khớp mốc phase 09; lệnh chạy thật ở `results/ab/README.md` + báo cáo lane |
-| detect (11) | **tạm dừng 18/11 ~19:30**: thầy YOLO11m xong 19:06 (4 epoch, dev-val 0,267, `D:\DevCache\runs\xla\e2\teacher\weights\best_devval.pt`); còn nhãn giả → trò 1–3 vòng → chọn model ship → xuất `detector-v1.0.0` → Accept. Trạng thái chi tiết: `results/e2/RESUME.md` trên `lane/detect` |
-| restore (13) vòng 2 | **tạm dừng 18/11 ~19:30**: mới smoke; còn train NAFNet-tiny → chọn checkpoint → xuất thay bundle → Accept. Chi tiết: `results/restore/RESUME.md` trên `lane/restore` |
+| detect (11) | **tạm dừng 18/11 22:15** `f1c9418`: thầy YOLO11m xong (dev-val 0,267); trò r1 xong (dev-val 0,379 tốt nhất, TB 3 epoch cuối 0,328 > E1 D2 0,329 / 0,229, `D:DevCacheunsxlae21weightsbest_devval.pt`); còn r2 (chạy lại từ đầu) → r3 nếu tăng → `--score` → xuất bundle → Accept. Chi tiết: `results/e2/RESUME.md` trên `lane/detect` |
+| restore (13) vòng 2 | **tạm dừng 18/11 22:15** `dc9a6db`: NAFNet-w16 train tới bước 3 000/4 500 (`last.pt`), val tổng hợp PSNR 22,17; còn 1 500 bước → select → xuất thay bundle → Accept. Một lệnh: `D:/DevCache/runs/xla/restore/driver/resume_round2.py`; chi tiết `results/restore/RESUME.md` |
 | 14 gộp + PR #2 | chưa bắt đầu (chủ dự án bảo dừng trước bước gộp) |
 
-## 8. Chạy tiếp sau khi bật máy (chủ dự án tắt máy nghỉ 18/11 ~19:30)
+## 8. Chạy tiếp sau khi bật máy (tạm dừng lần 2: 18/11 22:15)
 
 Mọi thứ đã commit + push; trọng số, nhãn giả, run ở `D:\DevCache\runs\xla\` (ổ D, không mất khi tắt máy). Thứ tự làm tiếp:
 
