@@ -36,5 +36,6 @@ train:
 select:                        # chọn checkpoint trên khung DEV thật (không test, không NR-IQA)
   split: dev
   stats_every: 3               # thống kê mức thấp trên mỗi khung thứ 3 trong các chuỗi dev liền kề
-  flicker_max: 1.15            # loại checkpoint làm nhấp nháy tăng > 15 % so với khung gốc
+  flicker_max: 1.15            # ưu tiên checkpoint không làm nhấp nháy tăng > 15 %; không ai đạt → flicker thấp nhất
+  # (lần chạy 18/11: mọi checkpoint huấn luyện 1,65–2,0 — khử mù tăng tương phản nên |Δ| giữa khung tăng theo)
   # điểm = giảm tương đối % hồng + giảm tương đối dark channel + giảm tương đối (blocking − 1); cao hơn tốt hơn

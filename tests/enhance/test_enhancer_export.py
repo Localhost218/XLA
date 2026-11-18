@@ -87,7 +87,14 @@ def test_speed_json_three_candidates_with_license(require_data) -> None:
         lic = r["license"]
         assert lic.get("code") and lic.get("weights"), r["candidate"]
         assert r["ms"]["p95"] > 0
-    if rep["chosen"] is not None:
+    if rep["chosen"] is None:
+        return
+    published = [rows[n] for n in ("nafnet", "fbcnn", "scunet")]
+    if rep.get("throttled"):
+        # lệnh chủ dự án 18/11: máy bị hãm → bản công bố nhanh nhất theo p95 đo cùng điều kiện, kèm điều kiện đo
+        assert rep["chosen"] == min(published, key=lambda r: r["ms"]["p95"])["candidate"]
+        assert rep["cpu_perf_pct"] and rep["gpu_state"]
+    else:
         assert rows[rep["chosen"]]["ms"]["p95"] <= rep["budget_p95_ms"]
 
 

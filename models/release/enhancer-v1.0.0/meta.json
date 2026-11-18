@@ -1,0 +1,93 @@
+{
+  "contract_version": "1.0",
+  "model": "enhancer",
+  "version": "1.0.0",
+  "onnx_sha256": "2ad08ebf6fd7adfbd0b08bcb9e6a5064a8611e7fcc587a243dfb34e9d0f79669",
+  "frame_size": [
+    640,
+    480
+  ],
+  "crop_left": 16,
+  "camera_profile_version": "1.2.0",
+  "train_run": "nafnet-train",
+  "metrics": {
+    "pink_frac_drop": null,
+    "dark_channel_drop": null,
+    "flicker_ratio": null
+  },
+  "ms_per_frame": {
+    "device": "RTX 4060 Laptop",
+    "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
+    "p50": 75.74754999950528,
+    "p95": 82.05958999924405
+  },
+  "created": "2026-11-18T10:40:26+00:00",
+  "metrics_note": "metrics (tập test thật) = null: lane restore không đụng khung test; phase 14 đo",
+  "metrics_dev": {
+    "split": "dev",
+    "pink_frac_drop": 0.9330697037629267,
+    "dark_channel_drop": 0.2731172995144077,
+    "flicker_ratio": 1.6469115286225906,
+    "blocking_excess_drop": 0.7425354727541509,
+    "checkpoint": "step_001500"
+  },
+  "network": {
+    "candidate": "nafnet",
+    "arch_kwargs": {},
+    "precision": "fp16",
+    "step": 1500
+  },
+  "ms_cpu_perf": {
+    "gate_before": {
+      "ok": true,
+      "min": 140.3,
+      "mean": 163.1,
+      "window_s": 10,
+      "at": "2026-11-18T10:39:09+00:00",
+      "waited_s": 10.5,
+      "throttled": false
+    },
+    "before_ms": {
+      "ok": true,
+      "min": 149.2,
+      "mean": 159.0,
+      "window_s": 10,
+      "at": "2026-11-18T10:39:47+00:00"
+    },
+    "gpu_before_ms": {
+      "temp_c": 76.0,
+      "power_w": 6.67,
+      "sm_mhz": 210.0,
+      "sm_max_mhz": 3105.0,
+      "throttle_reasons": "0x0000000000000001",
+      "pstate": "P8",
+      "at": "2026-11-18T10:39:47+00:00"
+    },
+    "after_ms": {
+      "ok": true,
+      "min": 154.5,
+      "mean": 158.3,
+      "window_s": 10,
+      "at": "2026-11-18T10:40:23+00:00"
+    },
+    "gpu_after_ms": {
+      "temp_c": 78.0,
+      "power_w": 7.73,
+      "sm_mhz": 210.0,
+      "sm_max_mhz": 3105.0,
+      "throttle_reasons": "0x0000000000000001",
+      "pstate": "P8",
+      "at": "2026-11-18T10:40:23+00:00"
+    },
+    "throttled": false,
+    "cpu_perf_pct": {
+      "before": 159.0,
+      "after": 158.3
+    }
+  },
+  "golden_sources": {
+    "000.jpg": "20261102-100941_002_00413.jpg",
+    "001.jpg": "20261102-100941_004_01932.jpg",
+    "002.jpg": "20261102-100941_007_00750.jpg"
+  }
+}

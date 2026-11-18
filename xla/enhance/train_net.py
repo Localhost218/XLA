@@ -328,6 +328,37 @@ def score_of(raw: dict[str, float], out: dict[str, float]) -> dict[str, float]:
     return {"pink_frac_drop": pink, "dark_channel_drop": dark, "blocking_excess_drop": blk, "score": pink + dark + blk}
 
 
+SELECT_RULE = (
+    "điểm = pink_frac_drop + dark_channel_drop + blocking_excess_drop (cao hơn tốt hơn). Có checkpoint huấn luyện qua "
+    "flicker_ratio ≤ flicker_max → điểm cao nhất trong số đó. Không checkpoint nào qua → checkpoint huấn luyện có "
+    "flicker_ratio thấp nhất (hoà thì điểm cao hơn), ghi rõ ngưỡng không đạt"
+)
+
+
+def choose(rows: list[dict[str, Any]]) -> tuple[dict[str, Any] | None, str]:
+    """Áp ``SELECT_RULE`` lên các dòng checkpoint (bỏ dòng ``pretrained``: không có file checkpoint)."""
+    trained = [r for r in rows if r["path"]]
+    ok = [r for r in trained if r["pass_flicker"]]
+    if ok:
+        return max(ok, key=lambda r: (r["score"], r["checkpoint"])), "qua flicker_max, điểm cao nhất"
+    if trained:
+        best = min(trained, key=lambda r: (r["flicker_ratio"], -r["score"]))
+        top = max(trained, key=lambda r: r["score"])
+        note = "cũng là điểm cao nhất" if top is best else f"điểm cao nhất là {top['checkpoint']}"
+        return best, f"không checkpoint nào qua flicker_max: chọn flicker_ratio thấp nhất ({note})"
+    return None, "không có checkpoint huấn luyện"
+
+
+def rescore(cfg: dict[str, Any]) -> dict[str, Any]:
+    """Áp lại ``SELECT_RULE`` lên kết quả ``select`` đã lưu (không chạy GPU lại)."""
+    p = repo_root() / TRAIN_JSON_REL
+    sel = json.loads(p.read_text(encoding="utf-8"))["select"]
+    best, how = choose(sel["checkpoints"])
+    sel.update(rule=SELECT_RULE, chosen_how=how, chosen=best["checkpoint"] if best else None,
+               chosen_path=best["path"] if best else None)
+    return sel
+
+
 def select(cfg: dict[str, Any], run_id: str) -> dict[str, Any]:
     from xla.eval.temporal import flicker_ratio
     from xla.gpu_lock import gpu_lock
@@ -369,8 +400,7 @@ def select(cfg: dict[str, Any], run_id: str) -> dict[str, Any]:
         sc = score_of(raw_stats, st)
         rows.append({"checkpoint": item["name"], "path": str(item["path"]) if item["path"] else None,
                      "flicker_ratio": fl, "stats": st, **sc, "pass_flicker": fl <= cs["flicker_max"]})
-    ok = [r for r in rows if r["pass_flicker"] and r["path"]]
-    best = max(ok, key=lambda r: (r["score"], r["checkpoint"])) if ok else None
+    best, how = choose(rows)
     return {
         "run_id": run_id,
         "split": cs["split"],
@@ -379,7 +409,8 @@ def select(cfg: dict[str, Any], run_id: str) -> dict[str, Any]:
         "n_frames_stats": len(raw_flat[::every]),
         "raw_stats": raw_stats,
         "flicker_max": cs["flicker_max"],
-        "rule": "loại flicker_ratio > flicker_max; điểm = pink_frac_drop + dark_channel_drop + blocking_excess_drop",
+        "rule": SELECT_RULE,
+        "chosen_how": how,
         "checkpoints": rows,
         "chosen": best["checkpoint"] if best else None,
         "chosen_path": best["path"] if best else None,
@@ -409,6 +440,7 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("select")
     s.add_argument("--config", default="configs/restore.yaml")
     s.add_argument("--run-id", required=True)
+    s.add_argument("--rescore", action="store_true", help="áp lại luật chọn lên kết quả select đã lưu, không chạy GPU")
     s.add_argument("--json", action="store_true")
     args = ap.parse_args(argv)
     cfg = load_config(args.config)
@@ -421,7 +453,7 @@ def main(argv: list[str] | None = None) -> int:
         out = train(cfg, run_id, args.smoke, args.max_steps)
         _write_train_json({"smoke" if args.smoke else "train": out})
     else:
-        out = select(cfg, args.run_id)
+        out = rescore(cfg) if args.rescore else select(cfg, args.run_id)
         _write_train_json({"select": out})
         if out["chosen"] is None:
             print(json.dumps(out, ensure_ascii=False) if args.json else "không checkpoint nào qua", file=sys.stderr)

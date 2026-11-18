@@ -157,7 +157,13 @@ def export_bundle(
             del cuda
         report["gpu_seconds"] = round(time.time() - t0, 1)
         report["wait_lock_seconds"] = round(t0 - t_wait, 1)
-    parity_ok = report["parity"]["ort_cpu_vs_torch_mae_worst"] <= PARITY_MAE_MAX
+    par = report["parity"]
+    parity_ok = par["ort_cpu_vs_torch_mae_worst"] <= PARITY_MAE_MAX
+    if not skip_cuda:  # IOT-CV kiểm golden trên GPU theo dung sai §4: CUDA phải khớp CPU trong ngưỡng đó
+        par["cuda_within_golden_tolerance"] = (
+            par["ort_cuda_vs_cpu_mae_worst"] <= contract.ENH_MAE_MAX and par["ort_cuda_vs_cpu_abs_max"] <= contract.ENH_ABS_MAX
+        )
+        parity_ok = parity_ok and par["cuda_within_golden_tolerance"]
 
     # golden: JPEG gốc camera của 3 khung dev, kết quả của chính file .onnx trên ORT CPU
     expected: dict[str, Any] = {}

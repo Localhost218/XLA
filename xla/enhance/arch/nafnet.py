@@ -4,7 +4,8 @@
 # Nguồn: https://github.com/megvii-research/NAFNet (MIT License, xem LICENSE gốc), file
 # basicsr/models/archs/NAFNet_arch.py + LayerNorm2d trong basicsr/models/archs/arch_util.py.
 # Thay đổi của XLA (18/11/2026): bỏ import basicsr/Local_Base (NAFNetLocal, TLC không dùng); LayerNorm2d viết bằng phép
-# tensor thường thay cho autograd.Function riêng (cùng forward, gradient do autograd tính) để xuất được ONNX; tham số
+# tensor thường thay cho autograd.Function riêng (cùng forward, gradient do autograd tính) để xuất được ONNX, và
+# tính ở fp32 khi tensor vào là fp16 (ORT CUDA fp16 lệch tới 182/255 so với CPU khi chuẩn hoá ở fp16); tham số
 # danh sách mặc định đổi sang tuple; định dạng lại cho ruff.
 #
 # MIT License — Copyright (c) 2022 megvii-model. Permission is hereby granted, free of charge, to any person obtaining a
@@ -41,9 +42,11 @@ class LayerNorm2d(nn.Module):
         self.eps = eps
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        mu = x.mean(1, keepdim=True)
-        var = (x - mu).pow(2).mean(1, keepdim=True)
-        y = (x - mu) / (var + self.eps).sqrt()
+        dt = x.dtype
+        xf = x.float()  # fp16: (x − μ)² tràn 65 504 và eps 1e-6 mất độ chính xác → tính chuẩn hoá ở fp32
+        mu = xf.mean(1, keepdim=True)
+        var = (xf - mu).pow(2).mean(1, keepdim=True)
+        y = ((xf - mu) / (var + self.eps).sqrt()).to(dt)
         return self.weight.view(1, -1, 1, 1) * y + self.bias.view(1, -1, 1, 1)
 
 

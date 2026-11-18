@@ -133,12 +133,12 @@ class EnhancerGraph(nn.Module):
         super().__init__()
         self.net = net
         self.crop_left = int(crop_left)
-        self.half = half
+        self.use_half = half
         self.register_buffer("perm", torch.tensor([2, 1, 0], dtype=torch.long), persistent=False)
 
     def forward(self, frame: torch.Tensor) -> torch.Tensor:
         x = frame[:, self.crop_left :, :].index_select(2, self.perm).permute(2, 0, 1).unsqueeze(0).float() / 255.0
-        if self.half:
+        if self.use_half:
             x = x.half()
         y = self.net(x).float().clamp(0.0, 1.0) * 255.0
         y = torch.round(y)[0].permute(1, 2, 0).index_select(2, self.perm).to(torch.uint8)
