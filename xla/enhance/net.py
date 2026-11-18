@@ -347,6 +347,38 @@ def cpu_perf_check(n: int) -> dict[str, Any]:
             "window_s": n, "at": datetime.now(UTC).isoformat(timespec="seconds")}
 
 
+def allow_throttled() -> bool:
+    """``XLA_ALLOW_THROTTLED=1``: không chờ hết hạ xung, đo trong điều kiện hiện tại và gắn cờ ``throttled``.
+
+    Lệnh chủ dự án 18/11/2026 (máy quá nhiệt, GPU SW thermal slowdown, CPU ~22 %): đo luôn, ghi kèm điều kiện đo;
+    số đo là số chính thức của lần chạy.
+    """
+    import os
+
+    return os.environ.get("XLA_ALLOW_THROTTLED", "") == "1"
+
+
+def gpu_state() -> dict[str, Any]:
+    """Nhiệt độ / công suất / xung / lý do hạ xung của GPU 0 (nvidia-smi); lỗi → ghi lỗi, không đoán."""
+    import subprocess
+
+    q = "temperature.gpu,power.draw,clocks.sm,clocks.max.sm,clocks_throttle_reasons.active,pstate"
+    r = subprocess.run(["nvidia-smi", f"--query-gpu={q}", "--format=csv,noheader,nounits"], check=False,
+                       capture_output=True, text=True, timeout=30)
+    if r.returncode != 0:
+        return {"error": r.stderr.strip()[:200]}
+    v = [x.strip() for x in r.stdout.strip().splitlines()[0].split(",")]
+    keys = ("temp_c", "power_w", "sm_mhz", "sm_max_mhz", "throttle_reasons", "pstate")
+    out: dict[str, Any] = dict(zip(keys, v, strict=False))
+    for k in ("temp_c", "power_w", "sm_mhz", "sm_max_mhz"):
+        try:
+            out[k] = float(out[k])
+        except (KeyError, ValueError):
+            pass
+    out["at"] = datetime.now(UTC).isoformat(timespec="seconds")
+    return out
+
+
 def wait_cpu_perf(window_s: int = CPU_PERF_WINDOW_S, max_wait_s: float = CPU_PERF_MAX_WAIT_S) -> dict[str, Any]:
     """Chờ tới khi CPU hết hạ xung: mọi mẫu trong ``window_s`` giây liên tục ≥ ``CPU_PERF_MIN`` % (Owner 18/11).
 
@@ -355,9 +387,10 @@ def wait_cpu_perf(window_s: int = CPU_PERF_WINDOW_S, max_wait_s: float = CPU_PER
     """
     t0 = time.time()
     while True:
-        c = cpu_perf_check(window_s)
-        if c["ok"]:
+        c = cpu_perf_check(window_s if not allow_throttled() else CPU_PERF_RECHECK_S)
+        if c["ok"] or allow_throttled():
             c["waited_s"] = round(time.time() - t0, 1)
+            c["throttled"] = not c["ok"]
             return c
         print(f"[cpu-perf] chưa đạt {CPU_PERF_MIN} %: {c}", file=sys.stderr, flush=True)
         if time.time() - t0 > max_wait_s:
@@ -377,19 +410,27 @@ def run_speed(names: list[str], warmup: int = WARMUP, iters: int = ITERS) -> dic
         with gpu_lock("phase13 restore speed", timeout_s=GPU_LOCK_TIMEOUT_S):
             t_lock = time.time()
             in_lock = cpu_perf_check(CPU_PERF_RECHECK_S)
-            if not in_lock["ok"]:  # hạ xung giữa lúc chờ khoá: nhả khoá, chờ lại
+            gpu_before = gpu_state()
+            if not in_lock["ok"] and not allow_throttled():  # hạ xung giữa lúc chờ khoá: nhả khoá, chờ lại
                 gpu_s += time.time() - t_lock
                 print(f"[cpu-perf] hạ xung lúc vào khoá {in_lock}, nhả khoá chờ lại", file=sys.stderr, flush=True)
                 continue
             rows = [speed_one(n, warmup, iters, out_dir) for n in names]
             after = cpu_perf_check(CPU_PERF_RECHECK_S)
+            gpu_after = gpu_state()
             gpu_s += time.time() - t_lock
-        if after["ok"]:
+        if after["ok"] or allow_throttled():
             break
         print(f"[cpu-perf] hạ xung sau khi đo {after}: bỏ số đo, đo lại", file=sys.stderr, flush=True)
+    throttled = not (gate_before["ok"] and in_lock["ok"] and after["ok"])
     ok = [r for r in rows if r["p95_le_budget"] and r["candidate"] in CANDIDATES]
     ok_var = [r for r in rows if r["p95_le_budget"] and r["candidate"] in VARIANTS]
-    if ok:
+    published = [r for r in rows if r["candidate"] in CANDIDATES]
+    if throttled and published:
+        # Lệnh chủ dự án 18/11: máy bị hãm (CPU hạ xung, GPU thermal slowdown) → vẫn chọn bản công bố nhanh nhất
+        # theo số đo cùng điều kiện cho cả ba, ghi lý do; không dừng Kill (c) chỉ vì hạ xung. Số ms là số chính thức.
+        chosen = min(published, key=lambda r: r["ms"]["p95"])["candidate"]
+    elif ok:
         chosen = min(ok, key=lambda r: r["ms"]["p95"])["candidate"]
     elif ok_var:  # không bản công bố nào đạt: biến thể thu nhỏ lớn nhất (nhiều tham số nhất) còn trong ngân sách
         chosen = max(ok_var, key=lambda r: r["params"])["candidate"]
@@ -407,8 +448,15 @@ def run_speed(names: list[str], warmup: int = WARMUP, iters: int = ITERS) -> dic
         "nhỏ nhiều tham số nhất còn đạt; không gì đạt → null (Kill (c))",
         "gpu_seconds": round(gpu_s, 1),
         "wait_lock_seconds": round(t_lock - t0, 1),
+        "throttled": throttled,
+        "chosen_by": (
+            "nhanh nhất trong ba bản công bố, đo cùng điều kiện máy bị hãm (lệnh chủ dự án 18/11: không dừng Kill (c) "
+            "vì hạ xung)"
+        ) if throttled else "trần p95",
+        "cpu_perf_pct": {"in_lock": in_lock["mean"], "after": after["mean"]},
         "cpu_perf": {"counter": CPU_PERF_COUNTER, "min_pct": CPU_PERF_MIN, "gate_before": gate_before,
                      "in_lock": in_lock, "after": after, "attempts": attempts},
+        "gpu_state": {"before": gpu_before, "after": gpu_after},
     }
 
 

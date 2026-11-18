@@ -14,7 +14,7 @@ data:
   flip: true                   # lật ngang/dọc cùng lúc cho cả cặp (patch bội 8 nên lưới khối giữ nguyên)
 
 train:
-  batch: 8
+  batch: 4                     # batch 8 vượt 8 GB VRAM (đỉnh 8,42 GB, tràn bộ nhớ chia sẻ, 2,4 s/bước) ở smoke đầu
   workers: 4                   # trần 4 (RAM lật bit dưới tải, thuc-thi §3)
   lr: 1.0e-4                   # fine-tune: 1/10 lr gốc của NAFNet-SIDD (1e-3)
   lr_min: 1.0e-6
@@ -22,13 +22,13 @@ train:
   weight_decay: 0.0
   warmup_steps: 100
   smoke_steps: 500
-  max_steps: 5000              # chốt từ smoke (results/restore/train.json: smoke, budget)
+  max_steps: 1500              # chốt từ smoke: 1,196 s/bước (máy bị hãm), ngân sách còn ~2 140 s
   ssim_weight: 1.0             # loss = L1 + w·(1 − SSIM)
   grad_clip: 0.01              # như công thức NAFNet (clip_grad_norm 0.01)
   amp: bf16
-  ckpt_every: 1000             # checkpoint giữ lại để chọn
+  ckpt_every: 500              # checkpoint giữ lại để chọn (1 500 bước theo ngân sách → 3 checkpoint)
   last_every: 200              # last.pt để resume
-  val_every: 1000
+  val_every: 500
   val_n: 100                   # số cặp val tổng hợp (khung đủ 480×624) mỗi lần đo giữa chừng; cuối cùng đo hết
   seed: 20261118
   budget_gpu_hours: 1.25       # ngân sách phase 13 (thuc-thi §4) gồm đo tốc độ + smoke + huấn luyện

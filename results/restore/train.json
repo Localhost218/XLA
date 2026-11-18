@@ -1,0 +1,47 @@
+{
+  "smoke": {
+    "run_id": "nafnet-smoke",
+    "smoke": true,
+    "candidate": "nafnet",
+    "params": 29159715,
+    "steps": 500,
+    "batch": 4,
+    "patch": 256,
+    "s_per_step": 1.1960143871307374,
+    "hours_per_1000_steps": 0.332226218647427,
+    "vram_peak_gb": 4.458876132965088,
+    "gpu_seconds": 655.6024215221405,
+    "wait_lock_seconds": 2556.8719778060913,
+    "cpu_perf_gate": {
+      "ok": true,
+      "min": 81.1,
+      "mean": 120.4,
+      "window_s": 10,
+      "at": "2026-11-18T08:55:12+00:00",
+      "waited_s": 11.0,
+      "throttled": false
+    },
+    "val_synthetic": [
+      {
+        "step": 0,
+        "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+        "n": 100,
+        "psnr": 14.048787197480042,
+        "ssim": 0.6131219804286957,
+        "psnr_input": 14.141917645295687,
+        "ssim_input": 0.6359054046869278
+      },
+      {
+        "step": 500,
+        "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+        "n": 100,
+        "psnr": 20.575090170123016,
+        "ssim": 0.7948496979475022,
+        "psnr_input": 14.141917645295687,
+        "ssim_input": 0.6359054046869278
+      }
+    ],
+    "run_dir": "D:\\DevCache\\runs\\xla\\restore\\nafnet-smoke",
+    "finished": "2026-11-18T09:48:44+00:00"
+  }
+}
