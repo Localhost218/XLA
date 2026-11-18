@@ -2,7 +2,7 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 04 | M (~1,5 ngày agent), ~0,5 giờ GPU cho smoke (chưa xác minh) | Không |
+| xong 18/11/2026 | phase 04 | M (~1,5 ngày agent), ~0,5 giờ GPU cho smoke (chưa xác minh) | Không |
 
 Lane: realism
 Depends-on: 04
@@ -32,7 +32,7 @@ lẫn kết luận (báo cáo, trên khung thật giữ riêng). Ba tầng, xế
 2. **Thống kê mức thấp:** với mỗi đại lượng trong hồ sơ (dark channel, Y p1, độ bão hoà, % hồng, blocking, Laplacian, NLF,
    PSD, MTF50, tối góc), khoảng cách Wasserstein-1 giữa hai phân bố chia cho IQR của tập thật; tổng có trọng số (trọng số
    trong config, mặc định bằng nhau); DQT + lấy mẫu màu so khớp chính xác (khác → báo riêng, không trộn vào tổng).
-3. **KID-DINOv2:** dùng `dgm-eval` (encoder DINOv2-ViT-L/14) nếu cài được ở phase 01; trích đặc trưng trên 1 000–3 000 patch
+3. **KID-DINOv2:** dùng `dgm-eval` (encoder DINOv2-ViT-L/14) nếu cài được ở phase 01 (→ 18/11/2026: không cài được, dùng phương án thay Owner đã duyệt trong `thuc-thi-phase-01-07.md` §2: DINOv2 qua `torch.hub` + KID tự viết); trích đặc trưng trên 1 000–3 000 patch
    mỗi tập, KID đa thức bậc 3 ước lượng không chệch, lặp 10 tập con có seed, báo trung bình + CI 95 % bootstrap. Trích đặc
    trưng trong `xla.gpu_lock`; cache đặc trưng theo sha256 ảnh vào `D:\DevCache\cache\realism\`.
 4. **C2ST** (`xla/eval/c2st.py`): phần dư cao tần (ảnh − Gauss σ=2) của patch 64×64; CNN nhỏ (≤ 100 k tham số) phân biệt

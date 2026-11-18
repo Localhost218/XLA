@@ -2,7 +2,7 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 01 | M (~1 ngày agent), ~0,3 giờ GPU (đếm người sơ bộ, chưa xác minh) | Không |
+| xong 18/11/2026 | phase 01 | M (~1 ngày agent), ~0,3 giờ GPU (đếm người sơ bộ, chưa xác minh) | Không |
 
 Lane: data
 Depends-on: 01
@@ -55,6 +55,15 @@ nhà, không người). Sau phase này `data/real/split.json` là chỉ đọc.
 9. Commit trên nhánh `lane/data`, gồm cả `data/real/frames/` (file mới: `git add` đúng các đường dẫn rồi
    `git commit -- <đường dẫn>`, không `git add -A`). Trước khi commit in tổng dung lượng khung: ước 30–70 MB (cả buổi 02/11
    trung bình 9,3 KB/khung, đo 18/11/2026; khung bay ngoài trời có thể to hơn); quá 500 MB thì dừng, báo lead. Đẩy, báo lead.
+
+## Quyết định chia lại (Owner, 18/11/2026, chủ dự án giao quyền)
+
+Chạy thật cho thấy mục tiêu 300–400 khung test và ≥ 150 khung test có người là **không khả thi**: camera chỉ phủ ~420 s
+bay; đưa cả 2 915 khung bay vào test, chọn cách nhau ≥ 1 s, trần là 362 khung / 74 khung có người (`results/data/split_report.json`
+mục `feasibility`). Con số ~370 của báo cáo 18/11 đếm khung liên tiếp ~5 khung/s. Lần chia đầu (test 283 / dev 470) ăn gần
+hết dev. Owner chọn **test 200–400** (`--test-min 200`, mặc định mới của CLI): test ~198 khung (45 có người theo đếm sơ bộ; nhãn đã duyệt ở phase 08: 39 khung, 149 hộp), dev ~1 115
+khung (224 có người); ngưỡng "test có người" thành cấu hình theo trần khả thi. Hồ sơ camera đo lại trên dev mới thành
+`profile_version` 1.1.0. Dev-val phase 08 đổi sang khung cách nhau ≥ 1 s.
 
 ## Cổng pass
 

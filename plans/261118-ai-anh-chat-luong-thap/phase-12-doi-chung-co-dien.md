@@ -2,7 +2,11 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 04 | M (~1,5 ngày agent), 0 giờ GPU | Không |
+| xong 18/11/2026 | phase 04 | M (~1,5 ngày agent), 0 giờ GPU | Không |
+
+Kết quả (18/11/2026, `e859e22`, gộp `dcc04d4`): trên 200 khung dev, điểm hồng −91,6 %, dark channel trung vị 142,7 → 65,3,
+blocking 2,73 → 2,08. Bench đo lại ở phase 14 lúc máy khoẻ (cv2 4 luồng): p50 9,18 / p95 10,21 ms, ≤ 30 ms.
+Chi tiết: `results/enhance/classic_bench.json`.
 
 Lane: classic
 Depends-on: 04

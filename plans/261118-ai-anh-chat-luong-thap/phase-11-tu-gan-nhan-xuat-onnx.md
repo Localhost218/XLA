@@ -2,7 +2,12 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 02, 10 | L (~2,5 ngày agent), 10–25 giờ GPU (chưa xác minh — smoke đo trước) | Không |
+| xong 19/11/2026 | phase 02, 10 | L (~2,5 ngày agent), 10–25 giờ GPU (chưa xác minh — smoke đo trước) | Không |
+
+Kết quả (19/11/2026, `b0eec03`, gộp `5a4a05f`): dừng sau vòng 2 (dev-val r2 0,296 < r1 0,379), **ship trò r1** theo dev-val.
+Bundle `detector-v1.0.0` (đường ONNX): test mAP50 0,120 [0,032–0,197], B1 không đạt; báo nhầm khung bay 0,881, B2 không đạt;
+ORT CUDA EP p50 19,985 / p95 20,223 ms, **B3 đạt**; parity Δ 0,0000 (CPU) / −0,0001 (CUDA) so `.pt rect=False`. Giờ GPU 2,49.
+Chi tiết: `results/e2/README.md`, `results/e2/e2.json`, `models/release/detector-v1.0.0/meta.json`.
 
 Lane: detect
 Depends-on: 02, 10

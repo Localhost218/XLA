@@ -1,0 +1,127 @@
+{
+ "created": "2026-11-18T17:21:01+00:00",
+ "cpu_threads": {
+  "cv2": 4,
+  "ort_intra_op": 4,
+  "torch": 4
+ },
+ "cpu_perf_pct_before": {
+  "counter": "\\Processor Information(_Total)\\% Processor Performance",
+  "min": 157.2,
+  "mean": 169.2,
+  "window_s": 60,
+  "throttled": false
+ },
+ "models": {
+  "detector": {
+   "test100": {
+    "p50": 20.018,
+    "p95": 20.239,
+    "mean": 20.088,
+    "n": 100,
+    "warmup": 10
+   },
+   "dev300": {
+    "p50": 20.002,
+    "p95": 20.256,
+    "mean": 20.042,
+    "n": 300,
+    "warmup": 30
+   }
+  },
+  "enhancer": {
+   "test100": {
+    "p50": 11.103,
+    "p95": 11.24,
+    "mean": 11.112,
+    "n": 100,
+    "warmup": 10
+   },
+   "dev300": {
+    "p50": 11.112,
+    "p95": 11.289,
+    "mean": 11.133,
+    "n": 300,
+    "warmup": 30
+   }
+  }
+ },
+ "providers": {
+  "detector": [
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ],
+  "enhancer": [
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ]
+ },
+ "cpu_perf_pct_after": {
+  "counter": "\\Processor Information(_Total)\\% Processor Performance",
+  "min": 157.9,
+  "mean": 167.4,
+  "window_s": 30,
+  "throttled": false
+ },
+ "note": "mỗi model một session riêng, đo lần lượt (không xen kẽ model khác), khung đã giải mã, gồm chép host→GPU; detector dùng xla.detect.export_onnx.ort_session/run_detector như meta.ms_per_frame",
+ "code": "\"\"\"Phase 14 bước 4: đo lại ms/khung một lần (ORT CUDA EP, tách riêng từng model, trong gpu_lock).\"\"\"\nimport json\nimport sys\nimport time\nfrom datetime import UTC, datetime\nfrom pathlib import Path\n\nimport numpy as np\n\nimport xla.detect.export_onnx as X\nfrom xla.contract import decode_frame\nfrom xla.eval.enhance_eval import limit_cpu_threads, ort_session\nfrom xla.gpu_lock import gpu_lock\nfrom xla.paths import repo_root\n\nroot = repo_root()\nthreads = limit_cpu_threads()\nrows = json.loads((root / \"data/real/split.json\").read_text(encoding=\"utf-8\"))[\"frames\"]\npick = {s: sorted(r[\"frame\"] for r in rows if r[\"split\"] == s) for s in (\"test\", \"dev\")}\ndev = pick[\"dev\"]\ndev300 = [dev[i] for i in np.linspace(0, len(dev) - 1, 300).round().astype(int)]\nsets = {\"test100\": pick[\"test\"][:100], \"dev300\": dev300}\nframes = {k: [decode_frame(root / \"data/real/frames\" / f) for f in v] for k, v in sets.items()}\nwarm = {\"test100\": 10, \"dev300\": 30}\n\n\ndef timed(fn, fr, w):\n    for f in fr[:w]:\n        fn(f)\n    t = []\n    for f in fr:\n        t0 = time.perf_counter()\n        fn(f)\n        t.append((time.perf_counter() - t0) * 1000)\n    v = np.asarray(t)\n    return {\"p50\": round(float(np.median(v)), 3), \"p95\": round(float(np.percentile(v, 95)), 3),\n            \"mean\": round(float(v.mean()), 3), \"n\": int(v.size), \"warmup\": w}\n\n\nperf_before = X.cpu_performance_pct()\nout = {\"created\": datetime.now(UTC).isoformat(timespec=\"seconds\"), \"cpu_threads\": threads,\n       \"cpu_perf_pct_before\": perf_before, \"models\": {}}\nwith gpu_lock(\"phase14 ms remeasure\", timeout_s=6 * 3600):\n    import torch  # noqa: F401 - nạp DLL CUDA cho ORT như export_onnx\n\n    det = X.ort_session(root / \"models/release/detector-v1.0.0/detector.onnx\", cuda=True)\n    enh, active = ort_session(root / \"models/release/enhancer-v1.0.0/enhancer.onnx\",\n                              [\"CUDAExecutionProvider\", \"CPUExecutionProvider\"])\n    in_name = enh.get_inputs()[0].name\n    fns = {\"detector\": lambda f: X.run_detector(det, f), \"enhancer\": lambda f: enh.run(None, {in_name: f})}\n    for m, fn in fns.items():\n        out[\"models\"][m] = {k: timed(fn, frames[k], warm[k]) for k in sets}\n    out[\"providers\"] = {\"detector\": det.get_providers(), \"enhancer\": active}\nout[\"cpu_perf_pct_after\"] = X.cpu_performance_pct(30)\nout[\"note\"] = (\"mỗi model một session riêng, đo lần lượt (không xen kẽ model khác), khung đã giải mã, gồm chép \"\n               \"host→GPU; detector dùng xla.detect.export_onnx.ort_session/run_detector như meta.ms_per_frame\")\nout[\"code\"] = Path(__file__).read_text(encoding=\"utf-8\")\nPath(sys.argv[1]).write_text(json.dumps(out, ensure_ascii=False, indent=1) + \"\\n\", encoding=\"utf-8\", newline=\"\\n\")\nprint(json.dumps({m: v for m, v in out[\"models\"].items()}, ensure_ascii=False))\nprint(out[\"providers\"], perf_before and perf_before[\"mean\"], out[\"cpu_perf_pct_after\"] and out[\"cpu_perf_pct_after\"][\"mean\"])\n",
+ "enhance_eval_speed_alone": {
+  "command": "python -m xla.eval.enhance_eval speed",
+  "created": "2026-11-18T17:22:09+00:00",
+  "measured": {
+   "classic": {
+    "p50": 9.2327,
+    "p95": 11.535105,
+    "mean": 9.323147,
+    "n": 100,
+    "warmup": 10,
+    "device": "CPU",
+    "runtime": "python (hàm cổ điển)"
+   },
+   "net": {
+    "p50": 11.10635,
+    "p95": 11.31733,
+    "mean": 11.176343,
+    "n": 100,
+    "warmup": 10,
+    "providers_active": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ],
+    "runtime": "onnxruntime 1.24.4"
+   }
+  },
+  "cpu_threads": {
+   "cv2": 4,
+   "ort_intra_op": 4,
+   "torch": 4
+  }
+ },
+ "enhance_eval_all_speed": {
+  "measured": {
+   "classic": {
+    "p50": 9.6779,
+    "p95": 12.137155,
+    "mean": 9.763243,
+    "n": 100,
+    "warmup": 10,
+    "device": "CPU",
+    "runtime": "python (hàm cổ điển)"
+   },
+   "net": {
+    "p50": 21.04425,
+    "p95": 25.832315,
+    "mean": 21.60342,
+    "n": 100,
+    "warmup": 10,
+    "providers_active": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ],
+    "runtime": "onnxruntime 1.24.4"
+   }
+  },
+  "note": "trong lệnh all, ngay sau physical + flicker (~4 phút GPU chạy liên tục cùng tiến trình)"
+ },
+ "summary": "mạng (ORT CUDA EP): p50 11,1 ms khi đo riêng (3 lần: ms_remeasure test100/dev300, enhance_eval speed riêng), 21,0 ms trong lệnh all sau ~4 phút GPU chạy liên tục; cả hai ≤ 30 ms. detector: p50 20,0 ms, p95 20,3 ms (khớp meta 19,985/20,223). cổ điển (CPU, cv2 4 luồng): p50 9,2–9,7 ms. Cột ms của CSV E4 (~37 ms COCO .pt, ~47 ms bundle) là thời gian trong vòng xen kẽ 3 biến thể × 2 detector, không phải số ms chính thức."
+}

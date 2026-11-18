@@ -1,0 +1,58 @@
+{
+ "contract_version": "1.0",
+ "model": "detector",
+ "version": "1.0.0",
+ "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+ "frame_size": [
+  640,
+  480
+ ],
+ "crop_left": 16,
+ "camera_profile_version": "1.2.0",
+ "imgsz": 1280,
+ "score_floor": 0.05,
+ "nms_iou": 0.5,
+ "max_det": 100,
+ "conf_threshold": 0.07669,
+ "input_variant": "raw",
+ "train_run": "e2/r1",
+ "metrics": {
+  "map50": 0.119542,
+  "map50_95": 0.042457,
+  "precision": 0.188498,
+  "recall": 0.395973,
+  "fp_per_neg_frame": 0.30719
+ },
+ "ms_per_frame": {
+  "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
+  "p50": 19.985,
+  "p95": 20.223,
+  "n_frames": 300,
+  "warmup": 30,
+  "cpu_perf_pct": {
+   "counter": "\\Processor Information(_Total)\\% Processor Performance",
+   "min": 159.8,
+   "mean": 168.1,
+   "window_s": 60,
+   "throttled": false
+  }
+ },
+ "created": "2026-11-18T16:54:48+00:00",
+ "golden_sources": [
+  "20261102-100941_004_01748.jpg",
+  "20261102-100941_007_00497.jpg",
+  "20261102-100941_007_00820.jpg"
+ ],
+ "export": {
+  "tool": "xla.detect.export_onnx",
+  "weights": "best_devval.pt",
+  "weights_sha256": "7e37476576683bf5205863256f095fb0c8e1e46d5fea65d1e744bedfa310ade5",
+  "ultralytics": "8.4.215",
+  "onnx": "1.23.2",
+  "opset": 17,
+  "onnxsim": true,
+  "nms": "ONNX NonMaxSuppression",
+  "parity_pass": true
+ }
+}

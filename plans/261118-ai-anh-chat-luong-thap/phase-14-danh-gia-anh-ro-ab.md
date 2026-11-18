@@ -2,7 +2,13 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 09, 11, 12, 13 | M (~1,5 ngày agent + ~10 phút chủ dự án), ~1 giờ GPU (chưa xác minh) | Không |
+| xong 19/11/2026 (cổng cuối "PR #2 merge": xem dưới) | phase 09, 11, 12, 13 | M (~1,5 ngày agent + ~10 phút chủ dự án), ~1 giờ GPU (chưa xác minh) | Không |
+
+Kết quả (19/11/2026, `9fbdbba` → `8ed4930`): E4 giữ D5 `raw` (bundle: mạng − gốc −0,085 [−0,139; −0,011]). A/B lần 1 (cả
+khung): mạng vs gốc 11/25, vs cổ điển 1/25; lần 2 (phóng to 2×): 13/25 và 5/25; quanh người gộp hai lần 17/21 (mô tả hậu
+kiểm). Mạng đạt 3/7 tiêu chí §8 nhánh A → **không ship `enhancer-v1.0.0` làm ảnh rõ mặc định**; hướng sửa ở
+`results/ab/README.md` §4.6. Chi tiết: `results/ab/README.md` §4, `results/ab-zoom/README.md`, `results/e4/e4.json`,
+`results/enhance/enhance_eval.json`. Giờ GPU: không đo. PR #2 (`feat/ai-anh-chat-luong-thap` → `main`, https://github.com/Localhost218/XLA/pull/2) do Owner mở 19/11; file này nằm trong chính PR đó, nên có trên `main` nghĩa là cổng đã qua.
 
 Lane: serial
 Depends-on: 09, 11, 12, 13

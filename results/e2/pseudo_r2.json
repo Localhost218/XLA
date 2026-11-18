@@ -1,0 +1,223 @@
+{
+ "phase": "11",
+ "round": 2,
+ "created": "2026-11-18T16:00:35+00:00",
+ "teacher": "r1",
+ "teacher_weights": "D:/DevCache/runs/xla/e2/r1/weights/best_devval.pt",
+ "teacher_sha256": "7e37476576683bf5205863256f095fb0c8e1e46d5fea65d1e744bedfa310ade5",
+ "teacher_rule": "precision_min trước, rồi recall nhãn giả trên dev-val (_quality_key)",
+ "candidates": {
+  "r1": {
+   "weights": "D:/DevCache/runs/xla/e2/r1/weights/best_devval.pt",
+   "weights_sha256": "7e37476576683bf5205863256f095fb0c8e1e46d5fea65d1e744bedfa310ade5",
+   "tau_high": 0.75,
+   "tau_high_rule": "không τ nào đạt 0.9: lấy precision cao nhất",
+   "devval_quality": {
+    "precision": 0.8571428571428571,
+    "recall": 0.11214953271028037,
+    "tp": 12,
+    "fp": 2,
+    "gt": 107,
+    "frames_used": 89,
+    "frames_devval": 100
+   },
+   "grid": [
+    {
+     "tau_high": 0.1,
+     "precision": 0.3902439024390244,
+     "recall": 0.2318840579710145,
+     "tp": 16,
+     "fp": 25,
+     "gt": 69,
+     "frames_used": 71,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.15,
+     "precision": 0.425531914893617,
+     "recall": 0.23255813953488372,
+     "tp": 20,
+     "fp": 27,
+     "gt": 86,
+     "frames_used": 81,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.2,
+     "precision": 0.46938775510204084,
+     "recall": 0.24731182795698925,
+     "tp": 23,
+     "fp": 26,
+     "gt": 93,
+     "frames_used": 83,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.25,
+     "precision": 0.5,
+     "recall": 0.22916666666666666,
+     "tp": 22,
+     "fp": 22,
+     "gt": 96,
+     "frames_used": 84,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.3,
+     "precision": 0.5121951219512195,
+     "recall": 0.21875,
+     "tp": 21,
+     "fp": 20,
+     "gt": 96,
+     "frames_used": 85,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.35,
+     "precision": 0.5789473684210527,
+     "recall": 0.20952380952380953,
+     "tp": 22,
+     "fp": 16,
+     "gt": 105,
+     "frames_used": 87,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.4,
+     "precision": 0.7857142857142857,
+     "recall": 0.20754716981132076,
+     "tp": 22,
+     "fp": 6,
+     "gt": 106,
+     "frames_used": 88,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.45,
+     "precision": 0.7857142857142857,
+     "recall": 0.20754716981132076,
+     "tp": 22,
+     "fp": 6,
+     "gt": 106,
+     "frames_used": 88,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.5,
+     "precision": 0.7857142857142857,
+     "recall": 0.20754716981132076,
+     "tp": 22,
+     "fp": 6,
+     "gt": 106,
+     "frames_used": 88,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.55,
+     "precision": 0.7857142857142857,
+     "recall": 0.20754716981132076,
+     "tp": 22,
+     "fp": 6,
+     "gt": 106,
+     "frames_used": 88,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.6,
+     "precision": 0.84,
+     "recall": 0.19811320754716982,
+     "tp": 21,
+     "fp": 4,
+     "gt": 106,
+     "frames_used": 88,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.65,
+     "precision": 0.8333333333333334,
+     "recall": 0.18867924528301888,
+     "tp": 20,
+     "fp": 4,
+     "gt": 106,
+     "frames_used": 88,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.7,
+     "precision": 0.8,
+     "recall": 0.11214953271028037,
+     "tp": 12,
+     "fp": 3,
+     "gt": 107,
+     "frames_used": 89,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.75,
+     "precision": 0.8571428571428571,
+     "recall": 0.11214953271028037,
+     "tp": 12,
+     "fp": 2,
+     "gt": 107,
+     "frames_used": 89,
+     "frames_devval": 100
+    },
+    {
+     "tau_high": 0.8,
+     "precision": 0.8333333333333334,
+     "recall": 0.09345794392523364,
+     "tp": 10,
+     "fp": 2,
+     "gt": 107,
+     "frames_used": 89,
+     "frames_devval": 100
+    }
+   ],
+   "gpu_s": 111.0
+  }
+ },
+ "tta": true,
+ "n_sequences": 47,
+ "seq_len": {
+  "min": 1,
+  "median": 7.0,
+  "max": 184,
+  "n_frames": 1115
+ },
+ "tau_high": 0.75,
+ "tau_high_rule": "không τ nào đạt 0.9: lấy precision cao nhất",
+ "tau_low": 0.05,
+ "min_track_len": 3,
+ "devval_quality": {
+  "precision": 0.8571428571428571,
+  "recall": 0.11214953271028037,
+  "tp": 12,
+  "fp": 2,
+  "gt": 107,
+  "frames_used": 89,
+  "frames_devval": 100
+ },
+ "gpu_s": 111.0,
+ "dataset": {
+  "set": "d2+e2_r2",
+  "yaml": "D:/DevCache/datasets/xla/e2_r2/dataset.yaml",
+  "train_txt_sha256": "e793945cd656705f4124e0dbcc921c05154024a32acf1a054ed16ab54b70bf06",
+  "n_images": {
+   "train": 4452,
+   "val": 487
+  },
+  "n_source": 3006,
+  "n_target_frames": 573,
+  "n_target_with_box": 102,
+  "n_target_boxes": 154,
+  "target_repeat": 2,
+  "n_neg_frames": 300,
+  "dropped_dev": {
+   "devval": 100,
+   "devval_buffer": 428,
+   "rules": 26
+  },
+  "test_frames_in_train": 0,
+  "devval_frames_in_train": 0
+ }
+}

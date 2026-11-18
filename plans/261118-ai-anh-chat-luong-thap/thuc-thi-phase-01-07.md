@@ -81,3 +81,35 @@ Phase 06 tính khoảng cách thống kê trên đúng các khoá của `measure
 - Chọn phương án đầu tiên được khuyến nghị trong plan khi có nhiều lựa chọn; ghi lại trong báo cáo cuối của lane.
 - Tải dataset > 2 phút: chạy thử 1 file, ghi cỡ + thời gian ước vào báo cáo rồi **cứ tải tiếp** (Owner duyệt trước).
 - Ổ D còn ~57 GB lúc bắt đầu: giữ tối thiểu 10 GB trống; NOMAD giải nén xong thì được xoá file zip nếu ổ D < 15 GB (ghi sha256 trước).
+
+## 7. Trạng thái sau phase 01–09 (cập nhật 18/11/2026 12:30, sau các lần máy sập)
+
+Phase 01–09 **xong**, kể cả hiệu chỉnh D2 vòng 2. Tất cả nằm trên nhánh tích hợp `feat/ai-anh-chat-luong-thap` (đã đẩy;
+toàn bộ test **179 passed**, gồm 14 test marker `data`; ruff sạch). PR #1 (phase 01+02) đã merge vào `main`; PR #2 theo D12
+là sau phase 14. Worktree lane còn ở `D:\XLA-wt\` (data, degrade, realism, labels, baseline), đều đã gộp và sạch; giữ lại
+để tiếp tục, xoá khi không cần.
+
+Số chính:
+- Split: dev 1 115 / test 198 / neg 300 (seed 20261118). Nhãn test chủ dự án duyệt: 39 khung có người, 149 hộp; dev-val
+  100 khung, 115 hộp (chỉ agent soát; chủ dự án sửa 25,8 % hộp test của agent, chủ yếu ranh giới).
+- Hồ sơ camera v1.2.0. D2 **`params_version` 3**: vòng 1 CMA-ES 155 lượt (0,967 → 0,736), vòng 2 nới cận + mức đen dư,
+  80 lượt (0,736 → 0,712). Gain Real-SR 0,4. Tập D0/D1/D2/D2+RealSR ở `D:\DevCache\datasets\xla\` (3 493 ảnh/tập; train
+  3 006, val 487); D2 và D2+RealSR đã sinh lại theo v3.
+- Độ giống thật trên khung test (v3): thống kê D1 5,93 / D2 0,80 / D2+RealSR 0,66 / thật–thật 0,33; KID D1 4,44 / D2 4,41
+  (CI chồng D1) / D2+RealSR 3,99 [3,82; 4,17] (CI không chồng D1) / thật–thật 0,37. Vòng 2 không đổi kết luận trên test.
+- Mốc `edge16` (YOLO11s COCO, bỏ hộp chạm mép): mAP50 0,126 [0,030–0,224], 23,3 ms p95 lúc máy rảnh. Tiêu chí nhánh B
+  sau M2: `results/baseline/tieu-chi-sau-m2.md` (B1 ≥ 0,227 và cận dưới CI hiệu ghép cặp > 0; B2 ≤ 0,05 hộp/khung âm ở
+  ngưỡng dev-val; B3 ≤ 30 ms p95). Lệnh so ghép cặp: `python -m xla.eval.detection compare --pred-a --pred-b --split test --json`.
+- `python -m xla.detect.baseline score` chạy lại 18/11 12:22 lúc máy rảnh: exit 0, mọi chỉ số trùng `baseline.json` đã
+  commit (chỉ khác giờ chạy và đường dẫn tuyệt đối). Lần exit 1 trước đó không lặp lại; nghi do thiếu bộ nhớ khi máy đang
+  chạy hiệu chỉnh song song, chưa xác minh.
+
+**Máy sập (18/11):** 4 lần màn hình xanh khi chạy hiệu chỉnh 16 rồi 8 tiến trình, cộng 1 lần treo màn đen vì hết commit.
+kd đọc minidump: 2 lần `MEMORY_CORRUPTION_ONE_BIT` (một lần trong VS Code), 2 lần còn lại cũng trong bộ quản lý bộ nhớ
+của Windows, không có driver bên thứ ba. Gốc là RAM lật bit dưới tải nặng (RAM lắp lệch Micron 32 GB + Samsung 8 GB); chưa
+chạy memtest. Chủ dự án chốt: job CPU nặng **tối đa 4 worker**, checkpoint mỗi lượt. Vòng 2 chạy 4 worker 37 phút không sập.
+`git fsck` sau mỗi lần sập đều sạch.
+
+**Việc tiếp theo:** → 19/11/2026: phase 01–14 đã xong. Trạng thái, SHA và kết quả cuối của phase 10–14 ở
+`thuc-thi-phase-10-14.md` §7; việc còn lại là phase 15–18 theo `plan.md`. Human step DQT ở q 19–40 (Deferred 1) vẫn mở,
+không chặn plan.

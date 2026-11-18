@@ -1,0 +1,36 @@
+{
+ "recording": "20261102-100941",
+ "flight": {
+  "flights": 6,
+  "avi_chunks_total": 17775,
+  "csv_rows": 11908,
+  "avi_chunks_without_csv_row": 5867,
+  "csv_rows_with_jpeg": 11908,
+  "in_flight_window": 4769,
+  "alt_gt_3m": 2944,
+  "not_spike": 2915,
+  "spikes_removed": 29,
+  "undecodable": 0,
+  "final": 2915
+ },
+ "neg": {
+  "candidates_1_per_2s": 2719,
+  "final": 300
+ },
+ "expected_flight_frames": 2944,
+ "expected_range": [
+  2650,
+  3238
+ ],
+ "within_expected": true,
+ "stale_removed": 0,
+ "frames_total_bytes": 67165298,
+ "per_flight": {
+  "20261102-101046": 371,
+  "20261102-101435": 616,
+  "20261102-102319": 241,
+  "20261102-102636": 323,
+  "20261102-103039": 530,
+  "20261102-104039": 834
+ }
+}

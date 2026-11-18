@@ -1,0 +1,40 @@
+# D1: làm xấu ngẫu nhiên bậc hai kiểu Real-ESRGAN (Wang et al. 2021, options/train_realesrgan_x4plus.yml).
+# Đối chứng "không đo": KHÔNG đọc configs/camera_profile.yaml. Đọc bằng xla/degrade/d1_random.py.
+#
+# Chỗ khác Real-ESRGAN (quyết định phase 05, ghi để phase 07/10 biết):
+# - Real-ESRGAN làm xấu ảnh HR rồi hạ x4 ở cuối; ở đây ảnh đã ở đúng cỡ đích (624x480, người cỡ camera), không có
+#   bước hạ x4 cuối, nên dải resize thu hẹp (0.15–1.5 → 0.5–1.5; 0.3–1.2 → 0.5–1.2) để người 21–139 px không bị xoá
+#   sạch. Nhòe, nhiễu, JPEG giữ đúng khoảng gốc.
+# - Kernel chỉ Gauss đẳng hướng / bất đẳng hướng (bỏ generalized/plateau/sinc) theo phase 05 bước 4.
+# - JPEG bằng cv2 (IJG, 4:2:0) Q ngẫu nhiên; JPEG vòng hai là lần ghi file (không nén lại lần nữa).
+
+stage1:
+  blur_prob: 1.0
+  kernel_size: [7, 21]           # lẻ
+  aniso_prob: 0.5
+  sigma: [0.2, 3.0]
+  resize_prob: [0.2, 0.7, 0.1]   # lên, xuống, giữ
+  resize_range: [0.5, 1.5]
+  gaussian_noise_prob: 0.5
+  noise_range: [1, 30]           # σ thang 0–255
+  poisson_scale_range: [0.05, 3.0]
+  gray_noise_prob: 0.4
+  jpeg_range: [30, 95]
+
+stage2:
+  blur_prob: 0.8
+  kernel_size: [7, 21]
+  aniso_prob: 0.5
+  sigma: [0.2, 1.5]
+  resize_prob: [0.3, 0.4, 0.3]
+  resize_range: [0.5, 1.2]
+  gaussian_noise_prob: 0.5
+  noise_range: [1, 25]
+  poisson_scale_range: [0.05, 2.5]
+  gray_noise_prob: 0.4
+  jpeg_range: [30, 95]
+
+strip:                           # "16 cột đen ngẫu nhiên" (không theo đo đạc)
+  dark_width_px: [8, 16]
+  dark_level_0_255: [0, 60]
+  noise_0_255: 3.0

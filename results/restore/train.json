@@ -1,0 +1,590 @@
+{
+  "smoke": {
+    "run_id": "nafnet_w16-smoke",
+    "smoke": true,
+    "candidate": "nafnet",
+    "params": 1137203,
+    "steps": 500,
+    "batch": 16,
+    "lr": 0.001,
+    "patch": 256,
+    "s_per_step": 0.4536609625816345,
+    "hours_per_1000_steps": 0.12601693405045403,
+    "vram_peak_gb": 3.461998462677002,
+    "gpu_seconds": 257.2757318019867,
+    "wait_lock_seconds": 4293.680722475052,
+    "cpu_perf_gate": {
+      "ok": true,
+      "min": 96.5,
+      "mean": 113.1,
+      "window_s": 10,
+      "at": "2026-11-18T10:56:16+00:00",
+      "waited_s": 10.6,
+      "throttled": false
+    },
+    "val_synthetic": [
+      {
+        "step": 0,
+        "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+        "n": 100,
+        "psnr": 10.220185839751844,
+        "ssim": 0.2547586192935705,
+        "psnr_input": 14.141917645295687,
+        "ssim_input": 0.6359054046869278
+      },
+      {
+        "step": 500,
+        "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+        "n": 100,
+        "psnr": 19.99016024513933,
+        "ssim": 0.7674571174383163,
+        "psnr_input": 14.141917645295687,
+        "ssim_input": 0.6359054046869278
+      }
+    ],
+    "run_dir": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-smoke",
+    "finished": "2026-11-18T12:12:07+00:00"
+  },
+  "train": {
+    "run_id": "nafnet_w16-train",
+    "smoke": false,
+    "candidate": "nafnet",
+    "params": 1137203,
+    "steps": 4500,
+    "batch": 16,
+    "lr": 0.001,
+    "patch": 256,
+    "s_per_step": 0.3231654365857442,
+    "hours_per_1000_steps": 0.0897681768293734,
+    "vram_peak_gb": 3.461998462677002,
+    "gpu_seconds": 1872.4869256019592,
+    "wait_lock_seconds": 94.02273154258728,
+    "cpu_perf_gate": {
+      "ok": true,
+      "min": 166.5,
+      "mean": 172.7,
+      "window_s": 10,
+      "at": "2026-11-18T15:58:38+00:00",
+      "waited_s": 11.0,
+      "throttled": false
+    },
+    "val_synthetic": [
+      {
+        "step": 4000,
+        "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+        "n": 100,
+        "psnr": 22.730708349182624,
+        "ssim": 0.8098858040571213,
+        "psnr_input": 14.141917645295687,
+        "ssim_input": 0.6359054046869278
+      },
+      {
+        "step": 4500,
+        "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+        "n": 487,
+        "psnr": 22.674718934349887,
+        "ssim": 0.8050794073933204,
+        "psnr_input": 13.91911331278333,
+        "ssim_input": 0.6276742730297347
+      }
+    ],
+    "run_dir": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train",
+    "finished": "2026-11-18T16:08:53+00:00",
+    "workers_by_steps": {
+      "0-2200": 4,
+      "2200-3000": 2,
+      "3000-4500": 2,
+      "note": "bước 0-2200 workers 4 (configs/restore.yaml); hai lần resume dùng --workers 2 vì máy ảo VMware chiếm RAM rồi theo lệnh chủ dự án; lệnh đổi sang workers 4 tới khi train đã xong nên không áp"
+    }
+  },
+  "select": {
+    "run_id": "nafnet_w16-train",
+    "split": "dev",
+    "n_runs": 60,
+    "n_frames_flicker": 1086,
+    "n_frames_stats": 362,
+    "raw_stats": {
+      "pink_frac": 0.007059803973650658,
+      "dark_channel_15px": 142.95363924821152,
+      "blocking_ratio_8x8": 2.729008926212458
+    },
+    "flicker_max": 1.15,
+    "rule": "điểm = pink_frac_drop + dark_channel_drop + blocking_excess_drop (cao hơn tốt hơn). Có checkpoint huấn luyện qua flicker_ratio ≤ flicker_max → điểm cao nhất trong số đó. Không checkpoint nào qua → checkpoint huấn luyện có flicker_ratio thấp nhất (hoà thì điểm cao hơn), ghi rõ ngưỡng không đạt",
+    "chosen_how": "không checkpoint nào qua flicker_max: chọn flicker_ratio thấp nhất (điểm cao nhất là step_001000)",
+    "checkpoints": [
+      {
+        "checkpoint": "step_001000",
+        "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_001000.pt",
+        "flicker_ratio": 2.0969274819668664,
+        "stats": {
+          "pink_frac": 9.554882655711384e-06,
+          "dark_channel_15px": 74.59155010816569,
+          "blocking_ratio_8x8": 1.7772931041638496
+        },
+        "pink_frac_drop": 0.9986465796088144,
+        "dark_channel_drop": 0.4782116041225659,
+        "blocking_excess_drop": 0.5504400860054687,
+        "score": 2.027298269736849,
+        "pass_flicker": false
+      },
+      {
+        "checkpoint": "step_002000",
+        "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_002000.pt",
+        "flicker_ratio": 1.9080406262881948,
+        "stats": {
+          "pink_frac": 6.21620744203617e-06,
+          "dark_channel_15px": 87.96995249489423,
+          "blocking_ratio_8x8": 1.6903058030328697
+        },
+        "pink_frac_drop": 0.999119492911526,
+        "dark_channel_drop": 0.38462600212540715,
+        "blocking_excess_drop": 0.6007505845877594,
+        "score": 1.9844960796246927,
+        "pass_flicker": false
+      },
+      {
+        "checkpoint": "step_003000",
+        "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_003000.pt",
+        "flicker_ratio": 1.8541354105482493,
+        "stats": {
+          "pink_frac": 4.17795544694716e-06,
+          "dark_channel_15px": 91.13621245189357,
+          "blocking_ratio_8x8": 1.61218542815572
+        },
+        "pink_frac_drop": 0.999408205176441,
+        "dark_channel_drop": 0.3624771434209306,
+        "blocking_excess_drop": 0.6459327543804158,
+        "score": 2.0078181029777875,
+        "pass_flicker": false
+      },
+      {
+        "checkpoint": "step_004000",
+        "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_004000.pt",
+        "flicker_ratio": 1.8149060193093085,
+        "stats": {
+          "pink_frac": 4.150286867828304e-06,
+          "dark_channel_15px": 93.33326703019489,
+          "blocking_ratio_8x8": 1.6208088463841221
+        },
+        "pink_frac_drop": 0.999412124347458,
+        "dark_channel_drop": 0.3471081427445187,
+        "blocking_excess_drop": 0.6409452623567091,
+        "score": 1.9874655294486858,
+        "pass_flicker": false
+      },
+      {
+        "checkpoint": "step_004500",
+        "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_004500.pt",
+        "flicker_ratio": 1.77937680071577,
+        "stats": {
+          "pink_frac": 4.030389691646597e-06,
+          "dark_channel_15px": 94.92902388757555,
+          "blocking_ratio_8x8": 1.626353887233945
+        },
+        "pink_frac_drop": 0.9994291074218649,
+        "dark_channel_drop": 0.335945384903776,
+        "blocking_excess_drop": 0.6377381991855724,
+        "score": 1.9731126915112134,
+        "pass_flicker": false
+      }
+    ],
+    "chosen": "step_004500",
+    "chosen_path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_004500.pt",
+    "gpu_seconds": 136.3957016468048,
+    "wait_lock_seconds": 1242.210209608078
+  },
+  "runs": {
+    "nafnet-smoke": {
+      "smoke": {
+        "run_id": "nafnet-smoke",
+        "smoke": true,
+        "candidate": "nafnet",
+        "params": 29159715,
+        "steps": 500,
+        "batch": 4,
+        "patch": 256,
+        "s_per_step": 1.1960143871307374,
+        "hours_per_1000_steps": 0.332226218647427,
+        "vram_peak_gb": 4.458876132965088,
+        "gpu_seconds": 655.6024215221405,
+        "wait_lock_seconds": 2556.8719778060913,
+        "cpu_perf_gate": {
+          "ok": true,
+          "min": 81.1,
+          "mean": 120.4,
+          "window_s": 10,
+          "at": "2026-11-18T08:55:12+00:00",
+          "waited_s": 11.0,
+          "throttled": false
+        },
+        "val_synthetic": [
+          {
+            "step": 0,
+            "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+            "n": 100,
+            "psnr": 14.048787197480042,
+            "ssim": 0.6131219804286957,
+            "psnr_input": 14.141917645295687,
+            "ssim_input": 0.6359054046869278
+          },
+          {
+            "step": 500,
+            "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+            "n": 100,
+            "psnr": 20.575090170123016,
+            "ssim": 0.7948496979475022,
+            "psnr_input": 14.141917645295687,
+            "ssim_input": 0.6359054046869278
+          }
+        ],
+        "run_dir": "D:\\DevCache\\runs\\xla\\restore\\nafnet-smoke",
+        "finished": "2026-11-18T09:48:44+00:00"
+      }
+    },
+    "nafnet-train": {
+      "train": {
+        "run_id": "nafnet-train",
+        "smoke": false,
+        "candidate": "nafnet",
+        "params": 29159715,
+        "steps": 1500,
+        "batch": 4,
+        "patch": 256,
+        "s_per_step": 1.166695646127065,
+        "hours_per_1000_steps": 0.32408212392418473,
+        "vram_peak_gb": 4.458876132965088,
+        "gpu_seconds": 1957.199025630951,
+        "wait_lock_seconds": 38.01141858100891,
+        "cpu_perf_gate": {
+          "ok": false,
+          "min": 22.5,
+          "mean": 69.5,
+          "window_s": 10,
+          "at": "2026-11-18T09:49:53+00:00",
+          "waited_s": 10.9,
+          "throttled": true
+        },
+        "val_synthetic": [
+          {
+            "step": 0,
+            "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+            "n": 100,
+            "psnr": 14.048787197480042,
+            "ssim": 0.6131219804286957,
+            "psnr_input": 14.141917645295687,
+            "ssim_input": 0.6359054046869278
+          },
+          {
+            "step": 500,
+            "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+            "n": 100,
+            "psnr": 21.33539295338572,
+            "ssim": 0.7913428375124931,
+            "psnr_input": 14.141917645295687,
+            "ssim_input": 0.6359054046869278
+          },
+          {
+            "step": 1000,
+            "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+            "n": 100,
+            "psnr": 22.39301568433957,
+            "ssim": 0.8188753747940063,
+            "psnr_input": 14.141917645295687,
+            "ssim_input": 0.6359054046869278
+          },
+          {
+            "step": 1500,
+            "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+            "n": 487,
+            "psnr": 22.829751184527964,
+            "ssim": 0.8134558200836182,
+            "psnr_input": 13.91911331278333,
+            "ssim_input": 0.6276742730297347
+          }
+        ],
+        "run_dir": "D:\\DevCache\\runs\\xla\\restore\\nafnet-train",
+        "finished": "2026-11-18T10:23:08+00:00"
+      },
+      "select": {
+        "run_id": "nafnet-train",
+        "split": "dev",
+        "n_runs": 60,
+        "n_frames_flicker": 1086,
+        "n_frames_stats": 362,
+        "raw_stats": {
+          "pink_frac": 0.007059803973650658,
+          "dark_channel_15px": 142.95363924821152,
+          "blocking_ratio_8x8": 2.729008926212458
+        },
+        "flicker_max": 1.15,
+        "rule": "điểm = pink_frac_drop + dark_channel_drop + blocking_excess_drop (cao hơn tốt hơn). Có checkpoint huấn luyện qua flicker_ratio ≤ flicker_max → điểm cao nhất trong số đó. Không checkpoint nào qua → checkpoint huấn luyện có flicker_ratio thấp nhất (hoà thì điểm cao hơn), ghi rõ ngưỡng không đạt",
+        "checkpoints": [
+          {
+            "checkpoint": "pretrained",
+            "path": null,
+            "flicker_ratio": 0.9036732769125037,
+            "stats": {
+              "pink_frac": 0.007026574010128913,
+              "dark_channel_15px": 145.39260698332802,
+              "blocking_ratio_8x8": 1.466802100120987
+            },
+            "pink_frac_drop": 0.0047069243913527145,
+            "dark_channel_drop": -0.017061249702651552,
+            "blocking_excess_drop": 0.7300175302486397,
+            "score": 0.7176632049373408,
+            "pass_flicker": true
+          },
+          {
+            "checkpoint": "step_000500",
+            "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet-train\\step_000500.pt",
+            "flicker_ratio": 2.0074182021017943,
+            "stats": {
+              "pink_frac": 0.0021649187502951316,
+              "dark_channel_15px": 87.77010730059439,
+              "blocking_ratio_8x8": 1.5199425454297777
+            },
+            "pink_frac_drop": 0.6933457701693604,
+            "dark_channel_drop": 0.38602397419069223,
+            "blocking_excess_drop": 0.6992829027385322,
+            "score": 1.7786526470985846,
+            "pass_flicker": false
+          },
+          {
+            "checkpoint": "step_001000",
+            "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet-train\\step_001000.pt",
+            "flicker_ratio": 1.6760480582107855,
+            "stats": {
+              "pink_frac": 0.0005138516285356754,
+              "dark_channel_15px": 102.26208096859209,
+              "blocking_ratio_8x8": 1.482316688608728
+            },
+            "pink_frac_drop": 0.9272144622636086,
+            "dark_channel_drop": 0.2846486349953383,
+            "blocking_excess_drop": 0.7210444195535277,
+            "score": 1.9329075168124745,
+            "pass_flicker": false
+          },
+          {
+            "checkpoint": "step_001500",
+            "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet-train\\step_001500.pt",
+            "flicker_ratio": 1.6469115286225906,
+            "stats": {
+              "pink_frac": 0.00047251477133210555,
+              "dark_channel_15px": 103.91052734098314,
+              "blocking_ratio_8x8": 1.4451584657911438
+            },
+            "pink_frac_drop": 0.9330697037629267,
+            "dark_channel_drop": 0.2731172995144077,
+            "blocking_excess_drop": 0.7425354727541509,
+            "score": 1.9487224760314854,
+            "pass_flicker": false
+          }
+        ],
+        "chosen": "step_001500",
+        "chosen_path": "D:\\DevCache\\runs\\xla\\restore\\nafnet-train\\step_001500.pt",
+        "gpu_seconds": 642.5004086494446,
+        "wait_lock_seconds": 0.0009999275207519531,
+        "chosen_how": "không checkpoint nào qua flicker_max: chọn flicker_ratio thấp nhất (cũng là điểm cao nhất)"
+      }
+    },
+    "nafnet_w16-smoke": {
+      "smoke": {
+        "run_id": "nafnet_w16-smoke",
+        "smoke": true,
+        "candidate": "nafnet",
+        "params": 1137203,
+        "steps": 500,
+        "batch": 16,
+        "lr": 0.001,
+        "patch": 256,
+        "s_per_step": 0.4536609625816345,
+        "hours_per_1000_steps": 0.12601693405045403,
+        "vram_peak_gb": 3.461998462677002,
+        "gpu_seconds": 257.2757318019867,
+        "wait_lock_seconds": 4293.680722475052,
+        "cpu_perf_gate": {
+          "ok": true,
+          "min": 96.5,
+          "mean": 113.1,
+          "window_s": 10,
+          "at": "2026-11-18T10:56:16+00:00",
+          "waited_s": 10.6,
+          "throttled": false
+        },
+        "val_synthetic": [
+          {
+            "step": 0,
+            "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+            "n": 100,
+            "psnr": 10.220185839751844,
+            "ssim": 0.2547586192935705,
+            "psnr_input": 14.141917645295687,
+            "ssim_input": 0.6359054046869278
+          },
+          {
+            "step": 500,
+            "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+            "n": 100,
+            "psnr": 19.99016024513933,
+            "ssim": 0.7674571174383163,
+            "psnr_input": 14.141917645295687,
+            "ssim_input": 0.6359054046869278
+          }
+        ],
+        "run_dir": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-smoke",
+        "finished": "2026-11-18T12:12:07+00:00"
+      }
+    },
+    "nafnet_w16-train": {
+      "train": {
+        "run_id": "nafnet_w16-train",
+        "smoke": false,
+        "candidate": "nafnet",
+        "params": 1137203,
+        "steps": 4500,
+        "batch": 16,
+        "lr": 0.001,
+        "patch": 256,
+        "s_per_step": 0.3231654365857442,
+        "hours_per_1000_steps": 0.0897681768293734,
+        "vram_peak_gb": 3.461998462677002,
+        "gpu_seconds": 1872.4869256019592,
+        "wait_lock_seconds": 94.02273154258728,
+        "cpu_perf_gate": {
+          "ok": true,
+          "min": 166.5,
+          "mean": 172.7,
+          "window_s": 10,
+          "at": "2026-11-18T15:58:38+00:00",
+          "waited_s": 11.0,
+          "throttled": false
+        },
+        "val_synthetic": [
+          {
+            "step": 4000,
+            "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+            "n": 100,
+            "psnr": 22.730708349182624,
+            "ssim": 0.8098858040571213,
+            "psnr_input": 14.141917645295687,
+            "ssim_input": 0.6359054046869278
+          },
+          {
+            "step": 4500,
+            "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+            "n": 487,
+            "psnr": 22.674718934349887,
+            "ssim": 0.8050794073933204,
+            "psnr_input": 13.91911331278333,
+            "ssim_input": 0.6276742730297347
+          }
+        ],
+        "run_dir": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train",
+        "finished": "2026-11-18T16:08:53+00:00",
+        "workers_by_steps": {
+          "0-2200": 4,
+          "2200-3000": 2,
+          "3000-4500": 2,
+          "note": "bước 0-2200 workers 4 (configs/restore.yaml); hai lần resume dùng --workers 2 vì máy ảo VMware chiếm RAM rồi theo lệnh chủ dự án; lệnh đổi sang workers 4 tới khi train đã xong nên không áp"
+        }
+      },
+      "select": {
+        "run_id": "nafnet_w16-train",
+        "split": "dev",
+        "n_runs": 60,
+        "n_frames_flicker": 1086,
+        "n_frames_stats": 362,
+        "raw_stats": {
+          "pink_frac": 0.007059803973650658,
+          "dark_channel_15px": 142.95363924821152,
+          "blocking_ratio_8x8": 2.729008926212458
+        },
+        "flicker_max": 1.15,
+        "rule": "điểm = pink_frac_drop + dark_channel_drop + blocking_excess_drop (cao hơn tốt hơn). Có checkpoint huấn luyện qua flicker_ratio ≤ flicker_max → điểm cao nhất trong số đó. Không checkpoint nào qua → checkpoint huấn luyện có flicker_ratio thấp nhất (hoà thì điểm cao hơn), ghi rõ ngưỡng không đạt",
+        "chosen_how": "không checkpoint nào qua flicker_max: chọn flicker_ratio thấp nhất (điểm cao nhất là step_001000)",
+        "checkpoints": [
+          {
+            "checkpoint": "step_001000",
+            "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_001000.pt",
+            "flicker_ratio": 2.0969274819668664,
+            "stats": {
+              "pink_frac": 9.554882655711384e-06,
+              "dark_channel_15px": 74.59155010816569,
+              "blocking_ratio_8x8": 1.7772931041638496
+            },
+            "pink_frac_drop": 0.9986465796088144,
+            "dark_channel_drop": 0.4782116041225659,
+            "blocking_excess_drop": 0.5504400860054687,
+            "score": 2.027298269736849,
+            "pass_flicker": false
+          },
+          {
+            "checkpoint": "step_002000",
+            "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_002000.pt",
+            "flicker_ratio": 1.9080406262881948,
+            "stats": {
+              "pink_frac": 6.21620744203617e-06,
+              "dark_channel_15px": 87.96995249489423,
+              "blocking_ratio_8x8": 1.6903058030328697
+            },
+            "pink_frac_drop": 0.999119492911526,
+            "dark_channel_drop": 0.38462600212540715,
+            "blocking_excess_drop": 0.6007505845877594,
+            "score": 1.9844960796246927,
+            "pass_flicker": false
+          },
+          {
+            "checkpoint": "step_003000",
+            "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_003000.pt",
+            "flicker_ratio": 1.8541354105482493,
+            "stats": {
+              "pink_frac": 4.17795544694716e-06,
+              "dark_channel_15px": 91.13621245189357,
+              "blocking_ratio_8x8": 1.61218542815572
+            },
+            "pink_frac_drop": 0.999408205176441,
+            "dark_channel_drop": 0.3624771434209306,
+            "blocking_excess_drop": 0.6459327543804158,
+            "score": 2.0078181029777875,
+            "pass_flicker": false
+          },
+          {
+            "checkpoint": "step_004000",
+            "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_004000.pt",
+            "flicker_ratio": 1.8149060193093085,
+            "stats": {
+              "pink_frac": 4.150286867828304e-06,
+              "dark_channel_15px": 93.33326703019489,
+              "blocking_ratio_8x8": 1.6208088463841221
+            },
+            "pink_frac_drop": 0.999412124347458,
+            "dark_channel_drop": 0.3471081427445187,
+            "blocking_excess_drop": 0.6409452623567091,
+            "score": 1.9874655294486858,
+            "pass_flicker": false
+          },
+          {
+            "checkpoint": "step_004500",
+            "path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_004500.pt",
+            "flicker_ratio": 1.77937680071577,
+            "stats": {
+              "pink_frac": 4.030389691646597e-06,
+              "dark_channel_15px": 94.92902388757555,
+              "blocking_ratio_8x8": 1.626353887233945
+            },
+            "pink_frac_drop": 0.9994291074218649,
+            "dark_channel_drop": 0.335945384903776,
+            "blocking_excess_drop": 0.6377381991855724,
+            "score": 1.9731126915112134,
+            "pass_flicker": false
+          }
+        ],
+        "chosen": "step_004500",
+        "chosen_path": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_004500.pt",
+        "gpu_seconds": 136.3957016468048,
+        "wait_lock_seconds": 1242.210209608078
+      }
+    }
+  },
+  "note": "Khoá smoke/train/select ở gốc = lần mới nhất; runs.<run_id> giữ mọi vòng (vòng 1 width32: nafnet-smoke, nafnet-train)."
+}

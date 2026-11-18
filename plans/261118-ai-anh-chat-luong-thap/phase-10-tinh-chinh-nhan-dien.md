@@ -2,7 +2,12 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 07, 09 | L (~2 ngày agent), 12–30 giờ GPU (chưa xác minh — smoke đo trước) | Không |
+| xong 18/11/2026 | phase 07, 09 | L (~2 ngày agent), 12–30 giờ GPU (chưa xác minh — smoke đo trước) | Không |
+
+Kết quả (18/11/2026, `d1a13a2`, gộp `81a4898`): best theo dev-val = **D2** (dev-val mAP50 0,329). Test mAP50 mốc 0,126 /
+D0 0,297 / D1 0,143 / D2 0,236 / D2+RealSR 0,149; D2 − D1 +0,093 [−0,073; +0,252] (CI chạm 0), riêng báo nhầm khung bay
+D2 − D1 −0,692 [−1,238; −0,246]. B1 chỉ D0 đạt (không được chọn, D10), B2 B3 không model nào đạt; giờ GPU thật 2,85.
+Chi tiết: `results/e1/README.md`, `results/e1/e1.json`.
 
 Lane: detect
 Depends-on: 07, 09

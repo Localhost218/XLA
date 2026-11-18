@@ -124,6 +124,11 @@ altitude_m: {flight_frames: {p5, p50, p95}, filter: "rel_alt_m > 3, bỏ điểm
 `camera_profile.yaml` là **số đo của camera**; tham số chuỗi làm xấu D2 nằm riêng ở `configs/degrade_d2.yaml` (phase 05/07),
 mỗi tham số trỏ tới trường hồ sơ nó khớp.
 
+Nghĩa của `color` (làm rõ 18/11/2026, không đổi tên/kiểu trường nên `contract_version` giữ 1.0): `r_over_g`, `b_over_g`
+là tỉ số trung bình kênh của cả khung (ám màu toàn ảnh); `wb_gain_r_fit`, `wb_gain_b_fit` là **cận dưới** hệ số cân bằng
+trắng của ISP tương đối kênh G, ước từ điểm hồng ở vùng sáng có R (B) ≥ 250: trung vị `R_lin/G_lin` (`B_lin/G_lin`) trong
+sRGB tuyến tính; hệ số thật ≥ số này vì R/B đã bị cắt ở 255 (`xla.camera.measure.clipped_highlight_wb_ratios`).
+
 ## 7. Định dạng chấm điểm
 
 - Nhãn: một `.txt` YOLO mỗi khung, `0 cx cy w h` chuẩn hoá theo **640×480 khung gốc**; khung không người = file rỗng.

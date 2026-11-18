@@ -1,0 +1,106 @@
+{
+  "ckpt": "D:\\DevCache\\runs\\xla\\restore\\nafnet_w16-train\\step_004500.pt",
+  "bundle": "D:\\XLA-wt\\restore\\models\\release\\enhancer-v1.0.0",
+  "half": true,
+  "crop_left": 16,
+  "cpu_perf": {
+    "gate_before": {
+      "ok": true,
+      "min": 158.6,
+      "mean": 169.3,
+      "window_s": 10,
+      "at": "2026-11-18T16:33:25+00:00",
+      "waited_s": 10.5,
+      "throttled": false
+    },
+    "before_ms": {
+      "ok": true,
+      "min": 156.6,
+      "mean": 165.3,
+      "window_s": 10,
+      "at": "2026-11-18T16:33:43+00:00"
+    },
+    "gpu_before_ms": {
+      "temp_c": 72.0,
+      "power_w": 5.04,
+      "sm_mhz": 210.0,
+      "sm_max_mhz": 3105.0,
+      "throttle_reasons": "0x0000000000000001",
+      "pstate": "P8",
+      "at": "2026-11-18T16:33:43+00:00"
+    },
+    "after_ms": {
+      "ok": true,
+      "min": 162.0,
+      "mean": 169.2,
+      "window_s": 10,
+      "at": "2026-11-18T16:34:00+00:00"
+    },
+    "gpu_after_ms": {
+      "temp_c": 72.0,
+      "power_w": 4.36,
+      "sm_mhz": 210.0,
+      "sm_max_mhz": 3105.0,
+      "throttle_reasons": "0x0000000000000001",
+      "pstate": "P8",
+      "at": "2026-11-18T16:34:00+00:00"
+    },
+    "throttled": false,
+    "cpu_perf_pct": {
+      "before": 165.3,
+      "after": 169.2
+    }
+  },
+  "parity": {
+    "n_frames": 20,
+    "frames": [
+      "20261102-100941_002_00382.jpg",
+      "20261102-100941_002_00451.jpg",
+      "20261102-100941_002_00519.jpg",
+      "20261102-100941_002_00574.jpg",
+      "20261102-100941_003_02398.jpg",
+      "20261102-100941_004_01730.jpg",
+      "20261102-100941_004_01865.jpg",
+      "20261102-100941_004_01929.jpg",
+      "20261102-100941_004_01984.jpg",
+      "20261102-100941_005_01084.jpg",
+      "20261102-100941_005_01215.jpg",
+      "20261102-100941_007_00562.jpg",
+      "20261102-100941_007_00627.jpg",
+      "20261102-100941_007_00706.jpg",
+      "20261102-100941_007_00761.jpg",
+      "20261102-100941_007_00816.jpg",
+      "20261102-100941_007_00965.jpg",
+      "20261102-100941_007_01428.jpg",
+      "20261102-100941_007_01607.jpg",
+      "20261102-100941_007_01712.jpg"
+    ],
+    "reference": "PyTorch fp32 (CUDA, TF32 tắt)",
+    "ort_cpu_vs_torch_mae_mean": 0.02661550564236111,
+    "ort_cpu_vs_torch_mae_worst": 0.028910590277777776,
+    "ort_cpu_vs_torch_abs_max": 1,
+    "mae_max_allowed": 1.0,
+    "ort_cuda_vs_cpu_mae_worst": 0.071689453125,
+    "ort_cuda_vs_cpu_abs_max": 1,
+    "cuda_within_golden_tolerance": true
+  },
+  "ms_per_frame": {
+    "device": "RTX 4060 Laptop",
+    "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
+    "p50": 15.419849999943835,
+    "p95": 20.969349999995757,
+    "mean": 16.035179333333264,
+    "min": 12.553900000057183,
+    "n": 300
+  },
+  "gpu_seconds": 35.1,
+  "wait_lock_seconds": 0.0,
+  "errors": [],
+  "parity_ok": true,
+  "onnx_sha256": "1728de3e976112a208ffb43f57113ba3d31f81aa9e6e9ee43cbcc1cf2fff382e",
+  "golden_sources": [
+    "20261102-100941_002_00413.jpg",
+    "20261102-100941_004_01932.jpg",
+    "20261102-100941_007_00750.jpg"
+  ]
+}

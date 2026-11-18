@@ -1,0 +1,40 @@
+# Phase 10 — thí nghiệm E1: fine-tune YOLO11s COCO trên D0 / D1 / D2 / D2+RealSR (plan D9, D10, D11).
+# Đọc bằng xla/detect/train.py. Cùng siêu tham số, cùng số epoch cho cả bốn tập; chỉ `data` khác nhau.
+# Số epoch / batch / imgsz chốt từ smoke (results/e1/smoke.json, lý do ở results/e1/README.md mục Deferred).
+
+sets: [d0, d1, d2, d2sr]
+weights: yolo-weights/yolo11s.pt      # tương đối xla.paths.downloads_dir(); COCO-pretrained (đầu 80 lớp → 1 lớp)
+runs_dir: D:/DevCache/runs/xla/e1     # run + trọng số, KHÔNG vào repo; mỗi tập một thư mục con
+lock_timeout_s: 28800                 # chờ khoá GPU tối đa 8 giờ (lane khác có thể giữ ~1 giờ)
+
+train:                                # tham số truyền thẳng cho ultralytics `model.train`
+  epochs: 6
+  imgsz: 1280
+  batch: 4
+  workers: 2                          # ≤ 4 (RAM lật bit); 4 worker làm hết commit memory khi các lane khác cùng chạy (d0, d1 chết 18/11)
+  seed: 20261118
+  deterministic: true
+  device: 0
+  optimizer: auto
+  patience: 1000                      # không dừng sớm theo val tổng hợp; checkpoint chọn bằng dev-val thật
+  warmup_epochs: 1.0                  # mặc định 3 quá dài cho lần chạy 6 epoch
+  close_mosaic: 2                     # mosaic mặc định 1.0; tắt ở 2 epoch cuối (mặc định 10 > tổng số epoch)
+  hsv_h: 0.0                          # tắt augment màu: màu/ám là thứ D1/D2 đang dạy model
+  hsv_s: 0.0
+  hsv_v: 0.0
+  mosaic: 1.0
+  amp: true
+  val: true                           # val tổng hợp chỉ để ghi lại, không dùng chọn checkpoint
+  plots: false
+  cache: false
+
+smoke:
+  set: d2
+  fraction: 0.1                       # 10 % ảnh train của D2
+  epochs: 1
+  budget_min_per_run: 40              # trần GPU một lần đủ (Owner chốt)
+
+predict:                              # CSV dự đoán theo D11, giống mốc edge16
+  conf: 0.001
+  max_det: 300                        # bỏ hộp x1 < CROP_LEFT_PX (16 px, xla.camera.frames), đúng như mốc edge16
+  splits: [test, neg]                 # + dev-val (manifest nhãn) luôn được dự đoán

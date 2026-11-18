@@ -1,0 +1,1195 @@
+{
+ "phase": "14",
+ "created": "2026-11-18T18:17:19+00:00",
+ "variants": {
+  "raw": "khung gốc camera",
+  "classic": {
+   "spec": "xla.enhance.classic:enhance",
+   "params_path": null,
+   "params": {
+    "version": "1.0.0",
+    "profile_id": "ov3660-esp32s3-q12-20261102",
+    "crop_left": 16,
+    "vignette_focal_px": 1016.1,
+    "vignette": {
+     "max_gain": 1.35
+    },
+    "dehaze": {
+     "patch_px": 15,
+     "airlight_percentile": 99.9,
+     "airlight_range": [
+      180.0,
+      250.0
+     ],
+     "stat_stride": 4,
+     "omega": 0.85,
+     "t_min": 0.4,
+     "guided_radius": 24,
+     "guided_eps": 0.001,
+     "guided_scale": 0.25,
+     "black_percentile": 0.5,
+     "black_target": 8.0
+    },
+    "magenta": {
+     "sat_level": 230.0,
+     "sat_ramp": 10.0,
+     "excess_min": 6.0,
+     "excess_ramp": 14.0,
+     "dilate_px": 21,
+     "blur_px": 7,
+     "strength": 0.56,
+     "passes": 2,
+     "texture_sat_ramp": 15.0,
+     "texture_sigma": 2.0,
+     "texture_gain": 0.5
+    },
+    "deblock": {
+     "block_px": 8,
+     "alpha": 10.0,
+     "beta": 4.0,
+     "strength": 0.5,
+     "inner_weight": 0.5
+    },
+    "sharpen": {
+     "sigma": 1.2,
+     "amount": 0.6,
+     "coring_k": 2.0,
+     "noise_floor": 0.5
+    }
+   }
+  },
+  "net": {
+   "path": "D:\\XLA\\models\\release\\enhancer-v1.0.0",
+   "version": "1.0.0",
+   "onnx_sha256": "1728de3e976112a208ffb43f57113ba3d31f81aa9e6e9ee43cbcc1cf2fff382e",
+   "train_run": "nafnet_w16-train",
+   "providers_active": [
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+   ]
+  },
+  "providers_requested": [
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ]
+ },
+ "split_json": "D:\\XLA\\data\\real\\split.json",
+ "boot": {
+  "n": 2000,
+  "seed": 20261118,
+  "unit": "khối 30 s (block)"
+ },
+ "smoke_limit": null,
+ "cpu_threads": {
+  "cv2": 4,
+  "ort_intra_op": 4,
+  "torch": 4
+ },
+ "physical": {
+  "n_frames": 198,
+  "n_blocks": 13,
+  "crop_left": 16,
+  "metrics": {
+   "pink_frac": {
+    "stat": "mean",
+    "raw": {
+     "value": 0.009434,
+     "ci95": [
+      0.006687,
+      0.012789
+     ]
+    },
+    "classic": {
+     "value": 0.001018,
+     "ci95": [
+      0.000451,
+      0.001749
+     ],
+     "change_vs_raw": -0.892126,
+     "change_ci95": [
+      -0.953895,
+      -0.78969
+     ]
+    },
+    "net": {
+     "value": 1.2e-05,
+     "ci95": [
+      2e-06,
+      2.5e-05
+     ],
+     "change_vs_raw": -0.998697,
+     "change_ci95": [
+      -0.999828,
+      -0.996847
+     ]
+    }
+   },
+   "dark_channel_15px": {
+    "stat": "median",
+    "raw": {
+     "value": 140.824272,
+     "ci95": [
+      138.818423,
+      143.966223
+     ]
+    },
+    "classic": {
+     "value": 68.104637,
+     "ci95": [
+      62.663528,
+      73.255198
+     ],
+     "change_vs_raw": -0.516386,
+     "change_ci95": [
+      -0.549495,
+      -0.489909
+     ]
+    },
+    "net": {
+     "value": 89.056031,
+     "ci95": [
+      75.423748,
+      97.259231
+     ],
+     "change_vs_raw": -0.367609,
+     "change_ci95": [
+      -0.459326,
+      -0.309966
+     ]
+    }
+   },
+   "y_p1": {
+    "stat": "median",
+    "raw": {
+     "value": 116.0,
+     "ci95": [
+      111.0,
+      123.0
+     ]
+    },
+    "classic": {
+     "value": 53.0,
+     "ci95": [
+      50.0,
+      57.0
+     ],
+     "change_vs_raw": -0.543103,
+     "change_ci95": [
+      -0.567227,
+      -0.508621
+     ]
+    },
+    "net": {
+     "value": 44.0,
+     "ci95": [
+      42.0,
+      45.0
+     ],
+     "change_vs_raw": -0.62069,
+     "change_ci95": [
+      -0.655738,
+      -0.603448
+     ]
+    }
+   },
+   "saturation_mean": {
+    "stat": "mean",
+    "raw": {
+     "value": 15.201411,
+     "ci95": [
+      13.783446,
+      16.681232
+     ]
+    },
+    "classic": {
+     "value": 47.023846,
+     "ci95": [
+      42.166584,
+      51.818019
+     ],
+     "change_vs_raw": 2.093387,
+     "change_ci95": [
+      1.928005,
+      2.257622
+     ]
+    },
+    "net": {
+     "value": 22.334376,
+     "ci95": [
+      19.845344,
+      24.994454
+     ],
+     "change_vs_raw": 0.46923,
+     "change_ci95": [
+      0.373219,
+      0.589908
+     ]
+    }
+   },
+   "blocking_ratio_8x8": {
+    "stat": "mean",
+    "raw": {
+     "value": 2.515433,
+     "ci95": [
+      2.367056,
+      2.652268
+     ]
+    },
+    "classic": {
+     "value": 2.07582,
+     "ci95": [
+      2.044234,
+      2.108893
+     ],
+     "change_vs_raw": -0.174766,
+     "change_ci95": [
+      -0.21844,
+      -0.120601
+     ]
+    },
+    "net": {
+     "value": 1.578048,
+     "ci95": [
+      1.534804,
+      1.616338
+     ],
+     "change_vs_raw": -0.372654,
+     "change_ci95": [
+      -0.39792,
+      -0.34642
+     ]
+    }
+   },
+   "laplacian_var": {
+    "stat": "median",
+    "raw": {
+     "value": 38.742903,
+     "ci95": [
+      31.123538,
+      48.967542
+     ]
+    },
+    "classic": {
+     "value": 265.121078,
+     "ci95": [
+      200.317123,
+      358.138367
+     ],
+     "change_vs_raw": 5.843088,
+     "change_ci95": [
+      4.925073,
+      6.872478
+     ]
+    },
+    "net": {
+     "value": 111.734585,
+     "ci95": [
+      85.465721,
+      155.885117
+     ],
+     "change_vs_raw": 1.884001,
+     "change_ci95": [
+      1.677431,
+      2.373466
+     ]
+    }
+   }
+  },
+  "drops": {
+   "pink_frac": {
+    "classic": {
+     "drop": 0.892126,
+     "ci95": [
+      0.78969,
+      0.953895
+     ],
+     "criterion_min": 0.9,
+     "status": "khong_dat"
+    },
+    "net": {
+     "drop": 0.998697,
+     "ci95": [
+      0.996847,
+      0.999828
+     ],
+     "criterion_min": 0.9,
+     "status": "dat"
+    }
+   },
+   "dark_channel_15px": {
+    "classic": {
+     "drop": 0.516386,
+     "ci95": [
+      0.489909,
+      0.549495
+     ],
+     "criterion_min": 0.5,
+     "status": "dat"
+    },
+    "net": {
+     "drop": 0.367609,
+     "ci95": [
+      0.309966,
+      0.459326
+     ],
+     "criterion_min": 0.5,
+     "status": "khong_dat"
+    }
+   }
+  },
+  "gpu": {
+   "gpu_lock": true,
+   "wait_s": 0.0
+  },
+  "note": "tỉ lệ đổi = thống_kê(biến thể)/thống_kê(gốc) − 1; drop = −tỉ lệ đổi"
+ },
+ "flicker": {
+  "n_runs": 91,
+  "n_runs_skipped_static": 0,
+  "n_frames": 1307,
+  "n_blocks": 11,
+  "max_gap_s": 0.25,
+  "source": "D:\\XLA\\data\\real\\manifest.csv",
+  "crop_left": 16,
+  "variants": {
+   "classic": {
+    "flicker_ratio": 2.176989,
+    "ci95": [
+     2.099261,
+     2.307268
+    ],
+    "criterion_max": 1.0,
+    "status": "khong_dat"
+   },
+   "net": {
+    "flicker_ratio": 1.806122,
+    "ci95": [
+     1.738207,
+     1.920178
+    ],
+    "criterion_max": 1.0,
+    "status": "khong_dat"
+   }
+  },
+  "gpu": {
+   "gpu_lock": true,
+   "wait_s": 0.0
+  },
+  "note": "khung manifest.csv trong khoảng thời gian khối test (không thuộc khối dev); 1 = không đổi"
+ },
+ "speed": {
+  "measured": {
+   "classic": {
+    "p50": 8.2979,
+    "p95": 8.734455,
+    "mean": 8.198204,
+    "n": 100,
+    "warmup": 10,
+    "device": "CPU",
+    "runtime": "python (hàm cổ điển)"
+   },
+   "net": {
+    "p50": 20.6963,
+    "p95": 25.336735,
+    "mean": 21.026416,
+    "n": 100,
+    "warmup": 10,
+    "providers_active": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ],
+    "runtime": "onnxruntime 1.24.4"
+   }
+  },
+  "recorded": {
+   "classic_bench": {
+    "n": 200,
+    "config_version": "1.0.0",
+    "profile_id": "ov3660-esp32s3-q12-20261102",
+    "source": {
+     "split": "dev",
+     "n_split": 1115,
+     "frames_dir": "data/real/frames",
+     "selection": "cách đều theo tên đã sắp (linspace)"
+    },
+    "schema": "classic_bench/1",
+    "generated": "2026-11-18T17:11:15+00:00",
+    "command": "python -m xla.enhance.classic --split dev --limit 200 --bench --threads 4 --bench-out results/enhance/classic_bench.json --note Đo lại ở phase 14 (19/11/2026), máy khoẻ: cắm sạc, power scheme Legion Performance Mode, % Processor Performance trung bình 172 % ngay trước khi đo, không job GPU/CPU nào khác chạy; cv2 4 luồng (nhanh hơn 32 luồng mặc định: p50 9,1 so với 10,9 ms trên cùng 200 khung, cùng phiên). Thay số 95 ms đo lúc máy hạ xung 18/11.",
+    "warmup": 20,
+    "env": {
+     "cpu": "AMD Ryzen 9 7945HX with Radeon Graphics",
+     "logical_cpus": 32,
+     "cv2_threads": 4,
+     "numpy": "2.5.5",
+     "opencv": "5.1.0",
+     "python": "3.12.16",
+     "platform": "Windows-11-10.0.26300-SP0",
+     "processes": 1
+    },
+    "step_order": [
+     "crop",
+     "deblock",
+     "magenta",
+     "vignette",
+     "dehaze",
+     "sharpen",
+     "pad"
+    ],
+    "notes": [
+     "Thứ tự chạy: (a) cắt → (e) khử khối → (d) khử hồng → (b) tối góc → (c) khử mờ → (f) làm nét → (g) đệm; lý do ở docstring module (khử mờ nhân sắc độ 1/t: khử hồng sau khử mờ chỉ giảm 46–68 % điểm hồng, trước khử mờ 93 %).",
+     "Cổng khử hồng: min(R, B) − G thay (R+B)/2 − G (vật đỏ bão hoà có (R+B)/2 − G lớn); bão hoà từ 230, đủ ở 240.",
+     "A của khử mờ theo từng kênh (A xám làm ám xanh lá của khung bị khuếch đại 1/t); t có cận dưới từng điểm 1 − omega·min_c(I)/mean(A) để J không âm ở vùng tối sát vùng mờ sáng.",
+     "Mức đen: phân vị 0,5 của kênh min ra ≥ min(phân vị 0,5 vào, black_target); làm nét chặn vọt lố trong [min, max] 3×3.",
+     "Dạng mặt phẳng uint8 giữa các bước: mảng mới > 0,5 MB trên Windows tốn ~0,2 ms/MB cấp trang."
+    ],
+    "ms": {
+     "total": {
+      "p50": 9.181,
+      "p95": 10.21,
+      "mean": 8.924
+     },
+     "steps": {
+      "crop": {
+       "p50": 0.201,
+       "p95": 0.235,
+       "mean": 0.206
+      },
+      "deblock": {
+       "p50": 2.198,
+       "p95": 2.932,
+       "mean": 2.265
+      },
+      "magenta": {
+       "p50": 2.567,
+       "p95": 2.787,
+       "mean": 2.187
+      },
+      "vignette": {
+       "p50": 0.152,
+       "p95": 0.166,
+       "mean": 0.153
+      },
+      "dehaze": {
+       "p50": 2.214,
+       "p95": 2.534,
+       "mean": 2.238
+      },
+      "sharpen": {
+       "p50": 1.591,
+       "p95": 1.784,
+       "mean": 1.612
+      },
+      "pad": {
+       "p50": 0.252,
+       "p95": 0.296,
+       "mean": 0.257
+      }
+     }
+    },
+    "budget_ms": 30.0,
+    "pass": true,
+    "quality": {
+     "pink_px": {
+      "before_mean": 2084.0,
+      "after_mean": 174.115,
+      "reduction_total": 0.916452
+     },
+     "dark_channel_median": {
+      "before_mean": 142.71,
+      "after_mean": 65.25
+     },
+     "black_frac_le3": {
+      "before_mean": 0.0,
+      "after_mean": 0.0,
+      "max_increase": 1e-05
+     },
+     "blocking_ratio_8x8": {
+      "before_mean": 2.726616,
+      "after_mean": 2.084284
+     }
+    },
+    "cpu_load_pct_during": 4.9,
+    "cpu_perf_pct": {
+     "min": 166.3,
+     "mean": 182.0,
+     "max": 185.8,
+     "n_samples": 6,
+     "interval_s": 2
+    },
+    "throttled": false,
+    "run_notes": [
+     "Đo lại ở phase 14 (19/11/2026), máy khoẻ: cắm sạc, power scheme Legion Performance Mode, % Processor Performance trung bình 172 % ngay trước khi đo, không job GPU/CPU nào khác chạy; cv2 4 luồng (nhanh hơn 32 luồng mặc định: p50 9,1 so với 10,9 ms trên cùng 200 khung, cùng phiên). Thay số 95 ms đo lúc máy hạ xung 18/11."
+    ],
+    "gate": "pass"
+   },
+   "enhancer_meta_ms_per_frame": {
+    "device": "RTX 4060 Laptop",
+    "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
+    "p50": 15.419849999943835,
+    "p95": 20.969349999995757
+   }
+  },
+  "gpu": {
+   "gpu_lock": true,
+   "wait_s": 0.0
+  },
+  "criterion": {
+   "net_p50_max_ms": 30.0,
+   "status": "dat"
+  },
+  "note": "ms = một lần gọi hàm trên khung đã giải mã (không gồm đọc JPEG); mạng = ORT, provider ở providers_active"
+ },
+ "iqa": {
+  "n_frames": 198,
+  "crop": "cột [16, 640)",
+  "device": "cuda",
+  "pyiqa_version": "0.1.16",
+  "license": "pyiqa: PolyForm Noncommercial License 1.0.0 (+ NTU S-Lab License cho một số thành phần) — chỉ dùng trong đồ án, phi thương mại; số NR-IQA chỉ để mô tả, không chọn checkpoint/bộ khôi phục (Deferred 5)",
+  "metrics": {
+   "musiq": {
+    "stat": "mean",
+    "raw": {
+     "value": 32.882659,
+     "ci95": [
+      30.488052,
+      35.284588
+     ]
+    },
+    "classic": {
+     "value": 33.024857,
+     "ci95": [
+      30.564077,
+      35.258581
+     ],
+     "change_vs_raw": 0.004324,
+     "change_ci95": [
+      -0.030595,
+      0.047009
+     ]
+    },
+    "net": {
+     "value": 37.982924,
+     "ci95": [
+      36.142485,
+      39.91754
+     ],
+     "change_vs_raw": 0.155105,
+     "change_ci95": [
+      0.112758,
+      0.195761
+     ]
+    },
+    "lower_better": false
+   },
+   "niqe": {
+    "stat": "mean",
+    "raw": {
+     "value": 6.424645,
+     "ci95": [
+      6.236529,
+      6.603898
+     ]
+    },
+    "classic": {
+     "value": 5.530166,
+     "ci95": [
+      5.283232,
+      5.871045
+     ],
+     "change_vs_raw": -0.139226,
+     "change_ci95": [
+      -0.179079,
+      -0.093102
+     ]
+    },
+    "net": {
+     "value": 5.467868,
+     "ci95": [
+      5.227474,
+      5.775389
+     ],
+     "change_vs_raw": -0.148923,
+     "change_ci95": [
+      -0.180823,
+      -0.112898
+     ]
+    },
+    "lower_better": true
+   }
+  },
+  "gpu": {
+   "gpu_lock": true,
+   "wait_s": 0.0
+  },
+  "note": "CHỈ mô tả (Deferred 5): không dùng để chọn gì"
+ },
+ "e4": {
+  "cells": {
+   "coco": {
+    "raw": {
+     "mAP50": {
+      "value": 0.126482,
+      "ci95": [
+       0.029622,
+       0.224281
+      ]
+     },
+     "mAP50_95": {
+      "value": 0.062856,
+      "ci95": [
+       0.01985,
+       0.11246
+      ]
+     },
+     "AR_small": {
+      "value": 0.530588,
+      "ci95": [
+       0.497778,
+       0.7
+      ]
+     },
+     "fp_per_neg_frame@op": {
+      "value": 0.037037,
+      "ci95": [
+       0.019955,
+       0.058936
+      ]
+     },
+     "csv": "D:\\XLA\\results\\e4\\preds\\coco_raw.csv",
+     "official": true,
+     "n": {
+      "frames": 198,
+      "frames_with_person": 39,
+      "negative_frames": 459,
+      "labels_missing": 0
+     },
+     "ms_per_frame": {
+      "median": 36.855,
+      "mean": 37.4551,
+      "n_frames": 498,
+      "note": "cột ms của CSV (khung có ≥ 1 hộp)"
+     }
+    },
+    "classic": {
+     "mAP50": {
+      "value": 0.080748,
+      "ci95": [
+       0.019678,
+       0.147493
+      ]
+     },
+     "mAP50_95": {
+      "value": 0.037014,
+      "ci95": [
+       0.010014,
+       0.068334
+      ]
+     },
+     "AR_small": {
+      "value": 0.490588,
+      "ci95": [
+       0.446667,
+       0.7
+      ]
+     },
+     "fp_per_neg_frame@op": {
+      "value": 0.050109,
+      "ci95": [
+       0.023503,
+       0.079715
+      ]
+     },
+     "csv": "D:\\XLA\\results\\e4\\preds\\coco_classic.csv",
+     "official": true,
+     "n": {
+      "frames": 198,
+      "frames_with_person": 39,
+      "negative_frames": 459,
+      "labels_missing": 0
+     },
+     "ms_per_frame": {
+      "median": 37.14,
+      "mean": 37.684558,
+      "n_frames": 498,
+      "note": "cột ms của CSV (khung có ≥ 1 hộp)"
+     }
+    },
+    "net": {
+     "mAP50": {
+      "value": 0.195242,
+      "ci95": [
+       0.034135,
+       0.43357
+      ]
+     },
+     "mAP50_95": {
+      "value": 0.10839,
+      "ci95": [
+       0.013218,
+       0.290099
+      ]
+     },
+     "AR_small": {
+      "value": 0.48,
+      "ci95": [
+       0.16,
+       0.510345
+      ]
+     },
+     "fp_per_neg_frame@op": {
+      "value": 0.026144,
+      "ci95": [
+       0.010752,
+       0.045357
+      ]
+     },
+     "csv": "D:\\XLA\\results\\e4\\preds\\coco_net.csv",
+     "official": true,
+     "n": {
+      "frames": 198,
+      "frames_with_person": 39,
+      "negative_frames": 459,
+      "labels_missing": 0
+     },
+     "ms_per_frame": {
+      "median": 36.89,
+      "mean": 37.091778,
+      "n_frames": 495,
+      "note": "cột ms của CSV (khung có ≥ 1 hộp)"
+     }
+    }
+   },
+   "bundle": {
+    "raw": {
+     "mAP50": {
+      "value": 0.11949,
+      "ci95": [
+       0.032106,
+       0.197105
+      ]
+     },
+     "mAP50_95": {
+      "value": 0.042718,
+      "ci95": [
+       0.014927,
+       0.069231
+      ]
+     },
+     "AR_small": {
+      "value": 0.24,
+      "ci95": [
+       0.183704,
+       0.325581
+      ]
+     },
+     "fp_per_neg_frame@op": {
+      "value": 0.30719,
+      "ci95": [
+       0.109048,
+       0.543723
+      ]
+     },
+     "csv": "D:\\XLA\\results\\e4\\preds\\bundle_raw.csv",
+     "official": true,
+     "n": {
+      "frames": 198,
+      "frames_with_person": 39,
+      "negative_frames": 459,
+      "labels_missing": 0
+     },
+     "ms_per_frame": {
+      "median": 47.0,
+      "mean": 47.176139,
+      "n_frames": 101,
+      "note": "cột ms của CSV (khung có ≥ 1 hộp)"
+     }
+    },
+    "classic": {
+     "mAP50": {
+      "value": 0.007131,
+      "ci95": [
+       0.0,
+       0.021922
+      ]
+     },
+     "mAP50_95": {
+      "value": 0.002307,
+      "ci95": [
+       0.0,
+       0.007193
+      ]
+     },
+     "AR_small": {
+      "value": 0.032941,
+      "ci95": [
+       0.0,
+       0.0815
+      ]
+     },
+     "fp_per_neg_frame@op": {
+      "value": 0.278867,
+      "ci95": [
+       0.15929,
+       0.405694
+      ]
+     },
+     "csv": "D:\\XLA\\results\\e4\\preds\\bundle_classic.csv",
+     "official": true,
+     "n": {
+      "frames": 198,
+      "frames_with_person": 39,
+      "negative_frames": 459,
+      "labels_missing": 0
+     },
+     "ms_per_frame": {
+      "median": 46.945,
+      "mean": 47.173983,
+      "n_frames": 118,
+      "note": "cột ms của CSV (khung có ≥ 1 hộp)"
+     }
+    },
+    "net": {
+     "mAP50": {
+      "value": 0.034631,
+      "ci95": [
+       0.012368,
+       0.080112
+      ]
+     },
+     "mAP50_95": {
+      "value": 0.012818,
+      "ci95": [
+       0.00499,
+       0.026513
+      ]
+     },
+     "AR_small": {
+      "value": 0.110588,
+      "ci95": [
+       0.08125,
+       0.16
+      ]
+     },
+     "fp_per_neg_frame@op": {
+      "value": 0.106754,
+      "ci95": [
+       0.055928,
+       0.162559
+      ]
+     },
+     "csv": "D:\\XLA\\results\\e4\\preds\\bundle_net.csv",
+     "official": true,
+     "n": {
+      "frames": 198,
+      "frames_with_person": 39,
+      "negative_frames": 459,
+      "labels_missing": 0
+     },
+     "ms_per_frame": {
+      "median": 47.08,
+      "mean": 47.153412,
+      "n_frames": 85,
+      "note": "cột ms của CSV (khung có ≥ 1 hộp)"
+     }
+    }
+   }
+  },
+  "paired_diff_vs_raw": {
+   "coco": {
+    "classic": {
+     "mAP50": {
+      "a": 0.126482,
+      "b": 0.080748,
+      "diff": -0.045734,
+      "ci95": [
+       -0.088228,
+       -0.005654
+      ],
+      "p_diff_gt_0": 0.005506,
+      "p_b_better": 0.005506,
+      "higher_is_better": true,
+      "n_valid_samples": 1998
+     },
+     "mAP50_95": {
+      "a": 0.062856,
+      "b": 0.037014,
+      "diff": -0.025842,
+      "ci95": [
+       -0.050781,
+       -0.004243
+      ],
+      "p_diff_gt_0": 0.001001,
+      "p_b_better": 0.001001,
+      "higher_is_better": true,
+      "n_valid_samples": 1998
+     },
+     "fp_per_neg_frame@op": {
+      "a": 0.037037,
+      "b": 0.050109,
+      "diff": 0.013072,
+      "ci95": [
+       -0.006238,
+       0.034171
+      ],
+      "p_diff_gt_0": 0.884,
+      "p_b_better": 0.071,
+      "higher_is_better": false,
+      "n_valid_samples": 2000
+     }
+    },
+    "net": {
+     "mAP50": {
+      "a": 0.126482,
+      "b": 0.195242,
+      "diff": 0.06876,
+      "ci95": [
+       -0.033281,
+       0.231495
+      ],
+      "p_diff_gt_0": 0.855856,
+      "p_b_better": 0.855856,
+      "higher_is_better": true,
+      "n_valid_samples": 1998
+     },
+     "mAP50_95": {
+      "a": 0.062856,
+      "b": 0.10839,
+      "diff": 0.045534,
+      "ci95": [
+       -0.016522,
+       0.205734
+      ],
+      "p_diff_gt_0": 0.884885,
+      "p_b_better": 0.884885,
+      "higher_is_better": true,
+      "n_valid_samples": 1998
+     },
+     "fp_per_neg_frame@op": {
+      "a": 0.037037,
+      "b": 0.026144,
+      "diff": -0.010893,
+      "ci95": [
+       -0.022323,
+       0.0
+      ],
+      "p_diff_gt_0": 0.018,
+      "p_b_better": 0.952,
+      "higher_is_better": false,
+      "n_valid_samples": 2000
+     }
+    }
+   },
+   "bundle": {
+    "classic": {
+     "mAP50": {
+      "a": 0.11949,
+      "b": 0.007131,
+      "diff": -0.112358,
+      "ci95": [
+       -0.182362,
+       -0.027756
+      ],
+      "p_diff_gt_0": 0.0,
+      "p_b_better": 0.0,
+      "higher_is_better": true,
+      "n_valid_samples": 1998
+     },
+     "mAP50_95": {
+      "a": 0.042718,
+      "b": 0.002307,
+      "diff": -0.040411,
+      "ci95": [
+       -0.064891,
+       -0.01258
+      ],
+      "p_diff_gt_0": 0.0,
+      "p_b_better": 0.0,
+      "higher_is_better": true,
+      "n_valid_samples": 1998
+     },
+     "fp_per_neg_frame@op": {
+      "a": 0.30719,
+      "b": 0.278867,
+      "diff": -0.028322,
+      "ci95": [
+       -0.171498,
+       0.097327
+      ],
+      "p_diff_gt_0": 0.352,
+      "p_b_better": 0.6385,
+      "higher_is_better": false,
+      "n_valid_samples": 2000
+     }
+    },
+    "net": {
+     "mAP50": {
+      "a": 0.11949,
+      "b": 0.034631,
+      "diff": -0.084858,
+      "ci95": [
+       -0.138831,
+       -0.010524
+      ],
+      "p_diff_gt_0": 0.008008,
+      "p_b_better": 0.008008,
+      "higher_is_better": true,
+      "n_valid_samples": 1998
+     },
+     "mAP50_95": {
+      "a": 0.042718,
+      "b": 0.012818,
+      "diff": -0.0299,
+      "ci95": [
+       -0.049941,
+       0.0
+      ],
+      "p_diff_gt_0": 0.023023,
+      "p_b_better": 0.023023,
+      "higher_is_better": true,
+      "n_valid_samples": 1998
+     },
+     "fp_per_neg_frame@op": {
+      "a": 0.30719,
+      "b": 0.106754,
+      "diff": -0.200436,
+      "ci95": [
+       -0.399144,
+       -0.036103
+      ],
+      "p_diff_gt_0": 0.006,
+      "p_b_better": 0.9925,
+      "higher_is_better": false,
+      "n_valid_samples": 2000
+     }
+    }
+   }
+  },
+  "d5": {
+   "recommended_input_variant": "raw",
+   "basis": "bundle × net: CI 95 % của chênh mAP50 ghép cặp (net − raw)",
+   "diff_ci95": [
+    -0.138831,
+    -0.010524
+   ],
+   "rule": "đổi D5 sang enhanced CHỈ khi CI nằm trọn trên 0",
+   "action": "giữ D5: nhận diện chạy khung gốc"
+  },
+  "op_threshold": {
+   "coco": 0.25,
+   "bundle": 0.07669
+  },
+  "file": "D:\\XLA\\results\\e4\\e4.json"
+ },
+ "ab": {
+  "key_id": "68eb0546fa303711",
+  "n_choices": 55,
+  "comparisons": {
+   "net_vs_raw": {
+    "n": 25,
+    "net_wins": 11,
+    "win_rate": 0.44,
+    "ci95_wilson": [
+     0.266656,
+     0.629327
+    ],
+    "criterion_min": 0.7,
+    "meets_criterion": false,
+    "ci_lower_meets_criterion": false,
+    "verdict_vs_50": "chua_phan_dinh"
+   },
+   "net_vs_classic": {
+    "n": 25,
+    "net_wins": 1,
+    "win_rate": 0.04,
+    "ci95_wilson": [
+     0.007096,
+     0.195441
+    ],
+    "criterion_min": 0.55,
+    "meets_criterion": false,
+    "ci_lower_meets_criterion": false,
+    "verdict_vs_50": "mang_thua"
+   }
+  },
+  "consistency": {
+   "n_repeats": 5,
+   "agree": 3,
+   "rate": 0.6,
+   "note": "cặp lặp đổi bên; đồng ý = chọn cùng biến thể như lần đầu"
+  },
+  "side_bias": {
+   "left_rate": 0.54,
+   "n": 50
+  },
+  "exported_at": "2026-11-18T18:14:44.466Z"
+ },
+ "criteria_branch_a": [
+  {
+   "id": "pink_drop",
+   "text": "% điểm hồng giảm ≥ 90 %",
+   "value": 0.998697,
+   "ci95": [
+    0.996847,
+    0.999828
+   ],
+   "status": "dat"
+  },
+  {
+   "id": "dark_channel_drop",
+   "text": "dark channel trung vị giảm ≥ 50 %",
+   "value": 0.367609,
+   "ci95": [
+    0.309966,
+    0.459326
+   ],
+   "status": "khong_dat"
+  },
+  {
+   "id": "flicker",
+   "text": "nhấp nháy không tăng (≤ 1)",
+   "value": 1.806122,
+   "ci95": [
+    1.738207,
+    1.920178
+   ],
+   "status": "khong_dat"
+  },
+  {
+   "id": "ab_vs_raw",
+   "text": "thắng ≥ 70 % lượt A/B so với ảnh gốc",
+   "value": 0.44,
+   "ci95": [
+    0.266656,
+    0.629327
+   ],
+   "status": "khong_dat"
+  },
+  {
+   "id": "ab_vs_classic",
+   "text": "thắng ≥ 55 % lượt A/B so với cổ điển",
+   "value": 0.04,
+   "ci95": [
+    0.007096,
+    0.195441
+   ],
+   "status": "khong_dat"
+  },
+  {
+   "id": "ms",
+   "text": "≤ 30 ms/khung (mạng, p50)",
+   "value": 20.6963,
+   "status": "dat"
+  },
+  {
+   "id": "map_no_drop",
+   "text": "không làm giảm mAP nhánh B",
+   "value": -0.084858,
+   "ci95": [
+    -0.138831,
+    -0.010524
+   ],
+   "status": "dat",
+   "note": "D5 giữ khung gốc: detector không thấy ảnh enhancer"
+  }
+ ]
+}

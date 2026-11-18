@@ -1,0 +1,119 @@
+Quét 30 log + 11 lần ghi hình trong 0.9 s; bỏ qua 12 file
+  BỎ QUA fc-dataflash-20261025/002-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA fc-dataflash-20261025-bay-trong-nha/001-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA fc-dataflash-20261025-bay-trong-nha/002-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA fc-dataflash-20261025-bay-trong-nha/003-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA fc-dataflash-20261025-bay-trong-nha/004-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA fc-dataflash-20261025-bay-trong-nha/005-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA fc-dataflash-20261025-spin-arm-013/006-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA fc-dataflash-20261025-spin-arm-015/007-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA fc-dataflash-20261027-althold/008-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA fc-dataflash-20261027-althold/009-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA fc-dataflash-20261027-althold/010-khong-gio.bin: log không có giờ GPS (chưa fix 3D lần nào)
+  BỎ QUA tlog/20261102-095846.tlog: SITL (drone ảo)
+id               dài(s) bay  cao   xa    pin V        mAh  link%  cam/s phủ%  cảnh báo  mode
+20261024-182441      82 không   0.1   5.5 24.03→23.34  240     -     -    -      1    STABILIZE  [dataflash]
+      18:26:05 warning fc     PreArm: Check mag field (xy diff:153>100)
+20261101-194131       1 không  -0.2   1.0 16.12→16.12    -  38.9   2.8   50      4    STABILIZE,LOITER  [tlog+video]
+      19:41:34 error   fc     PreArm: GPS 1: not healthy
+      19:41:35 warning fc     Cờ GPS khoẻ tắt
+      19:41:41 warning fc     Cờ GPS khoẻ tắt
+      19:41:41 error   fc     PreArm: GPS 1: not healthy
+20261101-201225     255 có     15.3  35.3 15.44→15.05  562     -     -    -      1    STABILIZE,LOITER,RTL  [dataflash]
+      20:12:28 warning fc     PreArm: Fence enabled, need position estimate
+20261101-201851     192 có     15.4  34.9 15.29→14.93  506     -     -    -      0    STABILIZE,LOITER,AUTO,RTL  [dataflash]
+20261101-202414      95 có      8.2   3.9 15.18→14.90  239     -     -    -      1    RTL,LOITER,ALT_HOLD,AUTO  [dataflash]
+      20:25:51 warning fc     PreArm: Proximity 0 deg, 0.58m (want > 0.6m)
+20261101-202625     104 có     15.1   5.1 15.14→14.84  251     -     -    -      0    LOITER,AUTO  [dataflash]
+20261101-202834     132 có     18.1  29.3 15.08→14.76  345     -     -    -      4    AUTO,LOITER,STABILIZE  [dataflash]
+      20:30:53 warning fc     ERR Failsafe tay phát: mã 1
+      20:30:53 warning fc     Radio Failsafe - Disarming
+      20:30:54 warning fc     PreArm: Throttle below failsafe
+      20:30:54 warning fc     PreArm: Radio failsafe on
+20261102-101046     125 có     18.2  42.0 16.61→16.24  285   3.5   7.0   89      4    LOITER,RTL  [dataflash+tlog+video]
+      10:11:14 warning camera Mất hình 2.9 s
+      10:11:47 warning link   Mất link 3.1 s (backend nối lại)
+      10:11:57 warning camera Mất hình 4.0 s
+      10:12:02 warning camera Mất hình 2.3 s
+20261102-101359      29 không   0.5   1.1 16.41→16.35    2   0.0   9.6  100      0    LOITER  [dataflash+tlog+video]
+20261102-101435     153 có     18.3  49.6 16.38→15.96  380   1.8   6.5   81      5    LOITER,AUTO  [dataflash+tlog+video]
+      10:15:12 warning camera Mất hình 2.1 s
+      10:15:22 warning camera Mất hình 2.9 s
+      10:15:24 warning camera Mất hình 11.0 s
+      10:15:41 warning camera Mất hình 14.8 s
+      10:15:45 warning link   Mất link 14.3 s (backend nối lại)
+20261102-102312       4 không   0.2   0.5 16.14→16.11    0   0.0  10.0  100      0    LOITER  [dataflash+tlog+video]
+20261102-102319     138 có     15.6  28.9 16.12→15.76  339   4.2   4.6   63     12    LOITER,AUTO  [dataflash+tlog+video]
+      10:23:54 warning camera Mất hình 2.9 s
+      10:23:58 warning camera Mất hình 4.7 s
+      10:24:03 warning camera Mất hình 14.6 s
+      10:24:09 warning link   Mất link 2.4 s
+      10:24:18 warning link   Mất link 2.6 s
+      10:24:23 warning camera Mất hình 3.1 s
+      10:24:28 warning camera Mất hình 9.2 s
+      10:24:28 warning link   Mất link 32.3 s (backend nối lại)
+      10:24:43 warning camera Mất hình 4.3 s
+      10:24:48 warning camera Mất hình 2.0 s
+      10:24:51 warning camera Mất hình 4.2 s
+      10:24:56 warning camera Mất hình 3.7 s
+20261102-102616      17 không   0.1   2.2 15.95→15.92    0   0.0   8.4   88      2    AUTO,LOITER  [dataflash+tlog+video]
+      10:26:09 error   fc     Arm: Auto mode not armable
+      10:26:30 warning camera Mất hình 2.7 s
+20261102-102636     159 có     16.6  28.7 15.94→15.54  407   4.7   4.7   64     14    LOITER,AUTO  [dataflash+tlog+video]
+      10:26:30 warning camera Mất hình 2.7 s
+      10:26:56 warning camera Mất hình 3.0 s
+      10:27:28 warning camera Mất hình 6.0 s
+      10:27:35 warning camera Mất hình 12.3 s
+      10:27:57 warning camera Mất hình 3.0 s
+      10:28:03 warning camera Mất hình 12.5 s
+      10:28:16 warning camera Mất hình 13.6 s
+      10:28:23 warning link   Mất link 17.8 s (backend nối lại)
+      10:28:29 warning camera Mất hình 2.0 s
+      10:28:35 warning camera Mất hình 2.4 s
+      10:28:42 warning camera Mất hình 4.2 s
+      10:28:47 warning camera Mất hình 2.1 s
+      10:29:09 warning camera Mất hình 2.6 s
+      10:29:13 warning camera Mất hình 2.1 s
+20261102-103039     162 có     15.2  27.2 15.76→15.35  428  12.1   4.7   77     14    LOITER,AUTO  [dataflash+tlog+video]
+      10:31:14 warning camera Mất hình 3.6 s
+      10:31:20 warning camera Mất hình 6.1 s
+      10:31:21 warning link   Mất link 2.5 s
+      10:31:29 warning camera Mất hình 5.8 s
+      10:31:30 warning link   Mất link 2.4 s
+      10:31:38 warning link   Mất link 2.0 s
+      10:31:43 warning link   Mất link 2.0 s
+      10:32:10 warning camera Mất hình 5.0 s
+      10:32:16 warning camera Mất hình 3.0 s
+      10:32:19 warning camera Mất hình 2.1 s
+      10:32:23 warning camera Mất hình 2.3 s
+      10:32:29 warning camera Mất hình 2.2 s
+      10:32:36 warning camera Mất hình 4.5 s
+      10:32:38 warning link   Mất link 2.9 s
+20261102-104039     214 có     18.1  27.8 15.56→15.14  596   2.9   5.5   75     27    LOITER,AUTO,GUIDED  [dataflash+tlog+video]
+      10:40:45 warning camera Mất hình 2.8 s
+      10:40:55 warning camera Mất hình 3.0 s
+      10:41:08 warning camera Mất hình 2.1 s
+      10:41:31 warning camera Mất hình 3.8 s
+      10:41:35 warning camera Mất hình 2.6 s
+      10:41:42 warning fc     ERR Lỗi nội bộ: mã 1
+      10:41:42 warning fc     Internal Errors 0x4000
+      10:41:50 warning camera Mất hình 2.9 s
+      10:42:10 warning camera Mất hình 5.2 s
+      10:42:19 warning camera Mất hình 4.5 s
+      10:42:42 warning camera Mất hình 4.9 s
+      10:42:50 warning camera Mất hình 8.5 s
+      10:43:01 warning camera Mất hình 2.6 s
+      10:43:07 warning camera Mất hình 5.5 s
+      10:43:23 warning link   Mất link 15.6 s (backend nối lại)
+      10:43:24 warning camera Mất hình 2.5 s
+      10:43:30 warning camera Mất hình 4.0 s
+      10:44:01 warning camera Mất hình 2.0 s
+      10:44:08 warning camera Mất hình 2.2 s
+      10:44:18 warning camera Mất hình 2.4 s
+      10:44:20 warning fc     PreArm: GPS 1: Bad fix
+      10:44:20 warning fc     PreArm: Internal errors 0x4000 l:214 spi_fail
+      10:44:20 warning fc     PreArm: Fence requires position
+      10:44:20 warning fc     ERR Failsafe tay phát: mã 1
+      10:44:20 warning fc     Radio Failsafe - Disarming
+      10:44:21 warning fc     ERR Kiểm tra EKF: mã 2
+      10:44:21 warning fc     ERR Failsafe EKF: mã 1

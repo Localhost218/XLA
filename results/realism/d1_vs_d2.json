@@ -1,0 +1,329 @@
+{
+ "smoke": {
+  "what": "1 lần KID (10 tập con) d1 vs test, không dùng cache đặc trưng; trọng số đã có ở TORCH_HOME",
+  "row": "d1",
+  "n_patches": 1000,
+  "gpu_seconds": 122.85,
+  "seconds_total": 138.3,
+  "kid": {
+   "mean": 4.442546750089849,
+   "se": 0.08339249013042814,
+   "ci_low": 4.29094004900857,
+   "ci_high": 4.598183247648811,
+   "n_patches": 1000,
+   "n_repeats": 10,
+   "subset_size": 100,
+   "seed": 20261118,
+   "encoder": "dinov2_vitl14_cls_bicubic224"
+  },
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "measured": "2026-11-18 07:30"
+ },
+ "rows": [
+  {
+   "row": "d1",
+   "what": "D1 (Real-ESRGAN ngẫu nhiên)",
+   "n_real": 198,
+   "n_synth": 600,
+   "seed": 20261118,
+   "n_patches": 1000,
+   "manifest_sha256": "f9a765cd2191852b88b6d530fbe5add5d8c90a1a537ac21260a55b75008e1769",
+   "gpu_seconds": 31.67,
+   "seconds_total": 293.1,
+   "synth_examples": [
+    "visdrone__0000031_02000_d_0000041_w1.jpg",
+    "visdrone__0000039_00000_d_0000055_w1.jpg",
+    "visdrone__0000068_01001_d_0000004_w1.jpg"
+   ],
+   "stats": {
+    "total": 5.927529228673598,
+    "dqt_match": false,
+    "items": {
+     "b_over_g": 4.7378,
+     "blocking_ratio_8x8": 1.6531,
+     "dark_channel_15px": 8.0034,
+     "laplacian_var": 12.3565,
+     "left_strip_mean_y": 4.8256,
+     "left_strip_width_px": 3.7697,
+     "mtf50_cyc_per_px": 1.0539,
+     "pink_frac": 0.6006,
+     "pink_highlight_y": 20.1062,
+     "r_over_g": 9.643,
+     "saturation_mean": 5.0256,
+     "sigma_immerkaer": 12.3896,
+     "sobel_x2_over_y2": 0.2774,
+     "vignette_corner_center_ratio": 2.3743,
+     "y_p1": 4.2958,
+     "y_p99": 1.5438,
+     "nlf": 13.0696,
+     "psd_radial_log10": 0.9697
+    }
+   },
+   "c2st": {
+    "mean": 0.9364548494983278,
+    "ci_low": 0.9090797864452024,
+    "ci_high": 0.9604870754382709,
+    "n_patches": 1000
+   },
+   "kid": {
+    "mean": 4.442546709929441,
+    "se": 0.08339248306394177,
+    "ci_low": 4.290939964780826,
+    "ci_high": 4.598183023707095,
+    "n_patches": 1000,
+    "n_repeats": 10,
+    "subset_size": 100,
+    "seed": 20261118,
+    "encoder": "dinov2_vitl14_cls_bicubic224"
+   },
+   "timing_s": {
+    "stats": 232.7,
+    "c2st_load": 3.32,
+    "c2st": 12.67,
+    "kid_load": 4.23,
+    "kid_features": 22.32,
+    "kid": 26.62
+   },
+   "vram_peak_mb": {
+    "c2st": 367.2,
+    "kid": 16.2
+   },
+   "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "n_images_requested": 600
+  },
+  {
+   "row": "d2",
+   "what": "D2 (bản sao camera, đã hiệu chỉnh)",
+   "n_real": 198,
+   "n_synth": 600,
+   "seed": 20261118,
+   "n_patches": 1000,
+   "manifest_sha256": "3ad4511041b070e1478b6bd416bb4c05ba4a68ca0a07dc5a9db70aa4948150ab",
+   "gpu_seconds": 45.12,
+   "seconds_total": 96.0,
+   "synth_examples": [
+    "visdrone__0000031_02000_d_0000041_w1.jpg",
+    "visdrone__0000039_00000_d_0000055_w1.jpg",
+    "visdrone__0000068_01001_d_0000004_w1.jpg"
+   ],
+   "stats": {
+    "total": 0.7956588132103047,
+    "dqt_match": false,
+    "items": {
+     "b_over_g": 0.5629,
+     "blocking_ratio_8x8": 1.1573,
+     "dark_channel_15px": 0.1591,
+     "laplacian_var": 0.7151,
+     "left_strip_mean_y": 0.4665,
+     "left_strip_width_px": 0.3883,
+     "mtf50_cyc_per_px": 0.256,
+     "pink_frac": 0.3324,
+     "pink_highlight_y": 1.5911,
+     "r_over_g": 2.7141,
+     "saturation_mean": 0.1844,
+     "sigma_immerkaer": 1.2212,
+     "sobel_x2_over_y2": 0.5323,
+     "vignette_corner_center_ratio": 0.1776,
+     "y_p1": 0.4478,
+     "y_p99": 0.8782,
+     "nlf": 1.8848,
+     "psd_radial_log10": 0.6528
+    }
+   },
+   "c2st": {
+    "mean": 0.9498327759197325,
+    "ci_low": 0.9297290172421984,
+    "ci_high": 0.9660764318848424,
+    "n_patches": 1000
+   },
+   "kid": {
+    "mean": 4.40900867860437,
+    "se": 0.09822107627386725,
+    "ci_low": 4.23583953257164,
+    "ci_high": 4.599022019534083,
+    "n_patches": 1000,
+    "n_repeats": 10,
+    "subset_size": 100,
+    "seed": 20261118,
+    "encoder": "dinov2_vitl14_cls_bicubic224"
+   },
+   "timing_s": {
+    "stats": 39.52,
+    "c2st_load": 0.7,
+    "c2st": 5.22,
+    "kid_load": 0.73,
+    "kid_features": 40.6,
+    "kid": 41.35
+   },
+   "vram_peak_mb": {
+    "c2st": 367.2,
+    "kid": 1549.1
+   },
+   "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "n_images_requested": 600
+  },
+  {
+   "row": "d2sr",
+   "what": "D2 + Real-SR (nhiễu từ khung dev)",
+   "n_real": 198,
+   "n_synth": 600,
+   "seed": 20261118,
+   "n_patches": 1000,
+   "manifest_sha256": "1616c6c1f94a69a2c60a90096280c5a15a17319e49154a203b68198e1fa847c4",
+   "gpu_seconds": 43.3,
+   "seconds_total": 86.8,
+   "synth_examples": [
+    "visdrone__0000031_02000_d_0000041_w1.jpg",
+    "visdrone__0000039_00000_d_0000055_w1.jpg",
+    "visdrone__0000068_01001_d_0000004_w1.jpg"
+   ],
+   "stats": {
+    "total": 0.6628988352979023,
+    "dqt_match": false,
+    "items": {
+     "b_over_g": 0.549,
+     "blocking_ratio_8x8": 0.8526,
+     "dark_channel_15px": 0.2549,
+     "laplacian_var": 0.6132,
+     "left_strip_mean_y": 0.4707,
+     "left_strip_width_px": 0.3716,
+     "mtf50_cyc_per_px": 0.2613,
+     "pink_frac": 0.3312,
+     "pink_highlight_y": 1.5684,
+     "r_over_g": 2.6541,
+     "saturation_mean": 0.1876,
+     "sigma_immerkaer": 0.5539,
+     "sobel_x2_over_y2": 0.3598,
+     "vignette_corner_center_ratio": 0.1775,
+     "y_p1": 0.4293,
+     "y_p99": 0.8616,
+     "nlf": 0.9533,
+     "psd_radial_log10": 0.4819
+    }
+   },
+   "c2st": {
+    "mean": 0.9230769230769231,
+    "ci_low": 0.8972244153514769,
+    "ci_high": 0.9449285159069457,
+    "n_patches": 1000
+   },
+   "kid": {
+    "mean": 3.9943719421572084,
+    "se": 0.09299474783548178,
+    "ci_low": 3.823786637635251,
+    "ci_high": 4.168663387790459,
+    "n_patches": 1000,
+    "n_repeats": 10,
+    "subset_size": 100,
+    "seed": 20261118,
+    "encoder": "dinov2_vitl14_cls_bicubic224"
+   },
+   "timing_s": {
+    "stats": 39.48,
+    "c2st_load": 0.76,
+    "c2st": 3.5,
+    "kid_load": 0.78,
+    "kid_features": 40.56,
+    "kid": 41.36
+   },
+   "vram_peak_mb": {
+    "c2st": 367.2,
+    "kid": 1549.1
+   },
+   "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "n_images_requested": 600
+  },
+  {
+   "row": "real_dev",
+   "what": "thật–thật: khung dev",
+   "n_real": 198,
+   "n_synth": 600,
+   "seed": 20261118,
+   "n_patches": 1000,
+   "manifest_sha256": null,
+   "gpu_seconds": 87.62,
+   "seconds_total": 289.9,
+   "synth_examples": [
+    "20261102-100941_002_00382.jpg",
+    "20261102-100941_002_00391.jpg",
+    "20261102-100941_002_00392.jpg"
+   ],
+   "stats": {
+    "total": 0.33031533752363584,
+    "dqt_match": true,
+    "items": {
+     "b_over_g": 0.1322,
+     "blocking_ratio_8x8": 0.3853,
+     "dark_channel_15px": 0.3212,
+     "laplacian_var": 0.8121,
+     "left_strip_mean_y": 0.0995,
+     "left_strip_width_px": 0.6647,
+     "mtf50_cyc_per_px": 0.1332,
+     "pink_frac": 0.1689,
+     "pink_highlight_y": 0.1055,
+     "r_over_g": 0.1865,
+     "saturation_mean": 0.0867,
+     "sigma_immerkaer": 0.6753,
+     "sobel_x2_over_y2": 0.7392,
+     "vignette_corner_center_ratio": 0.1964,
+     "y_p1": 0.195,
+     "y_p99": 0.1747,
+     "nlf": 0.4694,
+     "psd_radial_log10": 0.3996
+    }
+   },
+   "c2st": {
+    "mean": 0.5418060200668896,
+    "ci_low": 0.4935621183020782,
+    "ci_high": 0.5935558312655086,
+    "n_patches": 1000
+   },
+   "kid": {
+    "mean": 0.37053273142256116,
+    "se": 0.04853151672269527,
+    "ci_low": 0.29022531107428773,
+    "ci_high": 0.468116486008319,
+    "n_patches": 1000,
+    "n_repeats": 10,
+    "subset_size": 100,
+    "seed": 20261118,
+    "encoder": "dinov2_vitl14_cls_bicubic224"
+   },
+   "timing_s": {
+    "stats": 180.55,
+    "c2st_load": 4.14,
+    "c2st": 8.81,
+    "kid_load": 5.78,
+    "kid_features": 82.95,
+    "kid": 88.87
+   },
+   "vram_peak_mb": {
+    "c2st": 367.2,
+    "kid": 1549.1
+   },
+   "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "n_images_requested": 600
+  }
+ ],
+ "phase": "07",
+ "measured": "2026-11-18",
+ "real": {
+  "split": "test",
+  "n_frames": 198,
+  "split_file": "data/real/split.json",
+  "split_file_sha256": "878f016a1e2673da365cb2ad2cf4041f16d3d396713c314aa0aa991cc74b0eda",
+  "labels_used": false
+ },
+ "params": {
+  "n_images_synth": 600,
+  "n_patches": 1000,
+  "seed": 20261118,
+  "kid_repeats": 10,
+  "ci": "95 % bootstrap"
+ },
+ "gpu_seconds_total": 207.7,
+ "env": {
+  "python": "3.12.16",
+  "platform": "Windows-11-10.0.26300-SP0"
+ }
+}

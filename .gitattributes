@@ -1,0 +1,11 @@
+# Mọi file văn bản lưu LF trong repo và khi checkout (kể cả máy Windows có core.autocrlf=true).
+* text=auto eol=lf
+*.ps1 text eol=lf
+*.bat text eol=crlf
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.onnx binary
+*.pt binary
+*.pdf binary
+*.avi binary
