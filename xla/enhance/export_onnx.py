@@ -34,7 +34,15 @@ import numpy as np
 import torch
 
 from xla import contract
-from xla.enhance.net import EnhancerGraph, export_onnx_cuda, load_checkpoint, measure_ort_ms, ort_session
+from xla.enhance.net import (
+    EnhancerGraph,
+    cpu_perf_check,
+    export_onnx_cuda,
+    load_checkpoint,
+    measure_ort_ms,
+    ort_session,
+    wait_cpu_perf,
+)
 from xla.paths import repo_root
 
 PARITY_MAE_MAX = 1.0
@@ -99,6 +107,7 @@ def export_bundle(
     frames = {n: contract.decode_frame(fdir / n) for n in parity_names}
 
     report: dict[str, Any] = {"ckpt": str(ckpt), "bundle": str(out), "half": half, "crop_left": crop_left}
+    report["cpu_perf"] = {"gate_before": wait_cpu_perf()} if not skip_cuda else None
     t_wait = time.time()
     with gpu_lock(f"phase13 restore export {out.name}", timeout_s=GPU_LOCK_TIMEOUT_S):
         t0 = time.time()
@@ -133,7 +142,9 @@ def export_bundle(
             cm = [_mae_max(gc[n], got[n]) for n in parity_names]
             report["parity"]["ort_cuda_vs_cpu_mae_worst"] = float(max(m for m, _ in cm))
             report["parity"]["ort_cuda_vs_cpu_abs_max"] = int(max(x for _, x in cm))
+            report["cpu_perf"]["before_ms"] = cpu_perf_check(10)
             ms = measure_ort_ms(cuda, {contract.INPUT_NAME: frames[parity_names[0]]})
+            report["cpu_perf"]["after_ms"] = cpu_perf_check(10)
             report["ms_per_frame"] = {"device": DEVICE_NAME, "runtime": f"onnxruntime-gpu {ort.__version__} CUDA EP",
                                       **ms}
             del cuda
@@ -173,6 +184,7 @@ def export_bundle(
         "metrics_dev": metrics_dev,
         "network": {"candidate": ck["candidate"], "arch_kwargs": ck.get("arch_kwargs") or {}, "precision":
                     "fp16" if half else "fp32", "step": ck.get("step")},
+        "ms_cpu_perf": report.get("cpu_perf"),
         "golden_sources": dict(zip(contract.GOLDEN_FRAMES, golden_names, strict=True)),
     }
     (out / contract.META_FILE).write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -218,7 +230,11 @@ def main(argv: list[str] | None = None) -> int:
     rp.parent.mkdir(parents=True, exist_ok=True)
     rp.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False) if args.json else json.dumps(report, indent=2, ensure_ascii=False))
-    return 0 if not report["errors"] and report["parity_ok"] else 1
+    cp = report.get("cpu_perf") or {}
+    cpu_ok = args.skip_cuda or (cp.get("before_ms", {}).get("ok") and cp.get("after_ms", {}).get("ok"))
+    if not cpu_ok:
+        print(f"[cpu-perf] CPU hạ xung trong lúc đo ms: số ms không dùng được, đo lại ({cp})", file=sys.stderr)
+    return 0 if not report["errors"] and report["parity_ok"] and cpu_ok else 1
 
 
 if __name__ == "__main__":

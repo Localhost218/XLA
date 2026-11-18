@@ -73,6 +73,25 @@ CANDIDATES: dict[str, dict[str, Any]] = {
 }
 
 
+VARIANTS: dict[str, dict[str, Any]] = {
+    # Biến thể thu nhỏ (brief Owner: được thu nhỏ ứng viên giấy phép rõ khi bản công bố quá chậm). Cùng width 32 nên
+    # nạp được trọng số công bố cho MỌI tham số: mỗi tầng giữ k khối ĐẦU của bản SIDD-width32 (khối thừa bỏ đi).
+    "nafnet_lite": {"base": "nafnet", "kwargs": {"middle_blk_num": 2, "enc_blk_nums": (1, 1, 1, 2),
+                                                 "dec_blk_nums": (1, 1, 1, 1)}},
+    "nafnet_tiny": {"base": "nafnet", "kwargs": {"middle_blk_num": 1, "enc_blk_nums": (1, 1, 1, 1),
+                                                 "dec_blk_nums": (1, 1, 1, 1)}},
+}
+
+
+def resolve(name: str) -> tuple[str, dict[str, Any]]:
+    """Tên ứng viên hoặc biến thể → (ứng viên gốc, kwargs ghi đè)."""
+    if name in CANDIDATES:
+        return name, {}
+    if name in VARIANTS:
+        return VARIANTS[name]["base"], dict(VARIANTS[name]["kwargs"])
+    raise ValueError(f"ứng viên không biết: {name}; có {sorted(CANDIDATES) + sorted(VARIANTS)}")
+
+
 def _arch_class(arch: str) -> type[nn.Module]:
     if arch == "nafnet":
         from xla.enhance.arch.nafnet import NAFNet
@@ -156,7 +175,9 @@ def load_pretrained(model: RestoreNet, name: str, weights_dir: Path = WEIGHTS_DI
     sd = torch.load(path, map_location="cpu", weights_only=True)
     if spec["weights_key"]:
         sd = sd[spec["weights_key"]]
-    model.net.load_state_dict(sd, strict=strict)
+    res = model.net.load_state_dict(sd, strict=strict)
+    if not strict and res.missing_keys:  # biến thể thu nhỏ: mọi tham số phải lấy từ trọng số công bố
+        raise ValueError(f"trọng số công bố thiếu {len(res.missing_keys)} khoá của biến thể: {res.missing_keys[:5]}")
     return model
 
 
@@ -254,12 +275,30 @@ def export_onnx_cuda(m: nn.Module, args: tuple[Any, ...], out: Path, inputs: lis
             return False
 
 
+@torch.no_grad()
+def torch_cuda_ms(model: nn.Module, warmup: int, iters: int) -> dict[str, float]:
+    """Tham chiếu: ms PyTorch fp16 CUDA (đồng bộ mỗi lần) của cùng mạng — chỉ để đối chiếu số ORT."""
+    x = torch.rand(1, 3, NET_H, NET_W, device="cuda").half()
+    for _ in range(warmup):
+        model(x)
+    torch.cuda.synchronize()
+    t = np.empty(iters, np.float64)
+    for i in range(iters):
+        t0 = time.perf_counter()
+        model(x)
+        torch.cuda.synchronize()
+        t[i] = (time.perf_counter() - t0) * 1000.0
+    return {"p50": float(np.percentile(t, 50)), "p95": float(np.percentile(t, 95)), "n": int(iters)}
+
+
 def speed_one(name: str, warmup: int, iters: int, out_dir: Path) -> dict[str, Any]:
     import onnxruntime as ort
 
-    model = load_pretrained(build(name), name)
+    base, kw = resolve(name)
+    model = load_pretrained(build(base, kw), base, strict=not kw)
     params = n_params(model)
     onnx_path = export_net_fp16(model, out_dir / f"{name}_fp16_{NET_H}x{NET_W}.onnx")
+    torch_ms = torch_cuda_ms(model, warmup, min(iters, 100))
     del model
     torch.cuda.empty_cache()
     sess = ort_session(onnx_path)
@@ -268,31 +307,94 @@ def speed_one(name: str, warmup: int, iters: int, out_dir: Path) -> dict[str, An
     del sess
     return {
         "candidate": name,
-        "published_weights": CANDIDATES[name]["published"],
-        "arch_kwargs": {k: list(v) if isinstance(v, tuple) else v for k, v in CANDIDATES[name]["kwargs"].items()},
+        "base": base,
+        "published_weights": CANDIDATES[base]["published"] + (" — biến thể thu nhỏ, giữ k khối đầu" if kw else ""),
+        "arch_kwargs": {k: list(v) if isinstance(v, tuple) else v for k, v in {**CANDIDATES[base]["kwargs"], **kw}.items()},
         "params": params,
         "input": [1, 3, NET_H, NET_W],
         "precision": "fp16",
         "runtime": f"onnxruntime-gpu {ort.__version__} CUDA EP (mặc định)",
         "ms": ms,
+        "torch_fp16_ms_ref": torch_ms,
         "p95_le_budget": ms["p95"] <= P95_BUDGET_MS,
-        "license": read_license(name),
+        "license": read_license(base),
     }
+
+
+CPU_PERF_COUNTER = r"\Processor Information(_Total)\% Processor Performance"
+CPU_PERF_MIN = 80.0
+CPU_PERF_WINDOW_S = 60
+CPU_PERF_RECHECK_S = 10
+CPU_PERF_MAX_WAIT_S = 6 * 3600
+
+
+def cpu_perf_samples(n: int) -> list[float]:
+    """``n`` mẫu (1 s/mẫu) của bộ đếm % Processor Performance (Windows). Lỗi đọc → RuntimeError, không đoán."""
+    import subprocess
+
+    cmd = f"(Get-Counter '{CPU_PERF_COUNTER}' -SampleInterval 1 -MaxSamples {int(n)}).CounterSamples.CookedValue"
+    r = subprocess.run(["powershell.exe", "-NoProfile", "-Command", cmd], check=False, capture_output=True,
+                       text=True, timeout=n + 60)
+    vals = [float(x.replace(",", ".")) for x in r.stdout.split() if x.strip()]
+    if r.returncode != 0 or len(vals) < n:
+        raise RuntimeError(f"không đọc được {CPU_PERF_COUNTER}: rc={r.returncode} {r.stderr[:200]}")
+    return vals
+
+
+def cpu_perf_check(n: int) -> dict[str, Any]:
+    v = cpu_perf_samples(n)
+    return {"ok": min(v) >= CPU_PERF_MIN, "min": round(min(v), 1), "mean": round(float(np.mean(v)), 1),
+            "window_s": n, "at": datetime.now(UTC).isoformat(timespec="seconds")}
+
+
+def wait_cpu_perf(window_s: int = CPU_PERF_WINDOW_S, max_wait_s: float = CPU_PERF_MAX_WAIT_S) -> dict[str, Any]:
+    """Chờ tới khi CPU hết hạ xung: mọi mẫu trong ``window_s`` giây liên tục ≥ ``CPU_PERF_MIN`` % (Owner 18/11).
+
+    Đo ms lúc hạ xung (pin yếu, sạc lại) cho số sai cả với ORT CUDA (phần CPU feed/copy chậm). Quá ``max_wait_s`` →
+    TimeoutError. Mỗi lần chưa đạt in một dòng ra stderr.
+    """
+    t0 = time.time()
+    while True:
+        c = cpu_perf_check(window_s)
+        if c["ok"]:
+            c["waited_s"] = round(time.time() - t0, 1)
+            return c
+        print(f"[cpu-perf] chưa đạt {CPU_PERF_MIN} %: {c}", file=sys.stderr, flush=True)
+        if time.time() - t0 > max_wait_s:
+            raise TimeoutError(f"CPU hạ xung quá {max_wait_s} s: {c}")
 
 
 def run_speed(names: list[str], warmup: int = WARMUP, iters: int = ITERS) -> dict[str, Any]:
     from xla.gpu_lock import gpu_lock
 
     out_dir = RUNS_DIR / "speed"
-    rows = []
     t0 = time.time()
-    with gpu_lock("phase13 restore speed", timeout_s=GPU_LOCK_TIMEOUT_S):
-        t_lock = time.time()
-        for n in names:
-            rows.append(speed_one(n, warmup, iters, out_dir))
-        gpu_s = time.time() - t_lock
-    ok = [r for r in rows if r["p95_le_budget"]]
-    chosen = min(ok, key=lambda r: r["ms"]["p95"])["candidate"] if ok else None
+    gpu_s = 0.0
+    attempts = 0
+    while True:
+        attempts += 1
+        gate_before = wait_cpu_perf()
+        with gpu_lock("phase13 restore speed", timeout_s=GPU_LOCK_TIMEOUT_S):
+            t_lock = time.time()
+            in_lock = cpu_perf_check(CPU_PERF_RECHECK_S)
+            if not in_lock["ok"]:  # hạ xung giữa lúc chờ khoá: nhả khoá, chờ lại
+                gpu_s += time.time() - t_lock
+                print(f"[cpu-perf] hạ xung lúc vào khoá {in_lock}, nhả khoá chờ lại", file=sys.stderr, flush=True)
+                continue
+            rows = [speed_one(n, warmup, iters, out_dir) for n in names]
+            after = cpu_perf_check(CPU_PERF_RECHECK_S)
+            gpu_s += time.time() - t_lock
+        if after["ok"]:
+            break
+        print(f"[cpu-perf] hạ xung sau khi đo {after}: bỏ số đo, đo lại", file=sys.stderr, flush=True)
+    ok = [r for r in rows if r["p95_le_budget"] and r["candidate"] in CANDIDATES]
+    ok_var = [r for r in rows if r["p95_le_budget"] and r["candidate"] in VARIANTS]
+    if ok:
+        chosen = min(ok, key=lambda r: r["ms"]["p95"])["candidate"]
+    elif ok_var:  # không bản công bố nào đạt: biến thể thu nhỏ lớn nhất (nhiều tham số nhất) còn trong ngân sách
+        chosen = max(ok_var, key=lambda r: r["params"])["candidate"]
+    else:
+        chosen = None
     return {
         "created": datetime.now(UTC).isoformat(timespec="seconds"),
         "device": torch.cuda.get_device_name(0),
@@ -301,9 +403,12 @@ def run_speed(names: list[str], warmup: int = WARMUP, iters: int = ITERS) -> dic
         "iters": iters,
         "candidates": rows,
         "chosen": chosen,
-        "rule": f"nhanh nhất (p95) trong các ứng viên có p95 ≤ {P95_BUDGET_MS} ms; không ai đạt → null (Kill (c))",
+        "rule": f"nhanh nhất (p95) trong các bản công bố có p95 ≤ {P95_BUDGET_MS} ms; không bản nào đạt → biến thể thu "
+        "nhỏ nhiều tham số nhất còn đạt; không gì đạt → null (Kill (c))",
         "gpu_seconds": round(gpu_s, 1),
         "wait_lock_seconds": round(t_lock - t0, 1),
+        "cpu_perf": {"counter": CPU_PERF_COUNTER, "min_pct": CPU_PERF_MIN, "gate_before": gate_before,
+                     "in_lock": in_lock, "after": after, "attempts": attempts},
     }
 
 
@@ -319,11 +424,11 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     names = [n.strip() for n in args.candidates.split(",") if n.strip()]
-    bad = [n for n in names if n not in CANDIDATES]
+    bad = [n for n in names if n not in CANDIDATES and n not in VARIANTS]
     if bad:
         print(f"ứng viên không biết: {bad}", file=sys.stderr)
         return 2
-    missing = [n for n in names if not (WEIGHTS_DIR / CANDIDATES[n]["weights"]).is_file()]
+    missing = [n for n in names if not (WEIGHTS_DIR / CANDIDATES[resolve(n)[0]]["weights"]).is_file()]
     if missing:
         print(f"thiếu trọng số: {missing} trong {WEIGHTS_DIR}", file=sys.stderr)
         return 2

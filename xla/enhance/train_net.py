@@ -36,7 +36,7 @@ import torch.nn.functional as F
 import yaml
 from torch.utils.data import DataLoader, Dataset
 
-from xla.enhance.net import RUNS_DIR, EnhancerGraph, build, enhance_frames, load_pretrained, n_params
+from xla.enhance.net import RUNS_DIR, EnhancerGraph, build, enhance_frames, load_pretrained, n_params, resolve
 from xla.paths import data_root, repo_root
 
 GPU_LOCK_TIMEOUT_S = 6 * 3600
@@ -217,6 +217,9 @@ def train(cfg: dict[str, Any], run_id: str, smoke: bool, max_steps: int | None) 
     meta = {"candidate": cfg["candidate"], "arch_kwargs": cfg.get("arch_kwargs") or {}, "crop_left": crop_left,
             "camera_profile_version": profile_version, "config_version": cfg["version"], "run_id": run_id}
     vals: list[dict[str, Any]] = []
+    from xla.enhance.net import wait_cpu_perf
+
+    cpu_gate = wait_cpu_perf()  # CPU hạ xung làm chậm dataloader → sai giờ/1 000 bước và phí giờ GPU
     t_wait = time.time()
     with gpu_lock(f"phase13 restore {'smoke' if smoke else 'train'} {run_id}", timeout_s=GPU_LOCK_TIMEOUT_S):
         t0 = time.time()
@@ -289,6 +292,7 @@ def train(cfg: dict[str, Any], run_id: str, smoke: bool, max_steps: int | None) 
         "vram_peak_gb": vram,
         "gpu_seconds": gpu_s,
         "wait_lock_seconds": wait_s,
+        "cpu_perf_gate": cpu_gate,
         "val_synthetic": vals,
         "run_dir": str(run_dir),
         "finished": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -409,8 +413,10 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     cfg = load_config(args.config)
     if args.cmd == "train":
-        if args.candidate:
-            cfg["candidate"] = args.candidate
+        if args.candidate:  # ứng viên hoặc biến thể thu nhỏ (xla.enhance.net.VARIANTS)
+            base, kw = resolve(args.candidate)
+            cfg["candidate"] = base
+            cfg["arch_kwargs"] = {k: list(v) if isinstance(v, tuple) else v for k, v in kw.items()}
         run_id = args.run_id or f"{cfg['candidate']}-{'smoke' if args.smoke else 'train'}"
         out = train(cfg, run_id, args.smoke, args.max_steps)
         _write_train_json({"smoke" if args.smoke else "train": out})

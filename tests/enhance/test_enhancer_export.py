@@ -82,7 +82,7 @@ def test_candidates_registry_has_three() -> None:
 def test_speed_json_three_candidates_with_license(require_data) -> None:
     rep = json.loads(require_data(SPEED_JSON, "python -m xla.enhance.net speed").read_text(encoding="utf-8"))
     rows = {r["candidate"]: r for r in rep["candidates"]}
-    assert set(rows) == {"nafnet", "fbcnn", "scunet"}
+    assert {"nafnet", "fbcnn", "scunet"} <= set(rows)  # có thể thêm biến thể thu nhỏ
     for r in rows.values():
         lic = r["license"]
         assert lic.get("code") and lic.get("weights"), r["candidate"]
