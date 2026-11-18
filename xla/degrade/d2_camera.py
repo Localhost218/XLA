@@ -151,9 +151,9 @@ def stage_tone(lin: np.ndarray, rng, cfg: dict, profile: dict, p: dict) -> np.nd
     """(c) về miền cảm biến (bỏ hệ số WB của ISP), nhân phơi sáng, cắt từng kênh ở 1,0, nhân lại hệ số WB, hệ số ra k
     và ám màu còn lại.
 
-    Hệ số WB của ISP (``isp_wb_gain_r/b`` trong cấu hình, > 1) KHÔNG đo được từ khung JPEG sau ISP nên không lấy từ hồ
-    sơ: ``color.wb_gain_*_fit`` của hồ sơ v1.1.0 chính là p50 của ``r_over_g``/``b_over_g`` (< 1), dùng làm hệ số ISP
-    thì vùng bão hoà ra xanh lá thay vì hồng. G bão hoà trước (lin ≥ k/brightness) và dừng ở k, R/B còn tăng →
+    Hệ số WB của ISP (``isp_wb_gain_r/b``, > 1) đọc từ cấu hình: khung JPEG sau ISP chỉ cho cận dưới
+    (``color.wb_gain_*_fit`` của hồ sơ v1.2.0), phase 07 hiệu chỉnh từ cận đó trở lên. (Hồ sơ v1.1.0 ghi p50 r/g, b/g
+    < 1 ở trường đó; dùng làm hệ số ISP thì vùng bão hoà ra xanh lá.) G bão hoà trước (lin ≥ k/brightness), dừng ở k, R/B còn tăng →
     R−G, B−G > 0: hồng/tím. Tông chưa bão hoà = ``lin·brightness·cast``; cast = p50 ``r_over_g``/``b_over_g`` của hồ sơ ×
     ``cast_r``/``cast_b``.
     """
@@ -202,11 +202,19 @@ def shaped_noise(shape: tuple[int, int], psd: list, rng) -> np.ndarray:
     return np.fft.irfft2(spec, s=shape).astype(np.float32)
 
 
-def stage_isp(srgb: np.ndarray, rng, cfg: dict, profile: dict, p: dict) -> np.ndarray:
+def stage_isp(srgb: np.ndarray, rng, cfg: dict, profile: dict, p: dict, noise_pool: dict | None = None,
+              realsr_gain: float = 1.0) -> np.ndarray:
     """(d) ISP: làm mềm (khử nhiễu của ISP trên ảnh nguồn sạch tương đương làm mềm), rồi nhiễu sau ISP:
-    σ(Y) nội suy theo ``noise.nlf``, phổ lọc theo ``noise.psd_radial``; nhiễu chủ yếu ở độ sáng, thêm phần màu nhỏ."""
+    σ(Y) nội suy theo ``noise.nlf``, phổ lọc theo ``noise.psd_radial``; nhiễu chủ yếu ở độ sáng, thêm phần màu nhỏ.
+    Có ``noise_pool`` (biến thể E3): nhiễu lấy từ phần dư khung dev thật (``xla.degrade.realsr``) thay nhiễu tổng hợp."""
     soft = float(rng.uniform(*cfg["soften_sigma"]))
     out = cv2.GaussianBlur(srgb, (0, 0), sigmaX=soft) if soft > 0.05 else srgb
+    if noise_pool is not None:
+        from xla.degrade import realsr
+
+        out, extra = realsr.inject(out, rng, noise_pool, realsr_gain)
+        p.update(soften_sigma=round(soft, 4), **extra)
+        return out
     nlf = sorted((float(a), float(b)) for a, b in get_field(profile, "noise.nlf"))
     psd = get_field(profile, "noise.psd_radial")
     scale = float(rng.uniform(*cfg["noise_scale"]))
@@ -252,8 +260,10 @@ def choose_q(rng, cfg: dict) -> int:
     return int(rng.integers(lo, hi + 1))
 
 
-def degrade(win_bgr: np.ndarray, rng, cfg: dict, profile: dict) -> tuple[np.ndarray, int, dict]:
-    """Cửa sổ 624×480 uint8 BGR → (khung 640×480 uint8 BGR trước JPEG, q, tham số). JPEG do ``encode_final``."""
+def degrade(win_bgr: np.ndarray, rng, cfg: dict, profile: dict,
+            noise_pool: dict | None = None) -> tuple[np.ndarray, int, dict]:
+    """Cửa sổ 624×480 uint8 BGR → (khung 640×480 uint8 BGR trước JPEG, q, tham số). JPEG do ``encode_final``.
+    ``noise_pool``: biến thể D2+Real-SR (nhiễu bước d lấy từ khung dev thật, hệ số ``realsr.gain`` của cấu hình)."""
     if win_bgr.shape[:2] != (WIN_H, WIN_W):
         raise ValueError(f"D2 nhận cửa sổ {WIN_W}x{WIN_H}, gặp {win_bgr.shape}")
     params: dict = {}
@@ -262,7 +272,8 @@ def degrade(win_bgr: np.ndarray, rng, cfg: dict, profile: dict) -> tuple[np.ndar
     lin = stage_lens(lin, rng, cfg["lens"], profile, params.setdefault("lens", {}))
     lin = stage_tone(lin, rng, cfg["tone"], profile, params.setdefault("tone", {}))
     srgb = linear_to_srgb(lin)
-    srgb = stage_isp(srgb, rng, cfg["isp"], profile, params.setdefault("isp", {}))
+    srgb = stage_isp(srgb, rng, cfg["isp"], profile, params.setdefault("isp", {}), noise_pool,
+                     float(cfg.get("realsr", {}).get("gain", 1.0)))
     frame = stage_strip(srgb, rng, cfg["strip"], profile, params.setdefault("strip", {}))
     q = choose_q(rng, cfg["jpeg"])
     params["jpeg"] = {"q": q}

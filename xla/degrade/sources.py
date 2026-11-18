@@ -311,8 +311,20 @@ def attach_scores(items: list[SourceItem], cfg: dict) -> None:
             it.probe_nadir = pr.get(it.key)
 
 
-def select(cfg: dict) -> list[SourceItem]:
-    """Ảnh nguồn dùng được: có điểm nadir đạt ngưỡng; ảnh không người vẫn giữ (cho cửa sổ âm)."""
+def load_val_split(cfg: dict) -> dict | None:
+    """Danh sách chuỗi VisDrone train chuyển sang val (``val_split_file``, sinh bằng lệnh ``pick-val``)."""
+    f = cfg.get("val_split_file")
+    if not f:
+        return None
+    p = Path(f) if Path(f).is_absolute() else paths.repo_root() / f
+    data = yaml.safe_load(p.read_text(encoding="utf-8"))
+    bad = [s for s in data["train_to_val"] if not str(s).startswith("train/")]
+    if bad:
+        raise ValueError(f"{p}: train_to_val chỉ nhận chuỗi train/…: {bad}")
+    return data
+
+
+def _filtered(cfg: dict) -> list[SourceItem]:
     items = collect(cfg)
     attach_scores(items, cfg)
     rule = cfg["nadir"]
@@ -321,6 +333,68 @@ def select(cfg: dict) -> list[SourceItem]:
     if not cfg.get("keep_images_without_person", True):
         out = [it for it in out if it.boxes]
     return sorted(out, key=lambda i: i.key)
+
+
+def select(cfg: dict) -> list[SourceItem]:
+    """Ảnh nguồn dùng được: có điểm nadir đạt ngưỡng; ảnh không người vẫn giữ (cho cửa sổ âm). Chuỗi train nằm trong
+    ``val_split_file`` chuyển sang val (chia theo chuỗi, cùng chia cho D0/D1/D2)."""
+    out = _filtered(cfg)
+    vs = load_val_split(cfg)
+    if vs:
+        move = set(vs["train_to_val"])
+        for it in out:
+            if it.source == "visdrone" and visdrone_seq(it) in move:
+                it.split = "val"
+    return out
+
+
+def pick_val_sequences(items: list[SourceItem], seed: int, min_val_with_person: int, max_extra: int) -> list[str]:
+    """Chọn chuỗi VisDrone train chuyển sang val: trộn có seed, lấy lần lượt chuỗi nào không làm số ảnh có người thêm
+    vượt ``max_extra``, dừng khi val đạt ``min_val_with_person`` ảnh có người."""
+    per: dict[str, int] = {}
+    have = 0
+    for it in items:
+        if it.source != "visdrone":
+            continue
+        s = visdrone_seq(it)
+        if it.split == "val":
+            have += bool(it.boxes)
+        else:
+            per[s] = per.get(s, 0) + bool(it.boxes)
+    need = min_val_with_person - have
+    order = sorted(per)
+    np.random.default_rng(seed).shuffle(order)
+    chosen, extra = [], 0
+    for s in order:
+        if extra >= need:
+            break
+        if per[s] and extra + per[s] <= max_extra:
+            chosen.append(s)
+            extra += per[s]
+    if extra < need:
+        raise ValueError(f"không đủ chuỗi train để val đạt {min_val_with_person} ảnh có người (thêm được {extra})")
+    return sorted(chosen)
+
+
+def cmd_pick_val(cfg: dict, seed: int, min_val: int, max_extra: int, out: Path) -> int:
+    items = _filtered(cfg)
+    chosen = pick_val_sequences(items, seed, min_val, max_extra)
+    ch = set(chosen)
+    tr_seq = {visdrone_seq(i) for i in items if i.source == "visdrone" and i.split == "train"}
+    moved = [i for i in items if i.source == "visdrone" and visdrone_seq(i) in ch]
+    val_p = sum(bool(i.boxes) for i in items if i.split == "val") + sum(bool(i.boxes) for i in moved)
+    head = (f"# Chuỗi VisDrone train chuyển sang val của tập sinh D0/D1/D2 (phase 07, lệnh Owner 18/11: val gốc chỉ "
+            f"{val_p - sum(bool(i.boxes) for i in moved)} ảnh\n"
+            f"# có người). Sinh bằng: python -m xla.degrade.sources pick-val --seed {seed} --min-val {min_val} "
+            f"--max-extra {max_extra}\n"
+            "# Chia theo CHUỖI (không theo ảnh) để không rò cảnh giữa train và val. Không sửa tay.\n")
+    body = {"seed": seed, "min_val_with_person": min_val, "max_extra": max_extra,
+            "train_sequences_total": len(tr_seq), "moved_sequences": len(chosen),
+            "moved_images": len(moved), "moved_with_person": sum(bool(i.boxes) for i in moved),
+            "val_with_person_after": val_p, "train_to_val": chosen}
+    out.write_text(head + yaml.safe_dump(body, allow_unicode=True, sort_keys=False), encoding="utf-8", newline="\n")
+    print(json.dumps({k: v for k, v in body.items() if k != "train_to_val"} | {"out": str(out)}, ensure_ascii=False))
+    return 0
 
 
 # ----------------------------------------------------------------------------- CLI
@@ -536,7 +610,7 @@ def cmd_stats(cfg: dict, as_json: bool) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=["score", "review-sheet", "seq-sheet", "fit-probe", "stats"])
+    ap.add_argument("cmd", choices=["score", "review-sheet", "seq-sheet", "fit-probe", "pick-val", "stats"])
     ap.add_argument("--config", default=str(paths.repo_root() / "configs" / "sources.yaml"))
     ap.add_argument("--batch", type=int, default=64)
     ap.add_argument("--device", default="auto")
@@ -545,6 +619,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--per-sheet", type=int, default=25)
     ap.add_argument("--out", type=Path, default=paths.cache_dir() / "degrade" / "nadir_review")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--min-val", type=int, default=200, help="pick-val: số ảnh có người tối thiểu của val")
+    ap.add_argument("--max-extra", type=int, default=180, help="pick-val: ảnh có người tối đa chuyển thêm")
     a = ap.parse_args(argv)
     cfg = load_config(a.config)
     if a.cmd == "score":
@@ -553,6 +629,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_review_sheet(cfg, a.n, a.seed, a.out, a.per_sheet)
     if a.cmd == "seq-sheet":
         return cmd_seq_sheet(cfg, a.out, a.per_sheet)
+    if a.cmd == "pick-val":
+        return cmd_pick_val(cfg, a.seed, a.min_val, a.max_extra, paths.repo_root() / "configs" / "visdrone_valsplit.yaml")
     if a.cmd == "fit-probe":
         return cmd_fit_probe(cfg, paths.cache_dir() / "degrade" / f"clip_emb_{cfg['nadir']['clip_model']}.npz")
     return cmd_stats(cfg, a.json)

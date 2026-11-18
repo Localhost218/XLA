@@ -87,7 +87,7 @@ def render_unit(set_name: str, item: dict, unit: str, seed: int, ctx: dict) -> d
     if (img.shape[1], img.shape[0]) != tuple(item["wh"]):
         raise ValueError(f"{item['key']}: cỡ ảnh {img.shape[1]}x{img.shape[0]} khác chỉ mục {item['wh']}")
     window = geometry.apply_window(img, win)
-    rng = rng_for(seed, set_name, unit)
+    rng = rng_for(seed, "d2" if set_name == "d2sr" else set_name, unit)   # d2sr: cùng tham số D2, chỉ khác nhiễu
     extra: dict = {}
     if set_name == "d0":
         data, params = encode_d0(pad_black(window)), {"jpeg": {"quality": D0_JPEG_QUALITY, "subsampling": "4:4:4"}}
@@ -95,7 +95,8 @@ def render_unit(set_name: str, item: dict, unit: str, seed: int, ctx: dict) -> d
         frame01, q, params = d1_random.degrade(window, rng, ctx["d1"])
         data = d1_random.encode_final(frame01, q)
     else:
-        frame, q, params = d2_camera.degrade(window, rng, ctx["d2"], ctx["profile"])
+        frame, q, params = d2_camera.degrade(window, rng, ctx["d2"], ctx["profile"],
+                                             ctx.get("noise_pool") if set_name == "d2sr" else None)
         data, verified = d2_camera.encode_final(frame, q, ctx["profile"])
         params["jpeg"]["qtable_verified"] = verified
         extra = {"profile_id": ctx["profile"].get("profile_id"), "profile_version": ctx["profile"].get("profile_version"),
@@ -204,15 +205,19 @@ def make_context(set_names: list[str], profile_path: Path, src_cfg: dict, d1_cfg
            "person_short_px": d2_camera.get_field(profile, "person_box_px.short_side")}
     if "d1" in set_names:
         ctx["d1"] = yaml.safe_load(d1_cfg.read_text(encoding="utf-8"))
-    if "d2" in set_names:
+    if "d2" in set_names or "d2sr" in set_names:
         ctx["d2"] = d2_camera.load_config(d2_cfg)
         ctx["profile"] = profile
+    if "d2sr" in set_names:
+        from xla.degrade import realsr
+
+        ctx["noise_pool"] = realsr.load_pool()
     return ctx
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--set", required=True, choices=[*SETS, "all"])
+    ap.add_argument("--set", required=True, choices=[*SETS, "d2sr", "all"])
     ap.add_argument("--seed", type=int, default=DEFAULT_SEED)
     ap.add_argument("--limit", type=int, default=0, help="số ảnh ra tối đa (0 = đủ); chạy thử nhỏ")
     ap.add_argument("--profile", type=Path, default=_repo_cfg("camera_profile.yaml"))
