@@ -126,7 +126,22 @@ nếu mỗi file < 5 MB.
 | detect (10) | **xong** `d1a13a2`: test mAP50 mốc 0,126 / D0 0,297 / D1 0,143 / D2 0,236 / D2sr 0,149; D2−D1 +0,093 [−0,073; +0,252]; best = D2 (dev-val 0,329); B1 chỉ D0 đạt, B2 B3 chưa |
 | detect-export | **xong** `0934f1e`: parity ORT CPU/CUDA −0,0029 mAP50 so `.pt` (đạt); resize trong graph trùng bit với `LetterBox` |
 | classic (12) | **xong** `e859e22`: hồng −91,6 %, dark channel 142,7→65,3, blocking 2,73→2,08; bench 95 ms lúc máy quá nhiệt (khoẻ 13–18 ms), đo lại ở phase 14 |
-| restore (13) | đang chạy |
+| restore (13) | vòng 1 `01a93c9`: NAFNet width32 bundle hợp lệ nhưng p95 82 ms (máy không hãm) > 30; % hồng −93 %, flicker 1,65; vòng 2 đang train NAFNet-tiny cho kịp 30 ms |
 | abeval (14 code) | **xong** `fbaf1dc`: chạy giả đầu-cuối đạt; E4 COCO×gốc 0,1265 khớp mốc phase 09; lệnh chạy thật ở `results/ab/README.md` + báo cáo lane |
-| detect (11) | đang chạy |
-| 14 gộp + PR #2 | chờ tất cả |
+| detect (11) | **tạm dừng 18/11 ~19:30**: thầy YOLO11m xong 19:06 (4 epoch, dev-val 0,267, `D:\DevCache\runs\xla\e2\teacher\weights\best_devval.pt`); còn nhãn giả → trò 1–3 vòng → chọn model ship → xuất `detector-v1.0.0` → Accept. Trạng thái chi tiết: `results/e2/RESUME.md` trên `lane/detect` |
+| restore (13) vòng 2 | **tạm dừng 18/11 ~19:30**: mới smoke; còn train NAFNet-tiny → chọn checkpoint → xuất thay bundle → Accept. Chi tiết: `results/restore/RESUME.md` trên `lane/restore` |
+| 14 gộp + PR #2 | chưa bắt đầu (chủ dự án bảo dừng trước bước gộp) |
+
+## 8. Chạy tiếp sau khi bật máy (chủ dự án tắt máy nghỉ 18/11 ~19:30)
+
+Mọi thứ đã commit + push; trọng số, nhãn giả, run ở `D:\DevCache\runs\xla\` (ổ D, không mất khi tắt máy). Thứ tự làm tiếp:
+
+1. Phiên Owner: `git -C D:\XLA status` + `git worktree list`, xác nhận worktree `D:\XLA-wt\detect` và `D:\XLA-wt\restore`
+   sạch và trùng `origin/lane/*`; khoá GPU trống.
+2. Song song: lane detect làm tiếp phase 11 theo `D:\XLA-wt\detect\results\e2\RESUME.md`; lane restore làm tiếp phase 13
+   vòng 2 theo `D:\XLA-wt\restore\results\restore\RESUME.md`. Hai lane dùng chung GPU qua `gpu_lock`. Brief gốc vẫn đúng:
+   §1–6, §6b của file này; lệnh chủ dự án: không chờ/hoãn/để nợ vì CPU-nhiệt.
+3. Hai lane xong (Accept exit 0, push) → phase 14: gộp `lane/restore`, `lane/detect` vào nhánh tích hợp (detect-export,
+   abeval, classic, phase 10 đã gộp), chép `detector.onnx`/`enhancer.onnx` từ worktree vào bundle của nhánh tích hợp,
+   `validate` từng bundle, `pytest -m "not gpu"`, rồi chạy các lệnh ở `results/ab/README.md` (enhance_eval all, ab_page
+   build), mở `results/ab/ab-test.html` cho chủ dự án chấm (~10 phút), ab_score, README kết luận, PR #2 → CI xanh → merge.
