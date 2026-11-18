@@ -3,7 +3,8 @@
 Trạng thái: **có số thật, A/B lần 1 đã chấm** (19/11/2026). Code và chạy thử bằng bundle giả do lane `abeval` làm
 (18/11/2026); phase 14 chạy lại mọi số bằng model thật, chủ dự án chấm 55/55 lượt. Kết quả và kết luận ở §4.
 
-A/B lần 2 có phóng to 2× đang chấm, kết quả ghi ở `results/ab-zoom/`.
+A/B lần 2 (khung thật, phóng to 2× quanh người, 19/11/2026) ở `results/ab-zoom/README.md`: mạng vs gốc 13/25 = 0,52
+[0,335; 0,700], vs cổ điển 5/25 = 0,20 [0,089; 0,391] — vẫn không đạt §8, quyết định §4.6 giữ nguyên.
 
 | File | Nội dung | Sinh bằng |
 |---|---|---|
@@ -157,15 +158,16 @@ Dự đoán trong thiết kế: "khôi phục giúp bộ nhận diện có sẵn
 - Hệ quả: D5 giữ khung gốc cho nhận diện. Bộ fine-tune chỉ ngang mốc COCO trên test (0,119 so 0,126), nên "mạng khôi phục rồi
   COCO" (0,195) là hướng đáng thử lại với nhiều khung có người hơn, chưa phải kết luận.
 
-### 4.6 Quyết định ship enhancer (theo A/B lần 1)
+### 4.6 Quyết định ship enhancer (A/B lần 1, lần 2 xác nhận)
 
 - **Forecast Kill (c) không kích hoạt**: Kill (c) chỉ xét tốc độ, và mạng ≤ 30 ms (20,7 ms trong `all`, 11,1 ms đo riêng).
   Bundle `enhancer-v1.0.0` hợp lệ hợp đồng (`validate` → `[]`), giữ trong `models/release/`.
 - **Chất lượng không đạt §8 nhánh A** (4/7 không đạt, ghi đúng như số ở §4.2): không hơn ảnh gốc (0,44, CI chạm 50 %) và thua
   rõ cổ điển (1/25). **Quyết định: không ship `enhancer-v1.0.0` làm ảnh rõ khuyến nghị cho người xem.** IOT-CV vẫn tích hợp
   được theo hợp đồng nếu Owner muốn bật thử, nhưng mặc định coi như chưa có enhancer đạt (luồng `enhanced` trả 503 như hợp đồng
-  quy định khi không có bundle) tới khi có bản sửa đạt A/B. Owner cập nhật mục này nếu A/B lần 2 (phóng to 2×,
-  `results/ab-zoom/`) cho kết quả khác.
+  quy định khi không có bundle) tới khi có bản sửa đạt A/B. **A/B lần 2** (phóng to 2×, `results/ab-zoom/`) cũng không
+  đạt (0,52 vs gốc, 0,20 vs cổ điển) nên quyết định giữ nguyên. Lần 2 thấy thêm: quanh người mạng thắng gốc ổn định (gộp hai
+  lần 17/21 = 0,81 [0,60; 0,92]), trên nền không người thua (7/29) — mô tả hậu kiểm, cần trang riêng khung có người để chốt.
 - Cổ điển thắng mạng 24/25 và đạt dark channel, nhưng chính nó cũng không đạt nhấp nháy (2,18) và hồng (−89,2 %, sát ngưỡng),
   và là hàm Python, không phải bundle ONNX của hợp đồng: dùng cổ điển làm ảnh rõ ở IOT-CV là quyết định của Owner (ngoài hợp
   đồng hiện tại), không tự chốt ở đây.
