@@ -45,6 +45,28 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File D:\XLA-wt\labels\scripts
 # dừng: thêm -Stop ; cổng khác: -Port 8081 ; lần đầu khởi tạo DB mất ~2-3 phút
 ```
 
+## Kết quả duyệt 18/11/2026 (bước 5–6)
+
+Chủ dự án Submit đủ 198/198 khung test (mỗi task một annotation, không annotation huỷ). `labelstudio export --json`
+exit 0: test **149 hộp** (agent soát 151), dev-val **115 hộp** (không qua chủ dự án).
+
+| Sửa của chủ dự án so với nhãn agent (ghép IoU ≥ 0,5) | Hộp |
+|---|---|
+| xoá | 5 |
+| thêm | 3 |
+| chỉnh (cặp ghép IoU < 0,95) | 31 (IoU ≥ 0,9: 7; 0,8–0,9: 7; < 0,8: 17; trung vị 0,787) |
+| **tổng `owner_edits`** | **39 / 151 = 25,8 %** |
+
+**25,8 % > ngưỡng 15 %: chất lượng soát của agent chưa đủ** để dùng nhãn agent thay cho người duyệt. Phần lớn là chỉnh
+hộp (31), 17 cặp lệch nhiều (IoU < 0,8) — ranh giới người / bóng / người dính nhau là chỗ agent đoán sai; số hộp gần như
+giữ nguyên (xoá 5, thêm 3). Hệ quả: nhãn **dev-val** (chỉ agent soát, cùng quy trình) có thể lệch hộp cỡ tương tự; dùng để
+chọn checkpoint/ngưỡng thì được, đừng báo số đo trên dev-val như số trên nhãn người duyệt.
+
+**Cờ `hard`:** `manifest.json` → `hard_frames` lấy **đúng** các khung chủ dự án tick (5 khung test), không gộp cờ của agent.
+Agent đã cờ 78 khung (45 test, 33 dev-val); chủ dự án cố ý bỏ tick 41/45 khung test agent cờ và thêm 1 khung mới (Owner đã
+hỏi trực tiếp, xác nhận là cố ý). Danh sách cờ của agent giữ để tham khảo ở `results/labels/agent_hard_frames.json` (và
+trường `hard` trong `results/labels/agent_reviewed.json`).
+
 Trang project: `http://localhost:8080/projects/<id>/data` (id in ra ở `labelstudio setup`). Chủ dự án: mở từng khung, sửa
 hộp nếu sai (kéo cạnh, xoá hộp thừa, vẽ hộp người sót với nhãn `person`), tick `hard` nếu nhóm người / mờ, bấm **Submit**
 (khung không người cũng Submit).

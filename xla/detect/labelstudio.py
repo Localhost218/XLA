@@ -211,10 +211,10 @@ def cmd_export(args: argparse.Namespace) -> int:
         print(f"LỖI: còn {len(pending)} khung test chưa Submit", file=sys.stderr)
         return 1
     reviewed = load_reviewed(root)
-    # cờ hard của khung test lấy theo annotation chủ dự án (agent đã tick sẵn trong predictions; bỏ tick = bỏ cờ);
-    # cờ hard của dev-val giữ nguyên
-    test_set = set(m["test_frames"])
-    hard = {f for f in m.get("hard_frames", []) if f not in test_set}
+    # hard_frames = đúng các khung chủ dự án tick hard (agent đã tick sẵn trong predictions; bỏ tick = bỏ cờ).
+    # Không gộp cờ của agent (kể cả dev-val): cờ agent giữ trong results/labels/agent_reviewed.json để tham khảo.
+    # Owner quyết 18/11/2026 sau khi hỏi chủ dự án: chủ dự án cố ý bỏ phần lớn cờ của agent.
+    hard: set[str] = set()
     labels, edits = {}, {"deleted": 0, "added": 0, "modified": 0}
     for f in m["test_frames"]:
         boxes, is_hard = ann_boxes(by_frame[f])
