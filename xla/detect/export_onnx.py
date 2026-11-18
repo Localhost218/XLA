@@ -26,13 +26,14 @@ Dây chuyền:
 3. ``onnxsim`` khi nó trả ``check=True`` **và** ORT CPU cho cùng kết quả trên khung thật (lệch > 1e-3 → giữ bản chưa rút
    gọn, ghi vào báo cáo).
 4. Tương đương trên dev-val (100 khung có nhãn trong ``data/real/labels/manifest.json``), chấm bằng
-   ``xla.eval.detection.evaluate``: chuẩn là ``.pt`` qua ``YOLO.predict`` mặc định trên **cùng khung đã cắt**
-   ``[:, crop_left:]``, cùng ``conf = score_floor``, ``iou = nms_iou``, ``max_det`` (cộng ``crop_left`` vào x). Cổng:
-   ``|mAP50(ORT CPU) − mAP50(.pt)| ≤ 0,005`` và như vậy cho ORT CUDA EP. Lưu ý: ``Model.predict`` ép ``rect=True`` nên
-   ``.pt`` letterbox chữ nhật tối thiểu (1280×992, lề 3 px) còn graph letterbox vuông theo §2 (lề 147 px = 4,5 bước
-   stride, lưới P5 lệch nửa ô) — phần lệch còn lại của cổng đến từ đây. Kèm số tham khảo (không chặn):
-   ``.pt`` ``rect=False`` (cùng tiền xử lý với graph — lệch ở đây mới là lỗi xuất) và ``.pt`` trên khung nguyên rồi bỏ
-   hộp ``x1 < crop_left`` (đường của mốc phase 09 / E1 tạo ra ``meta.metrics``).
+   ``xla.eval.detection.evaluate``: **mốc cổng** là ``.pt`` qua ``YOLO.predict(rect=False)`` trên **cùng khung đã cắt**
+   ``[:, crop_left:]`` — letterbox vuông imgsz×imgsz, đúng tiền xử lý của graph theo §2 — cùng ``conf = score_floor``,
+   ``iou = nms_iou``, ``max_det`` (cộng ``crop_left`` vào x). Cổng: ``|mAP50(ORT CPU) − mAP50(.pt vuông)| ≤ 0,005`` và
+   như vậy cho ORT CUDA EP; lệch ở đây mới là lỗi xuất. Số tham khảo (không chặn, ``parity.info``): ``.pt`` mặc định
+   (``rect=True``, letterbox chữ nhật tối thiểu 1280×992, lề 3 px) và ``.pt`` trên khung nguyên rồi bỏ hộp
+   ``x1 < crop_left`` (đường của mốc phase 09 / E1). Owner chốt 18/11/2026 (phase 11): trước đó mốc cổng là ``rect=True``,
+   nhưng chênh vuông − chữ nhật trên 100 khung dev-val đổi dấu giữa các model (r1 −0,034, E1 D2 +0,021, r2 −0,016,
+   thầy YOLO11m −0,005) — nhiễu của dev-val, không phải lỗi xuất; khi đó ORT CPU khớp ``.pt`` vuông tới 0,0000.
 5. ``ms_per_frame``: ORT CUDA EP, warmup 30 + đo 300 khung dev (gồm chép host→GPU), p50/p95. Ngay trước khi đo, đọc
    ``% Processor Performance`` 60 s (``cpu_perf_pct`` trong ``meta.ms_per_frame``); min < 80 % → cảnh báo
    "đo lúc hạ xung" trong báo cáo (không chặn: số vẫn ghi, người phát hành đo lại). Cả bước 4 (``.pt`` chạy
@@ -476,9 +477,9 @@ def predict_pt(weights: Path, frames: dict[str, np.ndarray], crop_left: int, img
     """``.pt`` qua ``YOLO.predict``, ba đường:
 
     - ``crop_rect``: khung đã cắt, mặc định của ``Model.predict`` (``rect=True`` → letterbox chữ nhật tối thiểu, với
-      1280: 1280×992, lề trên 3 px) — chuẩn của cổng parity;
-    - ``crop_square``: khung đã cắt, ``rect=False`` → letterbox vuông imgsz×imgsz như graph (§2) — tách lỗi xuất khỏi
-      ảnh hưởng của hình dạng letterbox;
+      1280: 1280×992, lề trên 3 px) — số tham khảo;
+    - ``crop_square``: khung đã cắt, ``rect=False`` → letterbox vuông imgsz×imgsz như graph (§2) — **mốc cổng parity**
+      (tách lỗi xuất khỏi ảnh hưởng của hình dạng letterbox);
     - ``full_edge``: khung nguyên rồi bỏ hộp ``x1 < crop_left`` (đường của mốc phase 09 / E1)."""
     from ultralytics import YOLO
 
@@ -678,24 +679,26 @@ def export_bundle(weights: str | Path, out_dir: str | Path, *, version: str, con
                            "runtime": f"onnxruntime-gpu {ort.__version__} CUDA EP"}
                 del gpu
 
-        ref = score_devval(pt["crop_rect"], work / "pt_crop_rect.csv")
+        ref = score_devval(pt["crop_square"], work / "pt_crop_square.csv")
         parity: dict[str, Any] = {
             "metric": "mAP50", "split": "devval", "tolerance": PARITY_TOL, "n_frames": ref["n_frames"],
-            "reference": {"name": "pt", "pipeline": f"YOLO.predict mặc định (rect=True) trên khung[:, {crop_left}:], "
-                                                    f"x += {crop_left}"} | ref,
+            "gate_reference": "pt_crop_square",
+            "reference": {"name": "pt_crop_square",
+                          "pipeline": f"YOLO.predict rect=False (letterbox vuông {imgsz}×{imgsz} như graph §2) trên "
+                                      f"khung[:, {crop_left}:], x += {crop_left}"} | ref,
             "candidates": {"ort_cpu": parity_entry(score_devval(ort_cpu, work / "ort_cpu.csv"), ref),
                            "ort_cuda": (parity_entry(score_devval(ort_cuda, work / "ort_cuda.csv"), ref)
                                         if ort_cuda is not None else None)},
         }
         cpu_map = parity["candidates"]["ort_cpu"]["mAP50"]
-        square = score_devval(pt["crop_square"], work / "pt_crop_square.csv")
+        rect = score_devval(pt["crop_rect"], work / "pt_crop_rect.csv")
         edge = score_devval(pt["full_edge"], work / "pt_full_edge.csv")
         parity["info"] = {
-            "pt_crop_square": square | {
-                "pipeline": f"YOLO.predict rect=False (letterbox vuông {imgsz}×{imgsz} như graph) trên khung[:, "
-                            f"{crop_left}:]",
-                "delta_map50_ort_cpu_minus_this": round(cpu_map - square["mAP50"], 6),
-                "note": "tham khảo, không chặn: cùng tiền xử lý với graph, lệch ở đây mới là lỗi xuất"},
+            "pt_crop_rect": rect | {
+                "pipeline": f"YOLO.predict mặc định (rect=True, letterbox chữ nhật tối thiểu) trên khung[:, "
+                            f"{crop_left}:], x += {crop_left}",
+                "delta_map50_ort_cpu_minus_this": round(cpu_map - rect["mAP50"], 6),
+                "note": "tham khảo, không chặn: khác hình dạng letterbox với graph (mốc cổng trước 18/11/2026)"},
             "pt_full_edge16": edge | {
                 "pipeline": f"YOLO.predict trên khung nguyên, bỏ hộp x1 < {crop_left} (đường của mốc / E1)",
                 "delta_map50_ort_cpu_minus_this": round(cpu_map - edge["mAP50"], 6),

@@ -1,0 +1,73 @@
+# Phase 11 — thí nghiệm E2: self-training trên khung bay dev thật (plan D9, D10, D11; nghien-cuu-tai-lieu.md §4).
+# Đọc bằng xla/detect/selftrain.py. Số epoch / batch chốt từ smoke (results/e2/smoke_*.json, lý do ở results/e2/README.md).
+
+runs_dir: D:/DevCache/runs/xla/e2          # run + trọng số, KHÔNG vào repo: teacher/, r1/, r2/, ...
+datasets_dir: D:/DevCache/datasets/xla     # tập nhãn giả e2_r<K>/ (khung dev thật chép vào, ngoài repo)
+lock_timeout_s: 28800                      # chờ khoá GPU tối đa 8 giờ
+workers_max: 4                             # trò train với 4 worker (Owner 18/11 23:00; 23:08 bỏ điều kiện bộ nhớ ảo ≥ 10 GB)
+workers_min_free_virtual_gb: 0             # lệnh chủ dự án 23:08: bỏ điều kiện 10 GB, luôn 4; chỉ lỗi bộ nhớ thật → train tiếp với train.workers
+source_set: d2                             # tập nguồn thắng dev-val ở E1 (results/e1/e1.json khoá best)
+
+train:                                     # tham số chung truyền thẳng cho ultralytics `model.train` (giống E1)
+  imgsz: 1280
+  workers: 2                               # ≤ 2: 4 worker từng làm hết commit memory (E1-4)
+  seed: 20261118
+  deterministic: true
+  device: 0
+  optimizer: auto
+  patience: 1000                           # không dừng sớm theo val tổng hợp; chọn checkpoint bằng dev-val thật
+  warmup_epochs: 1.0
+  close_mosaic: 1
+  hsv_h: 0.0                               # tắt augment màu như E1 (màu/ám là thứ D2 dạy)
+  hsv_s: 0.0
+  hsv_v: 0.0
+  mosaic: 1.0                              # mosaic trộn ảnh nguồn D2 với khung đích nhãn giả (SimROD rút gọn)
+  amp: true
+  val: true
+  plots: false
+  cache: false
+
+teacher:                                   # YOLO11m COCO @1280 fine-tune trên D2 (thầy vòng 1)
+  weights: yolo-weights/yolo11m.pt         # tương đối xla.paths.downloads_dir()
+  epochs: 4
+  batch: 2                                 # batch 4: VRAM 8,37 GB > 8 GB, tràn RAM chung, 1,15 s/batch (smoke_teacher_batch4.json)
+  budget_min_per_run: 75
+
+student:                                   # YOLO11s @1280 trên D2 + khung dev nhãn giả; trò vòng k = thầy vòng k+1
+  weights: e1_best                         # e1_best = trọng số results/e1/e1.json khoá best (YOLO11s D2)
+  epochs: 4
+  batch: 4
+  budget_min_per_run: 45
+  max_rounds: 3
+
+smoke:
+  fraction: 0.1
+  epochs: 1
+
+pseudo:
+  round1_teachers: [teacher, e1_d2]       # thầy vòng 1 chọn bằng chất lượng nhãn giả trên dev-val (precision ≥ 0,9, rồi recall)
+  tta: true                                # thầy chạy TTA (augment=True) khi gán nhãn giả
+  det_conf: 0.01                           # ngưỡng dự đoán thô đưa vào tracker
+  max_gap_s: 1.0                           # chuỗi khung dev liên tiếp: cùng split, cách nhau < 1 s (xla.eval.temporal)
+  tracker:                                 # ByteTrack của ultralytics, ngưỡng hạ thấp vì điểm người của model ~0,1–0,5
+    tracker_type: bytetrack
+    track_high_thresh: 0.05
+    track_low_thresh: 0.01
+    new_track_thresh: 0.1
+    track_buffer: 15                       # khung (~1,5 s ở ~10 khung/s)
+    match_thresh: 0.9                      # cost 1 − IoU < 0,9: người nhỏ dịch nhiều giữa hai khung ~10 khung/s
+    fuse_score: false                      # true: cost 1 − IoU·điểm, điểm ~0,15 → không ghép được (thử 18/11, README)
+  min_track_len: 3                         # L: track ngắn hơn → bỏ (phát hiện lẻ)
+  tau_low: 0.05                            # cứu hộp ≥ τ_thấp nằm trong track có hộp ≥ τ_cao
+  tau_high_grid: [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80]
+  precision_min: 0.9                       # τ_cao = ngưỡng nhỏ nhất trên lưới cho precision nhãn giả ≥ 0,9 trên dev-val
+  match_iou: 0.5
+  drop_frames_with_unkept_high: true       # khung có hộp ≥ τ_cao bị bỏ (lẻ / track ngắn) → không đưa vào train
+  devval_buffer_s: 0.3                     # khung dev cách một khung dev-val < 0,3 s không đưa vào train
+  target_repeat: 2                         # khung đích nhãn giả lặp 2 lần trong danh sách train (trộn nguồn/đích)
+  neg_frames: true                         # khung split `neg` vào train với nhãn rỗng (plan bước 2)
+
+predict:                                   # CSV dự đoán theo D11, giống E1
+  conf: 0.001
+  max_det: 300
+  splits: [test, neg]

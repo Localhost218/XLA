@@ -221,7 +221,7 @@ def _fit(cfg: dict[str, Any], ds: dict[str, Any], run_dir: Path, tracker: EpochT
         targs |= {"epochs": cfg["smoke"]["epochs"], "fraction": cfg["smoke"]["fraction"],
                   "close_mosaic": 0}  # smoke đo epoch CÓ mosaic (đắt hơn), không thì 1 epoch rơi vào close_mosaic
     if resumed:
-        model.train(resume=True)
+        model.train(resume=True, workers=int(cfg["train"]["workers"]))  # workers đổi được khi train tiếp (ultralytics cho phép)
     else:
         model.train(data=ds["yaml"], project=str(run_dir.parent), name=run_dir.name, exist_ok=True, **targs)
     return {"resumed": resumed, "batch_effective": int(model.trainer.batch_size), "epochs": int(model.trainer.epochs),

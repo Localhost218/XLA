@@ -1,0 +1,3382 @@
+{
+ "phase": "11",
+ "created": "2026-11-18T17:01:21+00:00",
+ "config": {
+  "runs_dir": "D:/DevCache/runs/xla/e2",
+  "datasets_dir": "D:/DevCache/datasets/xla",
+  "lock_timeout_s": 28800,
+  "workers_max": 4,
+  "workers_min_free_virtual_gb": 0,
+  "source_set": "d2",
+  "train": {
+   "imgsz": 1280,
+   "workers": 2,
+   "seed": 20261118,
+   "deterministic": true,
+   "device": 0,
+   "optimizer": "auto",
+   "patience": 1000,
+   "warmup_epochs": 1.0,
+   "close_mosaic": 1,
+   "hsv_h": 0.0,
+   "hsv_s": 0.0,
+   "hsv_v": 0.0,
+   "mosaic": 1.0,
+   "amp": true,
+   "val": true,
+   "plots": false,
+   "cache": false
+  },
+  "teacher": {
+   "weights": "yolo-weights/yolo11m.pt",
+   "epochs": 4,
+   "batch": 2,
+   "budget_min_per_run": 75
+  },
+  "student": {
+   "weights": "e1_best",
+   "epochs": 4,
+   "batch": 4,
+   "budget_min_per_run": 45,
+   "max_rounds": 3
+  },
+  "smoke": {
+   "fraction": 0.1,
+   "epochs": 1
+  },
+  "pseudo": {
+   "round1_teachers": [
+    "teacher",
+    "e1_d2"
+   ],
+   "tta": true,
+   "det_conf": 0.01,
+   "max_gap_s": 1.0,
+   "tracker": {
+    "tracker_type": "bytetrack",
+    "track_high_thresh": 0.05,
+    "track_low_thresh": 0.01,
+    "new_track_thresh": 0.1,
+    "track_buffer": 15,
+    "match_thresh": 0.9,
+    "fuse_score": false
+   },
+   "min_track_len": 3,
+   "tau_low": 0.05,
+   "tau_high_grid": [
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8
+   ],
+   "precision_min": 0.9,
+   "match_iou": 0.5,
+   "drop_frames_with_unkept_high": true,
+   "devval_buffer_s": 0.3,
+   "target_repeat": 2,
+   "neg_frames": true
+  },
+  "predict": {
+   "conf": 0.001,
+   "max_det": 300,
+   "splits": [
+    "test",
+    "neg"
+   ]
+  }
+ },
+ "baseline": {
+  "variant": "edge16",
+  "csv": "results/baseline/pred/edge16.csv",
+  "test": {
+   "conf_threshold": 0.06764,
+   "threshold_source": "devval",
+   "metrics": {
+    "mAP50": {
+     "value": 0.126482,
+     "ci95": [
+      0.029622,
+      0.224281
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.062856,
+     "ci95": [
+      0.01985,
+      0.11246
+     ]
+    },
+    "AP_small": {
+     "value": 0.053896,
+     "ci95": [
+      0.020947,
+      0.099399
+     ]
+    },
+    "AR_small": {
+     "value": 0.530588,
+     "ci95": [
+      0.497778,
+      0.7
+     ]
+    },
+    "precision@op": {
+     "value": 0.192913,
+     "ci95": [
+      0.02815,
+      0.288798
+     ]
+    },
+    "recall@op": {
+     "value": 0.328859,
+     "ci95": [
+      0.181818,
+      0.495678
+     ]
+    },
+    "f1@op": {
+     "value": 0.243176,
+     "ci95": [
+      0.051898,
+      0.339734
+     ]
+    },
+    "fp_per_neg_flight@op": {
+     "value": 0.597484,
+     "ci95": [
+      0.397432,
+      0.883876
+     ]
+    },
+    "fp_per_neg_indoor@op": {
+     "value": 0.116667,
+     "ci95": [
+      0.07666,
+      0.159871
+     ]
+    },
+    "fp_per_neg_frame@op": {
+     "value": 0.283224,
+     "ci95": [
+      0.210635,
+      0.373861
+     ]
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "neg_split_frames": 300,
+    "negative_frames": 459,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300,
+    "labels_missing": 0,
+    "pred_frames_other_splits": 1112
+   },
+   "official": true
+  }
+ },
+ "models": {
+  "teacher": {
+   "weights": "D:/DevCache/runs/xla/e2/teacher/weights/best_devval.pt",
+   "weights_sha256": "850f40350ef4745a58195777666567554309c3fe8cd6fe266ffdc88530c8cd6b",
+   "selected_by": "devval",
+   "selected_epoch": 4,
+   "devval_map50": 0.266567,
+   "devval_map50_last3_mean": 0.17212966666666665,
+   "gpu_hours": 1.1959,
+   "epochs": 4,
+   "batch_effective": 2,
+   "workers": [
+    2
+   ],
+   "train_data": {
+    "set": "d2",
+    "yaml": "D:/DevCache/datasets/xla/d2/dataset.yaml",
+    "manifest_sha256": "3ad4511041b070e1478b6bd416bb4c05ba4a68ca0a07dc5a9db70aa4948150ab",
+    "build_key": {
+     "key": "b84004109f52ec0ad57f63f73b55fdd57cc55edc28fd71f21ebac9391b095ff3",
+     "set": "d2",
+     "seed": 20261118
+    },
+    "n_images": {
+     "train": 3006,
+     "val": 487
+    },
+    "n_manifest": 3493,
+    "real_frames_in_train": 0
+   },
+   "init_weights": "yolo-weights/yolo11m.pt",
+   "devval_history": [
+    {
+     "epoch": 1,
+     "devval_mAP50": 0.025112,
+     "devval_mAP50_95": 0.006995,
+     "val_synth_mAP50": 0.03977,
+     "train_s": 973.73,
+     "val_save_s": 74.1,
+     "devval_s": 8.06,
+     "batches": 1503,
+     "median_batch_s": 0.66,
+     "batch": 2,
+     "vram_peak_gb": 4.41,
+     "startup_s": 9.2,
+     "time": "2026-11-18T11:13:48+00:00"
+    },
+    {
+     "epoch": 2,
+     "devval_mAP50": 0.061709,
+     "devval_mAP50_95": 0.012335,
+     "val_synth_mAP50": 0.08162,
+     "train_s": 925.29,
+     "val_save_s": 42.48,
+     "devval_s": 17.98,
+     "batches": 1503,
+     "median_batch_s": 0.6126,
+     "batch": 2,
+     "vram_peak_gb": 4.61,
+     "startup_s": 9.2,
+     "time": "2026-11-18T11:30:14+00:00"
+    },
+    {
+     "epoch": 3,
+     "devval_mAP50": 0.188113,
+     "devval_mAP50_95": 0.069412,
+     "val_synth_mAP50": 0.13051,
+     "train_s": 989.85,
+     "val_save_s": 45.54,
+     "devval_s": 18.96,
+     "batches": 1503,
+     "median_batch_s": 0.6526,
+     "batch": 2,
+     "vram_peak_gb": 4.68,
+     "startup_s": 9.2,
+     "time": "2026-11-18T11:47:48+00:00"
+    },
+    {
+     "epoch": 4,
+     "devval_mAP50": 0.266567,
+     "devval_mAP50_95": 0.098579,
+     "val_synth_mAP50": 0.19326,
+     "train_s": 999.47,
+     "val_save_s": 46.52,
+     "devval_s": 20.19,
+     "batches": 1503,
+     "median_batch_s": 0.6709,
+     "batch": 2,
+     "vram_peak_gb": 4.68,
+     "startup_s": 9.2,
+     "time": "2026-11-18T12:05:34+00:00"
+    }
+   ],
+   "test": {
+    "conf_threshold": 0.05431,
+    "threshold_source": "devval",
+    "metrics": {
+     "mAP50": {
+      "value": 0.218099,
+      "ci95": [
+       0.107462,
+       0.349384
+      ]
+     },
+     "mAP50_95": {
+      "value": 0.059577,
+      "ci95": [
+       0.027739,
+       0.092308
+      ]
+     },
+     "AP_small": {
+      "value": 0.081091,
+      "ci95": [
+       0.065937,
+       0.106688
+      ]
+     },
+     "AR_small": {
+      "value": 0.424706,
+      "ci95": [
+       0.338463,
+       0.58
+      ]
+     },
+     "precision@op": {
+      "value": 0.266932,
+      "ci95": [
+       0.070568,
+       0.356137
+      ]
+     },
+     "recall@op": {
+      "value": 0.449664,
+      "ci95": [
+       0.25,
+       0.533402
+      ]
+     },
+     "f1@op": {
+      "value": 0.335,
+      "ci95": [
+       0.117647,
+       0.41409
+      ]
+     },
+     "fp_per_neg_flight@op": {
+      "value": 0.389937,
+      "ci95": [
+       0.263505,
+       0.544719
+      ]
+     },
+     "fp_per_neg_indoor@op": {
+      "value": 0.683333,
+      "ci95": [
+       0.61564,
+       0.75002
+      ]
+     },
+     "fp_per_neg_frame@op": {
+      "value": 0.581699,
+      "ci95": [
+       0.518114,
+       0.649697
+      ]
+     }
+    },
+    "n": {
+     "frames": 198,
+     "frames_with_person": 39,
+     "gt_boxes": 149,
+     "neg_split_frames": 300,
+     "negative_frames": 459,
+     "negative_frames_flight": 159,
+     "negative_frames_indoor": 300,
+     "labels_missing": 0,
+     "pred_frames_other_splits": 100
+    },
+    "official": true
+   },
+   "test_bundle_keys": {
+    "map50": 0.218099,
+    "map50_95": 0.059577,
+    "precision": 0.266932,
+    "recall": 0.449664,
+    "fp_per_neg_frame": 0.581699
+   },
+   "path": "pt: YOLO.predict khung nguyên 640×480, bỏ hộp x1 < 16 (như mốc / E1)",
+   "criteria": {
+    "B1": {
+     "pass": false,
+     "mAP50": 0.218099,
+     "diff_vs_edge16": 0.091616,
+     "diff_ci95": [
+      -0.045633,
+      0.222742
+     ],
+     "rule": "mAP50 ≥ 0.227 và cận dưới CI hiệu ghép cặp > 0"
+    },
+    "B2": {
+     "verdict": "không đạt",
+     "fp_per_neg_flight": {
+      "value": 0.389937,
+      "ci95": [
+       0.263505,
+       0.544719
+      ]
+     },
+     "recall@op": {
+      "value": 0.449664,
+      "ci95": [
+       0.25,
+       0.533402
+      ]
+     },
+     "rule": "fp_per_neg_flight@op ≤ 0.05 và cận trên CI ≤ 0.1"
+    },
+    "B3": {
+     "pass_pytorch": false,
+     "ms_p95_pytorch": null,
+     "rule": "≤ 30.0 ms p95 trên ORT CUDA EP (đo ở phase 11/16); ở đây chỉ số PyTorch"
+    }
+   }
+  },
+  "r1": {
+   "weights": "D:/DevCache/runs/xla/e2/r1/weights/best_devval.pt",
+   "weights_sha256": "7e37476576683bf5205863256f095fb0c8e1e46d5fea65d1e744bedfa310ade5",
+   "selected_by": "devval",
+   "selected_epoch": 3,
+   "devval_map50": 0.379078,
+   "devval_map50_last3_mean": 0.32764033333333337,
+   "gpu_hours": 0.6019,
+   "epochs": 4,
+   "batch_effective": 4,
+   "workers": [
+    2
+   ],
+   "train_data": {
+    "set": "d2+e2_r1",
+    "yaml": "D:/DevCache/datasets/xla/e2_r1/dataset.yaml",
+    "train_txt_sha256": "dc01c327966dcf92c880f9856b025503e000ed26af1cc0e4502ed6ed6b9a1580",
+    "n_images": {
+     "train": 4462,
+     "val": 487
+    },
+    "n_source": 3006,
+    "n_target_frames": 578,
+    "n_target_with_box": 86,
+    "n_target_boxes": 87,
+    "target_repeat": 2,
+    "n_neg_frames": 300,
+    "dropped_dev": {
+     "devval": 100,
+     "devval_buffer": 428,
+     "rules": 20
+    },
+    "test_frames_in_train": 0,
+    "devval_frames_in_train": 0
+   },
+   "init_weights": "D:/DevCache/runs/xla/e1/d2/weights/best_devval.pt",
+   "devval_history": [
+    {
+     "epoch": 1,
+     "devval_mAP50": 0.250443,
+     "devval_mAP50_95": 0.095178,
+     "val_synth_mAP50": 0.15652,
+     "train_s": 522.18,
+     "val_save_s": 40.83,
+     "devval_s": 6.6,
+     "batches": 1116,
+     "median_batch_s": 0.3605,
+     "batch": 4,
+     "vram_peak_gb": 5.47,
+     "startup_s": 13.9,
+     "time": "2026-11-18T14:42:10+00:00"
+    },
+    {
+     "epoch": 2,
+     "devval_mAP50": 0.265131,
+     "devval_mAP50_95": 0.107768,
+     "val_synth_mAP50": 0.17596,
+     "train_s": 455.07,
+     "val_save_s": 31.37,
+     "devval_s": 10.86,
+     "batches": 1116,
+     "median_batch_s": 0.3656,
+     "batch": 4,
+     "vram_peak_gb": 5.47,
+     "startup_s": 13.9,
+     "time": "2026-11-18T14:50:27+00:00"
+    },
+    {
+     "epoch": 3,
+     "devval_mAP50": 0.379078,
+     "devval_mAP50_95": 0.172003,
+     "val_synth_mAP50": 0.23858,
+     "train_s": 542.01,
+     "val_save_s": 21.83,
+     "devval_s": 5.28,
+     "batches": 1116,
+     "median_batch_s": 0.4463,
+     "batch": 4,
+     "vram_peak_gb": 5.47,
+     "startup_s": 13.9,
+     "time": "2026-11-18T14:59:56+00:00"
+    },
+    {
+     "epoch": 4,
+     "devval_mAP50": 0.338712,
+     "devval_mAP50_95": 0.148685,
+     "val_synth_mAP50": 0.23192,
+     "train_s": 443.19,
+     "val_save_s": 20.53,
+     "devval_s": 6.01,
+     "batches": 1116,
+     "median_batch_s": 0.36,
+     "batch": 4,
+     "vram_peak_gb": 5.47,
+     "startup_s": 13.9,
+     "time": "2026-11-18T15:07:46+00:00"
+    }
+   ],
+   "test": {
+    "conf_threshold": 0.07492,
+    "threshold_source": "devval",
+    "metrics": {
+     "mAP50": {
+      "value": 0.155912,
+      "ci95": [
+       0.036476,
+       0.234622
+      ]
+     },
+     "mAP50_95": {
+      "value": 0.052319,
+      "ci95": [
+       0.017203,
+       0.086015
+      ]
+     },
+     "AP_small": {
+      "value": 0.061442,
+      "ci95": [
+       0.028968,
+       0.099476
+      ]
+     },
+     "AR_small": {
+      "value": 0.418824,
+      "ci95": [
+       0.367969,
+       0.475758
+      ]
+     },
+     "precision@op": {
+      "value": 0.18125,
+      "ci95": [
+       0.024345,
+       0.276281
+      ]
+     },
+     "recall@op": {
+      "value": 0.389262,
+      "ci95": [
+       0.235294,
+       0.466878
+      ]
+     },
+     "f1@op": {
+      "value": 0.247335,
+      "ci95": [
+       0.045416,
+       0.329102
+      ]
+     },
+     "fp_per_neg_flight@op": {
+      "value": 0.867925,
+      "ci95": [
+       0.386158,
+       1.411119
+      ]
+     },
+     "fp_per_neg_indoor@op": {
+      "value": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ]
+     },
+     "fp_per_neg_frame@op": {
+      "value": 0.300654,
+      "ci95": [
+       0.126423,
+       0.508073
+      ]
+     }
+    },
+    "n": {
+     "frames": 198,
+     "frames_with_person": 39,
+     "gt_boxes": 149,
+     "neg_split_frames": 300,
+     "negative_frames": 459,
+     "negative_frames_flight": 159,
+     "negative_frames_indoor": 300,
+     "labels_missing": 0,
+     "pred_frames_other_splits": 100
+    },
+    "official": true
+   },
+   "test_bundle_keys": {
+    "map50": 0.155912,
+    "map50_95": 0.052319,
+    "precision": 0.18125,
+    "recall": 0.389262,
+    "fp_per_neg_frame": 0.300654
+   },
+   "path": "pt: YOLO.predict khung nguyên 640×480, bỏ hộp x1 < 16 (như mốc / E1)",
+   "criteria": {
+    "B1": {
+     "pass": false,
+     "mAP50": 0.155912,
+     "diff_vs_edge16": 0.02943,
+     "diff_ci95": [
+      -0.074849,
+      0.080887
+     ],
+     "rule": "mAP50 ≥ 0.227 và cận dưới CI hiệu ghép cặp > 0"
+    },
+    "B2": {
+     "verdict": "không đạt",
+     "fp_per_neg_flight": {
+      "value": 0.867925,
+      "ci95": [
+       0.386158,
+       1.411119
+      ]
+     },
+     "recall@op": {
+      "value": 0.389262,
+      "ci95": [
+       0.235294,
+       0.466878
+      ]
+     },
+     "rule": "fp_per_neg_flight@op ≤ 0.05 và cận trên CI ≤ 0.1"
+    },
+    "B3": {
+     "pass_pytorch": false,
+     "ms_p95_pytorch": null,
+     "rule": "≤ 30.0 ms p95 trên ORT CUDA EP (đo ở phase 11/16); ở đây chỉ số PyTorch"
+    }
+   }
+  },
+  "r2": {
+   "weights": "D:/DevCache/runs/xla/e2/r2/weights/best_devval.pt",
+   "weights_sha256": "03a5401cc6fb22c96ca99fe73450d70f759df0c1dbee2853794ef5c52450a480",
+   "selected_by": "devval",
+   "selected_epoch": 3,
+   "devval_map50": 0.295726,
+   "devval_map50_last3_mean": 0.27340666666666663,
+   "gpu_hours": 0.3509,
+   "epochs": 4,
+   "batch_effective": 4,
+   "workers": [
+    4
+   ],
+   "train_data": {
+    "set": "d2+e2_r2",
+    "yaml": "D:/DevCache/datasets/xla/e2_r2/dataset.yaml",
+    "train_txt_sha256": "e793945cd656705f4124e0dbcc921c05154024a32acf1a054ed16ab54b70bf06",
+    "n_images": {
+     "train": 4452,
+     "val": 487
+    },
+    "n_source": 3006,
+    "n_target_frames": 573,
+    "n_target_with_box": 102,
+    "n_target_boxes": 154,
+    "target_repeat": 2,
+    "n_neg_frames": 300,
+    "dropped_dev": {
+     "devval": 100,
+     "devval_buffer": 428,
+     "rules": 26
+    },
+    "test_frames_in_train": 0,
+    "devval_frames_in_train": 0
+   },
+   "init_weights": "D:/DevCache/runs/xla/e1/d2/weights/best_devval.pt",
+   "devval_history": [
+    {
+     "epoch": 1,
+     "devval_mAP50": 0.12366,
+     "devval_mAP50_95": 0.051464,
+     "val_synth_mAP50": 0.02455,
+     "train_s": 295.17,
+     "val_save_s": 31.56,
+     "devval_s": 4.16,
+     "batches": 1113,
+     "median_batch_s": 0.2472,
+     "batch": 4,
+     "vram_peak_gb": 4.6,
+     "startup_s": 9.8,
+     "time": "2026-11-18T16:14:36+00:00"
+    },
+    {
+     "epoch": 2,
+     "devval_mAP50": 0.262988,
+     "devval_mAP50_95": 0.100657,
+     "val_synth_mAP50": 0.18007,
+     "train_s": 279.46,
+     "val_save_s": 14.15,
+     "devval_s": 4.67,
+     "batches": 1113,
+     "median_batch_s": 0.2521,
+     "batch": 4,
+     "vram_peak_gb": 4.88,
+     "startup_s": 9.8,
+     "time": "2026-11-18T16:19:34+00:00"
+    },
+    {
+     "epoch": 3,
+     "devval_mAP50": 0.295726,
+     "devval_mAP50_95": 0.136412,
+     "val_synth_mAP50": 0.21466,
+     "train_s": 279.94,
+     "val_save_s": 13.76,
+     "devval_s": 4.51,
+     "batches": 1113,
+     "median_batch_s": 0.2546,
+     "batch": 4,
+     "vram_peak_gb": 4.88,
+     "startup_s": 9.8,
+     "time": "2026-11-18T16:24:33+00:00"
+    },
+    {
+     "epoch": 4,
+     "devval_mAP50": 0.261506,
+     "devval_mAP50_95": 0.113333,
+     "val_synth_mAP50": 0.2131,
+     "train_s": 270.05,
+     "val_save_s": 13.26,
+     "devval_s": 4.15,
+     "batches": 1113,
+     "median_batch_s": 0.2288,
+     "batch": 4,
+     "vram_peak_gb": 4.88,
+     "startup_s": 9.8,
+     "time": "2026-11-18T16:29:20+00:00"
+    }
+   ],
+   "test": {
+    "conf_threshold": 0.01778,
+    "threshold_source": "devval",
+    "metrics": {
+     "mAP50": {
+      "value": 0.31331,
+      "ci95": [
+       0.034507,
+       0.472022
+      ]
+     },
+     "mAP50_95": {
+      "value": 0.157378,
+      "ci95": [
+       0.010912,
+       0.276556
+      ]
+     },
+     "AP_small": {
+      "value": 0.160013,
+      "ci95": [
+       0.021733,
+       0.331192
+      ]
+     },
+     "AR_small": {
+      "value": 0.445882,
+      "ci95": [
+       0.35,
+       0.559302
+      ]
+     },
+     "precision@op": {
+      "value": 0.27907,
+      "ci95": [
+       0.040806,
+       0.42659
+      ]
+     },
+     "recall@op": {
+      "value": 0.402685,
+      "ci95": [
+       0.235294,
+       0.531429
+      ]
+     },
+     "f1@op": {
+      "value": 0.32967,
+      "ci95": [
+       0.07013,
+       0.448031
+      ]
+     },
+     "fp_per_neg_flight@op": {
+      "value": 0.522013,
+      "ci95": [
+       0.155394,
+       0.968462
+      ]
+     },
+     "fp_per_neg_indoor@op": {
+      "value": 0.263333,
+      "ci95": [
+       0.179998,
+       0.352159
+      ]
+     },
+     "fp_per_neg_frame@op": {
+      "value": 0.352941,
+      "ci95": [
+       0.21395,
+       0.539155
+      ]
+     }
+    },
+    "n": {
+     "frames": 198,
+     "frames_with_person": 39,
+     "gt_boxes": 149,
+     "neg_split_frames": 300,
+     "negative_frames": 459,
+     "negative_frames_flight": 159,
+     "negative_frames_indoor": 300,
+     "labels_missing": 0,
+     "pred_frames_other_splits": 91
+    },
+    "official": true
+   },
+   "test_bundle_keys": {
+    "map50": 0.31331,
+    "map50_95": 0.157378,
+    "precision": 0.27907,
+    "recall": 0.402685,
+    "fp_per_neg_frame": 0.352941
+   },
+   "path": "pt: YOLO.predict khung nguyên 640×480, bỏ hộp x1 < 16 (như mốc / E1)",
+   "criteria": {
+    "B1": {
+     "pass": false,
+     "mAP50": 0.31331,
+     "diff_vs_edge16": 0.186828,
+     "diff_ci95": [
+      -0.00897,
+      0.318462
+     ],
+     "rule": "mAP50 ≥ 0.227 và cận dưới CI hiệu ghép cặp > 0"
+    },
+    "B2": {
+     "verdict": "không đạt",
+     "fp_per_neg_flight": {
+      "value": 0.522013,
+      "ci95": [
+       0.155394,
+       0.968462
+      ]
+     },
+     "recall@op": {
+      "value": 0.402685,
+      "ci95": [
+       0.235294,
+       0.531429
+      ]
+     },
+     "rule": "fp_per_neg_flight@op ≤ 0.05 và cận trên CI ≤ 0.1"
+    },
+    "B3": {
+     "pass_pytorch": false,
+     "ms_p95_pytorch": null,
+     "rule": "≤ 30.0 ms p95 trên ORT CUDA EP (đo ở phase 11/16); ở đây chỉ số PyTorch"
+    }
+   }
+  },
+  "e1_d2": {
+   "weights": "D:/DevCache/runs/xla/e1/d2/weights/best_devval.pt",
+   "weights_sha256": "d67bb170864759536e350b4fb77d5321a7995399e912ccb35ae97154cbc0440a",
+   "selected_by": "devval",
+   "selected_epoch": 6,
+   "devval_map50": 0.329412,
+   "devval_map50_last3_mean": 0.22929133333333332,
+   "gpu_hours": 0.7593,
+   "epochs": 6,
+   "test": {
+    "conf_threshold": 0.08852,
+    "threshold_source": "devval",
+    "metrics": {
+     "mAP50": {
+      "value": 0.235943,
+      "ci95": [
+       0.068647,
+       0.37012
+      ]
+     },
+     "mAP50_95": {
+      "value": 0.079408,
+      "ci95": [
+       0.031774,
+       0.121591
+      ]
+     },
+     "AP_small": {
+      "value": 0.090289,
+      "ci95": [
+       0.073853,
+       0.10942
+      ]
+     },
+     "AR_small": {
+      "value": 0.425882,
+      "ci95": [
+       0.408377,
+       0.52
+      ]
+     },
+     "precision@op": {
+      "value": 0.311927,
+      "ci95": [
+       0.064466,
+       0.412974
+      ]
+     },
+     "recall@op": {
+      "value": 0.456376,
+      "ci95": [
+       0.257576,
+       0.617143
+      ]
+     },
+     "f1@op": {
+      "value": 0.370572,
+      "ci95": [
+       0.103604,
+       0.48427
+      ]
+     },
+     "fp_per_neg_flight@op": {
+      "value": 0.301887,
+      "ci95": [
+       0.217847,
+       0.375665
+      ]
+     },
+     "fp_per_neg_indoor@op": {
+      "value": 0.02,
+      "ci95": [
+       0.003356,
+       0.040268
+      ]
+     },
+     "fp_per_neg_frame@op": {
+      "value": 0.117647,
+      "ci95": [
+       0.078473,
+       0.151902
+      ]
+     }
+    },
+    "n": {
+     "frames": 198,
+     "frames_with_person": 39,
+     "gt_boxes": 149,
+     "neg_split_frames": 300,
+     "negative_frames": 459,
+     "negative_frames_flight": 159,
+     "negative_frames_indoor": 300,
+     "labels_missing": 0,
+     "pred_frames_other_splits": 100
+    },
+    "official": true
+   },
+   "test_bundle_keys": {
+    "map50": 0.235943,
+    "map50_95": 0.079408,
+    "precision": 0.311927,
+    "recall": 0.456376,
+    "fp_per_neg_frame": 0.117647
+   },
+   "path": "pt: YOLO.predict khung nguyên 640×480, bỏ hộp x1 < 16 (như mốc / E1)",
+   "source": "results/e1/e1.json",
+   "criteria": {
+    "B1": {
+     "pass": false,
+     "mAP50": 0.235943,
+     "diff_vs_edge16": 0.109461,
+     "diff_ci95": [
+      -0.017168,
+      0.236137
+     ],
+     "rule": "mAP50 ≥ 0.227 và cận dưới CI hiệu ghép cặp > 0"
+    },
+    "B2": {
+     "verdict": "không đạt",
+     "fp_per_neg_flight": {
+      "value": 0.301887,
+      "ci95": [
+       0.217847,
+       0.375665
+      ]
+     },
+     "recall@op": {
+      "value": 0.456376,
+      "ci95": [
+       0.257576,
+       0.617143
+      ]
+     },
+     "rule": "fp_per_neg_flight@op ≤ 0.05 và cận trên CI ≤ 0.1"
+    },
+    "B3": {
+     "pass_pytorch": false,
+     "ms_p95_pytorch": null,
+     "rule": "≤ 30.0 ms p95 trên ORT CUDA EP (đo ở phase 11/16); ở đây chỉ số PyTorch"
+    }
+   }
+  }
+ },
+ "pseudo": {
+  "r1": {
+   "phase": "11",
+   "round": 1,
+   "created": "2026-11-18T12:21:56+00:00",
+   "teacher": "e1_d2",
+   "teacher_weights": "D:/DevCache/runs/xla/e1/d2/weights/best_devval.pt",
+   "teacher_sha256": "d67bb170864759536e350b4fb77d5321a7995399e912ccb35ae97154cbc0440a",
+   "teacher_rule": "precision_min trước, rồi recall nhãn giả trên dev-val (_quality_key)",
+   "candidates": {
+    "teacher": {
+     "weights": "D:/DevCache/runs/xla/e2/teacher/weights/best_devval.pt",
+     "weights_sha256": "850f40350ef4745a58195777666567554309c3fe8cd6fe266ffdc88530c8cd6b",
+     "tau_high": 0.45,
+     "tau_high_rule": "nhỏ nhất đạt precision_min",
+     "devval_quality": {
+      "precision": 1.0,
+      "recall": 0.07476635514018691,
+      "tp": 8,
+      "fp": 0,
+      "gt": 107,
+      "frames_used": 89,
+      "frames_devval": 100
+     },
+     "grid": [
+      {
+       "tau_high": 0.1,
+       "precision": 0.33783783783783783,
+       "recall": 0.33783783783783783,
+       "tp": 25,
+       "fp": 49,
+       "gt": 74,
+       "frames_used": 80,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.15,
+       "precision": 0.3188405797101449,
+       "recall": 0.24444444444444444,
+       "tp": 22,
+       "fp": 47,
+       "gt": 90,
+       "frames_used": 85,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.2,
+       "precision": 0.3,
+       "recall": 0.15789473684210525,
+       "tp": 15,
+       "fp": 35,
+       "gt": 95,
+       "frames_used": 86,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.25,
+       "precision": 0.34146341463414637,
+       "recall": 0.14736842105263157,
+       "tp": 14,
+       "fp": 27,
+       "gt": 95,
+       "frames_used": 86,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.3,
+       "precision": 0.41935483870967744,
+       "recall": 0.1262135922330097,
+       "tp": 13,
+       "fp": 18,
+       "gt": 103,
+       "frames_used": 88,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.35,
+       "precision": 0.5882352941176471,
+       "recall": 0.09345794392523364,
+       "tp": 10,
+       "fp": 7,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.4,
+       "precision": 0.7142857142857143,
+       "recall": 0.09345794392523364,
+       "tp": 10,
+       "fp": 4,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.45,
+       "precision": 1.0,
+       "recall": 0.07476635514018691,
+       "tp": 8,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.5,
+       "precision": 1.0,
+       "recall": 0.07476635514018691,
+       "tp": 8,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.55,
+       "precision": 1.0,
+       "recall": 0.06542056074766354,
+       "tp": 7,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.6,
+       "precision": 1.0,
+       "recall": 0.056074766355140186,
+       "tp": 6,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.65,
+       "precision": 1.0,
+       "recall": 0.056074766355140186,
+       "tp": 6,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.7,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.75,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.8,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      }
+     ],
+     "gpu_s": 405.0
+    },
+    "e1_d2": {
+     "weights": "D:/DevCache/runs/xla/e1/d2/weights/best_devval.pt",
+     "weights_sha256": "d67bb170864759536e350b4fb77d5321a7995399e912ccb35ae97154cbc0440a",
+     "tau_high": 0.55,
+     "tau_high_rule": "nhỏ nhất đạt precision_min",
+     "devval_quality": {
+      "precision": 1.0,
+      "recall": 0.08411214953271028,
+      "tp": 9,
+      "fp": 0,
+      "gt": 107,
+      "frames_used": 89,
+      "frames_devval": 100
+     },
+     "grid": [
+      {
+       "tau_high": 0.1,
+       "precision": 0.3466666666666667,
+       "recall": 0.5098039215686274,
+       "tp": 26,
+       "fp": 49,
+       "gt": 51,
+       "frames_used": 68,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.15,
+       "precision": 0.38461538461538464,
+       "recall": 0.5,
+       "tp": 35,
+       "fp": 56,
+       "gt": 70,
+       "frames_used": 79,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.2,
+       "precision": 0.4158415841584158,
+       "recall": 0.4772727272727273,
+       "tp": 42,
+       "fp": 59,
+       "gt": 88,
+       "frames_used": 85,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.25,
+       "precision": 0.4266666666666667,
+       "recall": 0.34408602150537637,
+       "tp": 32,
+       "fp": 43,
+       "gt": 93,
+       "frames_used": 86,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.3,
+       "precision": 0.42424242424242425,
+       "recall": 0.28865979381443296,
+       "tp": 28,
+       "fp": 38,
+       "gt": 97,
+       "frames_used": 87,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.35,
+       "precision": 0.41304347826086957,
+       "recall": 0.18627450980392157,
+       "tp": 19,
+       "fp": 27,
+       "gt": 102,
+       "frames_used": 88,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.4,
+       "precision": 0.625,
+       "recall": 0.18691588785046728,
+       "tp": 20,
+       "fp": 12,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.45,
+       "precision": 0.6818181818181818,
+       "recall": 0.14018691588785046,
+       "tp": 15,
+       "fp": 7,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.5,
+       "precision": 0.8,
+       "recall": 0.11214953271028037,
+       "tp": 12,
+       "fp": 3,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.55,
+       "precision": 1.0,
+       "recall": 0.08411214953271028,
+       "tp": 9,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.6,
+       "precision": 1.0,
+       "recall": 0.08411214953271028,
+       "tp": 9,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.65,
+       "precision": 1.0,
+       "recall": 0.07476635514018691,
+       "tp": 8,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.7,
+       "precision": 1.0,
+       "recall": 0.009345794392523364,
+       "tp": 1,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.75,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.8,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0,
+       "fp": 0,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      }
+     ],
+     "gpu_s": 160.9
+    }
+   },
+   "tta": true,
+   "n_sequences": 47,
+   "seq_len": {
+    "min": 1,
+    "median": 7.0,
+    "max": 184,
+    "n_frames": 1115
+   },
+   "tau_high": 0.55,
+   "tau_high_rule": "nhỏ nhất đạt precision_min",
+   "tau_low": 0.05,
+   "min_track_len": 3,
+   "devval_quality": {
+    "precision": 1.0,
+    "recall": 0.08411214953271028,
+    "tp": 9,
+    "fp": 0,
+    "gt": 107,
+    "frames_used": 89,
+    "frames_devval": 100
+   },
+   "gpu_s": 565.9,
+   "dataset": {
+    "set": "d2+e2_r1",
+    "yaml": "D:/DevCache/datasets/xla/e2_r1/dataset.yaml",
+    "train_txt_sha256": "dc01c327966dcf92c880f9856b025503e000ed26af1cc0e4502ed6ed6b9a1580",
+    "n_images": {
+     "train": 4462,
+     "val": 487
+    },
+    "n_source": 3006,
+    "n_target_frames": 578,
+    "n_target_with_box": 86,
+    "n_target_boxes": 87,
+    "target_repeat": 2,
+    "n_neg_frames": 300,
+    "dropped_dev": {
+     "devval": 100,
+     "devval_buffer": 428,
+     "rules": 20
+    },
+    "test_frames_in_train": 0,
+    "devval_frames_in_train": 0
+   }
+  },
+  "r2": {
+   "phase": "11",
+   "round": 2,
+   "created": "2026-11-18T16:00:35+00:00",
+   "teacher": "r1",
+   "teacher_weights": "D:/DevCache/runs/xla/e2/r1/weights/best_devval.pt",
+   "teacher_sha256": "7e37476576683bf5205863256f095fb0c8e1e46d5fea65d1e744bedfa310ade5",
+   "teacher_rule": "precision_min trước, rồi recall nhãn giả trên dev-val (_quality_key)",
+   "candidates": {
+    "r1": {
+     "weights": "D:/DevCache/runs/xla/e2/r1/weights/best_devval.pt",
+     "weights_sha256": "7e37476576683bf5205863256f095fb0c8e1e46d5fea65d1e744bedfa310ade5",
+     "tau_high": 0.75,
+     "tau_high_rule": "không τ nào đạt 0.9: lấy precision cao nhất",
+     "devval_quality": {
+      "precision": 0.8571428571428571,
+      "recall": 0.11214953271028037,
+      "tp": 12,
+      "fp": 2,
+      "gt": 107,
+      "frames_used": 89,
+      "frames_devval": 100
+     },
+     "grid": [
+      {
+       "tau_high": 0.1,
+       "precision": 0.3902439024390244,
+       "recall": 0.2318840579710145,
+       "tp": 16,
+       "fp": 25,
+       "gt": 69,
+       "frames_used": 71,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.15,
+       "precision": 0.425531914893617,
+       "recall": 0.23255813953488372,
+       "tp": 20,
+       "fp": 27,
+       "gt": 86,
+       "frames_used": 81,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.2,
+       "precision": 0.46938775510204084,
+       "recall": 0.24731182795698925,
+       "tp": 23,
+       "fp": 26,
+       "gt": 93,
+       "frames_used": 83,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.25,
+       "precision": 0.5,
+       "recall": 0.22916666666666666,
+       "tp": 22,
+       "fp": 22,
+       "gt": 96,
+       "frames_used": 84,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.3,
+       "precision": 0.5121951219512195,
+       "recall": 0.21875,
+       "tp": 21,
+       "fp": 20,
+       "gt": 96,
+       "frames_used": 85,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.35,
+       "precision": 0.5789473684210527,
+       "recall": 0.20952380952380953,
+       "tp": 22,
+       "fp": 16,
+       "gt": 105,
+       "frames_used": 87,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.4,
+       "precision": 0.7857142857142857,
+       "recall": 0.20754716981132076,
+       "tp": 22,
+       "fp": 6,
+       "gt": 106,
+       "frames_used": 88,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.45,
+       "precision": 0.7857142857142857,
+       "recall": 0.20754716981132076,
+       "tp": 22,
+       "fp": 6,
+       "gt": 106,
+       "frames_used": 88,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.5,
+       "precision": 0.7857142857142857,
+       "recall": 0.20754716981132076,
+       "tp": 22,
+       "fp": 6,
+       "gt": 106,
+       "frames_used": 88,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.55,
+       "precision": 0.7857142857142857,
+       "recall": 0.20754716981132076,
+       "tp": 22,
+       "fp": 6,
+       "gt": 106,
+       "frames_used": 88,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.6,
+       "precision": 0.84,
+       "recall": 0.19811320754716982,
+       "tp": 21,
+       "fp": 4,
+       "gt": 106,
+       "frames_used": 88,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.65,
+       "precision": 0.8333333333333334,
+       "recall": 0.18867924528301888,
+       "tp": 20,
+       "fp": 4,
+       "gt": 106,
+       "frames_used": 88,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.7,
+       "precision": 0.8,
+       "recall": 0.11214953271028037,
+       "tp": 12,
+       "fp": 3,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.75,
+       "precision": 0.8571428571428571,
+       "recall": 0.11214953271028037,
+       "tp": 12,
+       "fp": 2,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      },
+      {
+       "tau_high": 0.8,
+       "precision": 0.8333333333333334,
+       "recall": 0.09345794392523364,
+       "tp": 10,
+       "fp": 2,
+       "gt": 107,
+       "frames_used": 89,
+       "frames_devval": 100
+      }
+     ],
+     "gpu_s": 111.0
+    }
+   },
+   "tta": true,
+   "n_sequences": 47,
+   "seq_len": {
+    "min": 1,
+    "median": 7.0,
+    "max": 184,
+    "n_frames": 1115
+   },
+   "tau_high": 0.75,
+   "tau_high_rule": "không τ nào đạt 0.9: lấy precision cao nhất",
+   "tau_low": 0.05,
+   "min_track_len": 3,
+   "devval_quality": {
+    "precision": 0.8571428571428571,
+    "recall": 0.11214953271028037,
+    "tp": 12,
+    "fp": 2,
+    "gt": 107,
+    "frames_used": 89,
+    "frames_devval": 100
+   },
+   "gpu_s": 111.0,
+   "dataset": {
+    "set": "d2+e2_r2",
+    "yaml": "D:/DevCache/datasets/xla/e2_r2/dataset.yaml",
+    "train_txt_sha256": "e793945cd656705f4124e0dbcc921c05154024a32acf1a054ed16ab54b70bf06",
+    "n_images": {
+     "train": 4452,
+     "val": 487
+    },
+    "n_source": 3006,
+    "n_target_frames": 573,
+    "n_target_with_box": 102,
+    "n_target_boxes": 154,
+    "target_repeat": 2,
+    "n_neg_frames": 300,
+    "dropped_dev": {
+     "devval": 100,
+     "devval_buffer": 428,
+     "rules": 26
+    },
+    "test_frames_in_train": 0,
+    "devval_frames_in_train": 0
+   }
+  }
+ },
+ "smoke": {
+  "smoke_r1": {
+   "phase": "11",
+   "created": "2026-11-18T12:41:35+00:00",
+   "set": "d2+e2_r1",
+   "fraction": 0.1,
+   "imgsz": 1280,
+   "batch": 4,
+   "batch_effective": 4,
+   "workers": 2,
+   "n_train_full": 4462,
+   "batches_smoke": 112,
+   "batches_full": 1116,
+   "measured": {
+    "epoch": 1,
+    "devval_mAP50": 0.171849,
+    "devval_mAP50_95": 0.068211,
+    "val_synth_mAP50": 0.26004,
+    "train_s": 89.05,
+    "val_save_s": 62.06,
+    "devval_s": 12.58,
+    "batches": 112,
+    "median_batch_s": 0.3638,
+    "batch": 4,
+    "vram_peak_gb": 4.3,
+    "startup_s": 12.4,
+    "time": "2026-11-18T12:41:14+00:00"
+   },
+   "epoch_s_est_median_batch": 480.6,
+   "epoch_s_est_naive": 965.1,
+   "hours_per_epoch": 0.2681,
+   "vram_peak_gb": 4.3,
+   "budget_min_per_run": 45,
+   "epochs_fit_budget": 2,
+   "gpu_s": 197.7,
+   "run_dir": "D:/DevCache/runs/xla/e2/r1_smoke",
+   "name": "r1"
+  },
+  "smoke_teacher": {
+   "phase": "11",
+   "created": "2026-11-18T10:51:58+00:00",
+   "set": "d2",
+   "fraction": 0.1,
+   "imgsz": 1280,
+   "batch": 2,
+   "batch_effective": 2,
+   "workers": 2,
+   "n_train_full": 3006,
+   "batches_smoke": 151,
+   "batches_full": 1503,
+   "measured": {
+    "epoch": 1,
+    "devval_mAP50": 0.002331,
+    "devval_mAP50_95": 0.001148,
+    "val_synth_mAP50": 0.02678,
+    "train_s": 89.69,
+    "val_save_s": 46.75,
+    "devval_s": 6.0,
+    "batches": 151,
+    "median_batch_s": 0.6376,
+    "batch": 2,
+    "vram_peak_gb": 4.46,
+    "startup_s": 4.0,
+    "time": "2026-11-18T10:51:31+00:00"
+   },
+   "epoch_s_est_median_batch": 1011.1,
+   "epoch_s_est_naive": 949.6,
+   "hours_per_epoch": 0.2809,
+   "vram_peak_gb": 4.46,
+   "budget_min_per_run": 75,
+   "epochs_fit_budget": 4,
+   "gpu_s": 173.3,
+   "run_dir": "D:/DevCache/runs/xla/e2/teacher_smoke",
+   "name": "teacher"
+  },
+  "smoke_teacher_batch4": {
+   "phase": "11",
+   "created": "2026-11-18T10:46:01+00:00",
+   "set": "d2",
+   "fraction": 0.1,
+   "imgsz": 1280,
+   "batch": 4,
+   "batch_effective": 4,
+   "workers": 2,
+   "n_train_full": 3006,
+   "batches_smoke": 76,
+   "batches_full": 752,
+   "measured": {
+    "epoch": 1,
+    "devval_mAP50": 0.007102,
+    "devval_mAP50_95": 0.00299,
+    "val_synth_mAP50": 0.04737,
+    "train_s": 90.47,
+    "val_save_s": 40.84,
+    "devval_s": 6.71,
+    "batches": 76,
+    "median_batch_s": 1.1464,
+    "batch": 4,
+    "vram_peak_gb": 8.37,
+    "startup_s": 3.6,
+    "time": "2026-11-18T10:45:35+00:00"
+   },
+   "epoch_s_est_median_batch": 909.6,
+   "epoch_s_est_naive": 952.2,
+   "hours_per_epoch": 0.2645,
+   "vram_peak_gb": 8.37,
+   "budget_min_per_run": 75,
+   "epochs_fit_budget": 4,
+   "gpu_s": 167.0,
+   "run_dir": "D:/DevCache/runs/xla/e2/teacher_smoke",
+   "name": "teacher"
+  }
+ },
+ "compare": {
+  "edge16_vs_e1_d2": {
+   "pred_a": "D:\\XLA-wt\\detect\\results\\baseline\\pred\\edge16.csv",
+   "pred_b": "D:\\DevCache\\runs\\xla\\e2\\score\\e1_d2_all.csv",
+   "op_threshold": {
+    "a": {
+     "thr": 0.06764,
+     "source": "F1 tối đa trên dev-val"
+    },
+    "b": {
+     "thr": 0.08852,
+     "source": "F1 tối đa trên dev-val"
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300
+   },
+   "metrics": {
+    "mAP50": {
+     "a": 0.126482,
+     "b": 0.235943,
+     "diff": 0.109461,
+     "ci95": [
+      -0.017168,
+      0.236137
+     ],
+     "p_diff_gt_0": 0.953954,
+     "p_b_better": 0.953954,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "mAP50_95": {
+     "a": 0.062856,
+     "b": 0.079408,
+     "diff": 0.016552,
+     "ci95": [
+      -0.021902,
+      0.046831
+     ],
+     "p_diff_gt_0": 0.805305,
+     "p_b_better": 0.805305,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "AP_small": {
+     "a": 0.053896,
+     "b": 0.090289,
+     "diff": 0.036393,
+     "ci95": [
+      -0.005347,
+      0.071428
+     ],
+     "p_diff_gt_0": 0.971285,
+     "p_b_better": 0.971285,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "AR_small": {
+     "a": 0.530588,
+     "b": 0.425882,
+     "diff": -0.104706,
+     "ci95": [
+      -0.18,
+      -0.064418
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 0.0,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "precision@op": {
+     "a": 0.192913,
+     "b": 0.311927,
+     "diff": 0.119013,
+     "ci95": [
+      -0.019235,
+      0.234982
+     ],
+     "p_diff_gt_0": 0.9465,
+     "p_b_better": 0.9465,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.328859,
+     "b": 0.456376,
+     "diff": 0.127517,
+     "ci95": [
+      -0.141458,
+      0.345753
+     ],
+     "p_diff_gt_0": 0.797798,
+     "p_b_better": 0.797798,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "f1@op": {
+     "a": 0.243176,
+     "b": 0.370572,
+     "diff": 0.127396,
+     "ci95": [
+      -0.042386,
+      0.278956
+     ],
+     "p_diff_gt_0": 0.908408,
+     "p_b_better": 0.908408,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "fp_per_neg_frame@op": {
+     "a": 0.283224,
+     "b": 0.117647,
+     "diff": -0.165577,
+     "ci95": [
+      -0.259261,
+      -0.087824
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 1.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.597484,
+     "b": 0.301887,
+     "diff": -0.295597,
+     "ci95": [
+      -0.583972,
+      -0.089812
+     ],
+     "p_diff_gt_0": 0.001,
+     "p_b_better": 0.999,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_indoor@op": {
+     "a": 0.116667,
+     "b": 0.02,
+     "diff": -0.096667,
+     "ci95": [
+      -0.144262,
+      -0.05102
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 1.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   },
+   "bootstrap": {
+    "n": 2000,
+    "seed": 20261118,
+    "unit": "khối 30 s của split.json",
+    "ci_pct": 95.0,
+    "n_blocks": {
+     "flight": 13,
+     "neg": 213
+    },
+    "paired": true,
+    "note": "hiệu = B − A trên cùng mẫu khối cho cả hai model"
+   }
+  },
+  "edge16_vs_teacher": {
+   "pred_a": "D:\\XLA-wt\\detect\\results\\baseline\\pred\\edge16.csv",
+   "pred_b": "D:\\DevCache\\runs\\xla\\e2\\score\\teacher_all.csv",
+   "op_threshold": {
+    "a": {
+     "thr": 0.06764,
+     "source": "F1 tối đa trên dev-val"
+    },
+    "b": {
+     "thr": 0.05431,
+     "source": "F1 tối đa trên dev-val"
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300
+   },
+   "metrics": {
+    "mAP50": {
+     "a": 0.126482,
+     "b": 0.218099,
+     "diff": 0.091616,
+     "ci95": [
+      -0.045633,
+      0.222742
+     ],
+     "p_diff_gt_0": 0.913914,
+     "p_b_better": 0.913914,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "mAP50_95": {
+     "a": 0.062856,
+     "b": 0.059577,
+     "diff": -0.003279,
+     "ci95": [
+      -0.063078,
+      0.035502
+     ],
+     "p_diff_gt_0": 0.431431,
+     "p_b_better": 0.431431,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "AP_small": {
+     "a": 0.053896,
+     "b": 0.081091,
+     "diff": 0.027195,
+     "ci95": [
+      -0.024893,
+      0.072974
+     ],
+     "p_diff_gt_0": 0.935013,
+     "p_b_better": 0.935013,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "AR_small": {
+     "a": 0.530588,
+     "b": 0.424706,
+     "diff": -0.105882,
+     "ci95": [
+      -0.183718,
+      -0.058594
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 0.0,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "precision@op": {
+     "a": 0.192913,
+     "b": 0.266932,
+     "diff": 0.074019,
+     "ci95": [
+      -0.064295,
+      0.18032
+     ],
+     "p_diff_gt_0": 0.8595,
+     "p_b_better": 0.8595,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.328859,
+     "b": 0.449664,
+     "diff": 0.120805,
+     "ci95": [
+      -0.25,
+      0.278689
+     ],
+     "p_diff_gt_0": 0.835335,
+     "p_b_better": 0.835335,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "f1@op": {
+     "a": 0.243176,
+     "b": 0.335,
+     "diff": 0.091824,
+     "ci95": [
+      -0.100916,
+      0.212151
+     ],
+     "p_diff_gt_0": 0.85986,
+     "p_b_better": 0.85986,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "fp_per_neg_frame@op": {
+     "a": 0.283224,
+     "b": 0.581699,
+     "diff": 0.298475,
+     "ci95": [
+      0.190573,
+      0.400011
+     ],
+     "p_diff_gt_0": 1.0,
+     "p_b_better": 0.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.597484,
+     "b": 0.389937,
+     "diff": -0.207547,
+     "ci95": [
+      -0.511171,
+      0.033158
+     ],
+     "p_diff_gt_0": 0.039,
+     "p_b_better": 0.956,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_indoor@op": {
+     "a": 0.116667,
+     "b": 0.683333,
+     "diff": 0.566667,
+     "ci95": [
+      0.480386,
+      0.652027
+     ],
+     "p_diff_gt_0": 1.0,
+     "p_b_better": 0.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   },
+   "bootstrap": {
+    "n": 2000,
+    "seed": 20261118,
+    "unit": "khối 30 s của split.json",
+    "ci_pct": 95.0,
+    "n_blocks": {
+     "flight": 13,
+     "neg": 213
+    },
+    "paired": true,
+    "note": "hiệu = B − A trên cùng mẫu khối cho cả hai model"
+   }
+  },
+  "edge16_vs_r1": {
+   "pred_a": "D:\\XLA-wt\\detect\\results\\baseline\\pred\\edge16.csv",
+   "pred_b": "D:\\DevCache\\runs\\xla\\e2\\score\\r1_all.csv",
+   "op_threshold": {
+    "a": {
+     "thr": 0.06764,
+     "source": "F1 tối đa trên dev-val"
+    },
+    "b": {
+     "thr": 0.07492,
+     "source": "F1 tối đa trên dev-val"
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300
+   },
+   "metrics": {
+    "mAP50": {
+     "a": 0.126482,
+     "b": 0.155912,
+     "diff": 0.02943,
+     "ci95": [
+      -0.074849,
+      0.080887
+     ],
+     "p_diff_gt_0": 0.761261,
+     "p_b_better": 0.761261,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "mAP50_95": {
+     "a": 0.062856,
+     "b": 0.052319,
+     "diff": -0.010537,
+     "ci95": [
+      -0.051883,
+      0.008155
+     ],
+     "p_diff_gt_0": 0.133634,
+     "p_b_better": 0.133634,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "AP_small": {
+     "a": 0.053896,
+     "b": 0.061442,
+     "diff": 0.007547,
+     "ci95": [
+      -0.033141,
+      0.037787
+     ],
+     "p_diff_gt_0": 0.726952,
+     "p_b_better": 0.726952,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "AR_small": {
+     "a": 0.530588,
+     "b": 0.418824,
+     "diff": -0.111765,
+     "ci95": [
+      -0.28,
+      -0.049425
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 0.0,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "precision@op": {
+     "a": 0.192913,
+     "b": 0.18125,
+     "diff": -0.011663,
+     "ci95": [
+      -0.101318,
+      0.054915
+     ],
+     "p_diff_gt_0": 0.434,
+     "p_b_better": 0.434,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.328859,
+     "b": 0.389262,
+     "diff": 0.060403,
+     "ci95": [
+      -0.195679,
+      0.206897
+     ],
+     "p_diff_gt_0": 0.743243,
+     "p_b_better": 0.743243,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "f1@op": {
+     "a": 0.243176,
+     "b": 0.247335,
+     "diff": 0.004159,
+     "ci95": [
+      -0.129256,
+      0.085927
+     ],
+     "p_diff_gt_0": 0.56006,
+     "p_b_better": 0.56006,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "fp_per_neg_frame@op": {
+     "a": 0.283224,
+     "b": 0.300654,
+     "diff": 0.017429,
+     "ci95": [
+      -0.128612,
+      0.192609
+     ],
+     "p_diff_gt_0": 0.5465,
+     "p_b_better": 0.4425,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.597484,
+     "b": 0.867925,
+     "diff": 0.27044,
+     "ci95": [
+      -0.141997,
+      0.69345
+     ],
+     "p_diff_gt_0": 0.872,
+     "p_b_better": 0.121,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_indoor@op": {
+     "a": 0.116667,
+     "b": 0.0,
+     "diff": -0.116667,
+     "ci95": [
+      -0.159871,
+      -0.07666
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 1.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   },
+   "bootstrap": {
+    "n": 2000,
+    "seed": 20261118,
+    "unit": "khối 30 s của split.json",
+    "ci_pct": 95.0,
+    "n_blocks": {
+     "flight": 13,
+     "neg": 213
+    },
+    "paired": true,
+    "note": "hiệu = B − A trên cùng mẫu khối cho cả hai model"
+   }
+  },
+  "edge16_vs_r2": {
+   "pred_a": "D:\\XLA-wt\\detect\\results\\baseline\\pred\\edge16.csv",
+   "pred_b": "D:\\DevCache\\runs\\xla\\e2\\score\\r2_all.csv",
+   "op_threshold": {
+    "a": {
+     "thr": 0.06764,
+     "source": "F1 tối đa trên dev-val"
+    },
+    "b": {
+     "thr": 0.01778,
+     "source": "F1 tối đa trên dev-val"
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300
+   },
+   "metrics": {
+    "mAP50": {
+     "a": 0.126482,
+     "b": 0.31331,
+     "diff": 0.186828,
+     "ci95": [
+      -0.00897,
+      0.318462
+     ],
+     "p_diff_gt_0": 0.962462,
+     "p_b_better": 0.962462,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "mAP50_95": {
+     "a": 0.062856,
+     "b": 0.157378,
+     "diff": 0.094522,
+     "ci95": [
+      -0.019367,
+      0.192156
+     ],
+     "p_diff_gt_0": 0.896396,
+     "p_b_better": 0.896396,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "AP_small": {
+     "a": 0.053896,
+     "b": 0.160013,
+     "diff": 0.106117,
+     "ci95": [
+      -0.037935,
+      0.278563
+     ],
+     "p_diff_gt_0": 0.8267,
+     "p_b_better": 0.8267,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "AR_small": {
+     "a": 0.530588,
+     "b": 0.445882,
+     "diff": -0.084706,
+     "ci95": [
+      -0.2,
+      0.005747
+     ],
+     "p_diff_gt_0": 0.076071,
+     "p_b_better": 0.076071,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "precision@op": {
+     "a": 0.192913,
+     "b": 0.27907,
+     "diff": 0.086156,
+     "ci95": [
+      -0.068406,
+      0.226051
+     ],
+     "p_diff_gt_0": 0.851,
+     "p_b_better": 0.851,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.328859,
+     "b": 0.402685,
+     "diff": 0.073826,
+     "ci95": [
+      -0.195679,
+      0.275862
+     ],
+     "p_diff_gt_0": 0.713714,
+     "p_b_better": 0.713714,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "f1@op": {
+     "a": 0.243176,
+     "b": 0.32967,
+     "diff": 0.086494,
+     "ci95": [
+      -0.094537,
+      0.22813
+     ],
+     "p_diff_gt_0": 0.823824,
+     "p_b_better": 0.823824,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "fp_per_neg_frame@op": {
+     "a": 0.283224,
+     "b": 0.352941,
+     "diff": 0.069717,
+     "ci95": [
+      -0.086102,
+      0.259117
+     ],
+     "p_diff_gt_0": 0.744,
+     "p_b_better": 0.246,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.597484,
+     "b": 0.522013,
+     "diff": -0.075472,
+     "ci95": [
+      -0.521202,
+      0.40727
+     ],
+     "p_diff_gt_0": 0.336,
+     "p_b_better": 0.6515,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_indoor@op": {
+     "a": 0.116667,
+     "b": 0.263333,
+     "diff": 0.146667,
+     "ci95": [
+      0.052283,
+      0.245163
+     ],
+     "p_diff_gt_0": 0.9995,
+     "p_b_better": 0.0005,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   },
+   "bootstrap": {
+    "n": 2000,
+    "seed": 20261118,
+    "unit": "khối 30 s của split.json",
+    "ci_pct": 95.0,
+    "n_blocks": {
+     "flight": 13,
+     "neg": 213
+    },
+    "paired": true,
+    "note": "hiệu = B − A trên cùng mẫu khối cho cả hai model"
+   }
+  },
+  "e1_d2_vs_teacher": {
+   "pred_a": "D:\\DevCache\\runs\\xla\\e2\\score\\e1_d2_all.csv",
+   "pred_b": "D:\\DevCache\\runs\\xla\\e2\\score\\teacher_all.csv",
+   "op_threshold": {
+    "a": {
+     "thr": 0.08852,
+     "source": "F1 tối đa trên dev-val"
+    },
+    "b": {
+     "thr": 0.05431,
+     "source": "F1 tối đa trên dev-val"
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300
+   },
+   "metrics": {
+    "mAP50": {
+     "a": 0.235943,
+     "b": 0.218099,
+     "diff": -0.017845,
+     "ci95": [
+      -0.046192,
+      0.035263
+     ],
+     "p_diff_gt_0": 0.232733,
+     "p_b_better": 0.232733,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "mAP50_95": {
+     "a": 0.079408,
+     "b": 0.059577,
+     "diff": -0.019831,
+     "ci95": [
+      -0.051751,
+      0.016004
+     ],
+     "p_diff_gt_0": 0.142643,
+     "p_b_better": 0.142643,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "AP_small": {
+     "a": 0.090289,
+     "b": 0.081091,
+     "diff": -0.009199,
+     "ci95": [
+      -0.027089,
+      0.005544
+     ],
+     "p_diff_gt_0": 0.087154,
+     "p_b_better": 0.087154,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "AR_small": {
+     "a": 0.425882,
+     "b": 0.424706,
+     "diff": -0.001176,
+     "ci95": [
+      -0.119301,
+      0.06
+     ],
+     "p_diff_gt_0": 0.480605,
+     "p_b_better": 0.480605,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "precision@op": {
+     "a": 0.311927,
+     "b": 0.266932,
+     "diff": -0.044994,
+     "ci95": [
+      -0.072511,
+      0.011825
+     ],
+     "p_diff_gt_0": 0.0935,
+     "p_b_better": 0.0935,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.456376,
+     "b": 0.449664,
+     "diff": -0.006711,
+     "ci95": [
+      -0.113232,
+      0.157407
+     ],
+     "p_diff_gt_0": 0.428428,
+     "p_b_better": 0.428428,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "f1@op": {
+     "a": 0.370572,
+     "b": 0.335,
+     "diff": -0.035572,
+     "ci95": [
+      -0.082947,
+      0.041088
+     ],
+     "p_diff_gt_0": 0.194695,
+     "p_b_better": 0.194695,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "fp_per_neg_frame@op": {
+     "a": 0.117647,
+     "b": 0.581699,
+     "diff": 0.464052,
+     "ci95": [
+      0.393279,
+      0.539535
+     ],
+     "p_diff_gt_0": 1.0,
+     "p_b_better": 0.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.301887,
+     "b": 0.389937,
+     "diff": 0.08805,
+     "ci95": [
+      -0.017972,
+      0.22087
+     ],
+     "p_diff_gt_0": 0.93,
+     "p_b_better": 0.0525,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_indoor@op": {
+     "a": 0.02,
+     "b": 0.683333,
+     "diff": 0.663333,
+     "ci95": [
+      0.596011,
+      0.729457
+     ],
+     "p_diff_gt_0": 1.0,
+     "p_b_better": 0.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   },
+   "bootstrap": {
+    "n": 2000,
+    "seed": 20261118,
+    "unit": "khối 30 s của split.json",
+    "ci_pct": 95.0,
+    "n_blocks": {
+     "flight": 13,
+     "neg": 213
+    },
+    "paired": true,
+    "note": "hiệu = B − A trên cùng mẫu khối cho cả hai model"
+   }
+  },
+  "e1_d2_vs_r1": {
+   "pred_a": "D:\\DevCache\\runs\\xla\\e2\\score\\e1_d2_all.csv",
+   "pred_b": "D:\\DevCache\\runs\\xla\\e2\\score\\r1_all.csv",
+   "op_threshold": {
+    "a": {
+     "thr": 0.08852,
+     "source": "F1 tối đa trên dev-val"
+    },
+    "b": {
+     "thr": 0.07492,
+     "source": "F1 tối đa trên dev-val"
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300
+   },
+   "metrics": {
+    "mAP50": {
+     "a": 0.235943,
+     "b": 0.155912,
+     "diff": -0.080031,
+     "ci95": [
+      -0.187427,
+      1.3e-05
+     ],
+     "p_diff_gt_0": 0.026026,
+     "p_b_better": 0.026026,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "mAP50_95": {
+     "a": 0.079408,
+     "b": 0.052319,
+     "diff": -0.02709,
+     "ci95": [
+      -0.051429,
+      -0.007724
+     ],
+     "p_diff_gt_0": 0.008008,
+     "p_b_better": 0.008008,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "AP_small": {
+     "a": 0.090289,
+     "b": 0.061442,
+     "diff": -0.028847,
+     "ci95": [
+      -0.054928,
+      -0.000571
+     ],
+     "p_diff_gt_0": 0.022166,
+     "p_b_better": 0.022166,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "AR_small": {
+     "a": 0.425882,
+     "b": 0.418824,
+     "diff": -0.007059,
+     "ci95": [
+      -0.1,
+      0.042424
+     ],
+     "p_diff_gt_0": 0.374307,
+     "p_b_better": 0.374307,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "precision@op": {
+     "a": 0.311927,
+     "b": 0.18125,
+     "diff": -0.130677,
+     "ci95": [
+      -0.208216,
+      -0.026671
+     ],
+     "p_diff_gt_0": 0.0005,
+     "p_b_better": 0.0005,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.456376,
+     "b": 0.389262,
+     "diff": -0.067114,
+     "ci95": [
+      -0.15,
+      0.017759
+     ],
+     "p_diff_gt_0": 0.101602,
+     "p_b_better": 0.101602,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "f1@op": {
+     "a": 0.370572,
+     "b": 0.247335,
+     "diff": -0.123237,
+     "ci95": [
+      -0.219383,
+      -0.02854
+     ],
+     "p_diff_gt_0": 0.000501,
+     "p_b_better": 0.000501,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "fp_per_neg_frame@op": {
+     "a": 0.117647,
+     "b": 0.300654,
+     "diff": 0.183007,
+     "ci95": [
+      0.022202,
+      0.374483
+     ],
+     "p_diff_gt_0": 0.9865,
+     "p_b_better": 0.0125,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.301887,
+     "b": 0.867925,
+     "diff": 0.566038,
+     "ci95": [
+      0.098513,
+      1.081988
+     ],
+     "p_diff_gt_0": 0.9925,
+     "p_b_better": 0.0065,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_indoor@op": {
+     "a": 0.02,
+     "b": 0.0,
+     "diff": -0.02,
+     "ci95": [
+      -0.040268,
+      -0.003356
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 0.995,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   },
+   "bootstrap": {
+    "n": 2000,
+    "seed": 20261118,
+    "unit": "khối 30 s của split.json",
+    "ci_pct": 95.0,
+    "n_blocks": {
+     "flight": 13,
+     "neg": 213
+    },
+    "paired": true,
+    "note": "hiệu = B − A trên cùng mẫu khối cho cả hai model"
+   }
+  },
+  "e1_d2_vs_r2": {
+   "pred_a": "D:\\DevCache\\runs\\xla\\e2\\score\\e1_d2_all.csv",
+   "pred_b": "D:\\DevCache\\runs\\xla\\e2\\score\\r2_all.csv",
+   "op_threshold": {
+    "a": {
+     "thr": 0.08852,
+     "source": "F1 tối đa trên dev-val"
+    },
+    "b": {
+     "thr": 0.01778,
+     "source": "F1 tối đa trên dev-val"
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300
+   },
+   "metrics": {
+    "mAP50": {
+     "a": 0.235943,
+     "b": 0.31331,
+     "diff": 0.077367,
+     "ci95": [
+      -0.037305,
+      0.135754
+     ],
+     "p_diff_gt_0": 0.872372,
+     "p_b_better": 0.872372,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "mAP50_95": {
+     "a": 0.079408,
+     "b": 0.157378,
+     "diff": 0.07797,
+     "ci95": [
+      -0.027841,
+      0.15809
+     ],
+     "p_diff_gt_0": 0.864364,
+     "p_b_better": 0.864364,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "AP_small": {
+     "a": 0.090289,
+     "b": 0.160013,
+     "diff": 0.069724,
+     "ci95": [
+      -0.071529,
+      0.228753
+     ],
+     "p_diff_gt_0": 0.678589,
+     "p_b_better": 0.678589,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "AR_small": {
+     "a": 0.425882,
+     "b": 0.445882,
+     "diff": 0.02,
+     "ci95": [
+      -0.059375,
+      0.124419
+     ],
+     "p_diff_gt_0": 0.630227,
+     "p_b_better": 0.630227,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "precision@op": {
+     "a": 0.311927,
+     "b": 0.27907,
+     "diff": -0.032857,
+     "ci95": [
+      -0.115024,
+      0.066489
+     ],
+     "p_diff_gt_0": 0.331,
+     "p_b_better": 0.331,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.456376,
+     "b": 0.402685,
+     "diff": -0.053691,
+     "ci95": [
+      -0.083775,
+      0.0
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 0.0,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "f1@op": {
+     "a": 0.370572,
+     "b": 0.32967,
+     "diff": -0.040902,
+     "ci95": [
+      -0.115368,
+      0.024451
+     ],
+     "p_diff_gt_0": 0.164164,
+     "p_b_better": 0.164164,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "fp_per_neg_frame@op": {
+     "a": 0.117647,
+     "b": 0.352941,
+     "diff": 0.235294,
+     "ci95": [
+      0.101839,
+      0.40526
+     ],
+     "p_diff_gt_0": 1.0,
+     "p_b_better": 0.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.301887,
+     "b": 0.522013,
+     "diff": 0.220126,
+     "ci95": [
+      -0.134979,
+      0.656735
+     ],
+     "p_diff_gt_0": 0.792,
+     "p_b_better": 0.198,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_indoor@op": {
+     "a": 0.02,
+     "b": 0.263333,
+     "diff": 0.243333,
+     "ci95": [
+      0.162712,
+      0.331063
+     ],
+     "p_diff_gt_0": 1.0,
+     "p_b_better": 0.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   },
+   "bootstrap": {
+    "n": 2000,
+    "seed": 20261118,
+    "unit": "khối 30 s của split.json",
+    "ci_pct": 95.0,
+    "n_blocks": {
+     "flight": 13,
+     "neg": 213
+    },
+    "paired": true,
+    "note": "hiệu = B − A trên cùng mẫu khối cho cả hai model"
+   }
+  }
+ },
+ "ship": {
+  "name": "r1",
+  "weights": "D:/DevCache/runs/xla/e2/r1/weights/best_devval.pt",
+  "devval_map50": 0.379078,
+  "conf_threshold_pt": 0.07492,
+  "threshold_source": "devval",
+  "rule": "devval_map50 (epoch tốt nhất) cao nhất trong {E1 D2, E2 các vòng}; thầy YOLO11m không dự",
+  "candidates": {
+   "e1_d2": {
+    "devval_map50": 0.329412,
+    "devval_map50_last3_mean": 0.22929133333333332
+   },
+   "r1": {
+    "devval_map50": 0.379078,
+    "devval_map50_last3_mean": 0.32764033333333337
+   },
+   "r2": {
+    "devval_map50": 0.295726,
+    "devval_map50_last3_mean": 0.27340666666666663
+   }
+  },
+  "by_last3_mean": "r1",
+  "agree_with_last3_mean": true
+ },
+ "gpu_hours_total": 2.4862,
+ "bundle": {
+  "bundle": "models/release/detector-v1.0.0",
+  "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+  "model": "r1",
+  "conf_threshold": 0.07669,
+  "threshold_source": "devval (đường ONNX)",
+  "metrics": {
+   "map50": 0.119542,
+   "map50_95": 0.042457,
+   "precision": 0.188498,
+   "recall": 0.395973,
+   "fp_per_neg_frame": 0.30719
+  },
+  "test": {
+   "conf_threshold": 0.07669,
+   "threshold_source": "devval",
+   "metrics": {
+    "mAP50": {
+     "value": 0.119542,
+     "ci95": [
+      0.032124,
+      0.197155
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.042457,
+     "ci95": [
+      0.014793,
+      0.069047
+     ]
+    },
+    "AP_small": {
+     "value": 0.049525,
+     "ci95": [
+      0.021199,
+      0.089477
+     ]
+    },
+    "AR_small": {
+     "value": 0.24,
+     "ci95": [
+      0.183704,
+      0.325581
+     ]
+    },
+    "precision@op": {
+     "value": 0.188498,
+     "ci95": [
+      0.030765,
+      0.2957
+     ]
+    },
+    "recall@op": {
+     "value": 0.395973,
+     "ci95": [
+      0.270833,
+      0.5
+     ]
+    },
+    "f1@op": {
+     "value": 0.255411,
+     "ci95": [
+      0.058085,
+      0.350211
+     ]
+    },
+    "fp_per_neg_flight@op": {
+     "value": 0.880503,
+     "ci95": [
+      0.333232,
+      1.494758
+     ]
+    },
+    "fp_per_neg_indoor@op": {
+     "value": 0.003333,
+     "ci95": [
+      0.0,
+      0.010275
+     ]
+    },
+    "fp_per_neg_frame@op": {
+     "value": 0.30719,
+     "ci95": [
+      0.109048,
+      0.543723
+     ]
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "neg_split_frames": 300,
+    "negative_frames": 459,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300,
+    "labels_missing": 0,
+    "pred_frames_other_splits": 42
+   },
+   "official": true
+  },
+  "criteria": {
+   "B1": {
+    "pass": false,
+    "mAP50": 0.119542,
+    "diff_vs_edge16": -0.00694,
+    "diff_ci95": [
+     -0.137839,
+     0.066758
+    ],
+    "rule": "mAP50 ≥ 0.227 và cận dưới CI hiệu ghép cặp > 0"
+   },
+   "B2": {
+    "verdict": "không đạt",
+    "fp_per_neg_flight": {
+     "value": 0.880503,
+     "ci95": [
+      0.333232,
+      1.494758
+     ]
+    },
+    "recall@op": {
+     "value": 0.395973,
+     "ci95": [
+      0.270833,
+      0.5
+     ]
+    },
+    "rule": "fp_per_neg_flight@op ≤ 0.05 và cận trên CI ≤ 0.1"
+   },
+   "B3": {
+    "pass": true,
+    "ms_p50": 19.985,
+    "ms_p95": 20.223,
+    "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
+    "cpu_perf_pct": {
+     "counter": "\\Processor Information(_Total)\\% Processor Performance",
+     "min": 159.8,
+     "mean": 168.1,
+     "window_s": 60,
+     "throttled": false
+    },
+    "rule": "≤ 30 ms p95 trên ORT CUDA EP (meta.ms_per_frame của bundle)"
+   }
+  },
+  "path": "onnx: detector.onnx (ORT CPU EP) trên khung uint8 BGR 640×480 nguyên, cắt mép trong graph, letterbox vuông 1280, score_floor 0,05, NMS trong graph",
+  "is_bundle_metrics": true,
+  "predict_wall_s": 276.8,
+  "csv": "D:/XLA-wt/detect/results/e2/preds/onnx_detector-v1.0.0_all.csv",
+  "compare_vs_edge16": {
+   "op_threshold": {
+    "a": {
+     "thr": 0.06764,
+     "source": "F1 tối đa trên dev-val"
+    },
+    "b": {
+     "thr": 0.07669,
+     "source": "F1 tối đa trên dev-val"
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300
+   },
+   "metrics": {
+    "mAP50": {
+     "a": 0.126482,
+     "b": 0.119542,
+     "diff": -0.00694,
+     "ci95": [
+      -0.137839,
+      0.066758
+     ],
+     "p_diff_gt_0": 0.466967,
+     "p_b_better": 0.466967,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "mAP50_95": {
+     "a": 0.062856,
+     "b": 0.042457,
+     "diff": -0.020399,
+     "ci95": [
+      -0.070955,
+      0.014495
+     ],
+     "p_diff_gt_0": 0.115115,
+     "p_b_better": 0.115115,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "AP_small": {
+     "a": 0.053896,
+     "b": 0.049525,
+     "diff": -0.004371,
+     "ci95": [
+      -0.058844,
+      0.04186
+     ],
+     "p_diff_gt_0": 0.466499,
+     "p_b_better": 0.466499,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "AR_small": {
+     "a": 0.530588,
+     "b": 0.24,
+     "diff": -0.290588,
+     "ci95": [
+      -0.38,
+      -0.243363
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 0.0,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "precision@op": {
+     "a": 0.192913,
+     "b": 0.188498,
+     "diff": -0.004415,
+     "ci95": [
+      -0.11348,
+      0.088557
+     ],
+     "p_diff_gt_0": 0.5135,
+     "p_b_better": 0.5135,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.328859,
+     "b": 0.395973,
+     "diff": 0.067114,
+     "ci95": [
+      -0.21875,
+      0.24359
+     ],
+     "p_diff_gt_0": 0.757758,
+     "p_b_better": 0.757758,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "f1@op": {
+     "a": 0.243176,
+     "b": 0.255411,
+     "diff": 0.012235,
+     "ci95": [
+      -0.14211,
+      0.119536
+     ],
+     "p_diff_gt_0": 0.603604,
+     "p_b_better": 0.603604,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "fp_per_neg_frame@op": {
+     "a": 0.283224,
+     "b": 0.30719,
+     "diff": 0.023965,
+     "ci95": [
+      -0.14088,
+      0.225701
+     ],
+     "p_diff_gt_0": 0.5625,
+     "p_b_better": 0.43,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.597484,
+     "b": 0.880503,
+     "diff": 0.283019,
+     "ci95": [
+      -0.170736,
+      0.785341
+     ],
+     "p_diff_gt_0": 0.841,
+     "p_b_better": 0.1535,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_indoor@op": {
+     "a": 0.116667,
+     "b": 0.003333,
+     "diff": -0.113333,
+     "ci95": [
+      -0.158788,
+      -0.072164
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 1.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   }
+  },
+  "compare_pt_vs_onnx": {
+   "op_threshold": {
+    "a": {
+     "thr": 0.07492,
+     "source": "F1 tối đa trên dev-val"
+    },
+    "b": {
+     "thr": 0.07669,
+     "source": "F1 tối đa trên dev-val"
+    }
+   },
+   "n": {
+    "frames": 198,
+    "frames_with_person": 39,
+    "gt_boxes": 149,
+    "negative_frames_flight": 159,
+    "negative_frames_indoor": 300
+   },
+   "metrics": {
+    "mAP50": {
+     "a": 0.155912,
+     "b": 0.119542,
+     "diff": -0.03637,
+     "ci95": [
+      -0.07102,
+      0.01578
+     ],
+     "p_diff_gt_0": 0.062062,
+     "p_b_better": 0.062062,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "mAP50_95": {
+     "a": 0.052319,
+     "b": 0.042457,
+     "diff": -0.009861,
+     "ci95": [
+      -0.025634,
+      0.011108
+     ],
+     "p_diff_gt_0": 0.225225,
+     "p_b_better": 0.225225,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "AP_small": {
+     "a": 0.061442,
+     "b": 0.049525,
+     "diff": -0.011918,
+     "ci95": [
+      -0.034657,
+      0.008371
+     ],
+     "p_diff_gt_0": 0.15063,
+     "p_b_better": 0.15063,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "AR_small": {
+     "a": 0.418824,
+     "b": 0.24,
+     "diff": -0.178824,
+     "ci95": [
+      -0.233364,
+      -0.1
+     ],
+     "p_diff_gt_0": 0.0,
+     "p_b_better": 0.0,
+     "higher_is_better": true,
+     "n_valid_samples": 1985
+    },
+    "precision@op": {
+     "a": 0.18125,
+     "b": 0.188498,
+     "diff": 0.007248,
+     "ci95": [
+      -0.015596,
+      0.033672
+     ],
+     "p_diff_gt_0": 0.748,
+     "p_b_better": 0.748,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.389262,
+     "b": 0.395973,
+     "diff": 0.006711,
+     "ci95": [
+      -0.02044,
+      0.090909
+     ],
+     "p_diff_gt_0": 0.63013,
+     "p_b_better": 0.63013,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "f1@op": {
+     "a": 0.247335,
+     "b": 0.255411,
+     "diff": 0.008077,
+     "ci95": [
+      -0.017961,
+      0.034493
+     ],
+     "p_diff_gt_0": 0.748248,
+     "p_b_better": 0.748248,
+     "higher_is_better": true,
+     "n_valid_samples": 1998
+    },
+    "fp_per_neg_frame@op": {
+     "a": 0.300654,
+     "b": 0.30719,
+     "diff": 0.006536,
+     "ci95": [
+      -0.027909,
+      0.044454
+     ],
+     "p_diff_gt_0": 0.5895,
+     "p_b_better": 0.353,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.867925,
+     "b": 0.880503,
+     "diff": 0.012579,
+     "ci95": [
+      -0.088618,
+      0.115651
+     ],
+     "p_diff_gt_0": 0.5445,
+     "p_b_better": 0.408,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_indoor@op": {
+     "a": 0.0,
+     "b": 0.003333,
+     "diff": 0.003333,
+     "ci95": [
+      0.0,
+      0.010275
+     ],
+     "p_diff_gt_0": 0.6345,
+     "p_b_better": 0.0,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   }
+  }
+ }
+}
