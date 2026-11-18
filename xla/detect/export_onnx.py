@@ -33,7 +33,9 @@ Dây chuyền:
    stride, lưới P5 lệch nửa ô) — phần lệch còn lại của cổng đến từ đây. Kèm số tham khảo (không chặn):
    ``.pt`` ``rect=False`` (cùng tiền xử lý với graph — lệch ở đây mới là lỗi xuất) và ``.pt`` trên khung nguyên rồi bỏ
    hộp ``x1 < crop_left`` (đường của mốc phase 09 / E1 tạo ra ``meta.metrics``).
-5. ``ms_per_frame``: ORT CUDA EP, warmup 30 + đo 300 khung dev (gồm chép host→GPU), p50/p95. Cả bước 4 (``.pt`` chạy
+5. ``ms_per_frame``: ORT CUDA EP, warmup 30 + đo 300 khung dev (gồm chép host→GPU), p50/p95. Ngay trước khi đo, đọc
+   ``% Processor Performance`` 60 s (``cpu_perf_pct`` trong ``meta.ms_per_frame``); min < 80 % → cảnh báo
+   "đo lúc hạ xung" trong báo cáo (không chặn: số vẫn ghi, người phát hành đo lại). Cả bước 4 (``.pt`` chạy
    GPU, ORT CUDA) lẫn bước 5 nằm trong một lần giữ ``xla.gpu_lock`` (D9). ``import torch`` trước khi tạo session CUDA
    (DLL CUDA của torch, xem ``pyproject.toml``).
 6. ``golden/``: 3 khung **dev** ngoài dev-val (chép nguyên byte JPEG), ở vị trí 1/4, 1/2, 3/4 danh sách dev; mỗi vị trí dò
@@ -88,6 +90,9 @@ CPU_THREADS = 4  # máy lật bit RAM dưới tải nặng: tối đa 4 luồng 
 GOLDEN_POSITIONS = (0.25, 0.5, 0.75)
 GOLDEN_SCAN = 60
 GPU_LOCK_TIMEOUT_S = 6 * 3600.0
+CPU_PERF_MIN_PCT = 80.0  # dưới mức này CPU đang hạ xung (pin yếu, tiết kiệm điện): ms không đại diện
+CPU_PERF_WINDOW_S = 60
+CPU_PERF_COUNTER = r"\Processor Information(_Total)\% Processor Performance"
 CORE_INPUT = "images"
 CORE_PREFIX = "core/"
 PROFILE_REL = Path("configs/camera_profile.yaml")
@@ -407,6 +412,37 @@ def simplify_checked(model: Any, probes: list[np.ndarray]) -> tuple[Any, bool, s
     return simp, True, f"onnxsim {onnxsim.__version__}: đã rút gọn, khớp ORT CPU trên {len(probes)} khung thử"
 
 
+def cpu_performance_pct(window_s: int = CPU_PERF_WINDOW_S) -> dict[str, Any] | None:
+    """``% Processor Performance`` của Windows trong ``window_s`` giây (mỗi giây một mẫu); None khi không đo được.
+
+    Đo ms lúc CPU hạ xung (vd. pin vừa sạc lại từ mức thấp: ~22 %) cho số chậm hơn thật; báo cáo ghi kèm số này."""
+    import subprocess
+
+    if sys.platform != "win32":
+        return None
+    cmd = (f"(Get-Counter '{CPU_PERF_COUNTER}' -SampleInterval 1 -MaxSamples {int(window_s)})"
+           ".CounterSamples.CookedValue")
+    try:
+        out = subprocess.run(["powershell.exe", "-NoProfile", "-Command", cmd], capture_output=True, text=True,
+                             timeout=window_s + 60, check=True).stdout
+        vals = [float(v.replace(",", ".")) for v in out.split()]
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+    if not vals:
+        return None
+    return {"counter": CPU_PERF_COUNTER, "min": round(min(vals), 1), "mean": round(float(np.mean(vals)), 1),
+            "window_s": int(window_s), "throttled": min(vals) < CPU_PERF_MIN_PCT}
+
+
+def _cpu_perf_warning(perf: dict[str, Any] | None) -> str | None:
+    if perf is None:
+        return "không đọc được % Processor Performance trước khi đo ms (không biết CPU có hạ xung không)"
+    if perf["throttled"]:
+        return (f"đo lúc hạ xung: % Processor Performance min {perf['min']} / tb {perf['mean']} < "
+                f"{CPU_PERF_MIN_PCT} trong {perf['window_s']} s — ms_per_frame không đại diện, đo lại khi CPU đủ xung")
+    return None
+
+
 def measure_ms(sess: Any, frames: list[np.ndarray], warmup: int = WARMUP) -> dict[str, float]:
     for fr in frames[:warmup]:
         run_detector(sess, fr)
@@ -622,6 +658,7 @@ def export_bundle(weights: str | Path, out_dir: str | Path, *, version: str, con
             torch.set_num_threads(CPU_THREADS)
             pt = predict_pt(weights, dv_frames, crop_left, imgsz, "cpu")
             ort_cuda = None
+            cpu_perf = cpu_performance_pct()
             ms = measure_ms(cpu, timed)
             ms_meta = {"device": platform.processor() or "CPU", "runtime": f"onnxruntime {ort.__version__} CPU EP"}
             warnings.append("--skip-cuda: không parity CUDA, ms đo trên ORT CPU EP (bundle phát hành cần CUDA EP)")
@@ -635,6 +672,7 @@ def export_bundle(weights: str | Path, out_dir: str | Path, *, version: str, con
                 torch.cuda.empty_cache()
                 gpu = ort_session(onnx_path, cuda=True)
                 ort_cuda = {f: _rows(*run_detector(gpu, im)) for f, im in dv_frames.items()}
+                cpu_perf = cpu_performance_pct()
                 ms = measure_ms(gpu, timed)
                 ms_meta = {"device": torch.cuda.get_device_name(0),
                            "runtime": f"onnxruntime-gpu {ort.__version__} CUDA EP"}
@@ -662,6 +700,9 @@ def export_bundle(weights: str | Path, out_dir: str | Path, *, version: str, con
                 "pipeline": f"YOLO.predict trên khung nguyên, bỏ hộp x1 < {crop_left} (đường của mốc / E1)",
                 "delta_map50_ort_cpu_minus_this": round(cpu_map - edge["mAP50"], 6),
                 "note": "tham khảo, không chặn: khác đầu vào (cắt mép trong graph vs lọc hộp sau)"}}
+    perf_warn = _cpu_perf_warning(cpu_perf)
+    if perf_warn:
+        warnings.append(perf_warn)
     gated = [v for v in parity["candidates"].values() if v is not None]
     parity["pass"] = all(v["pass"] for v in gated)
     for k, v in parity["candidates"].items():
@@ -677,7 +718,7 @@ def export_bundle(weights: str | Path, out_dir: str | Path, *, version: str, con
         "imgsz": imgsz, "score_floor": SCORE_FLOOR, "nms_iou": NMS_IOU, "max_det": MAX_DET,
         "conf_threshold": float(conf_threshold), "input_variant": "raw", "train_run": train_run, "metrics": metrics,
         "ms_per_frame": ms_meta | {"p50": ms["p50"], "p95": ms["p95"], "n_frames": ms["n_frames"],
-                                   "warmup": ms["warmup"]},
+                                   "warmup": ms["warmup"], "cpu_perf_pct": cpu_perf},
         "created": datetime.now(UTC).isoformat(timespec="seconds"),
         "golden_sources": golden,
         "export": {"tool": "xla.detect.export_onnx", "weights": weights.name, "weights_sha256": C.sha256_file(weights),

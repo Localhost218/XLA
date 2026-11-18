@@ -228,6 +228,14 @@ def test_cuda_ep_empty_and_sorted_outputs() -> None:
             assert np.all(np.diff(sg) <= 0)
 
 
+def test_cpu_perf_warning_flags_throttle() -> None:
+    ok = {"min": 95.0, "mean": 99.0, "window_s": 60, "throttled": False}
+    slow = {"min": 21.8, "mean": 22.0, "window_s": 60, "throttled": True}
+    assert X._cpu_perf_warning(ok) is None
+    assert "hạ xung" in X._cpu_perf_warning(slow)
+    assert "không đọc được" in X._cpu_perf_warning(None)
+
+
 # ---- metrics + CLI ---------------------------------------------------------------------------------------------
 METRICS = {"map50": 0.5, "map50_95": 0.3, "precision": 0.6, "recall": 0.4, "fp_per_neg_frame": 0.1}
 
