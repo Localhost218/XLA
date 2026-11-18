@@ -11,7 +11,9 @@ nhãn test đã duyệt), mỗi khung dùng một lần; hai so sánh nhận t�
 seed; cặp lặp đổi bên so với lần đầu và cách lần đầu ≥ ``MIN_REPEAT_GAP`` lượt.
 
 Hiển thị: mọi biến thể cùng một cách — cắt bỏ cột ``[0, crop_left)`` (dải mép trái) rồi JPEG q95 4:4:4 — nên không
-lộ biến thể qua dải mép hay kiểu nén. Tên ảnh là mã hex ngẫu nhiên; biến thể chỉ có trong ``ab_key.json``. Trang HTML
+lộ biến thể qua dải mép hay kiểu nén. ``--zoom N`` (A/B lần 2, 19/11/2026): mỗi cặp cắt cùng một vùng 1/N mỗi chiều
+(tâm là người lớn nhất theo nhãn test, không có người thì vùng ngẫu nhiên theo seed) rồi phóng N× theo điểm ảnh gần
+nhất, để thấy khối JPEG, ám màu, chi tiết người. Tên ảnh là mã hex ngẫu nhiên; biến thể chỉ có trong ``ab_key.json``. Trang HTML
 tự đủ, mở thẳng bằng file://, không mạng, không thư viện ngoài; tiến độ lưu ``localStorage``; nút Xuất tải JSON cho
 ``python -m xla.eval.ab_score``.
 """
@@ -130,11 +132,33 @@ def plan_pairs(frames: list[dict[str, Any]], n_repeats: int, rng: np.random.Gene
     return seq
 
 
-def display_image(img: np.ndarray, crop_left: int) -> bytes:
-    """Ảnh hiển thị: cắt bỏ dải mép ``[0, crop_left)``, JPEG q95 4:4:4 — giống nhau cho mọi biến thể."""
+def pick_region(width: int, height: int, zoom: int, boxes: np.ndarray, crop_left: int,
+                rng: np.random.Generator) -> tuple[int, int, int, int]:
+    """Vùng ``(x0, y0, w, h)`` (toạ độ ảnh đã cắt mép) cỡ ``1/zoom`` mỗi chiều để phóng to.
+
+    Có người (``boxes`` xyxy px khung gốc) → tâm vùng là tâm hộp lớn nhất; không có → vùng ngẫu nhiên theo ``rng``.
+    Chọn theo nhãn đã duyệt, không theo ảnh đã xử lý, nên không thiên vị biến thể nào."""
+    w, h = width // zoom, height // zoom
+    if len(boxes):
+        b = boxes[int(np.argmax((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])))]
+        cx, cy = float(b[0] + b[2]) / 2 - crop_left, float(b[1] + b[3]) / 2
+        x0, y0 = round(cx - w / 2), round(cy - h / 2)
+    else:
+        x0, y0 = int(rng.integers(0, width - w + 1)), int(rng.integers(0, height - h + 1))
+    return min(max(x0, 0), width - w), min(max(y0, 0), height - h), w, h
+
+
+def display_image(img: np.ndarray, crop_left: int, region: tuple[int, int, int, int] | None = None,
+                  zoom: int = 1) -> bytes:
+    """Ảnh hiển thị: cắt bỏ dải mép ``[0, crop_left)``, (tuỳ chọn) cắt ``region`` rồi phóng ``zoom`` lần theo điểm
+    ảnh gần nhất (không nội suy, giữ nguyên khối JPEG/nhiễu), JPEG q95 4:4:4 — giống nhau cho mọi biến thể."""
     import cv2
 
-    ok, buf = cv2.imencode(".jpg", np.ascontiguousarray(img[:, crop_left:]),
+    view = img[:, crop_left:]
+    if region is not None:
+        x0, y0, w, h = region
+        view = cv2.resize(view[y0:y0 + h, x0:x0 + w], (w * zoom, h * zoom), interpolation=cv2.INTER_NEAREST)
+    ok, buf = cv2.imencode(".jpg", np.ascontiguousarray(view),
                            [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY,
                             cv2.IMWRITE_JPEG_SAMPLING_FACTOR, cv2.IMWRITE_JPEG_SAMPLING_FACTOR_444])
     if not ok:
@@ -150,11 +174,14 @@ def key_id_of(pairs: list[dict[str, Any]]) -> str:
 
 def build(cands: list[dict[str, Any]], load: Callable[[str], np.ndarray], fns: dict[str, Fn], out_dir: Path, *,
           n_pairs: int, n_repeats: int, seed: int, crop_left: int, variants_info: dict[str, Any],
-          force: bool = False) -> dict[str, Any]:
-    """Dựng trang + ảnh + khoá vào ``out_dir``; trả tóm tắt. ``cands``: ``{"frame","alt_m","alt_bin","has_person","block"}``."""
+          force: bool = False, zoom: int = 1) -> dict[str, Any]:
+    """Dựng trang + ảnh + khoá vào ``out_dir``; trả tóm tắt. ``cands``: ``{"frame","alt_m","alt_bin","has_person","block"}``
+    (+ ``"boxes"`` xyxy px khi ``zoom > 1``, để vùng phóng to nằm trên người)."""
     n_orig = n_pairs - n_repeats
     if n_repeats < 0 or n_orig <= 0 or n_orig % len(COMPARISONS):
         raise UsageError(f"--pairs {n_pairs} − --repeats {n_repeats} phải là số dương chia hết cho {len(COMPARISONS)}")
+    if zoom < 1:
+        raise UsageError(f"--zoom {zoom} phải ≥ 1")
     img_dir = out_dir / "img"
     html_p, key_p = out_dir / "ab-test.html", out_dir / "ab_key.json"
     old_imgs = sorted(img_dir.glob("*.jpg")) if img_dir.is_dir() else []
@@ -175,18 +202,27 @@ def build(cands: list[dict[str, Any]], load: Callable[[str], np.ndarray], fns: d
 
     images: dict[str, bytes] = {}
     by_id = {p["id"]: p for p in pairs}
+    boxes_of = {c["frame"]: c.get("boxes") for c in cands}
     for p in pairs:
         if p["repeat_of"] is not None:
             continue
         img = load(p["frame"])
+        region = None
+        if zoom > 1:
+            boxes = boxes_of.get(p["frame"])
+            boxes = np.zeros((0, 4)) if boxes is None else np.asarray(boxes, dtype=float).reshape(-1, 4)
+            region = pick_region(img.shape[1] - crop_left, img.shape[0], zoom, boxes, crop_left, rng)
+            p["region"] = list(region)
         for side in ("left", "right"):
             name = f"img/{new_code()}.jpg"
-            images[name] = display_image(fns[p[side]](img), crop_left)
+            images[name] = display_image(fns[p[side]](img), crop_left, region, zoom)
             p[f"{side}_img"] = name
     for p in pairs:
         if p["repeat_of"] is not None:
             src = by_id[p["repeat_of"]]
             p["left_img"], p["right_img"] = src["right_img"], src["left_img"]
+            if "region" in src:
+                p["region"] = src["region"]
     for f in old_imgs:
         f.unlink()
     img_dir.mkdir(parents=True, exist_ok=True)
@@ -199,7 +235,11 @@ def build(cands: list[dict[str, Any]], load: Callable[[str], np.ndarray], fns: d
             k = f"{p['comparison']}|{p['alt_bin']}|{'nguoi' if p['has_person'] else 'khong_nguoi'}"
             strata[k] = strata.get(k, 0) + 1
     key = {"format": KEY_FORMAT, "key_id": kid, "seed": seed, "created": datetime.now(UTC).isoformat(timespec="seconds"),
-           "crop_left": crop_left, "display": f"cột [{crop_left}, 640) của mọi biến thể, JPEG q{JPEG_QUALITY} 4:4:4",
+           "crop_left": crop_left, "zoom": zoom,
+           "display": (f"cột [{crop_left}, 640) của mọi biến thể, JPEG q{JPEG_QUALITY} 4:4:4" if zoom == 1 else
+                       f"vùng 1/{zoom} (pairs[].region, toạ độ sau khi cắt cột [0, {crop_left})) phóng {zoom}× điểm "
+                       f"ảnh gần nhất, tâm = người lớn nhất theo nhãn test hoặc ngẫu nhiên khi không có người; "
+                       f"JPEG q{JPEG_QUALITY} 4:4:4"),
            "min_repeat_gap": MIN_REPEAT_GAP, "variants": variants_info, "n_pairs": len(pairs), "strata": strata,
            "images_sha256": {n: hashlib.sha256(d).hexdigest() for n, d in sorted(images.items())}, "pairs": pairs}
     key_p.write_text(json.dumps(key, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
@@ -410,8 +450,9 @@ def test_candidates(root: Path, split_json: Path, labels_dir: Path) -> list[dict
         lab = base / (Path(r["frame"]).stem + ".txt")
         if not lab.is_file():
             raise AbPageError(f"thiếu nhãn test {lab}")
+        boxes = read_yolo_label(lab)
         out.append({"frame": r["frame"], "alt_m": float(r["alt_m"]), "alt_bin": alt_bin(float(r["alt_m"])),
-                    "has_person": len(read_yolo_label(lab)) > 0, "block": int(r["block"])})
+                    "has_person": len(boxes) > 0, "block": int(r["block"]), "boxes": boxes})
     return out
 
 
@@ -435,7 +476,7 @@ def cmd_build(a: argparse.Namespace) -> dict[str, Any]:
 
     with maybe_gpu(vs.uses_gpu, "ab_page", a.lock_timeout) as lock:
         res = build(cands, load, vs.fns, a.out_dir or root / OUT_REL, n_pairs=a.pairs, n_repeats=a.repeats,
-                    seed=a.seed, crop_left=vs.crop_left, variants_info=vs.info, force=a.force)
+                    seed=a.seed, crop_left=vs.crop_left, variants_info=vs.info, force=a.force, zoom=a.zoom)
     return res | {"gpu": lock}
 
 
@@ -446,6 +487,8 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--pairs", type=int, required=True, help="tổng số lượt, vd. 55 = 25 + 25 + 5 lặp")
     b.add_argument("--repeats", type=int, default=5)
     b.add_argument("--seed", type=int, required=True)
+    b.add_argument("--zoom", type=int, default=1,
+                   help="phóng to N× một vùng 1/N (trên người nếu có), vd. 2; mặc định 1 = cả khung")
     add_variant_args(b)
     b.add_argument("--split-json", type=Path, default=None, help=f"mặc định {SPLIT_REL}")
     b.add_argument("--frames-dir", type=Path, default=None, help=f"mặc định {FRAMES_REL}")
