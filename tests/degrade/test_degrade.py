@@ -211,10 +211,10 @@ def test_tone_stage_turns_white_pink_not_gray(cfgs, which) -> None:
     assert r - g > 25 and b - g > 25, (b, g, r)
     b2, g2, r2 = bgr[:, 40:, 0].mean(), bgr[:, 40:, 1].mean(), bgr[:, 40:, 2].mean()
     assert not (r2 - g2 > 25 and b2 - g2 > 25)
-    # xám chưa bão hoà mang đúng ám màu p50 của hồ sơ (miền tuyến tính)
+    # xám chưa bão hoà mang đúng ám màu = p50 của hồ sơ × cast của cấu hình (miền tuyến tính)
     lr = d2_camera.srgb_to_linear(np.array([r2, g2, b2]) / 255.0)
-    assert abs(lr[0] / lr[1] - prof["color"]["r_over_g"]["p50"]) < 0.02, (b2, g2, r2)
-    assert abs(lr[2] / lr[1] - prof["color"]["b_over_g"]["p50"]) < 0.02, (b2, g2, r2)
+    assert abs(lr[0] / lr[1] - prof["color"]["r_over_g"]["p50"] * cfg["cast_r"]) < 0.02, (b2, g2, r2)
+    assert abs(lr[2] / lr[1] - prof["color"]["b_over_g"]["p50"] * cfg["cast_b"]) < 0.02, (b2, g2, r2)
 
 
 def test_d1_does_not_read_camera_profile(cfgs, source_item, ctx, monkeypatch) -> None:
