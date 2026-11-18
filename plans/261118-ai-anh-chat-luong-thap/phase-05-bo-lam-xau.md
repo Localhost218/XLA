@@ -34,12 +34,13 @@ tái lập bằng seed + manifest. Phase này dựng máy và tham số ban đ�
 
 1. **Tải nguồn** (ổ D): VisDrone2019-DET train/val (link của Ultralytics `VisDrone.yaml`) → `D:\IOT_Tools\downloads\visdrone\`;
    NOMAD (Google Drive, CC BY 4.0, bằng `gdown`) → `D:\IOT_Tools\downloads\nomad\`; POG thử một lần, máy chủ không trả lời
-   thì ghi lý do và bỏ (Deferred 2). Giải nén vào `D:\DevCache\datasets\src\`. Ghi sha256 file tải vào `configs/sources.yaml`.
+   thì ghi lý do và bỏ (Deferred 2). → 18/11/2026: NOMAD tải tập con rồi loại vì ảnh nhìn xiên; POG không trả lời (`plans/reports/261118-phase-05-bo-lam-xau.md`). Giải nén vào `D:\DevCache\datasets\src\`. Ghi sha256 file tải vào `configs/sources.yaml`.
    Tải > 2 phút: chạy thử 1 file trước, báo cỡ + thời gian ước.
 2. **`xla/degrade/sources.py`:** VisDrone → một lớp person (category 1, 2), bỏ vùng `ignored` (category 0) bằng cách không
    đặt cửa sổ cắt chồng lên nó; NOMAD → hộp người theo nhãn của dataset, độ cao theo thư mục `ActorXXX_aNN`; lọc nadir theo
    Deferred 3 (metadata khi có; heuristic không-có-trời + điểm CLIP zero-shot cho phần còn lại, ngưỡng chọn trên 100 ảnh soát
-   tay, ghi vào `configs/sources.yaml`).
+   tay, ghi vào `configs/sources.yaml`). → đổi 18/11/2026: bộ lọc này precision ~0,5; thay bằng nhãn hướng nhìn theo chuỗi
+   (`configs/visdrone_view.yaml`) + probe logistic trên đặc trưng CLIP, ngưỡng 0,8 (Deferred 3 của `plan.md`).
 3. **Hình học chung D0/D1/D2:** cho mỗi ảnh nguồn, chọn hệ số thu nhỏ sao cho cạnh ngắn hộp người lấy mẫu theo phân bố
    `person_box_px` của hồ sơ (đo sơ bộ ở phase 04, cùng dải 21–139 px trung vị 50 của mẫu 300 khung), thu nhỏ bằng `INTER_AREA`, cắt
    cửa sổ 624×480 quanh người (và 20 % cửa sổ không người), giữ hộp còn ≥ 60 % diện tích. Kết quả 624×480 trước khi dán dải mép.

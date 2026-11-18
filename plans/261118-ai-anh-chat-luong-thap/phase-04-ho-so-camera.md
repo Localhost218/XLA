@@ -13,7 +13,7 @@ Accept: `pytest tests/camera/test_camera_profile.py`
 
 ## Mục tiêu
 
-Biến các số đo rời rạc của camera thành **một hồ sơ có phiên bản** (`profile_version` 1.0.0) đúng schema của phase 02 —
+Biến các số đo rời rạc của camera thành **một hồ sơ có phiên bản** (`profile_version` 1.0.0; → 18/11/2026: 1.1.0 khi đo lại trên dev mới sau chia lại, 1.2.0 khi sửa `wb_gain_*_fit` thành cận dưới hệ số WB ISP, xem `results/camera/profile_report.md` dòng 28 và 70) đúng schema của phase 02 —
 nguồn sự thật cho bộ làm xấu D2 (phase 05/07), đối chứng cổ điển (phase 12), camera giả của IOT-CV (phase 15). Đo **chỉ
 trên khung dev** (D10). Hồ sơ mô tả camera, không chứa tham số làm xấu.
 

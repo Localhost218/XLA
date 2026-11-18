@@ -172,9 +172,6 @@ def test_dqt_reported_separately(tmp_path):
 
 
 def test_stats_with_real_measure_module(tmp_path):
-    pytest.importorskip(
-        "xla.camera.measure", reason="xla/camera/measure.py do phase 04 (lane data) viết, chưa gộp vào nhánh này"
-    )
     paths = make_set(tmp_path / "a", 4, seed=9, size=(640, 480), ext=".jpg")
     res = compute_realism(paths, paths, tiers=("stats",), crop_left=CROP)
     assert res["stats"]["total"] == 0.0

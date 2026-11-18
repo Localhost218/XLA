@@ -41,7 +41,7 @@ Lệnh `labelstudio` gọi API ở `http://127.0.0.1:8080` nên chạy ngoài sa
 **Khởi động lại server** (sau khi máy khởi động lại hoặc server tắt):
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File D:\XLA-wt\labels\scripts\labelstudio_start.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\labelstudio_start.ps1
 # dừng: thêm -Stop ; cổng khác: -Port 8081 ; lần đầu khởi tạo DB mất ~2-3 phút
 ```
 
