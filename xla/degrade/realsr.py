@@ -66,7 +66,7 @@ def extract_patches(img_bgr: np.ndarray, crop_left: int, patch: int, per_frame: 
     return res.astype(np.float32), ymean
 
 
-def build_pool(frames: list[Path], crop_left: int = 16, patch: int = 32, per_frame: int = 24,
+def build_pool(frames: list[Path], crop_left: int = 16, patch: int = 32, per_frame: int = 8,
                flat_quantile: float = 0.3, seed: int = 20261118) -> dict:
     rng = np.random.default_rng(seed)
     res, ym, src = [], [], []
@@ -78,7 +78,9 @@ def build_pool(frames: list[Path], crop_left: int = 16, patch: int = 32, per_fra
         res.append(r)
         ym.append(m)
         src += [i] * len(m)
-    return {"residual": np.concatenate(res), "y_mean": np.concatenate(ym), "frame_index": np.array(src, np.int32)}
+    # float16: pool nằm trong RAM của MỖI tiến trình con (16 × float32 ≈ 5 GB với 24 patch/khung)
+    return {"residual": np.concatenate(res).astype(np.float16), "y_mean": np.concatenate(ym),
+            "frame_index": np.array(src, np.int32)}
 
 
 def bin_of(y255: np.ndarray | float) -> np.ndarray:
@@ -129,7 +131,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("cmd", choices=["build"])
     ap.add_argument("--split", default="dev", choices=["dev"], help="chỉ dev: test giữ riêng cho bước 4")
     ap.add_argument("--max-frames", type=int, default=0)
-    ap.add_argument("--per-frame", type=int, default=24)
+    ap.add_argument("--per-frame", type=int, default=8)
     ap.add_argument("--seed", type=int, default=20261118)
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)

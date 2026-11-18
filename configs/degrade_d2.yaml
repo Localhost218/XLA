@@ -59,7 +59,7 @@ jpeg:                            # (f) JPEG một lần cuối: Pillow qtables +
   hypothesis_q_range: [19, 40]   # auto-quality, bảng Annex K × q/16 (verified: false, Deferred 1)
 
 realsr:                          # E3 (phase 07 bước 5): D2 + nhiễu lấy từ khung dev thật (xla/degrade/realsr.py)
-  gain: 1.0                      # nhân phần dư thật; calibrate.py --realsr-gains chọn trên dev
+  gain: 0.4                      # nhân phần dư thật; calibrate.py --realsr-gains chọn trên dev
 
 calibration:                     # phase 07: python -m xla.degrade.calibrate --split dev --budget N
   sources_n: 500                 # số đơn vị nguồn cố định cho mỗi lượt đánh giá
