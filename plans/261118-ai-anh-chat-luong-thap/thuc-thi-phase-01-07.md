@@ -81,3 +81,30 @@ Phase 06 tính khoảng cách thống kê trên đúng các khoá của `measure
 - Chọn phương án đầu tiên được khuyến nghị trong plan khi có nhiều lựa chọn; ghi lại trong báo cáo cuối của lane.
 - Tải dataset > 2 phút: chạy thử 1 file, ghi cỡ + thời gian ước vào báo cáo rồi **cứ tải tiếp** (Owner duyệt trước).
 - Ổ D còn ~57 GB lúc bắt đầu: giữ tối thiểu 10 GB trống; NOMAD giải nén xong thì được xoá file zip nếu ổ D < 15 GB (ghi sha256 trước).
+
+## 7. Trạng thái khi tạm dừng (18/11/2026, chủ dự án tắt máy)
+
+Phase 01–09 **xong**, tất cả nằm trên nhánh tích hợp `feat/ai-anh-chat-luong-thap` (đã đẩy; toàn bộ test 168 passed,
+ruff sạch). PR #1 (phase 01+02) đã merge vào `main`; PR #2 theo D12 là sau phase 14. Worktree lane còn ở `D:\XLA-wt\`
+(data, degrade, realism, labels, baseline) — đều đã gộp, sạch; giữ lại để tiếp tục, xoá khi không cần.
+
+Số chính:
+- Split: dev 1 115 / test 198 / neg 300 (seed 20261118). Nhãn test chủ dự án duyệt: 39 khung có người, 149 hộp; dev-val
+  100 khung, 115 hộp (chỉ agent soát; chủ dự án sửa 25,8 % hộp test của agent, chủ yếu ranh giới).
+- Hồ sơ camera v1.2.0. D2 `params_version` 2 (CMA-ES 155 lượt, khoảng cách 0,967 → 0,736). Tập D0/D1/D2/D2+RealSR
+  ở `D:\DevCache\datasets\xla\` (3 493 ảnh/tập; train 3 006, val 487).
+- Độ giống thật trên khung test: thống kê D1 5,93 / D2 0,81 / D2+RealSR 0,66 / thật–thật 0,33; KID D1 4,44 / D2 4,37
+  (CI chồng D1) / D2+RealSR 3,93 (CI không chồng) / thật–thật 0,37.
+- Mốc `edge16` (YOLO11s COCO, bỏ hộp chạm mép): mAP50 0,126 [0,030–0,224], 23,3 ms p95 lúc máy rảnh. Tiêu chí nhánh B
+  sau M2: `results/baseline/tieu-chi-sau-m2.md` (B1 ≥ 0,227; B2 ≤ 0,05 hộp/khung âm ở ngưỡng dev-val; B3 ≤ 30 ms p95).
+
+**Việc tiếp theo khi bật máy (theo thứ tự, trước khi vào phase 10):**
+1. **Hiệu chỉnh D2 vòng 2** (lane degrade): ba tham số dừng sát biên khoảng tìm (vignette focal 0,618/biên 0,6,
+   `cast_r` 0,960/biên, hệ số WB ISP). Nới biên, khởi đầu từ `params_version` 2, ngân sách ~80 lượt; **chỉ nhận** nếu
+   khoảng cách trên dev giảm, khi đó `params_version` 3, sinh lại D2 + D2+RealSR, đo lại `d1_vs_d2`. ~1–1,6 giờ CPU.
+2. **So hiệu ghép cặp** trong `xla/eval/detection.py`: cùng mẫu khối bootstrap cho hai file dự đoán, CI của hiệu mAP50
+   (và báo nhầm/khung âm); thêm báo riêng 159 khung bay không người cho B2. Phase 10 cần lệnh này để kết luận B1.
+3. Label Studio không tự chạy lại sau khi tắt máy (nhãn đã xuất, không cần nữa); mở lại nếu cần:
+   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File D:\XLA-wt\labels\scripts\labelstudio_start.ps1`.
+4. Rồi phase 10 (E1 fine-tune D0/D1/D2, nên thêm D2+RealSR vì nó thắng KID) và các phase song song được: 12 (cổ điển,
+   CPU), 13 (mạng khôi phục), 15 + 17 (IOT-CV với bundle giả; nhớ bẫy ORT CUDA EP ở phase 15).
