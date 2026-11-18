@@ -1,4 +1,4 @@
-# Phase 13 vòng 2 — trạng thái lúc tạm dừng (18/11/2026 ~19:39, chủ dự án tắt máy)
+# Phase 13 vòng 2 — trạng thái lúc tạm dừng (lần 2: 18/11/2026 22:15; lần 1: ~19:39; chủ dự án tắt máy)
 
 Vòng 1 (width32) đã xong, xem `README.md`; bundle `models/release/enhancer-v1.0.0` hiện vẫn là **width32** (p95 82,1 ms,
 Accept FAIL ở `test_bundle_ms_p95`). Bản sao width32 ngoài repo: `D:\DevCache\tmp\enhancer-width32-v1.0.0\` (cả
@@ -25,11 +25,14 @@ Accept FAIL ở `test_bundle_ms_p95`). Bản sao width32 ngoài repo: `D:\DevCac
 3. **Smoke nafnet_w16** (`D:\DevCache\runs\xla\restore\nafnet_w16-smoke\smoke.json`): 500 bước, 0,454 s/bước, VRAM
    3,46 GB, 257 s GPU; val tổng hợp PSNR 10,22 → 19,99 dB, SSIM 0,255 → 0,767. Số bước theo ngân sách: **4 500**
    (ckpt/val mỗi 1 000).
-4. **Train nafnet_w16** (`D:\DevCache\runs\xla\restore\nafnet_w16-train\`): dừng ở bước 2 200/4 500 (`last.pt` bước
-   2 200, 979 s GPU); `step_001000.pt`, `step_002000.pt` có sẵn. Val tổng hợp: bước 1 000 PSNR 20,74 / SSIM 0,782,
-   bước 2 000 PSNR 22,03 / SSIM 0,803 (width32 vòng 1 cuối: 22,83 / 0,813).
+4. **Train nafnet_w16** (`D:\DevCache\runs\xla\restore\nafnet_w16-train\`): lần 1 dừng ở bước 2 200 (979 s GPU);
+   22:08:35 chạy tiếp từ `last.pt` (workers 2 vì máy ảo VMware giữ 16,5 GB RAM; trước đó chờ khoá GPU vì detect
+   phase 11 giữ từ 21:32), dừng lần 2 ngay sau checkpoint bước **3 000** (22:14:48, PID 29032, ~373 s GPU). Hiện có
+   `last.pt` = bước 3 000 (đã đọc lại), `step_001000.pt`, `step_002000.pt`, `step_003000.pt`. Val tổng hợp: bước
+   1 000 PSNR 20,74 / SSIM 0,782; 2 000 PSNR 22,03 / 0,803; 3 000 PSNR 22,17 / 0,805 (width32 vòng 1 cuối:
+   22,83 / 0,813). `train_summary.json` và `runs.nafnet_w16-train` trong `train.json` chỉ ghi khi chạy hết 4 500 bước.
 
-Giờ GPU vòng 2 tới lúc dừng: speed 92 + 82 s, dò LN ~120 s (ước), smoke 257 s, train 979 s ≈ 25 phút.
+Giờ GPU vòng 2 tới lúc dừng: speed 92 + 82 s, dò LN ~120 s (ước), smoke 257 s, train 979 + ~373 s ≈ 32 phút.
 
 ## Chạy tiếp (sau khi bật máy, đúng thứ tự)
 
@@ -38,9 +41,9 @@ cd /d/XLA-wt/restore
 export UV_CACHE_DIR='D:\DevCache\uv' UV_PROJECT_ENVIRONMENT='D:\DevCache\venvs\xla' TORCH_HOME='D:\DevCache\torch' \
   XLA_DATA_ROOT='D:\DevCache\datasets\xla' PYTHONUTF8=1 TMP='D:\DevCache\tmp' TEMP='D:\DevCache\tmp' XLA_ALLOW_THROTTLED=1
 PY=/d/DevCache/venvs/xla/Scripts/python.exe
-# 1) train tiếp (tự resume từ last.pt bước 2200; giữ nguyên mọi tham số để lịch lr cosine khớp)
+# 1) train tiếp (tự resume từ last.pt bước 3000; giữ nguyên mọi tham số để lịch lr cosine khớp; workers ≤ 2 khi VM chạy)
 $PY -m xla.enhance.train_net train --candidate nafnet_w16 --run-id nafnet_w16-train --batch 16 --lr 1e-3 \
-    --max-steps 4500 --ckpt-every 1000 --json
+    --max-steps 4500 --ckpt-every 1000 --workers 2 --json
 # 2) chọn checkpoint trên dev thật (exit 1 chỉ khi không có checkpoint; luật dự phòng flicker có sẵn)
 $PY -m xla.enhance.train_net select --run-id nafnet_w16-train --json
 # 3) xuất bundle thay width32 (ckpt = chosen_path trong results/restore/train.json khoá select)
@@ -53,7 +56,7 @@ $PY -m pytest -m "not gpu" -q -p no:cacheprovider
 $PY -m ruff check .
 ```
 
-Hoặc chạy nền một lệnh cho 1–3: `$PY D:/DevCache/runs/xla/restore/driver/resume_round2.py` (từ gốc worktree, cùng biến
+Hoặc chạy nền một lệnh cho 1–3: `$PY D:/DevCache/runs/xla/restore/driver/resume_round2.py` (đã có `--workers 2`; từ gốc worktree, cùng biến
 môi trường). Job dài: chạy tách tiến trình, chờ trong lượt; dừng tiến trình theo đúng PID.
 
 Sau đó: xem 3 khung golden trước/sau, cập nhật `README.md` (bảng width32 vs w16: chỉ số dev, flicker, ms; flicker

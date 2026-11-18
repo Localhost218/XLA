@@ -460,6 +460,7 @@ def main(argv: list[str] | None = None) -> int:
     t.add_argument("--batch", type=int, default=None, help="ghi đè train.batch")
     t.add_argument("--lr", type=float, default=None, help="ghi đè train.lr")
     t.add_argument("--ckpt-every", type=int, default=None, help="ghi đè train.ckpt_every và val_every")
+    t.add_argument("--workers", type=int, default=None, help="ghi đè train.workers (trần 4)")
     t.add_argument("--json", action="store_true")
     s = sub.add_parser("select")
     s.add_argument("--config", default="configs/restore.yaml")
@@ -473,6 +474,8 @@ def main(argv: list[str] | None = None) -> int:
             cfg["train"]["batch"] = args.batch
         if args.lr:
             cfg["train"]["lr"] = args.lr
+        if args.workers:
+            cfg["train"]["workers"] = args.workers
         if args.ckpt_every:
             cfg["train"]["ckpt_every"] = cfg["train"]["val_every"] = args.ckpt_every
         if args.candidate:  # ứng viên hoặc biến thể thu nhỏ (xla.enhance.net.VARIANTS)
