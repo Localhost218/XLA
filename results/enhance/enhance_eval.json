@@ -1,6 +1,6 @@
 {
  "phase": "14",
- "created": "2026-11-18T17:11:50+00:00",
+ "created": "2026-11-18T18:17:19+00:00",
  "variants": {
   "raw": "khung gốc camera",
   "classic": {
@@ -380,18 +380,18 @@
  "speed": {
   "measured": {
    "classic": {
-    "p50": 9.6779,
-    "p95": 12.137155,
-    "mean": 9.763243,
+    "p50": 8.2979,
+    "p95": 8.734455,
+    "mean": 8.198204,
     "n": 100,
     "warmup": 10,
     "device": "CPU",
     "runtime": "python (hàm cổ điển)"
    },
    "net": {
-    "p50": 21.04425,
-    "p95": 25.832315,
-    "mean": 21.60342,
+    "p50": 20.6963,
+    "p95": 25.336735,
+    "mean": 21.026416,
     "n": 100,
     "warmup": 10,
     "providers_active": [
@@ -1080,7 +1080,49 @@
   },
   "file": "D:\\XLA\\results\\e4\\e4.json"
  },
- "ab": null,
+ "ab": {
+  "key_id": "68eb0546fa303711",
+  "n_choices": 55,
+  "comparisons": {
+   "net_vs_raw": {
+    "n": 25,
+    "net_wins": 11,
+    "win_rate": 0.44,
+    "ci95_wilson": [
+     0.266656,
+     0.629327
+    ],
+    "criterion_min": 0.7,
+    "meets_criterion": false,
+    "ci_lower_meets_criterion": false,
+    "verdict_vs_50": "chua_phan_dinh"
+   },
+   "net_vs_classic": {
+    "n": 25,
+    "net_wins": 1,
+    "win_rate": 0.04,
+    "ci95_wilson": [
+     0.007096,
+     0.195441
+    ],
+    "criterion_min": 0.55,
+    "meets_criterion": false,
+    "ci_lower_meets_criterion": false,
+    "verdict_vs_50": "mang_thua"
+   }
+  },
+  "consistency": {
+   "n_repeats": 5,
+   "agree": 3,
+   "rate": 0.6,
+   "note": "cặp lặp đổi bên; đồng ý = chọn cùng biến thể như lần đầu"
+  },
+  "side_bias": {
+   "left_rate": 0.54,
+   "n": 50
+  },
+  "exported_at": "2026-11-18T18:14:44.466Z"
+ },
  "criteria_branch_a": [
   {
    "id": "pink_drop",
@@ -1115,21 +1157,27 @@
   {
    "id": "ab_vs_raw",
    "text": "thắng ≥ 70 % lượt A/B so với ảnh gốc",
-   "value": null,
-   "ci95": null,
-   "status": "cho_do"
+   "value": 0.44,
+   "ci95": [
+    0.266656,
+    0.629327
+   ],
+   "status": "khong_dat"
   },
   {
    "id": "ab_vs_classic",
    "text": "thắng ≥ 55 % lượt A/B so với cổ điển",
-   "value": null,
-   "ci95": null,
-   "status": "cho_do"
+   "value": 0.04,
+   "ci95": [
+    0.007096,
+    0.195441
+   ],
+   "status": "khong_dat"
   },
   {
    "id": "ms",
    "text": "≤ 30 ms/khung (mạng, p50)",
-   "value": 21.04425,
+   "value": 20.6963,
    "status": "dat"
   },
   {

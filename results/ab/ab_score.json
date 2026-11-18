@@ -1,0 +1,45 @@
+{
+ "export": "results\\ab\\ab_result.json",
+ "key": "D:\\XLA\\results\\ab\\ab_key.json",
+ "key_id": "68eb0546fa303711",
+ "n_choices": 55,
+ "comparisons": {
+  "net_vs_raw": {
+   "n": 25,
+   "net_wins": 11,
+   "win_rate": 0.44,
+   "ci95_wilson": [
+    0.266656,
+    0.629327
+   ],
+   "criterion_min": 0.7,
+   "meets_criterion": false,
+   "ci_lower_meets_criterion": false,
+   "verdict_vs_50": "chua_phan_dinh"
+  },
+  "net_vs_classic": {
+   "n": 25,
+   "net_wins": 1,
+   "win_rate": 0.04,
+   "ci95_wilson": [
+    0.007096,
+    0.195441
+   ],
+   "criterion_min": 0.55,
+   "meets_criterion": false,
+   "ci_lower_meets_criterion": false,
+   "verdict_vs_50": "mang_thua"
+  }
+ },
+ "consistency": {
+  "n_repeats": 5,
+  "agree": 3,
+  "rate": 0.6,
+  "note": "cặp lặp đổi bên; đồng ý = chọn cùng biến thể như lần đầu"
+ },
+ "side_bias": {
+  "left_rate": 0.54,
+  "n": 50
+ },
+ "exported_at": "2026-11-18T18:14:44.466Z"
+}

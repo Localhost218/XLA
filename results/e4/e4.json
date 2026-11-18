@@ -1,5 +1,5 @@
 {
- "created": "2026-11-18T17:18:55+00:00",
+ "created": "2026-11-18T18:22:13+00:00",
  "split": "test",
  "op_threshold": {
   "coco": 0.25,
@@ -16,10 +16,7 @@
    "version": "1.0.0",
    "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
    "train_run": "e2/r1",
-   "providers_active": [
-    "CUDAExecutionProvider",
-    "CPUExecutionProvider"
-   ]
+   "providers_active": []
   }
  },
  "variants": {
@@ -545,7 +542,8 @@
   "action": "giữ D5: nhận diện chạy khung gốc"
  },
  "gpu": {
-  "gpu_lock": true,
-  "wait_s": 0.0
+  "gpu_lock": false,
+  "wait_s": 0.0,
+  "score_only": true
  }
 }
