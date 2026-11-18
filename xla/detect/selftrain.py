@@ -186,8 +186,19 @@ def source_dataset(cfg: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------- nhãn giả
 
 
-def teacher_of_round(cfg: dict[str, Any], k: int) -> Path:
-    return best_weights(cfg, "teacher" if k == 1 else f"r{k - 1}")
+def teacher_candidates(cfg: dict[str, Any], k: int) -> dict[str, Path]:
+    """Thầy vòng ``k``: vòng 1 = các ứng viên ``pseudo.round1_teachers`` (``teacher`` = YOLO11m, ``e1_d2`` = YOLO11s D2
+    của E1), chọn bằng chất lượng nhãn giả trên dev-val; vòng k > 1 = trò vòng k − 1."""
+    if k > 1:
+        return {f"r{k - 1}": best_weights(cfg, f"r{k - 1}")}
+    names = cfg["pseudo"].get("round1_teachers", ["teacher"])
+    return {n: Path(e1_best(repo_root())["weights"]) if n == "e1_d2" else best_weights(cfg, n) for n in names}
+
+
+def _quality_key(q: dict[str, Any], pmin: float) -> tuple[float, float, float]:
+    """Xếp thầy: đạt precision_min trước, rồi recall nhãn giả, rồi precision (trên khung dev-val)."""
+    p, r = q["precision"] or 0.0, q["recall"] or 0.0
+    return (1.0 if p >= pmin else 0.0, r, p)
 
 
 def dev_sequences(rows: list[dict[str, Any]], max_gap_s: float) -> list[list[str]]:
@@ -434,34 +445,49 @@ def pseudo_label(cfg: dict[str, Any], k: int) -> dict[str, Any]:
     pcfg = cfg["pseudo"]
     rows = _split_rows(root)
     seqs = dev_sequences(rows, float(pcfg["max_gap_s"]))
-    weights = teacher_of_round(cfg, k)
-    if not weights.is_file():
-        raise FileNotFoundError(f"thiếu thầy vòng {k}: {weights}")
-    raw_p = pdir / "raw_dets.json"
-    if not raw_p.is_file():
+    cands = teacher_candidates(cfg, k)
+    for n, w in cands.items():
+        if not w.is_file():
+            raise FileNotFoundError(f"thiếu thầy {n} vòng {k}: {w}")
+    todo = {n: w for n, w in cands.items() if not (pdir / f"raw_dets_{n}.json").is_file()}
+    if todo:
         t_wait = time.perf_counter()
-        with gpu_lock(f"phase11 e2 nhãn giả vòng {k}", timeout_s=float(cfg["lock_timeout_s"])):
-            t0 = time.perf_counter()
-            dets = detect_sequences(weights, seqs, root / FRAMES_REL, pcfg, int(cfg["train"]["imgsz"]))
-            gpu_s = time.perf_counter() - t0
-        _dump(raw_p, {"weights": weights.as_posix(), "weights_sha256": _sha256(weights), "gpu_s": round(gpu_s, 1),
-                      "lock_wait_s": round(t0 - t_wait, 1), "tta": bool(pcfg["tta"]), "frames": dets})
-    raw_doc = _load(raw_p)
-    if raw_doc["weights_sha256"] != _sha256(weights):
-        raise ValueError(f"{raw_p} là của trọng số khác {weights}: xoá thư mục {pdir} rồi chạy lại")
-    raw = track_sequences(raw_doc["frames"], seqs, pcfg)
+        with gpu_lock(f"phase11 e2 nhãn giả vòng {k} ({', '.join(todo)})", timeout_s=float(cfg["lock_timeout_s"])):
+            wait = time.perf_counter() - t_wait
+            for n, w in todo.items():
+                t0 = time.perf_counter()
+                dets = detect_sequences(w, seqs, root / FRAMES_REL, pcfg, int(cfg["train"]["imgsz"]))
+                _dump(pdir / f"raw_dets_{n}.json", {"weights": w.as_posix(), "weights_sha256": _sha256(w),
+                                                    "gpu_s": round(time.perf_counter() - t0, 1),
+                                                    "lock_wait_s": round(wait, 1), "tta": bool(pcfg["tta"]),
+                                                    "frames": dets})
     dv = devval_frames(root)
     gt, _, _ = load_labels(root / LABELS_REL, "devval", dv, allow_missing=False)
-    tau, grid, why = select_tau_high(raw, gt, pcfg)
-    labels = apply_rules(raw, tau, pcfg)
+    per: dict[str, Any] = {}
+    for n, w in cands.items():
+        raw_doc = _load(pdir / f"raw_dets_{n}.json")
+        if raw_doc["weights_sha256"] != _sha256(w):
+            raise ValueError(f"raw_dets_{n}.json là của trọng số khác {w}: xoá {pdir} rồi chạy lại")
+        raw = track_sequences(raw_doc["frames"], seqs, pcfg)
+        tau, grid, why = select_tau_high(raw, gt, pcfg)
+        labels = apply_rules(raw, tau, pcfg)
+        per[n] = {"weights": w.as_posix(), "weights_sha256": raw_doc["weights_sha256"], "tau_high": tau,
+                  "tau_high_rule": why, "devval_quality": label_quality(labels, gt, float(pcfg["match_iou"])),
+                  "grid": grid, "gpu_s": raw_doc["gpu_s"], "_labels": labels}
+    pmin = float(pcfg["precision_min"])
+    pick = max(per, key=lambda n: _quality_key(per[n]["devval_quality"], pmin))
+    labels = per[pick].pop("_labels")
+    for v in per.values():
+        v.pop("_labels", None)
     ds = build_pseudo_dataset(cfg, k, labels, rows, dv)
-    rep = {"phase": "11", "round": k, "created": _now(), "teacher": weights.as_posix(),
-           "teacher_sha256": _sha256(weights), "tta": bool(pcfg["tta"]), "n_sequences": len(seqs),
+    rep = {"phase": "11", "round": k, "created": _now(), "teacher": pick, "teacher_weights": per[pick]["weights"],
+           "teacher_sha256": per[pick]["weights_sha256"], "teacher_rule": "precision_min trước, rồi recall nhãn giả "
+           "trên dev-val (_quality_key)", "candidates": per, "tta": bool(pcfg["tta"]), "n_sequences": len(seqs),
            "seq_len": {"min": min(map(len, seqs)), "median": float(np.median([len(s) for s in seqs])),
                        "max": max(map(len, seqs)), "n_frames": sum(map(len, seqs))},
-           "tau_high": tau, "tau_high_rule": why, "tau_low": pcfg["tau_low"], "min_track_len": pcfg["min_track_len"],
-           "devval_quality": label_quality(labels, gt, float(pcfg["match_iou"])), "grid": grid,
-           "gpu_s": raw_doc["gpu_s"], "lock_wait_s": raw_doc.get("lock_wait_s"), "dataset": ds, "config": pcfg}
+           "tau_high": per[pick]["tau_high"], "tau_high_rule": per[pick]["tau_high_rule"], "tau_low": pcfg["tau_low"],
+           "min_track_len": pcfg["min_track_len"], "devval_quality": per[pick]["devval_quality"],
+           "gpu_s": round(sum(v["gpu_s"] for v in per.values()), 1), "dataset": ds, "config": pcfg}
     _dump(rep_p, rep)
     _dump(root / RESULTS_REL / f"pseudo_r{k}.json", {kk: v for kk, v in rep.items() if kk != "config"})
     return rep
@@ -500,6 +526,25 @@ def _finish(cfg: dict[str, Any], name: str, role: str, res: dict[str, Any], smok
 BASELINE_CSV_REL = Path("results/baseline/pred/edge16.csv")
 E1_PREDS_REL = Path("results/e1/preds")
 BUNDLE_KEYS = ("map50", "map50_95", "precision", "recall", "fp_per_neg_frame")  # hop-dong-model.md §4
+
+
+def _cached(kind: str, fn: Any, csvs: list[Path], boot: int, seed: int, cache_dir: Path) -> dict[str, Any]:
+    """``evaluate`` / ``compare`` nhớ theo sha256 CSV + nhãn + boot + seed (chấm lại e2.json khi thêm vòng không phải
+    chạy lại bootstrap của model cũ)."""
+    import hashlib
+
+    h = hashlib.sha256(f"{kind}|{boot}|{seed}".encode())
+    for p in csvs:
+        h.update(_sha256(p).encode())
+    for p in sorted((repo_root() / LABELS_REL).rglob("*")):
+        if p.is_file():
+            h.update(p.name.encode() + p.read_bytes())
+    c = cache_dir / f"{kind}_{h.hexdigest()[:24]}.json"
+    if c.is_file():
+        return _load(c)
+    r = fn(*csvs, "test", boot_n=boot, seed=seed)
+    _dump(c, r)
+    return r
 
 
 def _combine(parts: list[Path], out: Path) -> Path:
@@ -557,7 +602,8 @@ def score(cfg: dict[str, Any], boot: int, seed: int) -> dict[str, Any]:
     names = ["teacher"] + [f"r{k}" for k in rounds_done(cfg)]
     for n in names:
         csvs[n] = _combine([res_dir / "preds" / f"{n}_{sp}.csv" for sp in ("test", "neg", "devval")], tmp / f"{n}_all.csv")
-    evs = {n: evaluate(p, "test", boot_n=boot, seed=seed) for n, p in csvs.items()}
+    cache = tmp / "cache"
+    evs = {n: _cached("evaluate", evaluate, [p], boot, seed, cache) for n, p in csvs.items()}
     for n, ev in evs.items():
         _dump(res_dir / "eval" / f"{n}_test.json", ev)
     models: dict[str, Any] = {n: _model_entry(cfg, n, root, evs[n]) for n in names}
@@ -566,8 +612,9 @@ def score(cfg: dict[str, Any], boot: int, seed: int) -> dict[str, Any]:
                                             "devval_map50", "devval_map50_last3_mean", "gpu_hours", "epochs")} | {
         "test": summarize(evs["e1_d2"]), "test_bundle_keys": bundle_metrics(summarize(evs["e1_d2"])),
         "path": "pt: YOLO.predict khung nguyên 640×480, bỏ hộp x1 < 16 (như mốc / E1)", "source": E1_REL.as_posix()}
-    cmp = {f"edge16_vs_{n}": compare(base_csv, csvs[n], "test", boot_n=boot, seed=seed) for n in ["e1_d2", *names]}
-    cmp |= {f"e1_d2_vs_{n}": compare(csvs["e1_d2"], csvs[n], "test", boot_n=boot, seed=seed) for n in names}
+    cmp = {f"edge16_vs_{n}": _cached("compare", compare, [base_csv, csvs[n]], boot, seed, cache)
+           for n in ["e1_d2", *names]}
+    cmp |= {f"e1_d2_vs_{n}": _cached("compare", compare, [csvs["e1_d2"], csvs[n]], boot, seed, cache) for n in names}
     for n in ["e1_d2", *names]:
         models[n]["criteria"] = criteria(cmp[f"edge16_vs_{n}"], models[n]["test"], None)
     cands = ["e1_d2"] + [n for n in names if n != "teacher"]

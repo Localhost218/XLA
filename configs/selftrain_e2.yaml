@@ -43,6 +43,7 @@ smoke:
   epochs: 1
 
 pseudo:
+  round1_teachers: [teacher, e1_d2]       # thầy vòng 1 chọn bằng chất lượng nhãn giả trên dev-val (precision ≥ 0,9, rồi recall)
   tta: true                                # thầy chạy TTA (augment=True) khi gán nhãn giả
   det_conf: 0.01                           # ngưỡng dự đoán thô đưa vào tracker
   max_gap_s: 1.0                           # chuỗi khung dev liên tiếp: cùng split, cách nhau < 1 s (xla.eval.temporal)

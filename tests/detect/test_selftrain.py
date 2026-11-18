@@ -75,7 +75,7 @@ def test_select_tau_high_reaches_precision() -> None:
     tracks = [[(*BOX, 1, 0.8), (400, 300, 440, 380, 2, 0.4)] for _ in range(5)]
     raw = _raw(5, tracks)
     gt = {f: np.asarray([BOX]) for f in raw}
-    tau, grid, why = S.select_tau_high(raw, gt, PCFG)
+    tau, grid, _why = S.select_tau_high(raw, gt, PCFG)
     assert tau == 0.5, grid
     q = next(g for g in grid if g["tau_high"] == tau)
     assert q["precision"] == 1.0 and q["recall"] == 1.0
