@@ -2,7 +2,7 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 11, 13, 14, 15 | M (~1 ngày agent), ~0,5 giờ GPU (chưa xác minh) | Không (phát lại bản ghi, không bay) |
+| xong 19/11/2026, ngân sách p95 nhịp thật chưa đạt (GPU hạ xung khi rảnh, thuc-thi-phase-10-14.md §10) | phase 11, 13, 14, 15 | M (~1 ngày agent), ~0,5 giờ GPU (chưa xác minh) | Không (phát lại bản ghi, không bay) |
 
 Lane: serial
 Depends-on: 11, 13, 14, 15

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="280" viewBox="0 0 760 280" font-family="sans-serif" font-size="13">
+<rect width="760" height="280" fill="#ffffff"/>
+<text x="12" y="24" font-size="15" font-weight="bold" fill="#111">E4: mAP50 khi đưa khung đã làm rõ vào bộ nhận diện</text>
+<text x="292" y="62" text-anchor="end" fill="#222">COCO × gốc</text>
+<rect x="300" y="46" width="104.2" height="22" fill="#4a6fa5"/>
+<line x1="324.4" y1="57.0" x2="484.7" y2="57.0" stroke="#111" stroke-width="1.5"/>
+<text x="490.7" y="62" fill="#111">0,126</text>
+<text x="292" y="96" text-anchor="end" fill="#222">COCO × cổ điển</text>
+<rect x="300" y="80" width="66.5" height="22" fill="#4a6fa5"/>
+<line x1="316.2" y1="91.0" x2="421.5" y2="91.0" stroke="#111" stroke-width="1.5"/>
+<text x="427.5" y="96" fill="#111">0,081</text>
+<text x="292" y="130" text-anchor="end" fill="#222">COCO × mạng</text>
+<rect x="300" y="114" width="160.8" height="22" fill="#4a6fa5"/>
+<line x1="328.1" y1="125.0" x2="657.1" y2="125.0" stroke="#111" stroke-width="1.5"/>
+<text x="663.1" y="130" fill="#111">0,195</text>
+<text x="292" y="164" text-anchor="end" fill="#222">fine-tune × gốc</text>
+<rect x="300" y="148" width="98.4" height="22" fill="#4a6fa5"/>
+<line x1="326.4" y1="159.0" x2="462.4" y2="159.0" stroke="#111" stroke-width="1.5"/>
+<text x="468.4" y="164" fill="#111">0,119</text>
+<text x="292" y="198" text-anchor="end" fill="#222">fine-tune × cổ điển</text>
+<rect x="300" y="182" width="5.9" height="22" fill="#4a6fa5"/>
+<line x1="300.0" y1="193.0" x2="318.1" y2="193.0" stroke="#111" stroke-width="1.5"/>
+<text x="324.1" y="198" fill="#111">0,007</text>
+<text x="292" y="232" text-anchor="end" fill="#222">fine-tune × mạng</text>
+<rect x="300" y="216" width="28.5" height="22" fill="#4a6fa5"/>
+<line x1="310.2" y1="227.0" x2="366.0" y2="227.0" stroke="#111" stroke-width="1.5"/>
+<text x="372.0" y="232" fill="#111">0,035</text>
+</svg>

@@ -9,7 +9,7 @@ Ngày lập: 18/11/2026. Thiết kế đã duyệt (SSOT mục tiêu, kiến tr�
 (`video/phan-tich-video.md`, `kiem-xla/kiem-xla.md`, `nghien-cuu/nghien-cuu-tai-lieu.md` và các script `.py`).
 Hợp đồng chung XLA ↔ IOT-CV: `contract.md` (cạnh file này; phase 02 chuyển thành `docs/hop-dong-model.md`).
 
-Plan này viết trước khi có code (→ 18/11/2026: phase 01–09 đã thực thi; trạng thái và các quyết định đổi so với plan ở `thuc-thi-phase-01-07.md` §6–7. → 19/11/2026: phase 10–14 xong, trạng thái + kết quả cuối ở `thuc-thi-phase-10-14.md` §7; còn phase 15–18). Mỗi phase là một file tự đủ: agent chỉ cầm `phase-NN-*.md` + `contract.md` là bắt đầu được.
+Plan này viết trước khi có code (→ 18/11/2026: phase 01–09 đã thực thi; trạng thái và các quyết định đổi so với plan ở `thuc-thi-phase-01-07.md` §6–7. → 19/11/2026: phase 10–14 xong, trạng thái + kết quả cuối ở `thuc-thi-phase-10-14.md` §7; còn phase 15–18). → 19/11/2026: phase 15–18 xong, kết quả ở `thuc-thi-phase-10-14.md` §10. Mỗi phase là một file tự đủ: agent chỉ cầm `phase-NN-*.md` + `contract.md` là bắt đầu được.
 
 ## Forecast
 
@@ -74,8 +74,9 @@ làm sớm với bundle giả.
 |---|---|---|---|---|
 | ~~Duyệt lần cuối nhãn tập test (~20–30 phút)~~ → xong 18/11/2026: chủ dự án duyệt 39 khung, 149 hộp, cờ hard 5 khung (`data/real/labels/manifest.json`) | phase 08 | Label Studio local `http://localhost:8080`, project `xla-test-v1`, agent mở sẵn đúng trang, nhãn gán trước + đã soát đã nạp; bấm **Submit** từng khung, xong báo "đã duyệt" | Nhãn cuối của tập test là phán quyết của chủ dự án (ràng buộc đã chốt) | later: cần nhãn gán trước + agent soát xong (phase 08 bước 1–4) |
 | ~~Chấm thử mù A/B ~55 lượt (~10 phút)~~ → xong 19/11/2026: chủ dự án chấm 55/55 lượt hai lần, cả khung và phóng to 2× (`results/ab/ab_result.json`, `results/ab-zoom/ab_result.json`) | phase 14 | Mở file `results/ab/ab-test.html` trong trình duyệt (agent mở sẵn), chọn ảnh rõ hơn mỗi cặp, bấm **Xuất kết quả** | Cảm nhận của người xem là chính đại lượng cần đo | later: cần ảnh của phase 12 + 13 |
-| Bảo commit/PR các file IOT-CV agent đã ghi ở phase 15–17 | phase 18 | `git -C d:\Coding\IOT-CV status --short` (phase 18 bước 6: agent đưa danh sách file + kết quả test) | Luật AGENTS.md số 2: IOT-CV chỉ ghi file khi chưa được bảo | later: sau khi phase 16 pass |
+| ~~Bảo commit/PR các file IOT-CV agent đã ghi ở phase 15–17~~ → 19/11/2026 chủ dự án giao toàn quyền trong phiên cook phase 15–18, agent tự commit + mở PR | phase 18 | `git -C d:\Coding\IOT-CV status --short` (phase 18 bước 6: agent đưa danh sách file + kết quả test) | Luật AGENTS.md số 2: IOT-CV chỉ ghi file khi chưa được bảo | later: sau khi phase 16 pass |
 | Duyệt xoá các khung sườn cũ `ml/scripts/*.py` của IOT-CV (tuỳ chọn) | phase 17 | Danh sách file + kết quả quét tham chiếu từ phase 17 | Xoá file không tự quyết (luật autonomous) | later: sau phase 17 |
+| NVIDIA app → Graphics → Program settings → `python.exe` của IOT-CV (`.venv`) → Power management mode = **Prefer maximum performance**, rồi `uv run python scripts/vision/replay_bench.py --recording logs/recordings/20261102-100941` ở IOT-CV | phase 16 (ngân sách p95 nhịp thật) | Bảng điều khiển NVIDIA là GUI có quyền admin, đổi cấu hình máy của chủ dự án | later: trước buổi bay có bật Ảnh rõ |
 | Khi camera bật lại lần tới: cho agent ghi vài giây ở mỗi mức auto-quality (19–40) để kiểm giả thuyết bảng DQT | phase 05 (giả thuyết q ≠ 12) | Bật drone + camera, không cần bay; agent đổi `quality` qua `/set` và đọc khung | Cần cắm pin + bật phần cứng bằng tay | later: lần dùng phần cứng tới, không chặn plan |
 
 ## Planning waves

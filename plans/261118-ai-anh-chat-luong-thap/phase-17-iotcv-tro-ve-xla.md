@@ -2,7 +2,7 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 02 | S (~0,5 ngày agent) | Không |
+| xong 19/11/2026 (IOT-CV, nhánh feat/ai-vision-phase-15-17) | phase 02 | S (~0,5 ngày agent) | Không |
 
 Lane: iotcv-docs
 Depends-on: 02

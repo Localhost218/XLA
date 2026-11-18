@@ -2,7 +2,7 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 02 | L (~2,5 ngày agent), 0 giờ GPU huấn luyện | Không (chỉ laptop) |
+| xong 19/11/2026 (IOT-CV, nhánh feat/ai-vision-phase-15-17) | phase 02 | L (~2,5 ngày agent), 0 giờ GPU huấn luyện | Không (chỉ laptop) |
 
 Lane: iotcv
 Depends-on: 02

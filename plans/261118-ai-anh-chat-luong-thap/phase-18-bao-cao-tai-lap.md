@@ -2,7 +2,7 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 07, 10, 11, 14, 16, 17 | M (~1,5 ngày agent) | Không |
+| xong 19/11/2026 | phase 07, 10, 11, 14, 16, 17 | M (~1,5 ngày agent) | Không |
 
 Lane: serial
 Depends-on: 07, 10, 11, 14, 16, 17

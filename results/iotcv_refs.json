@@ -1,0 +1,2493 @@
+{
+ "generated": "2026-11-19",
+ "iotcv_commit_base": "d35fc0c",
+ "pattern": "(^|[^A-Za-z_./-])(ml/|plans/ai)",
+ "globs": "*.md,*.py,*.ts,*.tsx,*.yaml,*.yml,*.toml,*.json; bỏ node_modules,.venv,frontend/dist",
+ "n_refs": 353,
+ "n_type_a": 12,
+ "ml_scripts_skeleton": {
+  "files": [
+   "augment.py",
+   "convert_visdrone_person.py",
+   "evaluate.py",
+   "extract_frames.py",
+   "split_dataset.py",
+   "train.py"
+  ],
+  "note": "đều NotImplementedError; xoá chờ chủ dự án duyệt (Human steps)",
+  "delete_approved": null
+ },
+ "refs": [
+  {
+   "file": "AGENTS.md",
+   "line": 21,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "| Phần AI xử lý ảnh chất lượng thấp (thiết kế, plan, thí nghiệm, bằng chứng) | `D:\\XLA\\plans\\` trên nhánh `main` của XLA (phase 01–14 xong 19/11/2026, PR #2): p"
+  },
+  {
+   "file": "CONTRIBUTING.md",
+   "line": 66,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "`.gitignore` đã chặn sẵn, nhưng nhắc lại: không commit dataset (`ml/datasets/`; phần AI nay ở repo XLA, xem `ml/README.md`),"
+  },
+  {
+   "file": "README.md",
+   "line": 36,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "ml/          Khung sườn AI cũ, không dùng: phần AI nay ở repo XLA (ml/README.md)"
+  },
+  {
+   "file": "pyproject.toml",
+   "line": 66,
+   "type": "b",
+   "action": "ruff extend-exclude ml/datasets, ml/weights: còn đúng",
+   "text": "extend-exclude = [\"ardupilot\", \"logs\", \"ml/datasets\", \"ml/weights\", \".venv\", \"venv-ardupilot\"]"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 11,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "Biến đống số liệu trong `ml/results/` thành một báo cáo môn học đọc được, trung thực, và **tái lập được**: có câu hỏi nghiên cứu rõ ràng, có phương pháp mô tả đ"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 17,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- `ml/results/REPORT.md` — mọi bảng đã điền (AI Phase 3 A3.11). Đây là nguồn số liệu duy nhất; báo cáo **không được chứa con số nào không truy ngược được về fil"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 19,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- `ml/experiments/ma-tran-thi-nghiem.md`, `nhat-ky-thu-du-lieu.md`, `ml/results/dataset_stats.json`, `prelabel_bias.json`, `align_report.json`, `bench_backends."
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 22,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- `ml/data/README.md` và `ml/restore/WEIGHTS.md` — nguồn cho mục giấy phép."
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 43,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/make_figures.py               sinh MỌI hình từ JSON trong ml/results/"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 44,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/reproduce.ps1                 dựng lại toàn bộ kết quả bằng một lệnh"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 45,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/results/figures/                      hình sinh ra (gitignore; commit bản chốt nếu cần nộp)"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 48,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Chỉ đọc, không sửa**: `ml/results/**` (số liệu gốc — sửa số liệu ở khâu viết báo cáo là gian lận), `ml/experiments/**`, `ml/scripts/{train,evaluate,coco_eval,"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 82,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| 01 Giới thiệu | Vì sao bài toán này khó và vì sao câu hỏi này đáng hỏi | Hình: ảnh cùng cảnh từ camera rẻ và từ điện thoại, đặt cạnh nhau | `ml/datasets/paire"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 84,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| 03 Phương pháp | Mô tả đủ để người khác làm lại | Sơ đồ pipeline; sơ đồ chuỗi suy giảm bậc hai; bảng sáu phép đo (nhánh A) | `ml/degrade/`, `degrade_esp32*.ya"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 86,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| 05 Kết quả | Chỉ số, không diễn giải | Bảng 1–6 của `REPORT.md` | `ml/results/**` |"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 94,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Luật một câu, áp cho toàn báo cáo:** *mỗi con số trong báo cáo phải truy ngược được về một file cụ thể trong `ml/results/`.* Con số nào không truy ngược được "
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 100,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Làm gì.** Viết `ml/scripts/make_figures.py` đọc thẳng các file JSON trong `ml/results/` rồi xuất hình vào `ml/results/figures/`. **Không chụp màn hình bảng Ex"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 223,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "### A4.7 Script tái lập `ml/scripts/reproduce.ps1`"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 230,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "# ml/scripts/reproduce.ps1"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 238,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "# 0. env    — kiểm GPU, kiểm phiên bản gói khớp với ml/results/*/env.json"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 247,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "1. **Kiểm môi trường trước.** So `torch.__version__`, `ultralytics.__version__` và tên GPU với nội dung `ml/results/r02_*/env.json`. Khác thì **in cảnh báo rõ**"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 252,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "6. **Ghi `ml/results/reproduce_log.txt`** — ngày chạy, chặng nào, thời gian, kết quả."
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 272,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Mục giấy phép** (lấy từ `ml/data/README.md` và `ml/restore/WEIGHTS.md`), ghi nguyên văn sự mơ hồ chứ đừng làm tròn:"
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 309,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] Mọi con số trong báo cáo truy ngược được về một file trong `ml/results/`."
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 331,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] Mỗi con số truy ngược được về file trong `ml/results/` (soát ngẫu nhiên 10 con số để kiểm)."
+  },
+  {
+   "file": "plans/ai/ai-phase-04-bao-cao-xla.md",
+   "line": 332,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] `ml/scripts/reproduce.ps1` chạy thật được `-Stage figures` và `-Stage eval`; `reproduce_log.txt` có bằng chứng; phụ lục ghi rõ chặng nào chưa kiểm được."
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 17,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- **`ml/experiments/protocol-thu-du-lieu.md`** (sản phẩm của A2.6) — đọc trước tiên, đây là danh sách phải thu."
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 19,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- `ml/results/REPORT.md` (AI Phase 2) — biết bảng nào đang trống."
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 20,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- `ml/results/prelabel_bias.json` (A1.7 chạy thử) — biết quy trình kiểm thiên lệch."
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 32,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/align_pairs.py                      căn chỉnh cặp ảnh ORB/SIFT + homography + RANSAC"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 33,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/measure_degradation_profile.py      (nhánh A) đo MTF / nhiễu / méo / vignette / rolling shutter"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 34,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/configs/degrade_esp32_measured.yaml         (nhánh A) YAML có measured: true"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 35,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/configs/own_camera_pairs.yaml"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 36,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/experiments/nhat-ky-thu-du-lieu.md          nhật ký từng buổi: giờ, trời, độ cao, người, sự cố"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 37,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/datasets/own_camera.dvc"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 38,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/datasets/paired.dvc"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 39,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/tests/test_align_pairs.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 45,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/configs/own_camera.yaml        trỏ đúng thư mục split thật (AI Phase 1 chưa đụng file này)"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 46,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/results/REPORT.md              ĐIỀN các bảng đang trống; không đổi cấu trúc bảng của A2.7"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 47,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/experiments/ma-tran-thi-nghiem.md   cập nhật trạng thái TN A và TN D từ \"chờ\" → \"đã chạy\""
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 48,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/configs/degrade_esp32.yaml     (nhánh A) chỉ cập nhật trường `source`, trỏ sang bản measured"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 52,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Chỉ dùng, không sửa**: `ml/scripts/extract_frames.py`, `split_dataset.py`, `train.py`, `evaluate.py`, `coco_eval.py`, `ml/degrade/**`, `ml/restore/**`, `backe"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 67,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Người trong ảnh.** Dataset này có hình ảnh người thật. Trước buổi thu: nói rõ với từng người ảnh sẽ dùng làm gì, lưu ở đâu (ổ cứng + thư mục Drive **riêng tư*"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 196,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Sản phẩm phụ quan trọng: bảng chuyển thang `q_esp` ↔ `q_cv2`.** `ml/configs/degrade_esp32.yaml` (A1.5) hiện dùng thang chất lượng JPEG **phỏng đoán** (`measur"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 220,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Spec `ml/scripts/align_pairs.py`:**"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 223,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "Vào : ml/datasets/paired/esp32/<session>/  và  ml/datasets/paired/phone/<session>/"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 224,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "Ra  : ml/datasets/paired/aligned/<session>/{lq,hq}/ + align_report.json"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 241,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`ml/tests/test_align_pairs.py`: dựng một ảnh, tạo bản warp bằng một homography **biết trước**, chạy hàm căn chỉnh, khẳng định ma trận tìm được gần với ma trận t"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 282,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`ml/scripts/measure_degradation_profile.py` nhận thư mục ảnh chụp bảng chuẩn, chạy sáu phép đo, ghi ra **`ml/configs/degrade_esp32_measured.yaml`** — **cùng sch"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 323,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Kết quả mong đợi.** `ml/datasets/own_split/` có ba split; `split_manifest.json` cho thấy không session nào trùng; `dvc push` xong và `dvc status` sạch."
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 339,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "2. Chạy `r02` (hoặc `r03`) lên đúng 100 ảnh đó. Tính **tỉ lệ bỏ sót** và **tỉ lệ dương tính giả** của bước tiền-gán-nhãn, **phân tầng theo chiều cao hộp** (`<16"
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 349,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Kết quả mong đợi.** `ml/datasets/own_split/*/labels/` đầy đủ; `classes.txt` đúng một dòng `person`; `prelabel_bias.json` có số và đã áp luật quyết định; `dvc "
+  },
+  {
+   "file": "plans/ai/ai-phase-03-du-lieu-that.md",
+   "line": 398,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Làm gì.** Quay lại `ml/results/REPORT.md` (cấu trúc do A2.7 định), điền **Bảng 6 (độ cao × model)** và cập nhật Bảng 5 bằng số đo trên ảnh thật. Cập nhật `ml/"
+  },
+  {
+   "file": "ml/scripts/train.py",
+   "line": 14,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "python ml/scripts/train.py --data ml/configs/visdrone_person.yaml \\"
+  },
+  {
+   "file": "ml/scripts/train.py",
+   "line": 32,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "parser.add_argument(\"--project\", type=Path, default=Path(\"ml/results\"))"
+  },
+  {
+   "file": "ml/scripts/split_dataset.py",
+   "line": 11,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "python ml/scripts/split_dataset.py --images ml/datasets/own/images \\"
+  },
+  {
+   "file": "ml/scripts/split_dataset.py",
+   "line": 28,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "parser.add_argument(\"--out\", type=Path, default=Path(\"ml/datasets/own_split\"))"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 7,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| chưa bắt đầu | **AI Phase 1** (bắt buộc, toàn bộ). Không phụ thuộc luồng chính. Khuyến nghị chạy sau `phase-19`/`phase-21` theo ưu tiên của người dùng, nhưng "
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 13,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "Xong phase này có: ba bộ trọng số đã huấn luyện, một engine TensorRT đã cắm vào backend, một harness so sánh 6 bộ khôi phục ảnh, và `ml/results/REPORT.md` với m"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 19,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- **AI Phase 1 đã qua toàn bộ cổng pass.** Đặc biệt: `ml/results/dataset_stats.json`, `ml/results/smoke_report.md` (giây/epoch thật), `ml/degrade/` có test xanh"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 31,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/restore/__init__.py            REGISTRY: none | bicubic | fbcnn | nafnet | realesr | zerodce | sci"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 32,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/restore/base.py                giao diện Restorer chung"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 33,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/restore/none.py                bản đối chứng (identity)"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 34,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/restore/bicubic.py             đối chứng nội suy — BẮT BUỘC, xem A2.5"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 35,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/restore/fbcnn.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 36,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/restore/nafnet.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 37,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/restore/realesr.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 38,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/restore/zerodce.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 39,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/restore/sci.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 40,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/restore/WEIGHTS.md             URL + sha256 + giấy phép từng file trọng số"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 41,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/bench_restore.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 42,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/sahi_eval.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 43,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/export_and_bench.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 44,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/configs/visdrone_person_degraded.yaml"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 45,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/experiments/README.md"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 46,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/experiments/ma-tran-thi-nghiem.md"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 47,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/experiments/protocol-thu-du-lieu.md      bàn giao sang AI Phase 3"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 48,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/results/REPORT.md"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 49,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/tests/test_restore_registry.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 55,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/evaluate.py        CHỈ THÊM cờ --sahi và --restorer; KHÔNG đổi/xoá khoá nào"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 57,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/weights/                   chứa .pt/.onnx/.engine sinh ra (đã gitignore)"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 62,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Sinh ra khi chạy (không commit)**: `ml/datasets/visdrone_person_degraded/**`, `ml/results/r0*/**`, `ml/weights/**`."
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 64,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Tuyệt đối không đụng**: `ml/degrade/**` và `ml/scripts/{train,convert_visdrone_person,split_dataset}.py` (thuộc AI Phase 1 — nếu cần sửa thì sửa ở đó rồi chạy"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 144,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- Đọc `ml/results/smoke_report.md` (A1.10). Nếu tổng thời gian cho **2 seed × 2 model ≤ ~30 giờ GPU** thì chạy thêm `--seed 1` cho cả hai và báo cáo **trung bìn"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 192,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`ml/configs/visdrone_person_degraded.yaml` trỏ `train:` vào một file danh sách gồm **cả** `visdrone_person/train/images` lẫn `visdrone_person_degraded/train/ima"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 211,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- `r03` tệ hơn `r02` **ở cả hai cột**: tỉ lệ trộn sai (đang gần 100% ảnh xấu) hoặc suy giảm quá tay. Mở `ml/results/degrade_preview/` ra xem bằng mắt."
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 230,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`ml/scripts/sahi_eval.py` dùng `AutoDetectionModel.from_pretrained(model_type=\"ultralytics\", ...)` rồi `get_sliced_prediction(..., postprocess_type=\"GREEDYNMM\","
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 272,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "YOLO_WEIGHTS=ml/weights/r02_yolo26n_visdrone.engine"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 277,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`backend/vision/detector.py` (chủ sở hữu chốt ở phase khác, ngoài phạm vi AI Phase 1/2 — xem `plans/ai/ai-phase-01-chuan-bi.md` bảng ranh giới) đã được thiết kế"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 301,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "# ml/restore/__init__.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 329,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`ml/restore/WEIGHTS.md` ghi mỗi file trọng số: URL tải, **sha256**, giấy phép, ngày tải. Trọng số để ở `ml/weights/restore/` (đã gitignore), **không commit**."
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 331,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Harness `ml/scripts/bench_restore.py`:**"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 360,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Làm gì.** Viết `ml/experiments/ma-tran-thi-nghiem.md` — bảng nói rõ **câu hỏi nào đang được trả lời**, khác với bảng model ở §6.2 vốn nói *cái gì được huấn lu"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 371,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Giao thức bàn giao — `ml/experiments/protocol-thu-du-lieu.md`.** Đây là sản phẩm quan trọng nhất của A2.6: danh sách yêu cầu để AI Phase 3 đi thu đúng thứ cần"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 380,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Kết quả mong đợi.** Hai file trong `ml/experiments/`; mỗi TN ghi rõ trạng thái *đã chạy* / *chờ dữ liệu bay*."
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 388,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "### A2.7 Mẫu báo cáo `ml/results/REPORT.md`"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 453,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- nhãn đúng chưa (mở lại `ml/results/convert_check/`)"
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 464,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] `ml/experiments/ma-tran-thi-nghiem.md` và `protocol-thu-du-lieu.md` tồn tại; mỗi TN ghi rõ đã chạy hay chờ dữ liệu bay."
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 465,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] `ml/results/REPORT.md` có 6 bảng; **mọi bảng có cột AR-small**; mục \"Kỳ vọng trung thực\" và \"Giới hạn\" đã viết."
+  },
+  {
+   "file": "plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md",
+   "line": 466,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] `ml/scripts/evaluate.py` chỉ **thêm** cờ, schema `metrics.json` của A1.6 không bị đổi tên/xoá khoá nào."
+  },
+  {
+   "file": "ml/scripts/extract_frames.py",
+   "line": 6,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "python ml/scripts/extract_frames.py --video raw/session_01.mp4 \\"
+  },
+  {
+   "file": "ml/scripts/extract_frames.py",
+   "line": 7,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "--out ml/datasets/own/images --every 1.5"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 9,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "> **Ghi chú phạm vi.** Phần thị giác đầy đủ của backend cho web (parser MJPEG + proxy fan-out + nguồn giả cho `phase-10`) **không còn thuộc AI Phase 1** — nó th"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 40,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "Mọi script trong `ml/scripts/` hiện là **khung rỗng**: có `parse_args()` đầy đủ rồi `raise NotImplementedError`. Không có dòng logic nào chạy được. Cụ thể:"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 44,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/scripts/train.py` | 45 | `--data --model(yolo11n.pt) --epochs 100 --imgsz 640 --batch 16 --name --project(ml/results)`; docstring mô tả thang model A→E | "
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 45,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/scripts/evaluate.py` | 45 | `--weights --data --imgsz --condition --out(metrics.csv)`; hằng `CONDITIONS`, `METRICS` (precision/recall/mAP50/mAP50-95) | **"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 46,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/scripts/convert_visdrone_person.py` | 48 | `--visdrone --out --skip-empty`; hằng `VISDRONE_PERSON_CATEGORIES = (1, 2)` theo **đánh số THÔ** (file `.txt` g"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 47,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/scripts/split_dataset.py` | 41 | `--images --labels --train --val --test --out`; ý tưởng chia theo session **đã đúng** | Thân hàm; kiểm tra giao nhau giữa"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 48,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/scripts/augment.py` | 48 | `--images --out --degradations --copies`; **đã có guard chặn đường dẫn chứa `test`** (giữ nguyên, rất đúng) | Chỉ liệt kê 3 phé"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 49,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/scripts/extract_frames.py` | 43 | `--video --out --every 1.5 --prefix` | Thân hàm. AI Phase 1 chỉ implement đủ để cắt khung từ video; dùng thật ở **AI Pha"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 50,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/configs/visdrone_person.yaml` | 10 | `path: ../datasets/visdrone_person`, train/val/test, `names: {0: person}` | Dòng `nc: 1` (Ultralytics suy ra được như"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 51,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/configs/own_camera.yaml` | 10 | trỏ `../datasets/own_split` | Không sửa ở AI Phase 1 (AI Phase 3 dùng) |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 52,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "Kết luận prior-art: **không có gì phải xoá, chỉ có điền thân hàm và thêm file mới.** Hai chỗ cần sửa nội dung đã có: `train.py` (mặc định batch + docstring tên "
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 65,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/.venv/                                (không commit, .gitignore đã loại)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 66,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/check_gpu.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 67,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/download_visdrone.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 68,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/make_degraded_dataset.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 69,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/prelabel_to_labelstudio.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 70,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/coco_eval.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 71,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/degrade/__init__.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 72,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/degrade/params.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 73,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/degrade/custom.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 74,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/degrade/pipeline.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 75,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/configs/degrade_esp32.yaml"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 76,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/configs/heridal.yaml"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 77,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/tests/__init__.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 78,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/tests/test_degrade_bbox.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 79,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/tests/test_degrade_pipeline.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 80,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/tests/test_convert_visdrone.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 81,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/tests/test_split_no_leak.py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 82,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/data/README.md                        (giấy phép — đặt NGOÀI ml/datasets/ vì thư mục đó bị gitignore)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 83,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/labeling/README.md"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 84,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/labeling/label_config.xml"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 85,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/tools/mjpeg_client.py                 (đọc MJPEG đúng docs/hop-dong-mjpeg.md, chỉ để thu dữ liệu — xem A1.9)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 87,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/datasets/visdrone_person.dvc"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 93,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/pyproject.toml                        (chỉ nếu cần thêm/bớt gói — Phase 01 đã tạo khung đúng ghim)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 94,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/configs/visdrone_person.yaml          (thêm nc: 1)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 95,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/train.py                      (điền thân + thêm args + sửa docstring)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 96,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/evaluate.py                   (điền thân + thêm chỉ số)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 97,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/convert_visdrone_person.py    (điền thân)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 98,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/split_dataset.py              (điền thân)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 99,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/augment.py                    (nối vào ml/degrade/, giữ nguyên guard test)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 100,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/scripts/extract_frames.py             (điền thân)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 103,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Sinh ra khi chạy (không commit)**: `ml/datasets/**`, `ml/weights/**`, `ml/results/**`."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 111,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `backend/vision/stream.py`, `fake_stream.py` | **`phase-07`** | AI Phase 1 chỉ **đọc** (qua `ml/tools/mjpeg_client.py`, cùng URL `CAMERA_STREAM_URL`) |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 116,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `.gitignore` (ngoại lệ `!ml/datasets/*.dvc`) | `phase-01` §01.5 | AI Phase 1 không sửa — chỉ dùng |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 126,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`ml/` là một **dự án `uv` riêng**, khung `ml/pyproject.toml` đã được **Phase 01** tạo sẵn (§01.6) — Python `3.13`, ghim đúng `albumentations==2.0.8`, `opencv-py"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 128,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Label Studio và DVC KHÔNG cài vào `ml/.venv`** — cài bằng `uv tool install` để chúng có env riêng. Label Studio kéo theo Django và hàng chục gói web; trộn với"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 142,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "# 2. Vào dự án uv riêng của ml/, ghim đúng Python (khớp pyproject.toml Phase 01 đã tạo)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 148,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "# 3. CÀI TORCH TRƯỚC (bắt buộc đúng thứ tự này) — KHÔNG nằm trong ml/pyproject.toml"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 151,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "# 4. Rồi mới đồng bộ phần còn lại từ ml/pyproject.toml"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 159,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`ml/pyproject.toml` (Phase 01 đã tạo khung, nội dung ghim đúng — xem `plans/phase-01-tai-cau-truc-repo.md` §01.6) là nơi khai báo phụ thuộc ML; sửa **file đó** "
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 161,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**`ml/scripts/check_gpu.py` phải in và kiểm tra:**"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 191,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/datasets/"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 200,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "├─ visdrone_person_degraded/ bản đã chạy qua ml/degrade (AI Phase 2 sinh, cùng cấu trúc)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 212,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`ml/data/README.md` phải ghi (đặt ở `ml/data/` chứ không phải `ml/datasets/` vì `.gitignore` dòng 36 loại sạch `ml/datasets/*`):"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 242,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Kết quả mong đợi.** Cây thư mục khớp sơ đồ trên; `ml/data/README.md` tồn tại và vào được git."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 246,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- `git status` không thấy `ml/data/README.md`: bị luật ignore nào đó bắt → `git check-ignore -v <file>` cho biết dòng nào của `.gitignore` gây ra, rồi thêm ngoạ"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 247,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- Trùng tên `ml/data` và `ml/datasets` gây nhầm khi gõ: chấp nhận, nhưng nhớ quy ước — `data` là **tài liệu về dữ liệu** (vào git), `datasets` là **dữ liệu** (k"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 266,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`ml/scripts/download_visdrone.py` chỉ làm ba việc: gọi `from ultralytics.data.utils import check_det_dataset` rồi `check_det_dataset(\"VisDrone.yaml\")`, in ra đư"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 293,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Spec cho `ml/scripts/convert_visdrone_person.py`** (điền thân, giữ nguyên `--visdrone --out --skip-empty` đã có):"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 300,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `--verify-sample` | `20` | Vẽ hộp lên N ảnh, ghi vào `ml/results/convert_check/` để **mắt người** kiểm tra |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 301,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `--stats-out` | `ml/results/dataset_stats.json` | — |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 312,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "8. `--verify-sample 20`: vẽ hộp lên ảnh và ghi ra `ml/results/convert_check/`. **Bước này là cổng chống lệch-một duy nhất đáng tin.** Mở 20 ảnh đó ra xem: hộp c"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 313,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "9. Ghi `ml/results/dataset_stats.json`."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 320,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "\"source\": \"ml/datasets/_raw/VisDrone2019-DET-*\","
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 360,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "Rồi thêm `nc: 1` vào `ml/configs/visdrone_person.yaml` cho rõ ràng."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 362,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Kết quả mong đợi.** Ba cặp `images/labels/meta` đầy đủ, `dataset_stats.json` có `instances_person > 0` cho cả ba split, và 20 ảnh trong `ml/results/convert_ch"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 384,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Spec cho `ml/scripts/split_dataset.py`** (giữ nguyên các tham số đã có):"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 389,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- Ghi `ml/results/split_manifest.json`: `{\"train\": {\"sessions\": [...], \"n_images\": N}, \"val\": {...}, \"test\": {...}, \"created_at\": ...}`."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 391,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "`ml/tests/test_split_no_leak.py` kiểm: dựng 3 session giả bằng file rỗng trong `tmp_path`, chạy hàm chia, khẳng định (a) không có stem nào xuất hiện ở hai split"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 410,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "### A1.5 Gói suy giảm ảnh `ml/degrade/`"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 421,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "ml/degrade/"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 460,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**`ml/configs/degrade_esp32.yaml`** — cấu trúc (mọi số hiện tại là **phỏng đoán, chưa xác minh**, chờ AI Phase 3 thay bằng số đo):"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 527,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Kiểm thử bắt buộc — `ml/tests/test_degrade_bbox.py`.** Đây là phần quan trọng nhất của việc A1.5, vì lỗi bbox không tự báo:"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 540,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Quan trọng:** `ml/tests/` **không được import torch**. Chỉ numpy + opencv + albumentations. Như vậy CI (`phase-01`) chạy được bộ test này mà không phải cài 6 "
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 553,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Kết quả mong đợi.** Toàn bộ test pass. `ml/results/degrade_preview/` có 30 cặp ảnh trước–sau đặt cạnh nhau, và **nhìn bằng mắt thấy giống ảnh camera rẻ**: nho"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 600,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `--project` | `ml/results` | giữ nguyên |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 605,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- `ml/results/<run>/train_args.json` — toàn bộ tham số đã dùng."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 606,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- `ml/results/<run>/env.json` — `torch.__version__`, `ultralytics.__version__`, tên GPU, phiên bản driver, **git SHA hiện tại**, đường dẫn tuyệt đối của file da"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 607,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- `ml/results/<run>/epoch_times.json` — `[{\"epoch\": 0, \"seconds\": 214.3}, ...]`. Nguồn số liệu cho việc A1.10 và cho mọi ước lượng lịch sau này."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 612,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "2. **Chỉ số COCO, trong đó có `AR-small`** — bổ sung quan trọng nhất. Ultralytics không trả về `AR-small` trực tiếp, nên cần `ml/scripts/coco_eval.py` làm ba bư"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 627,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Schema `ml/results/<run>/metrics.json`** (các phase sau chỉ được **thêm** khoá, không đổi tên hay xoá khoá — đây là hợp đồng giữa AI Phase 1, 2, 3, 4):"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 632,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "\"weights\": \"ml/results/r02_yolo26n_visdrone/weights/best.pt\","
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 634,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "\"data\": \"ml/configs/visdrone_person.yaml\","
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 699,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**`ml/labeling/label_config.xml`:**"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 730,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "3. Ghi kết quả vào `ml/results/prelabel_bias.json`."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 734,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**`ml/scripts/prelabel_to_labelstudio.py`** chuyển dự đoán YOLO sang JSON nhập vào Label Studio. Lưu ý định dạng: Label Studio dùng **phần trăm 0–100** cho `x`,"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 743,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Xuất.** Label Studio → Export → **YOLO** → file zip chứa `images/`, `labels/`, `classes.txt`. Giải nén vào `ml/datasets/own_camera/sessions/<session_id>/`. Ki"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 778,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Sửa `.gitignore` — bắt buộc, nếu không con trỏ DVC không commit được.** Dòng 36 hiện là `ml/datasets/*`, nó nuốt luôn cả file `.dvc`. Thêm ngay dưới:"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 781,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "!ml/datasets/*.dvc"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 782,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "!ml/datasets/.gitignore"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 785,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "Kiểm bằng `git check-ignore -v ml/datasets/visdrone_person.dvc` — sau khi sửa, lệnh này phải **không in gì**."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 791,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/datasets/visdrone_person/` | Có | >1 GB, tái tạo lại tốn ~1 giờ |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 792,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/datasets/own_camera/` | Có (AI Phase 3) | **Không thể tái tạo** — quay lại không bay được nữa. Quan trọng nhất |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 793,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/datasets/paired/` | Có (AI Phase 3) | như trên |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 794,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/datasets/_raw/` | Không | Tải lại được từ nguồn gốc; chỉ tốn chỗ trên Drive |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 795,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/datasets/visdrone_person_degraded/` | Không | Tái tạo được từ `visdrone_person` + YAML + seed. **Tính tái lập đến từ việc ghim seed, không từ việc lưu ảnh"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 796,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/weights/*.pt` | Có, từ AI Phase 2 | File nhỏ (~5 MB) nhưng git đã ignore `*.pt`; DVC hoá weights cuối để báo cáo dựng lại được |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 797,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/weights/*.engine` | **Không bao giờ** | Gắn chặt với GPU và phiên bản driver của đúng máy này |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 799,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Kết quả mong đợi.** `dvc push` chạy xong; `dvc status` in `Data and pipelines are up to date.`; `git status` thấy `ml/datasets/visdrone_person.dvc` sẵn sàng c"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 810,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "### A1.9 Công cụ đọc MJPEG để thu dữ liệu (`ml/tools/mjpeg_client.py`)"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 814,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Làm gì.** AI Phase 3 sẽ thu ảnh thật từ camera trên drone để làm dataset `own_camera/`. Việc đó cần một công cụ nhỏ, **độc lập với backend**, đọc luồng MJPEG "
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 829,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "**Kết quả mong đợi.** 20 file `.jpg` trong `ml/results/mjpeg_client_smoke/`, `manifest.jsonl` có 20 dòng, `frame_id` tăng dần không trùng."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 855,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "Ghi vào `ml/results/smoke_report.md`:"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 878,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- Chạy được nhưng `mAP50 = 0`: khả năng cao là nhãn sai — quay lại việc A1.3, mở `ml/results/convert_check/` ra xem."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 885,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] `ml/pyproject.toml` ghim `albumentations==2.0.8` và `opencv-python>=4.10,<5`; `ml/.venv` là Python **3.13**, tách khỏi `.venv` của backend (cùng phiên bản"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 886,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] `ml/results/dataset_stats.json` tồn tại, `instances_person > 0` cho cả ba split, và **20 ảnh trong `ml/results/convert_check/` có hộp trùm lên người** (ki"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 887,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] `ml/data/README.md` nằm trong git và ghi đủ giấy phép của VisDrone (không có LICENSE), HERIDAL (CC BY), albumentations (MIT, lý do ghim)."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 889,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] `ml/results/degrade_preview/` có ≥ 30 cặp ảnh trước–sau, nhìn thấy rõ ảnh sau giống ảnh camera rẻ."
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 894,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] `dvc status` in `up to date`; `ml/datasets/visdrone_person.dvc` **commit được** (`git check-ignore -v` không in gì); đã thử xoá thư mục và `dvc pull` lấy "
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 895,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "- [ ] `ml/tools/mjpeg_client.py --limit 20` (chạy sau khi `phase-07` dựng xong `GET /api/video/stream`) lưu đúng 20 `.jpg` + `manifest.jsonl` 20 dòng, `frame_id"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 905,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| Tập test bị augment nhầm → mất khả năng đo độ bền | 2 | 5 | **10** | Giữ guard đường dẫn đã có trong `augment.py`, nhân bản sang `ml/degrade` và `evaluate.py`"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 907,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| `ml/tools/mjpeg_client.py` giả định sai hợp đồng header vì `phase-07` đổi `docs/hop-dong-mjpeg.md` sau khi AI Phase 1 đã viết công cụ | 2 | 2 | **4** | `mjpeg"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 918,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| A1.2 Bố cục thư mục + `ml/data/README.md` giấy phép | 1.5 | |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 921,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| A1.5 Gói `ml/degrade/` + YAML + 8 test | 8.0 | **Việc lớn nhất.** Rolling shutter + cập nhật bbox chiếm quá nửa |"
+  },
+  {
+   "file": "plans/ai/ai-phase-01-chuan-bi.md",
+   "line": 925,
+   "type": "b",
+   "action": "file cũ chính nó: khối 'Đã thay thế' ở đầu file",
+   "text": "| A1.9 Công cụ đọc MJPEG để thu dữ liệu (`ml/tools/mjpeg_client.py`) | 1.5 | Phần thị giác đầy đủ (parser + proxy + nguồn giả) đã chuyển sang `phase-07` |"
+  },
+  {
+   "file": "ml/scripts/evaluate.py",
+   "line": 13,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "python ml/scripts/evaluate.py --weights ml/weights/model_c.pt \\"
+  },
+  {
+   "file": "ml/scripts/evaluate.py",
+   "line": 14,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "--data ml/configs/own_camera.yaml --condition blur"
+  },
+  {
+   "file": "ml/scripts/evaluate.py",
+   "line": 32,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "parser.add_argument(\"--out\", type=Path, default=Path(\"ml/results/metrics.csv\"))"
+  },
+  {
+   "file": "ml/scripts/convert_visdrone_person.py",
+   "line": 11,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "python ml/scripts/convert_visdrone_person.py \\"
+  },
+  {
+   "file": "ml/scripts/convert_visdrone_person.py",
+   "line": 12,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "--visdrone ml/datasets/VisDrone2019-DET-train \\"
+  },
+  {
+   "file": "ml/scripts/convert_visdrone_person.py",
+   "line": 13,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "--out ml/datasets/visdrone_person/train"
+  },
+  {
+   "file": "ml/scripts/augment.py",
+   "line": 12,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "python ml/scripts/augment.py --images ml/datasets/own_split/train/images \\"
+  },
+  {
+   "file": "ml/scripts/augment.py",
+   "line": 13,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "--out ml/datasets/own_split_aug/train/images"
+  },
+  {
+   "file": "ml/README.md",
+   "line": 1,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "# ml/ — khung sườn AI cũ, KHÔNG DÙNG"
+  },
+  {
+   "file": "ml/README.md",
+   "line": 3,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "Thư mục này là khung sườn của luồng AI cũ (`plans/ai/`, 21/09/2026): mọi script trong `ml/scripts/`"
+  },
+  {
+   "file": "ml/README.md",
+   "line": 16,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "`backend/vision/model_bundle.py`. Thư mục `ml/` chưa xoá vì xoá cần chủ dự án duyệt"
+  },
+  {
+   "file": "ml/pyproject.toml",
+   "line": 1,
+   "type": "b",
+   "action": "khung sườn cũ: con trỏ ở ml/README.md",
+   "text": "# KHÔNG DÙNG: khung sườn AI cũ; phần AI nay ở repo XLA, xem ml/README.md (19/11/2026)."
+  },
+  {
+   "file": "backend/tests/__init__.py",
+   "line": 5,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "nằm ở dự án uv riêng `ml/pyproject.toml` và không bao giờ được CI cài (phần AI nay ở repo XLA, `ml/README.md`)."
+  },
+  {
+   "file": "docs/hop-dong-mjpeg.md",
+   "line": 6,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "`plans/ai/ai-phase-01-chuan-bi.md` (bản cũ, phần AI nay ở repo XLA) chỉ **trích dẫn** file này; không nơi nào khác"
+  },
+  {
+   "file": "plans/phase-03-hoc-ardupilot-drone-ao.md",
+   "line": 35,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Không đụng:** `backend/`, `frontend/`, `ml/`, `firmware/`, `scripts/`, `plans/reports/`. Đặc biệt **không sửa `firmware/ardupilot/params/`** — việc nạp param "
+  },
+  {
+   "file": "docs/bao-cao-tong-quan-du-an.md",
+   "line": 377,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "├── ml/"
+  },
+  {
+   "file": "plans/phase-04-param-va-tranh-vat-can-ao.md",
+   "line": 50,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Không đụng:** `firmware/ardupilot/params/01-base.param` và `02-avoid-tfmini.param` (Phase 11 sở hữu) · `firmware/ardupilot/params/obstacle-avoidance-tfminiplu"
+  },
+  {
+   "file": "plans/phase-05-backend-mavlink-telemetry.md",
+   "line": 43,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "| `backend/vision/*.py` | `stream.py`, `detector.py`, `events.py` đều `NotImplementedError` | Phase 07 chỉ thêm nguồn giả; bản thật thuộc `plans/ai/` và Phase 1"
+  },
+  {
+   "file": "plans/phase-05-backend-mavlink-telemetry.md",
+   "line": 401,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "`backend/config.py` đã có sẵn khối Vision (`CAMERA_STREAM_URL`, `YOLO_WEIGHTS`, `DETECTION_CONFIDENCE`, `DETECTION_MIN_FRAMES`, `DETECTION_COOLDOWN_S`). `plans/"
+  },
+  {
+   "file": "plans/phase-05-backend-mavlink-telemetry.md",
+   "line": 448,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "| `detection` | 3–5 Hz | Sự kiện | 07 (nguồn giả) · `plans/ai/` (nguồn thật) |"
+  },
+  {
+   "file": "plans/phase-05-backend-mavlink-telemetry.md",
+   "line": 538,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "`boxes` **được phép rỗng** — và ở Phase 07 đến 10 thường sẽ rỗng hoặc chỉ có box giả, vì bộ nhận diện thật thuộc `plans/ai/`."
+  },
+  {
+   "file": "plans/phase-07-backend-mission-proximity-safety.md",
+   "line": 11,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Xong phase này, backend đã **đủ tính năng** — Phase 08–10 chỉ còn dựng giao diện lên trên nó. Đây cũng là phase tạo **nguồn video giả** để Phase 10 dựng panel v"
+  },
+  {
+   "file": "plans/phase-07-backend-mission-proximity-safety.md",
+   "line": 320,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Phase 10 cần một nguồn video để dựng panel video + canvas overlay, nhưng camera thật chỉ có ở Phase 17 và bộ nhận diện thật ở `plans/ai/`. `fake_stream.py` lấp "
+  },
+  {
+   "file": "plans/phase-07-backend-mission-proximity-safety.md",
+   "line": 335,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Viết file `docs/hop-dong-mjpeg.md` ở gốc repo. Đây là **nguồn sự thật duy nhất** của bốn header multipart — `plans/phase-12-firmware-esp32-camera.md` (firmware)"
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 23,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Trạng thái repo hiện tại (đã kiểm ngày 21/09/2026): `backend/` (5 module + 4 file test), `frontend/` (7 file JS thuần + html + css), `ml/`, `esp32/` (2 sketch `"
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 35,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- `ml/pyproject.toml` — khung dự án `uv` riêng cho ML (Python 3.13, **không có** `torch` — AI Phase 1 tự cài torch bằng `--index-url cu130`, xem 01.6)"
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 49,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Xoá: `requirements.txt`, `requirements-dev.txt` (nội dung chuyển vào `pyproject.toml` gốc), `requirements-ml.txt` (nội dung chuyển vào `ml/pyproject.toml` — khu"
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 51,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Không đụng:** `backend/mavlink/`, `backend/mqtt/`, `backend/vision/`, `ml/`, `scripts/run_sitl.sh` (Phase 02 sở hữu), `scripts/github/`, `SAFETY.md`, `LICENSE"
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 209,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Việc trả về luồng chính (nhận từ AI Phase 1, A1.8 — DVC).** AI Phase 1 dùng DVC để phiên bản-hoá `ml/datasets/`. Dòng `ml/datasets/*` đã có sẵn trong `.gitign"
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 212,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "!ml/datasets/*.dvc"
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 213,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "!ml/datasets/.gitignore"
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 297,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "> File này **chỉ có phụ thuộc backend**. Không có nhóm `ml` — AI Phase 1 dùng một dự án `uv` riêng ở `ml/pyproject.toml` (tạo bên dưới), vì `torch` + CUDA runti"
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 312,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Khung `ml/pyproject.toml`.** Một interpreter Python **3.13** chạy cả backend lẫn ML (không dùng phiên bản khác riêng cho ML — xem AI Phase 1 §A1.1), nhưng `ml"
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 604,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] Ba file `requirements*.txt` đã xoá; `pyproject.toml` (gốc) có khối `[project]` **không có** `[project.optional-dependencies] ml`; `ml/pyproject.toml` tồn "
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 620,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "| Xoá `requirements*.txt` nhưng `ml/` hoặc tài liệu còn trỏ vào | 2 | 2 | 4 | `Select-String -Pattern \"requirements\" -Path *.md,ml\\**\\*.py` rồi sửa; `Makefile` "
+  },
+  {
+   "file": "plans/phase-01-tai-cau-truc-repo.md",
+   "line": 646,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- **Trình quản lý gói là gì** — `uv` cho Python, `pnpm` cho JavaScript; lockfile là gì và vì sao nó quan trọng; vì sao gộp ba `requirements*.txt` về hai `pyproj"
+  },
+  {
+   "file": "docs/archive/plan-nhap-92-giai-doan.md",
+   "line": 268,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "├── ml/"
+  },
+  {
+   "file": "docs/archive/plan-nhap-92-giai-doan.md",
+   "line": 1103,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "ml/scripts/convert_visdrone_person.py"
+  },
+  {
+   "file": "plans/phase-10-web-dieu-khien-obstacle-video.md",
+   "line": 230,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Ở Phase 10, nguồn là MJPEG **giả** của Phase 07 §7.8.2 (320×240 @10 fps, một hình chữ nhật di chuyển, kèm `detection` bám theo nó mỗi 300 ms). Camera thật vào ở"
+  },
+  {
+   "file": "docs/archive/team-plan-4-nguoi-cu.md",
+   "line": 60,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| **P4** | Vision & ML Lead | `ml/`, `backend/vision/`, 5 model, 4 experiment, dataset | \"Model này phát hiện được người ở độ cao bay thật, và tôi chứng minh bằ"
+  },
+  {
+   "file": "docs/archive/team-plan-4-nguoi-cu.md",
+   "line": 84,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| `ml/**` | P4 | — |"
+  },
+  {
+   "file": "plans/phase-11-firmware-ardupilot-param.md",
+   "line": 206,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Thu muc nay DUOC COMMIT (khac voi logs/ va ml/datasets/). Day la lich su cau hinh"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 15,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| **ML pipeline** | `ml/` — datasets, scripts, configs, weights, results |"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 59,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| Chạy YOLO11n baseline | `ml/scripts/` | predict ảnh mẫu, thấy class `person` |"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 98,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "# ml/scripts/convert_visdrone_person.py"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 119,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "# ml/scripts/train.py"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 122,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "data=\"ml/configs/visdrone_person.yaml\","
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 169,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "Ghi vào ml/results/distance_test.csv:"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 191,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "# ml/scripts/split_dataset.py"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 207,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "# ml/configs/combined_person.yaml"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 208,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "train: ml/datasets/combined/train"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 209,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "val:   ml/datasets/combined/val"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 216,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "model.train(data=\"ml/configs/combined_person.yaml\", epochs=50, name=\"model_C\")"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 224,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "# ml/scripts/augment.py"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 350,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "data=\"ml/configs/final.yaml\",  # VisDrone + ground + airborne"
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 360,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "MODEL_PATH = \"ml/weights/model_E_final.pt\""
+  },
+  {
+   "file": "docs/archive/team-cu/P4-vision-ml.md",
+   "line": 407,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "ml/"
+  },
+  {
+   "file": "docs/so-tay/07-backend-mission-proximity-safety.md",
+   "line": 246,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "diện thật ở `plans/ai/` (19/11/2026: nay ở repo XLA), nhưng Phase 10 cần một luồng để dựng panel video và canvas"
+  },
+  {
+   "file": "plans/phase-17-ban-esp32-tfmini-camera.md",
+   "line": 485,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "diện thật thuộc luồng AI riêng (`plans/ai/`), bắt đầu sau khi drone đã bay được."
+  },
+  {
+   "file": "plans/phase-18-lap-rap-khung.md",
+   "line": 46,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Không đụng:** `firmware/`, `backend/`, `frontend/`, `ml/`, `params/`, `plans/reports/`, `SAFETY.md`, `docs/bao-cao-tong-quan-du-an.md`. Nếu số cân thật lệch n"
+  },
+  {
+   "file": "docs/so-tay/10-web-dieu-khien-obstacle-video.md",
+   "line": 182,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "Camera thật vào ở Phase 17, bộ nhận diện thật ở `plans/ai/` (19/11/2026: nay ở repo XLA, nạp bằng `backend/vision/detector.py`). Nguồn giả của Phase 07"
+  },
+  {
+   "file": "plans/phase-19-hieu-chinh-tren-khung-failsafe.md",
+   "line": 50,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Không đụng:** `backend/`, `frontend/`, `ml/`, `plans/reports/`, `SAFETY.md`, các file param `00`–`03` (chúng là lịch sử, không sửa đè). Nếu phải thay đổi một "
+  },
+  {
+   "file": "firmware/ardupilot/params/README.md",
+   "line": 3,
+   "type": "b",
+   "action": "nhắc ml/datasets bị gitignore: còn đúng",
+   "text": "Thư mục này **được commit** (khác với `logs/` và `ml/datasets/`). Đây là lịch sử cấu hình"
+  },
+  {
+   "file": "plans/phase-20-bay-rc-co-ban.md",
+   "line": 51,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Không đụng:** `backend/`, `frontend/`, `ml/`, `firmware/camera/`, `firmware/dronebridge/`, các file param `00`–`04`."
+  },
+  {
+   "file": "plans/phase-21-bay-tu-dong-va-web.md",
+   "line": 64,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Không đụng:** `backend/`, `frontend/`, `ml/`, `firmware/camera/`, các file param `00`–`05`."
+  },
+  {
+   "file": "plans/phase-23-iot-mqtt-su-kien-dashboard.md",
+   "line": 11,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Điểm quan trọng về phạm vi: phase này **không phụ thuộc vào luồng AI**. Pipeline sự kiện được thiết kế để chạy với **bất kỳ bộ nhận diện nào** đang được nạp — `"
+  },
+  {
+   "file": "plans/phase-23-iot-mqtt-su-kien-dashboard.md",
+   "line": 33,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- Một bộ trọng số bất kỳ cho detector: `ml/weights/yolo11n.pt` tải sẵn là đủ."
+  },
+  {
+   "file": "plans/phase-23-iot-mqtt-su-kien-dashboard.md",
+   "line": 70,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Không đụng:** `backend/mavlink/*` (Phase 05–07 sở hữu; phase này chỉ **đọc** telemetry qua API đã có), `backend/vision/stream.py` và `backend/vision/fake_stre"
+  },
+  {
+   "file": "plans/phase-23-iot-mqtt-su-kien-dashboard.md",
+   "line": 359,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Nhờ `FakeDetector`, toàn bộ pipeline sự kiện **test được mà không cần camera, không cần GPU, không cần luồng AI xong**. Đây là điểm quan trọng nhất của việc này"
+  },
+  {
+   "file": "plans/phase-23-iot-mqtt-su-kien-dashboard.md",
+   "line": 361,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Trọng số thật mặc định lấy từ `.env` (`YOLO_WEIGHTS=ml/weights/yolo11n.pt`). Với `yolo11n.pt` gốc (huấn luyện COCO), lớp `person` là **class index 0** — lọc đún"
+  },
+  {
+   "file": "plans/phase-22-tranh-vat-can-that-va-tuning.md",
+   "line": 61,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Không đụng:** `backend/`, `frontend/`, `ml/`, các file param `00`–`01`, `03`–`06`."
+  },
+  {
+   "file": "plans/README.md",
+   "line": 49,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "**Luồng AI (`plans/ai/`, ai-01 → ai-04, bản cũ 21/09/2026)** — mục tiêu: model nhận diện người từ trên cao và các thí nghiệm cho môn Xử lý ảnh. Đây là **luồng p"
+  },
+  {
+   "file": "plans/README.md",
+   "line": 91,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "### Luồng AI (`plans/ai/`) — đã thay thế bằng repo XLA, xem khối đầu mục trên"
+  },
+  {
+   "file": "plans/QUYET-DINH-CHUA-CHOT.md",
+   "line": 41,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "Ngày ghi: 21/09/2026. Bối cảnh: đã duyệt kiến trúc, luồng chính 25 phase (`plans/phase-00..24`, danh sách ở `plans/_phase-index.md`) và luồng AI 4 phase (`plans"
+  },
+  {
+   "file": "plans/_phase-index.md",
+   "line": 3,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "Luồng chính `plans/phase-NN-<slug>.md` (UAV bay được + đầy đủ tính năng). Luồng AI `plans/ai/ai-phase-NN-<slug>.md` bắt đầu sau Phase 21 (drone bay tự động ổn),"
+  },
+  {
+   "file": "plans/_phase-index.md",
+   "line": 33,
+   "type": "a",
+   "action": "đã thêm con trỏ tới XLA trong file",
+   "text": "Luồng AI `plans/ai/` (ĐÃ THAY THẾ 18/11/2026 bằng repo XLA `D:\\XLA`, plan `plans/261118-ai-anh-chat-luong-thap/`; phase 01–14 xong 19/11, IOT-CV tích hợp ở phas"
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 93,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [x] Ba file `requirements*.txt` đã xoá; `pyproject.toml` (gốc) có khối `[project]` **không có** `[project.optional-dependencies] ml`; `ml/pyproject.toml` tồn "
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 106,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Sàn phiên bản Python lấy bản CAO giữa hai nguồn, không chép số trong plan.** Plan §01.6 ghi `numpy>=1.26` / `websockets>=13.0` / `pytest>=8.3` / `ruff>=0.7`, "
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1208,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Plan: plans/ai/ai-phase-01-chuan-bi.md"
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1213,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] `ml/pyproject.toml` ghim `albumentations==2.0.8` và `opencv-python>=4.10,<5`; `ml/.venv` là Python **3.13**, tách khỏi `.venv` của backend (cùng phiên bản"
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1214,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] `ml/results/dataset_stats.json` tồn tại, `instances_person > 0` cho cả ba split, và **20 ảnh trong `ml/results/convert_check/` có hộp trùm lên người** (ki"
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1215,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] `ml/data/README.md` nằm trong git và ghi đủ giấy phép của VisDrone (không có LICENSE), HERIDAL (CC BY), albumentations (MIT, lý do ghim)."
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1217,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] `ml/results/degrade_preview/` có ≥ 30 cặp ảnh trước–sau, nhìn thấy rõ ảnh sau giống ảnh camera rẻ."
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1222,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] `dvc status` in `up to date`; `ml/datasets/visdrone_person.dvc` **commit được** (`git check-ignore -v` không in gì); đã thử xoá thư mục và `dvc pull` lấy "
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1223,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] `ml/tools/mjpeg_client.py --limit 20` (chạy sau khi `phase-07` dựng xong `GET /api/video/stream`) lưu đúng 20 `.jpg` + `manifest.jsonl` 20 dòng, `frame_id"
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1229,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Plan: plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md"
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1236,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- nhãn đúng chưa (mở lại `ml/results/convert_check/`)"
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1247,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] `ml/experiments/ma-tran-thi-nghiem.md` và `protocol-thu-du-lieu.md` tồn tại; mỗi TN ghi rõ đã chạy hay chờ dữ liệu bay."
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1248,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] `ml/results/REPORT.md` có 6 bảng; **mọi bảng có cột AR-small**; mục \"Kỳ vọng trung thực\" và \"Giới hạn\" đã viết."
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1249,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] `ml/scripts/evaluate.py` chỉ **thêm** cờ, schema `metrics.json` của A1.6 không bị đổi tên/xoá khoá nào."
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1255,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Plan: plans/ai/ai-phase-03-du-lieu-that.md"
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1277,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Plan: plans/ai/ai-phase-04-bao-cao-xla.md"
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1286,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] Mỗi con số truy ngược được về file trong `ml/results/` (soát ngẫu nhiên 10 con số để kiểm)."
+  },
+  {
+   "file": "plans/PROGRESS.md",
+   "line": 1287,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] `ml/scripts/reproduce.ps1` chạy thật được `-Stage figures` và `-Stage eval`; `reproduce_log.txt` có bằng chứng; phụ lục ghi rõ chặng nào chưa kiểm được."
+  },
+  {
+   "file": "plans/phase-24-iot-qos-hong-hoc-bao-cao.md",
+   "line": 15,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Phạm vi **không** bao gồm báo cáo môn Xử lý ảnh — việc đó thuộc `plans/ai/ai-phase-04-bao-cao-xla.md`. Hai báo cáo dùng chung số liệu nhưng tách file, tách ngườ"
+  },
+  {
+   "file": "plans/phase-24-iot-qos-hong-hoc-bao-cao.md",
+   "line": 37,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- Luồng AI đã có `ml/results/` với các bảng kết quả — cần cho mục 24.7 và 24.11; nếu chưa xong, phần IoT vẫn viết được độc lập."
+  },
+  {
+   "file": "plans/phase-24-iot-qos-hong-hoc-bao-cao.md",
+   "line": 70,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Không đụng:** `backend/mqtt/*` (Phase 23 sở hữu — nếu cần đổi, ghi thành mục trong `docs/lessons-learned.md`), `backend/mavlink/*`, `firmware/camera/*` (Phase"
+  },
+  {
+   "file": "plans/phase-24-iot-qos-hong-hoc-bao-cao.md",
+   "line": 393,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Cả bốn phải sạch/xanh. `git status --short` phải rỗng (mọi thứ đã commit, và không có file dữ liệu lớn nào lọt vào — kiểm tra `.gitignore` có `logs/`, `ml/datas"
+  },
+  {
+   "file": "plans/phase-24-iot-qos-hong-hoc-bao-cao.md",
+   "line": 549,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "> Điểm 3 nằm trong §5.5, thuộc phần nội dung Xử lý ảnh mà `plans/ai/ai-phase-04-bao-cao-xla.md` cũng chạm tới. **Phối hợp:** làm mục 24.10 **sau khi** ai-phase-"
+  },
+  {
+   "file": "plans/phase-24-iot-qos-hong-hoc-bao-cao.md",
+   "line": 622,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "**Phần C — sản phẩm môn Xử lý ảnh:** thuộc `plans/ai/ai-phase-04-bao-cao-xla.md`. Ở đây chỉ để **một ô tick trỏ sang đó**, không liệt kê lại (tránh hai bản sự t"
+  },
+  {
+   "file": "plans/phase-24-iot-qos-hong-hoc-bao-cao.md",
+   "line": 625,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "- [ ] Phần Xử lý ảnh hoàn thành theo checklist của plans/ai/ai-phase-04-bao-cao-xla.md"
+  },
+  {
+   "file": "plans/phase-24-iot-qos-hong-hoc-bao-cao.md",
+   "line": 639,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "Move-Item plans/ai/ai-phase-*.md plans/archive/"
+  },
+  {
+   "file": "plans/phase-24-iot-qos-hong-hoc-bao-cao.md",
+   "line": 735,
+   "type": "b",
+   "action": "bản ghi phase/tiến độ đã xong, giữ nguyên",
+   "text": "| 24.10 Đính chính tài liệu + viết lại README | 3 | Phối hợp thời điểm với `plans/ai/ai-phase-04` |"
+  },
+  {
+   "file": "plans/reports/260921-research-web-gcs-stack.md",
+   "line": 221,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "`ultralytics 8.4.157` ship YOLO11. Trên **laptop CPU không GPU**: **YOLO11n** hoặc **YOLO11s**, export ONNX. `config.YOLO_WEIGHTS` đang trỏ `ml/weights/yolo11n."
+  },
+  {
+   "file": "plans/reports/260921-research-web-gcs-stack.md",
+   "line": 236,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "├─ ml/                      # giữ nguyên"
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 10,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "`plans/phase-00..24-*.md` (25 file), `plans/ai/ai-phase-01..04-*.md` (4 file)."
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 13,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "(`backend/`, `frontend/`, `ml/`, `esp32/`, `params/`, `scripts/`, `Makefile`, `.gitignore`, `.env.example`)."
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 34,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| `plans/ai/ai-phase-01-chuan-bi.md:36` | `## Hiện trạng từng file (luật prior-art)` | thấp | Giữ — rất giá trị; nên chuẩn hoá thành mục tuỳ chọn trong template"
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 72,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "**Không phát hiện lỗi.** Đã quét toàn bộ `plans/*.md` + `plans/ai/*.md`:"
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 135,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| Chiến lược môi trường ML | `phase-01:264-279` (`[project.optional-dependencies] ml` + `uv sync --extra ml`) vs `ai-phase-01:135,152-165` (`uv venv --python 3."
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 223,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| 4 | `phase-12` **không hề trích dẫn** `ai-phase-01` §A1.9, dù `ai-phase-01:847,123` tuyên bố mình là SSOT và *\"`phase-12` phải cài đặt đúng nguyên văn\"*. `pha"
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 371,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| `plans/ai/ai-phase-02-huan-luyen-thi-nghiem.md:78-86` | Bảng 4 nhánh **A / B / C / D** cho đề tài môn XLA, có cột khuyến nghị (*\"B+A (khuyến nghị trong file q"
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 449,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "**Không phát hiện.** Đã quét `yolo|huấn luyện|train\\.py|dataset|VisDrone|ultralytics|epoch|gán nhãn` trên `plans/phase-*.md`, loại bỏ dòng trỏ về `plans/ai/`:"
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 451,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "- `phase-23:33,215,356` — chỉ **dùng suy luận** với trọng số có sẵn `ml/weights/yolo11n.pt` (COCO gốc, lọc class 0). `phase-23:65` khai rõ *\"`ml/**` (luồng AI s"
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 452,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "- `phase-07:291`, `phase-10:230` — nguồn `detection` **giả**, nói rõ *\"khi bộ nhận diện thật vào ở `plans/ai/`, chỉ đổi nguồn\"*. Đúng."
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 465,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "`plans/ai/ai-phase-01-chuan-bi.md:87-90,106-110` khai sở hữu **8 đường dẫn thuộc luồng chính**:"
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 477,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| `.gitignore` | sửa (`!ml/datasets/*.dvc`) | chồng với `phase-01`, `phase-11:41`, `phase-18:39` |"
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 481,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "**(b)** Chuyển toàn bộ cụm `backend/vision/*` và `scripts/fake_mjpeg_server.py` sang luồng chính (một mục mới trong `phase-17` hoặc `phase-23`), `ai-phase-01` c"
+  },
+  {
+   "file": "plans/reports/260921-review-plan-consistency.md",
+   "line": 489,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "**Mức: trung bình.** **Đề xuất:** thay mọi tham chiếu **số dòng** bằng tham chiếu **tên khối/tên hằng** (`khối Vision trong backend/config.py`, `khối ml/ trong "
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 60,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "`ml/scripts/train.py` đang viết quanh YOLO11n, và YOLO11n có nhiều số liệu VisDrone công bố hơn để"
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 73,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "yolo detect train data=ml/configs/visdrone_person.yaml model=yolo26n.pt `"
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 232,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "**Quy trình lọc còn một lớp `person`** (dùng cho `ml/scripts/convert_visdrone_person.py`):"
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 241,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "6. `nc: 1`, `names: ['person']` — khớp với `ml/configs/visdrone_person.yaml` hiện có."
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 283,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "`ml/scripts/split_dataset.py` đã ghi đúng yêu cầu này."
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 285,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "bền trước suy giảm thật. `ml/scripts/augment.py` đã có guard chặn đường dẫn chứa `test` — giữ nguyên."
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 293,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "Đây là phát hiện cần xử lý ngay vì `ml/requirements.txt` hiện ghi `albumentations>=1.4`."
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 451,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "> toàn bộ `ml/scripts/`, dataset VisDrone-person và ladder model A→G vẫn giữ nguyên giá trị. Thay đổi"
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 692,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "dvc add ml/datasets/visdrone_person"
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 693,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "git add ml/datasets/visdrone_person.dvc .gitignore"
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 700,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "> **Kiểm tra `.gitignore` ngay bây giờ:** đảm bảo `ml/datasets/`, `ml/weights/`, `ml/results/` đã bị"
+  },
+  {
+   "file": "plans/reports/260921-research-ai-vision-pipeline.md",
+   "line": 710,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| 1 | Sửa `ml/requirements.txt`: ghim `albumentations==2.0.8` + chú thích về AlbumentationsX/AGPL | Gói đã ngừng bảo trì; quyết định giấy phép phải có chủ đích "
+  },
+  {
+   "file": "plans/reports/260921-brainstorm-thiet-ke-tong-the.md",
+   "line": 66,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "├─ ml/        torch cu130, ultralytics, VisDrone-person, degradation pipeline, train/eval (AR-small), SAHI, export ONNX/TensorRT, Label Studio, DVC"
+  },
+  {
+   "file": "plans/reports/260921-brainstorm-thiet-ke-tong-the.md",
+   "line": 86,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| Luồng AI (`plans/ai/`) | ai-01 chuẩn bị · ai-02 huấn luyện/thí nghiệm · ai-03 dữ liệu thật · ai-04 báo cáo XLA | ai-03 cần drone bay |"
+  },
+  {
+   "file": "plans/reports/260921-brainstorm-thiet-ke-tong-the.md",
+   "line": 96,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "├─ ml/                 giữ; sửa requirements (albumentations==2.0.8, opencv<5), thêm degradation/, experiments/"
+  },
+  {
+   "file": "plans/reports/260921-brainstorm-thiet-ke-tong-the.md",
+   "line": 123,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "| `git add .` dính 15 GB ảnh | `.gitignore` đã loại `ml/datasets`; DVC từ khi > 1 GB |"
+  },
+  {
+   "file": "plans/reports/260921-brainstorm-thiet-ke-tong-the.md",
+   "line": 138,
+   "type": "b",
+   "action": "bản ghi lịch sử, giữ nguyên",
+   "text": "1. `/t1k:plan` viết `plans/phase-00..24` + `plans/ai/ai-phase-01..04` chi tiết (việc, lệnh, cổng pass, rủi ro, file sở hữu)."
+  }
+ ]
+}
