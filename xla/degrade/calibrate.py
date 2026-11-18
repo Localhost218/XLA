@@ -275,20 +275,52 @@ def _summary_items(res: dict) -> dict:
     return {k: round(v["value"], 4) for k, v in res["items"].items() if math.isfinite(v["value"])}
 
 
+def checkpoint_path(base: dict, space: list[dict], units: list, profile: dict, seed: int, split: str) -> Path:
+    """Checkpoint CMA-ES theo khoá (config gốc, không gian, đơn vị, hồ sơ, seed, split): đổi gì là khoá mới."""
+    key = json.dumps({"cfg": base, "space": space, "units": [u for _, u in units], "seed": seed, "split": split,
+                      "profile": [profile.get("profile_id"), profile.get("profile_version")]}, sort_keys=True,
+                     default=str)
+    return paths.cache_dir() / "degrade" / f"calib_ckpt_{hashlib.sha256(key.encode()).hexdigest()[:16]}.pkl"
+
+
+def _save_ckpt(path: Path, state: dict) -> None:
+    import pickle
+
+    tmp = path.with_suffix(".tmp")
+    tmp.write_bytes(pickle.dumps(state))
+    tmp.replace(path)                      # thay nguyên tử: ngắt giữa chừng không làm hỏng checkpoint cũ
+
+
 def run_cma(ev: Evaluator, base: dict, space: list[dict], budget: int, sigma0: float, seed: int,
-            log) -> tuple[list[dict], dict, dict]:
+            log, ckpt: Path | None = None, progress: Path | None = None) -> tuple[list[dict], dict, dict, float]:
+    """CMA-ES; sau lượt "trước" và sau mỗi thế hệ ghi ``ckpt`` (trạng thái CMA + đường hội tụ) và ``progress`` (jsonl,
+    một dòng mỗi lượt). Có ``ckpt`` cũ cùng khoá thì chạy tiếp từ đó. Trả (đường hội tụ, tốt nhất, trước, giây)."""
+    import pickle
+
     import cma
 
-    x0 = [s["x0"] for s in space]
-    before = ev([apply_values(base, space, x0)])[0]
-    hist = [{"eval": 1, "gen": 0, "values": dict(zip([s["name"] for s in space], x0, strict=True)),
-             "total": before["total"]}]
-    best = {"total": before["total"], "values": x0, "res": before}
-    log(f"trước: {before['total']:.4f}")
-    es = cma.CMAEvolutionStrategy(to_unit(space, x0).tolist(), sigma0,
-                                  {"bounds": [0, 1], "seed": seed, "maxfevals": budget - 1, "verbose": -9})
-    gen = 0
+    names = [s["name"] for s in space]
+    if ckpt is not None and ckpt.exists():
+        st = pickle.loads(ckpt.read_bytes())
+        es, hist, best, before, gen, secs = st["es"], st["hist"], st["best"], st["before"], st["gen"], st["secs"]
+        es.opts.set({"maxfevals": budget - 1})  # ngân sách có thể khác lần trước
+        log(f"chạy tiếp từ checkpoint {ckpt.name}: {len(hist)} lượt, thế hệ {gen}, tốt nhất {best['total']:.4f}")
+    else:
+        t0 = time.perf_counter()
+        x0 = [s["x0"] for s in space]
+        before = ev([apply_values(base, space, x0)])[0]
+        hist = [{"eval": 1, "gen": 0, "values": dict(zip(names, x0, strict=True)), "total": before["total"]}]
+        best = {"total": before["total"], "values": x0, "res": before}
+        es = cma.CMAEvolutionStrategy(to_unit(space, x0).tolist(), sigma0,
+                                      {"bounds": [0, 1], "seed": seed, "maxfevals": budget - 1, "verbose": -9})
+        gen, secs = 0, time.perf_counter() - t0
+        log(f"trước: {before['total']:.4f}")
+        if progress is not None:
+            progress.write_text(json.dumps(hist[0]) + "\n", encoding="utf-8", newline="\n")
+    if ckpt is not None:
+        _save_ckpt(ckpt, {"es": es, "hist": hist, "best": best, "before": before, "gen": gen, "secs": secs})
     while not es.stop() and len(hist) < budget:
+        t0 = time.perf_counter()
         gen += 1
         xs = es.ask()
         xs = xs[:budget - len(hist)]
@@ -297,16 +329,24 @@ def run_cma(ev: Evaluator, base: dict, space: list[dict], budget: int, sigma0: f
         totals = [r["total"] for r in res]
         if len(xs) == es.popsize:
             es.tell(xs, totals)
+        new = []
         for v, r in zip(vals, res, strict=True):
-            hist.append({"eval": len(hist) + 1, "gen": gen,
-                         "values": {s["name"]: round(x, 5) for s, x in zip(space, v, strict=True)},
-                         "total": r["total"]})
+            new.append({"eval": len(hist) + 1, "gen": gen,
+                        "values": {s["name"]: round(x, 5) for s, x in zip(space, v, strict=True)},
+                        "total": r["total"]})
+            hist.append(new[-1])
             if r["total"] < best["total"]:
                 best = {"total": r["total"], "values": v, "res": r}
+        secs += time.perf_counter() - t0
+        if progress is not None:
+            with progress.open("a", encoding="utf-8", newline="\n") as f:
+                f.writelines(json.dumps(h) + "\n" for h in new)
+        if ckpt is not None:
+            _save_ckpt(ckpt, {"es": es, "hist": hist, "best": best, "before": before, "gen": gen, "secs": secs})
         log(f"thế hệ {gen}: tốt nhất thế hệ {min(totals):.4f}, tốt nhất {best['total']:.4f} ({len(hist)} lượt)")
         if len(xs) < es.popsize:
             break
-    return hist, best, before
+    return hist, best, before, secs
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -343,13 +383,15 @@ def main(argv: list[str] | None = None) -> int:
         return _run_realsr(a, base, real, units, ctx, log)
 
     space = resolve_space(base, ctx["profile"])
+    ckpt = checkpoint_path(base, space, units, ctx["profile"], a.seed, a.split)
+    progress = ckpt.with_suffix(".progress.jsonl")
+    log(f"checkpoint: {ckpt}")
     ev = Evaluator(real, units, ctx, a.workers)
-    t0 = time.perf_counter()
     try:
-        hist, best, before = run_cma(ev, base, space, a.budget, float(base["calibration"]["sigma0"]), a.seed, log)
+        hist, best, before, secs = run_cma(ev, base, space, a.budget, float(base["calibration"]["sigma0"]), a.seed,
+                                           log, ckpt, progress)
     finally:
         ev.close()
-    secs = time.perf_counter() - t0
     best_cfg = apply_values(base, space, best["values"])
     improved = best["total"] < before["total"]
     old_pv = int(base.get("params_version", 1))

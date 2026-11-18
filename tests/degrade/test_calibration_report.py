@@ -125,6 +125,26 @@ def test_space_center_mode_and_profile_lower_bound() -> None:
     assert calibrate.from_unit(space, u) == pytest.approx([0.5, 2.0])
 
 
+def test_cma_resumes_from_checkpoint_identically(tmp_path) -> None:
+    space = [{"name": f"p{i}", "key": f"b.p{i}", "lo": 0.0, "hi": 1.0, "x0": 0.9} for i in range(3)]
+    base = {"b": {f"p{i}": 0.9 for i in range(3)}}
+
+    def ev(cfgs):
+        return [{"total": float(sum((c["b"][f"p{i}"] - 0.3) ** 2 for i in range(3))), "items": {}} for c in cfgs]
+
+    def quiet(_):
+        return None
+
+    full = calibrate.run_cma(ev, base, space, 22, 0.2, 5, quiet)
+    ck, pr = tmp_path / "c.pkl", tmp_path / "c.progress.jsonl"
+    part = calibrate.run_cma(ev, base, space, 8, 0.2, 5, quiet, ck, pr)   # "bị ngắt" sau 8 lượt
+    resumed = calibrate.run_cma(ev, base, space, 22, 0.2, 5, quiet, ck, pr)
+    assert len(part[0]) == 8 and [h["total"] for h in resumed[0]] == pytest.approx([h["total"] for h in full[0]])
+    assert resumed[1]["total"] == pytest.approx(full[1]["total"])
+    assert full[1]["total"] < full[2]["total"]
+    assert len(pr.read_text(encoding="utf-8").splitlines()) == len(resumed[0])
+
+
 def test_in_memory_measure_matches_lowlevel_measure_set(tmp_path) -> None:
     from xla.eval.lowlevel import measure_set
 

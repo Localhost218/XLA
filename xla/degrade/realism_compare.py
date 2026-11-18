@@ -98,8 +98,20 @@ def main(argv: list[str] | None = None) -> int:
                             "measured": time.strftime("%Y-%m-%d %H:%M")}
             result = out["smoke"]
         else:
-            rows = [run_row(r, real, a.n_images, a.n_patches, a.seed, ("stats", "c2st", "kid"), a.device)
-                    for r in a.rows.split(",") if r]
+            old = {r["row"]: r for r in out.get("rows", [])}
+            rows = []
+            for name in [r for r in a.rows.split(",") if r]:
+                prev = old.get(name)
+                if (prev and prev["seed"] == a.seed and prev["n_patches"] == a.n_patches
+                        and prev.get("n_images_requested") == a.n_images and prev["manifest_sha256"] == _manifest_sha(name)):
+                    rows.append(prev)                      # chịu ngắt: hàng đã đo cùng tham số + cùng tập thì giữ
+                    continue
+                row = run_row(name, real, a.n_images, a.n_patches, a.seed, ("stats", "c2st", "kid"), a.device)
+                row["n_images_requested"] = a.n_images
+                rows.append(row)
+                out["rows"] = rows + [r for k, r in old.items() if k not in {x["row"] for x in rows}]
+                a.out.parent.mkdir(parents=True, exist_ok=True)
+                a.out.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
             out.update({
                 "phase": "07", "measured": time.strftime("%Y-%m-%d"),
                 "real": {"split": "test", "n_frames": len(real), "split_file": "data/real/split.json",
