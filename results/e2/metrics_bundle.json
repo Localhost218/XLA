@@ -1,0 +1,12 @@
+{
+ "metrics": {
+  "map50": 0.119542,
+  "map50_95": 0.042457,
+  "precision": 0.188498,
+  "recall": 0.395973,
+  "fp_per_neg_frame": 0.30719
+ },
+ "conf_threshold": 0.07669,
+ "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+ "model": "r1"
+}

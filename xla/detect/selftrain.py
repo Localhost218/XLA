@@ -624,7 +624,9 @@ def _model_entry(cfg: dict[str, Any], name: str, root: Path, ev: dict[str, Any])
             "devval_map50": sel["devval_mAP50"],
             "devval_map50_last3_mean": float(np.mean([h["devval_mAP50"] for h in hist[-3:]])),
             "gpu_hours": round(sum(x["gpu_s"] for x in info["sessions"]) / 3600, 4), "epochs": done["epochs"],
-            "batch_effective": done["batch_effective"], "train_data": info["dataset"], "init_weights":
+            "batch_effective": done["batch_effective"],
+            "workers": [w for x in info["sessions"] for w in x.get("workers", [info["config"]["train"]["workers"]])],
+            "train_data": info["dataset"], "init_weights":
             info["config"]["weights"], "devval_history": hist, "test": summ, "test_bundle_keys": bundle_metrics(summ),
             "path": "pt: YOLO.predict khung nguyên 640×480, bỏ hộp x1 < 16 (như mốc / E1)"}
 

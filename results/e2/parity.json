@@ -1,0 +1,60 @@
+{
+ "metric": "mAP50",
+ "split": "devval",
+ "tolerance": 0.005,
+ "n_frames": 100,
+ "gate_reference": "pt_crop_square",
+ "reference": {
+  "name": "pt_crop_square",
+  "pipeline": "YOLO.predict rect=False (letterbox vuông 1280×1280 như graph §2) trên khung[:, 16:], x += 16",
+  "mAP50": 0.26342,
+  "mAP50_95": 0.128783,
+  "n_frames": 100,
+  "labels_official": true
+ },
+ "candidates": {
+  "ort_cpu": {
+   "mAP50": 0.26342,
+   "mAP50_95": 0.127711,
+   "n_frames": 100,
+   "labels_official": true,
+   "delta_map50": 0.0,
+   "delta_map50_95": -0.001072,
+   "pass": true
+  },
+  "ort_cuda": {
+   "mAP50": 0.263284,
+   "mAP50_95": 0.127671,
+   "n_frames": 100,
+   "labels_official": true,
+   "delta_map50": -0.000136,
+   "delta_map50_95": -0.001112,
+   "pass": true
+  }
+ },
+ "info": {
+  "pt_crop_rect": {
+   "mAP50": 0.29712,
+   "mAP50_95": 0.140405,
+   "n_frames": 100,
+   "labels_official": true,
+   "pipeline": "YOLO.predict mặc định (rect=True, letterbox chữ nhật tối thiểu) trên khung[:, 16:], x += 16",
+   "delta_map50_ort_cpu_minus_this": -0.0337,
+   "note": "tham khảo, không chặn: khác hình dạng letterbox với graph (mốc cổng trước 18/11/2026)"
+  },
+  "pt_full_edge16": {
+   "mAP50": 0.31762,
+   "mAP50_95": 0.151595,
+   "n_frames": 100,
+   "labels_official": true,
+   "pipeline": "YOLO.predict trên khung nguyên, bỏ hộp x1 < 16 (đường của mốc / E1)",
+   "delta_map50_ort_cpu_minus_this": -0.0542,
+   "note": "tham khảo, không chặn: khác đầu vào (cắt mép trong graph vs lọc hộp sau)"
+  }
+ },
+ "pass": true,
+ "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+ "weights_sha256": "7e37476576683bf5205863256f095fb0c8e1e46d5fea65d1e744bedfa310ade5",
+ "created": "2026-11-18T16:54:48+00:00",
+ "bundle": "models/release/detector-v1.0.0"
+}
