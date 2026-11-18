@@ -9,13 +9,13 @@
     "selection": "cách đều theo tên đã sắp (linspace)"
   },
   "schema": "classic_bench/1",
-  "generated": "2026-11-18T07:46:58+00:00",
-  "command": "python -m xla.enhance.classic --split dev --limit 200 --bench --bench-out results/enhance/classic_bench.json --note Máy hạ xung: GPU 87 °C SW thermal slowdown do lane khác huấn luyện, % Processor Performance ~22 % suốt từ 13:45; chủ dự án chọn để nguyên và cho đo luôn (18/11/2026). --note Số tham chiếu lúc máy khoẻ (13:30–13:45, ngay sau khởi động lại, cắm sạc, tải CPU 7 %, chưa ghi % Processor Performance): stepbench min-of-7, trung vị 21 khung dev (cách 55), toàn chuỗi 17,7 ms (cv2 32 luồng) / 13,4 ms (4 luồng); từng bước 32 luồng: deblock 2,95, magenta 3,03, vignette 0,13, dehaze 4,31, sharpen 4,67 ms. Mã lúc đó khác bản này ở dilate 15 px và kẹp vọt lố tính bằng float.",
+  "generated": "2026-11-18T17:11:15+00:00",
+  "command": "python -m xla.enhance.classic --split dev --limit 200 --bench --threads 4 --bench-out results/enhance/classic_bench.json --note Đo lại ở phase 14 (19/11/2026), máy khoẻ: cắm sạc, power scheme Legion Performance Mode, % Processor Performance trung bình 172 % ngay trước khi đo, không job GPU/CPU nào khác chạy; cv2 4 luồng (nhanh hơn 32 luồng mặc định: p50 9,1 so với 10,9 ms trên cùng 200 khung, cùng phiên). Thay số 95 ms đo lúc máy hạ xung 18/11.",
   "warmup": 20,
   "env": {
     "cpu": "AMD Ryzen 9 7945HX with Radeon Graphics",
     "logical_cpus": 32,
-    "cv2_threads": 32,
+    "cv2_threads": 4,
     "numpy": "2.5.5",
     "opencv": "5.1.0",
     "python": "3.12.16",
@@ -40,50 +40,50 @@
   ],
   "ms": {
     "total": {
-      "p50": 95.458,
-      "p95": 115.96,
-      "mean": 98.443
+      "p50": 9.181,
+      "p95": 10.21,
+      "mean": 8.924
     },
     "steps": {
       "crop": {
-        "p50": 1.578,
-        "p95": 1.974,
-        "mean": 1.618
+        "p50": 0.201,
+        "p95": 0.235,
+        "mean": 0.206
       },
       "deblock": {
-        "p50": 23.802,
-        "p95": 32.435,
-        "mean": 25.394
+        "p50": 2.198,
+        "p95": 2.932,
+        "mean": 2.265
       },
       "magenta": {
-        "p50": 20.624,
-        "p95": 28.237,
-        "mean": 19.224
+        "p50": 2.567,
+        "p95": 2.787,
+        "mean": 2.187
       },
       "vignette": {
-        "p50": 0.861,
-        "p95": 1.205,
-        "mean": 1.091
+        "p50": 0.152,
+        "p95": 0.166,
+        "mean": 0.153
       },
       "dehaze": {
-        "p50": 28.746,
-        "p95": 36.097,
-        "mean": 30.114
+        "p50": 2.214,
+        "p95": 2.534,
+        "mean": 2.238
       },
       "sharpen": {
-        "p50": 17.554,
-        "p95": 21.396,
-        "mean": 18.653
+        "p50": 1.591,
+        "p95": 1.784,
+        "mean": 1.612
       },
       "pad": {
-        "p50": 2.216,
-        "p95": 2.739,
-        "mean": 2.24
+        "p50": 0.252,
+        "p95": 0.296,
+        "mean": 0.257
       }
     }
   },
   "budget_ms": 30.0,
-  "pass": false,
+  "pass": true,
   "quality": {
     "pink_px": {
       "before_mean": 2084.0,
@@ -104,18 +104,17 @@
       "after_mean": 2.084284
     }
   },
-  "cpu_load_pct_during": 44.1,
+  "cpu_load_pct_during": 4.9,
   "cpu_perf_pct": {
-    "min": 21.7,
-    "mean": 21.9,
-    "max": 22.0,
-    "n_samples": 44,
+    "min": 166.3,
+    "mean": 182.0,
+    "max": 185.8,
+    "n_samples": 6,
     "interval_s": 2
   },
-  "throttled": true,
+  "throttled": false,
   "run_notes": [
-    "Máy hạ xung: GPU 87 °C SW thermal slowdown do lane khác huấn luyện, % Processor Performance ~22 % suốt từ 13:45; chủ dự án chọn để nguyên và cho đo luôn (18/11/2026).",
-    "Số tham chiếu lúc máy khoẻ (13:30–13:45, ngay sau khởi động lại, cắm sạc, tải CPU 7 %, chưa ghi % Processor Performance): stepbench min-of-7, trung vị 21 khung dev (cách 55), toàn chuỗi 17,7 ms (cv2 32 luồng) / 13,4 ms (4 luồng); từng bước 32 luồng: deblock 2,95, magenta 3,03, vignette 0,13, dehaze 4,31, sharpen 4,67 ms. Mã lúc đó khác bản này ở dilate 15 px và kẹp vọt lố tính bằng float."
+    "Đo lại ở phase 14 (19/11/2026), máy khoẻ: cắm sạc, power scheme Legion Performance Mode, % Processor Performance trung bình 172 % ngay trước khi đo, không job GPU/CPU nào khác chạy; cv2 4 luồng (nhanh hơn 32 luồng mặc định: p50 9,1 so với 10,9 ms trên cùng 200 khung, cùng phiên). Thay số 95 ms đo lúc máy hạ xung 18/11."
   ],
-  "gate": "over_budget_throttled"
+  "gate": "pass"
 }

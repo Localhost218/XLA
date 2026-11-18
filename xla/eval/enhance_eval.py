@@ -68,6 +68,7 @@ AB_RESULT_REL = Path("results/ab/ab_result.json")
 AB_KEY_REL = Path("results/ab/ab_key.json")
 LOCK_TIMEOUT_S = 6 * 3600.0
 ORT_THREADS = 4  # máy lật bit RAM dưới tải: tối đa 4 luồng/worker (thuc-thi §3)
+CPU_THREADS = 4  # cùng lý do: trần luồng cv2 (hàm cổ điển) và torch (pyiqa, ultralytics) của tiến trình
 PROVIDERS = {"cuda": "CUDAExecutionProvider", "cpu": "CPUExecutionProvider", "trt": "TensorrtExecutionProvider"}
 
 PHYSICAL = {
@@ -217,6 +218,20 @@ def load_classic(spec: str, params_path: Path | None = None) -> tuple[Fn, dict[s
     info = {"spec": spec, "params_path": str(params_path) if params_path else None,
             "params": json.loads(json.dumps(params, default=str)) if params is not None else None}
     return (lambda f: _check_out("classic", fn(f))), info
+
+
+def limit_cpu_threads(n: int = CPU_THREADS) -> dict[str, int]:
+    """Đặt trần luồng CPU của cv2 và torch (nếu có) cho cả tiến trình; trả số luồng thật để ghi vào JSON."""
+    import cv2
+
+    cv2.setNumThreads(n)
+    out = {"cv2": int(cv2.getNumThreads()), "ort_intra_op": ORT_THREADS}
+    with contextlib.suppress(ImportError):
+        import torch
+
+        torch.set_num_threads(n)
+        out["torch"] = int(torch.get_num_threads())
+    return out
 
 
 def parse_providers(text: str) -> list[str]:
@@ -403,7 +418,7 @@ def make_ctx(a: argparse.Namespace) -> Ctx:
         raise UsageError("--boot và --limit phải ≥ 0")
     return Ctx(root, rows, a.frames_dir or root / FRAMES_REL, a.boot, a.seed, a.limit, a.lock_timeout,
                {"split_json": str(split_json), "boot": {"n": a.boot, "seed": a.seed, "unit": "khối 30 s (block)"},
-                "smoke_limit": a.limit or None})
+                "smoke_limit": a.limit or None, "cpu_threads": limit_cpu_threads()})
 
 
 # ---------------------------------------------------------------- bước 2: chỉ số vật lý

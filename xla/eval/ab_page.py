@@ -41,6 +41,7 @@ from xla.eval.enhance_eval import (
     UsageError,
     add_variant_args,
     build_variants,
+    limit_cpu_threads,
     maybe_gpu,
 )
 from xla.paths import repo_root
@@ -415,6 +416,7 @@ def test_candidates(root: Path, split_json: Path, labels_dir: Path) -> list[dict
 
 
 def cmd_build(a: argparse.Namespace) -> dict[str, Any]:
+    limit_cpu_threads()
     root = repo_root()
     split_json = a.split_json or root / SPLIT_REL
     if not split_json.is_file():
