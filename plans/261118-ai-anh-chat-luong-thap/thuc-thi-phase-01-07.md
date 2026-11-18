@@ -110,10 +110,6 @@ của Windows, không có driver bên thứ ba. Gốc là RAM lật bit dưới 
 chạy memtest. Chủ dự án chốt: job CPU nặng **tối đa 4 worker**, checkpoint mỗi lượt. Vòng 2 chạy 4 worker 37 phút không sập.
 `git fsck` sau mỗi lần sập đều sạch.
 
-**Việc tiếp theo (phase 10 trở đi):**
-1. Phase 10 (E1 fine-tune D0/D1/D2, thêm D2+RealSR vì nó thắng KID), kết luận B1 bằng lệnh so ghép cặp ở trên.
-2. Song song được: 12 (cổ điển, CPU, tối đa 4 worker), 13 (mạng khôi phục), 15 + 17 (IOT-CV với bundle giả; nhớ bẫy
-   ORT CUDA EP ở phase 15).
-3. Label Studio không tự chạy lại sau khi tắt máy (nhãn đã xuất, không cần nữa); mở lại nếu cần:
-   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\labelstudio_start.ps1`.
-4. Human step còn mở, không chặn plan: lần tới bật camera thì kiểm bảng DQT ở q 19–40 (Deferred 1).
+**Việc tiếp theo:** → 19/11/2026: phase 01–14 đã xong. Trạng thái, SHA và kết quả cuối của phase 10–14 ở
+`thuc-thi-phase-10-14.md` §7; việc còn lại là phase 15–18 theo `plan.md`. Human step DQT ở q 19–40 (Deferred 1) vẫn mở,
+không chặn plan.

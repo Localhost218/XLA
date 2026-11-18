@@ -119,18 +119,45 @@ nếu mỗi file < 5 MB.
   `cpu_perf_pct`. Hai test `gpu` của `tests/detect/test_detector_export.py` phải chạy xanh ở phase 11.
 - Thư mục `--out` phải tên đúng `detector-v<version>` (công cụ trả exit 2 nếu sai).
 
-## 7. Trạng thái (Owner cập nhật)
+## 7. Trạng thái (Owner cập nhật; bảng cuối 19/11/2026)
+
+Mọi lane xong và đã gộp vào `feat/ai-anh-chat-luong-thap`; SHA là commit cuối của lane / merge commit trên nhánh tích hợp.
 
 | Lane | Trạng thái |
 |---|---|
-| detect (10) | **xong** `d1a13a2`: test mAP50 mốc 0,126 / D0 0,297 / D1 0,143 / D2 0,236 / D2sr 0,149; D2−D1 +0,093 [−0,073; +0,252]; best = D2 (dev-val 0,329); B1 chỉ D0 đạt, B2 B3 chưa |
-| detect-export | **xong** `0934f1e`: parity ORT CPU/CUDA −0,0029 mAP50 so `.pt` (đạt); resize trong graph trùng bit với `LetterBox` |
-| classic (12) | **xong** `e859e22`: hồng −91,6 %, dark channel 142,7→65,3, blocking 2,73→2,08; bench 95 ms lúc máy quá nhiệt (khoẻ 13–18 ms), đo lại ở phase 14 |
-| restore (13) | vòng 1 `01a93c9`: NAFNet width32 bundle hợp lệ nhưng p95 82 ms (máy không hãm) > 30; % hồng −93 %, flicker 1,65; vòng 2 đang train NAFNet-tiny cho kịp 30 ms |
-| abeval (14 code) | **xong** `fbaf1dc`: chạy giả đầu-cuối đạt; E4 COCO×gốc 0,1265 khớp mốc phase 09; lệnh chạy thật ở `results/ab/README.md` + báo cáo lane |
-| detect (11) | **tạm dừng 18/11 22:15** `f1c9418`: thầy YOLO11m xong (dev-val 0,267); trò r1 xong (dev-val 0,379 tốt nhất, TB 3 epoch cuối 0,328 > E1 D2 0,329 / 0,229, `D:DevCacheunsxlae21weightsbest_devval.pt`); còn r2 (chạy lại từ đầu) → r3 nếu tăng → `--score` → xuất bundle → Accept. Chi tiết: `results/e2/RESUME.md` trên `lane/detect` |
-| restore (13) vòng 2 | **tạm dừng 18/11 22:15** `dc9a6db`: NAFNet-w16 train tới bước 3 000/4 500 (`last.pt`), val tổng hợp PSNR 22,17; còn 1 500 bước → select → xuất thay bundle → Accept. Một lệnh: `D:/DevCache/runs/xla/restore/driver/resume_round2.py`; chi tiết `results/restore/RESUME.md` |
-| 14 gộp + PR #2 | chưa bắt đầu (chủ dự án bảo dừng trước bước gộp) |
+| detect (10) | **xong** 18/11 `d1a13a2`, gộp `81a4898`: test mAP50 mốc 0,126 / D0 0,297 / D1 0,143 / D2 0,236 / D2sr 0,149; D2−D1 +0,093 [−0,073; +0,252]; best = D2 (dev-val 0,329); B1 chỉ D0 đạt, B2 B3 không model nào đạt |
+| detect-export | **xong** 18/11 `0934f1e`, gộp `63ed406`: parity ORT CPU/CUDA −0,0029 mAP50 so `.pt` (đạt); resize trong graph trùng bit với `LetterBox`; mốc cổng đổi sang `.pt rect=False` ở `8746726` (§9) |
+| classic (12) | **xong** 18/11 `e859e22`, gộp `dcc04d4`: hồng −91,6 %, dark channel 142,7→65,3, blocking 2,73→2,08 (200 khung dev); bench đo lại ở phase 14 lúc máy khoẻ p50 9,18 / p95 10,21 ms (thay số 95 ms lúc quá nhiệt) |
+| abeval (14 code) | **xong** 18/11 `fbaf1dc`, gộp `52ec195`: chạy giả đầu-cuối đạt; E4 COCO×gốc 0,1265 khớp mốc phase 09 |
+| restore (13) | **xong** 18/11 `868d881`, gộp `9650338`: vòng 1 `01a93c9` NAFNet-width32 p95 82,1 ms (Accept FAIL); vòng 2 NAFNet-w16, bundle `enhancer-v1.0.0` p50 15,4 / p95 21,0 ms, Accept 7/7 PASS |
+| detect (11) | **xong** 19/11 `b0eec03`, gộp `5a4a05f`: dừng sau r2 (dev-val 0,296 < r1 0,379), ship trò r1; bundle `detector-v1.0.0` ONNX test mAP50 0,120, B1 B2 không đạt, B3 đạt p95 20,2 ms |
+| 14 gộp + chạy thật | **xong** 19/11 trên nhánh tích hợp: `9fbdbba` (bước 1–7, model thật, E4, trang A/B), `e142767` (trang A/B lần 2 phóng to), `779985a` (bước 9–11, chấm A/B lần 1, tiêu chí §8), `8ed4930` (kết quả A/B lần 2) |
+| PR #2 | `feat/ai-anh-chat-luong-thap` → `main`, **Owner mở**, đang mở (https://github.com/Localhost218/XLA/pull/2). Agent không mở PR, không merge; cổng "PR #2 merge" của phase 14 chờ Owner |
+
+### Kết quả cuối phase 10–14
+
+- **Phase 10 (E1):** best theo dev-val = D2 (dev-val mAP50 0,329). Trên test D2 − D1 +0,093 [−0,073; +0,252], CI chạm 0:
+  chưa đủ để nói D2 hơn D1 về mAP; báo nhầm khung bay D2 thấp hơn D1 rõ (−0,692 [−1,238; −0,246]). `results/e1/README.md`.
+- **Phase 11 (E2):** ship trò r1 theo dev-val. Bundle `detector-v1.0.0` đường ONNX test mAP50 0,120 [0,032–0,197]: B1 không
+  đạt, B2 không đạt (0,881 hộp/khung bay không người), **B3 đạt** (ORT CUDA EP p95 20,2 ms). Dev-val không dự đoán được test
+  lần này (r1 kém E1 D2 trên test, r2 cao nhất 0,313 nhưng không ship). `results/e2/README.md`.
+- **Phase 12 (cổ điển):** `xla.enhance.classic` p50 9,18 ms CPU. Trên test: hồng −89,2 %, dark channel −51,6 % (đạt), nhấp
+  nháy 2,18 (không đạt); thắng mạng 24/25 lượt A/B lần 1. `results/enhance/classic_bench.json`, `results/ab/README.md` §4.2.
+- **Phase 13 (mạng):** NAFNet-w16 (`enhancer-v1.0.0`), p95 21,0 ms. Trên test: hồng −99,9 % (đạt), dark channel −36,8 %
+  (không đạt), nhấp nháy 1,81 (không đạt). `results/restore/README.md` §8.
+- **Phase 14:** E4 → **D5 giữ `raw`** (bundle × mạng − gốc −0,085 [−0,139; −0,011]; hợp đồng không đổi). A/B lần 1 (cả khung):
+  mạng vs gốc 11/25 = 0,44 [0,267; 0,629], vs cổ điển 1/25 = 0,04 [0,007; 0,195]. A/B lần 2 (phóng to 2×): 13/25 = 0,52
+  [0,335; 0,700] và 5/25 = 0,20 [0,089; 0,391]. Quanh người gộp hai lần mạng thắng gốc 17/21 = 0,81 [0,60; 0,92]; đây là mô
+  tả hậu kiểm, không phải tiêu chí đã đăng ký. Mạng đạt 3/7 tiêu chí §8 nhánh A → **không ship `enhancer-v1.0.0` làm ảnh rõ
+  mặc định** (bundle vẫn hợp lệ hợp đồng, Kill (c) không kích hoạt). Hướng sửa (màu nguội/nhạt, khử mù yếu, nhấp nháy, chấm
+  lại bằng trang mới): `results/ab/README.md` §4.6. Chi tiết: `results/ab/README.md` §4, `results/ab-zoom/README.md`,
+  `results/e4/e4.json`, `results/enhance/enhance_eval.json`.
+- **Giờ GPU thật** (so ngân sách §4): phase 10 2,85 (trần ~3); phase 11 2,49 (trần ~2, vượt ~0,5); phase 13 ~1,7 gồm cả hai
+  vòng (vòng 1 1,03 trong trần ~1,25; vòng 2 ~0,67 trong trần riêng 45 phút); phase 14 + xuất/đo ms: không đo.
+
+**Việc còn lại sau phase 14:** phase 15–18 theo `plan.md` (15 IOT-CV tích hợp code, 16 IOT-CV chạy model thật, 17 IOT-CV
+trỏ về XLA, 18 báo cáo + một lệnh tái lập + PR cuối). Chưa làm. Phase 15–16 cần biết quyết định ở `results/ab/README.md`
+§4.6: enhancer chưa đạt nên mặc định không có ảnh rõ khuyến nghị; bật thử hay dùng cổ điển là quyết định của Owner.
 
 ## 8. Chạy tiếp sau khi bật máy (tạm dừng lần 2: 18/11 22:15)
 

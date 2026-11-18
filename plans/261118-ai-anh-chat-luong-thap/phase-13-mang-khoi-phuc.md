@@ -2,7 +2,12 @@
 
 | Trạng thái | Phụ thuộc | Ước lượng | Cần phần cứng |
 |---|---|---|---|
-| chưa bắt đầu | phase 02, 07 | L (~2,5 ngày agent), 6–20 giờ GPU (chưa xác minh — smoke đo trước) | Không |
+| xong 18/11/2026 | phase 02, 07 | L (~2,5 ngày agent), 6–20 giờ GPU (chưa xác minh — smoke đo trước) | Không |
+
+Kết quả (18/11/2026, `868d881`, gộp `9650338`): vòng 1 NAFNet-SIDD-width32 p95 82,1 ms > 30 ms (Accept FAIL) → vòng 2
+**NAFNet-w16** (1,14 M tham số, khởi tạo ngẫu nhiên, 4 500 bước, chọn `step_004500`): bundle `enhancer-v1.0.0` ORT CUDA EP
+p50 15,4 / p95 21,0 ms, Accept 7/7 PASS; dev thật: hồng −99,9 %, dark channel −33,6 %, flicker 1,78 (> 1,15). Giờ GPU trong
+khoá: vòng 1 1,03 + vòng 2 ~0,67. Chi tiết: `results/restore/README.md`, `models/release/enhancer-v1.0.0/meta.json`.
 
 Lane: restore
 Depends-on: 02, 07
