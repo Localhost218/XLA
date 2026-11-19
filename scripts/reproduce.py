@@ -132,7 +132,7 @@ def rescore(tmp: Path) -> list[dict]:
 
 # -- 2. bảng ---------------------------------------------------------------------------------
 DET_ROWS = [
-    ("Mốc: YOLO11n COCO, khung 640 + cắt mép 16 px", "results/baseline/baseline.json", ["variants", "edge16"]),
+    ("Mốc: YOLO11s COCO @1280 + cắt mép 16 px", "results/baseline/baseline.json", ["variants", "edge16"]),
     *[(f"E1 {lab}", "results/e1/e1.json", ["sets", s, "test"])
       for s, lab in (("d0", "D0 ảnh sạch"), ("d1", "D1 làm xấu ngẫu nhiên"), ("d2", "D2 bản sao camera"),
                      ("d2sr", "D2 + siêu phân giải"))],
@@ -175,7 +175,7 @@ def t_realism() -> str:
 def t_e4() -> str:
     e4 = load("results/e4/e4.json")
     rows = []
-    for d, lab in (("coco", "YOLO11n COCO (có sẵn)"), ("bundle", "detector-v1.0.0 (đã fine-tune)")):
+    for d, lab in (("coco", "YOLO11s COCO (có sẵn)"), ("bundle", "detector-v1.0.0 (đã fine-tune)")):
         cells = e4["cells"][d]
         pd = e4["paired_diff_vs_raw"][d]
         rows.append([lab, f3(cells["raw"]["mAP50"]["value"]),

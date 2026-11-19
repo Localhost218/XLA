@@ -9,7 +9,7 @@ import json
 import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 import pytest
 
@@ -61,3 +61,14 @@ def test_readme_khong_con_camera_cu():
     for line in (ROOT / "README.md").read_text(encoding="utf-8").splitlines():
         if re.search(r"OV2640|ESP32-CAM", line):
             assert "nhầm" in line, f"README còn camera cũ ngoài câu giải thích: {line}"
+
+
+def test_nhan_moc_coco_khop_trong_so_da_ghi():
+    """Tên + cỡ vào của mốc COCO trong bảng lấy theo trọng số ghi trong JSON kết quả (từng ghi nhầm YOLO11n, khung 640)."""
+    meta = json.loads((ROOT / "results/baseline/baseline.json").read_text(encoding="utf-8"))["run_meta"]
+    e4 = json.loads((ROOT / "results/e4/e4.json").read_text(encoding="utf-8"))["detectors"]["coco"]
+    for weights, table, want in ((meta["weights"]["path"], "t1_nhan_dien.md", f"COCO @{meta['imgsz']}"),
+                                 (e4["weights"], "t5_e4.md", "COCO")):
+        name = "YOLO" + PureWindowsPath(weights).stem.removeprefix("yolo")  # JSON ghi cả đường Windows lẫn kiểu '/'
+        row = (ROOT / "results/reproduce/tables" / table).read_text(encoding="utf-8").splitlines()[2]
+        assert f"{name} {want}" in row, f"{table}: dòng mốc {row!r} không khớp trọng số {weights}"

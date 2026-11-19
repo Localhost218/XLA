@@ -21,7 +21,7 @@ Drone của nhóm mang camera ESP32-S3 N16R8 + cảm biến OV3660, phát JPEG 6
 hồng ở vùng sáng, mờ như có sương, vỡ khối JPEG, tối dần ra bốn góc và có một dải đen 16 px ở mép trái. Đồ án làm hai việc
 trên đúng khung bay thật ngày 02/11/2026: phát hiện người để cảnh báo, và làm rõ ảnh cho người xem trên trạm mặt đất.
 
-Phần nhận diện: một YOLO11n huấn luyện trên ảnh làm xấu theo số đo của chính camera này (D2) đạt mAP50 0,236 trên 198 khung
+Phần nhận diện: một YOLO11s huấn luyện trên ảnh làm xấu theo số đo của chính camera này (D2) đạt mAP50 0,236 trên 198 khung
 test, gần gấp đôi mốc COCO có sẵn (0,126), và báo nhầm trên khung bay không người ít hơn hẳn làm xấu ngẫu nhiên (D1). Bản ship
 `detector-v1.0.0` (trò tự huấn luyện vòng 1, xuất ONNX) chạy 23,6 ms/khung trung vị trong web điều khiển của drone, nhưng mAP50
 trên test chỉ 0,120: chọn model theo tập dev-val đã không dự đoán đúng tập test lần này.
@@ -101,10 +101,10 @@ trưng DINOv2. Hàng "thật với thật" (khung dev so khung dev) cho biết m
 
 ### 3.3. Nhận diện (E1, E2)
 
-- **Mốc:** YOLO11n COCO có sẵn, khung 640, bỏ 16 px mép trái.
-- **E1:** tinh chỉnh YOLO11n trên VisDrone qua từng bộ làm xấu D0 (ảnh sạch), D1, D2, D2 + siêu phân giải. Chọn model bằng
+- **Mốc:** YOLO11s COCO có sẵn, cỡ vào 1280 px, bỏ 16 px mép trái.
+- **E1:** tinh chỉnh YOLO11s trên VisDrone qua từng bộ làm xấu D0 (ảnh sạch), D1, D2, D2 + siêu phân giải. Chọn model bằng
   mAP50 trên dev-val.
-- **E2:** thầy YOLO11m gán nhãn giả cho khung bay chưa nhãn, trò YOLO11n học lại (hai vòng). Ship trò vòng 1 theo dev-val, xuất
+- **E2:** thầy YOLO11m gán nhãn giả cho khung bay chưa nhãn, trò YOLO11s học lại (hai vòng). Ship trò vòng 1 theo dev-val, xuất
   ONNX có resize trong graph, ngưỡng vận hành chọn bằng F1 tối đa trên dev-val.
 - **Độ đo:** mAP50, mAP50-95, AR cho vật nhỏ, số hộp báo nhầm trên mỗi khung bay không người ở ngưỡng vận hành. CI 95 % bằng
   bootstrap theo khối thời gian (2 000 mẫu), so hai model bằng bootstrap ghép cặp.
@@ -148,7 +148,7 @@ góc nhìn cao) khác bãi bay của nhóm; giả thuyết này chưa được k
 <!-- bang: results/reproduce/tables/t1_nhan_dien.md -->
 | Model | mAP50 [CI 95 %] | mAP50-95 | AR nhỏ | FP/khung bay không người | Ngưỡng (F1 dev-val) |
 |---|---|---|---|---|---|
-| Mốc: YOLO11n COCO, khung 640 + cắt mép 16 px | 0,126 [0,030; 0,224] | 0,063 | 0,531 | 0,597 | 0,068 |
+| Mốc: YOLO11s COCO @1280 + cắt mép 16 px | 0,126 [0,030; 0,224] | 0,063 | 0,531 | 0,597 | 0,068 |
 | E1 D0 ảnh sạch | 0,297 [0,036; 0,408] | 0,100 | 0,519 | 1,195 | 0,053 |
 | E1 D1 làm xấu ngẫu nhiên | 0,143 [0,083; 0,185] | 0,047 | 0,444 | 0,994 | 0,023 |
 | E1 D2 bản sao camera | 0,236 [0,069; 0,370] | 0,079 | 0,426 | 0,302 | 0,089 |
@@ -214,7 +214,7 @@ hết tiêu chí.
 <!-- bang: results/reproduce/tables/t5_e4.md -->
 | Bộ nhận diện | Khung gốc | Sau cổ điển (chênh [CI]) | Sau mạng (chênh [CI]) |
 |---|---|---|---|
-| YOLO11n COCO (có sẵn) | 0,126 | 0,081 (-0,046 [-0,088; -0,006]) | 0,195 (+0,069 [-0,033; 0,231]) |
+| YOLO11s COCO (có sẵn) | 0,126 | 0,081 (-0,046 [-0,088; -0,006]) | 0,195 (+0,069 [-0,033; 0,231]) |
 | detector-v1.0.0 (đã fine-tune) | 0,119 | 0,007 (-0,112 [-0,182; -0,028]) | 0,035 (-0,085 [-0,139; -0,011]) |
 <!-- /bang -->
 
@@ -308,7 +308,7 @@ phần mềm drone) do nhóm làm cùng trợ lý AI, chủ dự án duyệt nh�
 
 ## 10. Khai báo sử dụng AI
 
-- **Model mã nguồn mở dùng trong hệ thống:** YOLO11n/YOLO11m (Ultralytics, tinh chỉnh lại), NAFNet (huấn luyện lại từ đầu),
+- **Model mã nguồn mở dùng trong hệ thống:** YOLO11s/YOLO11m (Ultralytics, tinh chỉnh lại), NAFNet (huấn luyện lại từ đầu),
   DINOv2 (chỉ để đo KID).
 - **Trợ lý AI (Claude Code):** viết phần lớn mã, chạy thí nghiệm, sinh bảng và viết nháp báo cáo này. Mọi số trong báo cáo đến
   từ file kết quả do mã chạy ra và được `scripts/reproduce.py --check` kiểm lại; nhóm đọc, duyệt và chịu trách nhiệm về kết
