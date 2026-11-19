@@ -191,7 +191,10 @@ Mọi thứ đã commit + push; trọng số, nhãn giả, run ở `D:\DevCache\
 - **16 (chạy thật):** bench chính thức `results/iotcv/bench-20261119-022705.json` (GPU 72 °C): nhịp thật tổng p50 37,5 / p95 54,1 ms,
   detector p95 33,4 (vượt 50 / 30), enhancer p95 19,0 (đạt), bỏ 0,3 % khung; hết tốc lực 23,6 khung/s, tổng p95 44,9, detector p95
   28,1 (đạt). Nguyên nhân vượt: GPU hạ xung giữa hai khung camera; ngân sách giữ nguyên, `tests/integration/test_iotcv_replay.py::test_ngan_sach_ms`
-  đỏ có chủ đích tới khi đo lại sau bước người "Prefer maximum performance" (plan.md Human steps). Golden GPU hai bundle đạt; web kiểm
+  đỏ có chủ đích. Đo lại 19/11 sau bước người "Prefer maximum performance" (cả `.venv` lẫn python gốc Python313): tổng p95
+  123 ms (`20261119-090310`) và 90 ms (`20261119-091205`); dưới tải liên tục GPU giữ 2,3–2,5 GHz, detector 24,7 ms trung vị
+  (imgsz 1280), ở nhịp camera xung vẫn tụt về 780 MHz. **Owner chấp nhận giới hạn** (19/11): không nới ngân sách, không đổi
+  model; test giữ đỏ có chủ đích. Golden GPU hai bundle đạt; web kiểm
   ở 1707×900 cả ba trạng thái (gốc có box, Ảnh rõ, về gốc).
 - **17 (trỏ về XLA):** `plans/ai/ai-phase-0{1..4}*.md` có khối "Đã thay thế", `ml/README.md` mới, 353 tham chiếu phân loại ở
   `results/iotcv_refs.json`; `ml/scripts/*.py` chưa xoá (chờ chủ dự án duyệt).
