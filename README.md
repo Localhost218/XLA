@@ -7,7 +7,7 @@ ONNX và chạy trong phần mềm drone (repo IOT-CV, `backend/vision/`).
 Bản trước của nhóm viết cho camera ESP32-CAM OV2640, ghi nhầm loại camera; báo cáo và mã đó giữ ở `archive/v2-nhom/`.
 
 Báo cáo: [`BAO_CAO_DO_AN.md`](BAO_CAO_DO_AN.md). Slide: mở `docs/slide/index.html` trong trình duyệt (phím ← →).
-Bài nộp (báo cáo ngắn PDF, slide pptx): thư mục [`docs/nop-bai/`](docs/nop-bai/).
+Báo cáo ngắn (PDF) và slide nộp bài chỉ lưu trên Google Drive của nhóm, không đưa vào repo.
 
 ## Kết quả chính (198 khung test thật, chuyến 02/11/2026)
 
@@ -209,7 +209,6 @@ Phía IOT-CV chép bundle bằng `scripts/vision/lay_model.py --from <thư mục
 | Tài liệu | File |
 |---|---|
 | Báo cáo đồ án | [`BAO_CAO_DO_AN.md`](BAO_CAO_DO_AN.md) |
-| Bài nộp: báo cáo ngắn PDF, slide pptx | [`docs/nop-bai/`](docs/nop-bai/) |
 | Slide HTML | [`docs/slide/index.html`](docs/slide/index.html) |
 | Hợp đồng model với IOT-CV | [`docs/hop-dong-model.md`](docs/hop-dong-model.md) |
 | Plan nghiên cứu | [`plans/261118-ai-anh-chat-luong-thap/plan.md`](plans/261118-ai-anh-chat-luong-thap/plan.md) |
