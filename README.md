@@ -19,7 +19,7 @@ Báo cáo ngắn (PDF) và slide nộp bài chỉ lưu trên Google Drive của 
 | Làm rõ: cổ điển vs mạng `enhancer-v1.0.0` | người chấm mù chọn cổ điển 24/25 lượt; mạng không bật mặc định |
 | Làm rõ trước khi nhận diện (E4) | bộ đã tinh chỉnh giảm mAP50 0,085 [−0,139; −0,011] → nhận diện luôn chạy trên khung gốc |
 
-Bảng đầy đủ kèm CI 95 %: `results/reproduce/tables/`. Detector là YOLO11s (`configs/train_e1.yaml`), thầy E2 là YOLO11m (`configs/selftrain_e2.yaml`); bảng sinh ra và báo cáo còn ghi nhầm "YOLO11n". CI GitHub chạy `pytest -m "not gpu and not data"` trên mọi push.
+Bảng đầy đủ kèm CI 95 %: `results/reproduce/tables/`. Detector là YOLO11s (`configs/train_e1.yaml`), thầy E2 là YOLO11m (`configs/selftrain_e2.yaml`). CI GitHub chạy `pytest -m "not gpu and not data"` trên mọi push.
 
 Ngân sách thời gian trong IOT-CV (p95 tổng ≤ 50 ms, detector ≤ 30 ms) **không đạt ở nhịp camera thật** trên laptop này: GPU hạ
 xung giữa hai khung, tổng p95 54,1 ms (lần đo tốt nhất). Chạy hết tốc lực thì đạt (44,9 ms, 23,6 khung/s). Nhóm chấp nhận giới

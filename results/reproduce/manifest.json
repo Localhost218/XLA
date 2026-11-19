@@ -41,13 +41,13 @@
  ],
  "rescore_tolerance": 1e-06,
  "outputs": {
-  "results/reproduce/tables/t1_nhan_dien.md": "5343f5db20bebf4f8931f193c15027078a0e9b8be2d099ce740b70f89f0936d8",
+  "results/reproduce/tables/t1_nhan_dien.md": "bbd3952884f3fa5261722f3c713505a754597ad4b4408a477c00d6e43311f19f",
   "results/reproduce/tables/t2_do_giong_that.md": "a83080174482564d85a23d2fc315792b165d7510f7d9d06067ed24b23d4cb54d",
   "results/reproduce/tables/t3_tieu_chi_anh_ro.md": "987fbd08ac6e7c34a8022ce0eb4d9de499adbcc5e400d415b7d4636e34c3e75d",
   "results/reproduce/tables/t4_ab.md": "bf49161332c4a05f33e9fb425bcd57b22216d4ab9375f519ed29a93c6d91b056",
-  "results/reproduce/tables/t5_e4.md": "24ea5b9d5232ae546db2995e4b90fb06ca6110ed7472579512096a9df6351699",
+  "results/reproduce/tables/t5_e4.md": "ae8f42e2b85711aa82c6460a74dd3788d01d05b8dfe29c71b4e807d9871675ff",
   "results/reproduce/tables/t6_iotcv_ms.md": "fe495bdea2850d43b0ce9af17d9a47ba87b9b7b6e8f57f4748305533a75c8dbe",
-  "results/reproduce/fig/f1_nhan_dien.svg": "ed369ab9f0dac5558aec861ff33a1bd06c55f32fa9e306cf5ef2d4896cc24481",
+  "results/reproduce/fig/f1_nhan_dien.svg": "07ac5d2f8763510437a9f911695c52226634d10d1b1d9feb97a53e3c74cef6aa",
   "results/reproduce/fig/f2_ab.svg": "3a188d8f98298138a8b4569e2aee94fd44d8c2083cb8b744da3c08c28b5a113c",
   "results/reproduce/fig/f3_e4.svg": "8cc4aef3e826eab4b46e30eed3c62bd949700b5bf8e21e8938ddb4c9c1d72665"
  },
