@@ -238,9 +238,12 @@ gian thật của bản ghi.
 Pipeline theo kịp camera (bỏ 0,3 % khung) và chạy hết tốc lực được 23,6 khung/s, gấp ba nhịp camera tốt nhất. Ngân sách đặt
 trước là p95 tổng ≤ 50 ms và detector ≤ 30 ms. Ở nhịp thật hai p95 này vượt (54,1 và 33,4 ms), trong khi chạy hết tốc lực lại
 đạt (44,9 và 28,1 ms). Lý do: giữa hai khung camera GPU rảnh khoảng 100 ms và tự hạ xung (1 890 so với 3 105 MHz tối đa), khung
-kế tiếp chạy trên GPU chậm. Hàng "chỉ detector" còn chậm hơn vì GPU rảnh lâu hơn. Nhóm không nới ngân sách: test `pytest -m gpu`
-ở `tests/integration/test_iotcv_replay.py` vẫn báo đỏ, và việc tiếp theo là đặt chế độ hiệu năng tối đa cho python.exe trong
-NVIDIA app rồi đo lại.
+kế tiếp chạy trên GPU chậm. Hàng "chỉ detector" còn chậm hơn vì GPU rảnh lâu hơn. Ngày 19/11 nhóm đặt "Prefer maximum performance" cho python.exe trong NVIDIA app rồi đo lại hai lần. Dưới tải liên tục GPU
+giữ được 2,3–2,5 GHz (detector 24,7 ms trung vị), nhưng ở nhịp camera khoảng 7 khung/s xung vẫn tụt về 780 MHz giữa hai khung,
+và tổng p95 ra 90–123 ms. Phần lớn chi phí là của chính detector: nó phóng khung lên 1280 px để thấy người ở xa, nên một khung
+tốn khoảng 20–25 ms ngay cả khi GPU chạy hết xung. Nhóm **chấp nhận giới hạn này** và không nới ngân sách: trên laptop này,
+ở nhịp camera thật, ngân sách p95 50 ms không đạt; test `tests/integration/test_iotcv_replay.py::test_ngan_sach_ms` để đỏ có
+chủ đích. Bảng trên là lần đo tốt nhất (GPU 72 °C, chưa nóng).
 
 ---
 
@@ -270,7 +273,8 @@ thống giữ quy tắc D5: nhận diện chạy trên khung gốc, ảnh rõ ch
 - **Tập nhỏ:** 39 khung test có người, CI của mAP rộng (thường ±0,1). Dev-val 100 khung không chọn đúng model ở E2.
 - **Hồ sơ camera khớp 02/11:** bảng DQT chỉ đo ở chất lượng q12. Web IOT-CV hạ chất lượng xuống q40 khi Wi-Fi yếu, và bảng DQT ở
   các mức đó chưa đo; khung giả ở q ≠ 12 trong IOT-CV vẫn nén theo ước lượng.
-- **Ngân sách ms ở nhịp thật** vượt do GPU hạ xung khi rảnh (mục 4.5), chưa đo lại sau khi khoá chế độ hiệu năng.
+- **Ngân sách ms ở nhịp thật không đạt** trên laptop này (mục 4.5): detector 1280 px tốn 20–25 ms mỗi khung, GPU hạ xung
+  giữa hai khung camera kể cả khi đặt chế độ hiệu năng tối đa. Pipeline vẫn theo kịp camera (bỏ 0,3–16 % khung tuỳ lần đo).
 - **NR-IQA** (MUSIQ, NIQE) dùng giấy phép phi thương mại và chỉ để mô tả.
 
 ## 7. Việc tiếp
@@ -279,7 +283,8 @@ thống giữ quy tắc D5: nhận diện chạy trên khung gốc, ảnh rõ ch
    cảm biến, đo DQT ở q40.
 2. Thu thêm khung bay có người ở nhiều độ cao, nhiều buổi, để dev-val đủ lớn chọn model.
 3. Mạng làm rõ: thêm ràng buộc màu và ràng buộc thời gian (khung liền nhau) khi huấn luyện, chấm lại bằng trang A/B phóng to.
-4. Khoá chế độ hiệu năng GPU cho backend rồi đo lại ngân sách ms.
+4. Nếu cần đạt ngân sách ms: thử detector imgsz 960 hoặc FP16 và chấm lại mAP trên 198 khung test, hoặc khoá xung GPU
+   (`nvidia-smi -lgc`) trong lúc bay.
 
 ---
 
