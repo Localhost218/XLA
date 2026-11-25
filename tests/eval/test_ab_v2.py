@@ -178,8 +178,11 @@ def test_decision_schema(tmp_path: Path) -> None:
     good = ab_score.score(_fake_export(key, {c: 20 for c in ab_page.COMPARISONS_V2}), key)
     bad = ab_score.score(_fake_export(key, {c: 12 for c in ab_page.COMPARISONS_V2}), key)
     gpass = {"decision": "pass", "diff": {"diff": -0.03, "ci95": [-0.1, 0.04]}}
-    d = ab_score.decision({"full": bad, "zoom": good}, gpass)
+    d = ab_score.decision({"full": good, "zoom": bad}, gpass)
     assert tuple(d) == ab_score.DECISION_KEYS and d["format"] == ab_score.DECISION_FORMAT
+    assert ab_score.decision({"full": bad, "zoom": good}, gpass)["offline_ship"] is False  # zoom không quyết định
+    with pytest.raises(ab_score.AbScoreError):
+        ab_score.decision({"zoom": good}, gpass)
     assert d["offline_ship"] is True and d["hybrid_replaces_classic"] is False and d["classic_default_unchanged"]
     assert ab_score.decision({"full": bad}, gpass)["offline_ship"] is False
     assert ab_score.decision({"full": good}, {"decision": "reject", "diff": {}})["offline_ship"] is False

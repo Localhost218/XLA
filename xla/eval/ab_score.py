@@ -127,7 +127,8 @@ def score(export: dict[str, Any], key: dict[str, Any]) -> dict[str, Any]:
 
 DECISION_FORMAT = "xla-ab-v2-decision-v1"
 DECISION_RULE = ("offline ship ⇔ guard_fp trên cal = pass VÀ offline_vs_raw lẫn offline_vs_classic đều passes (cận dưới "
-                 "Wilson 95 % > 0,5) trong cùng ít nhất một lượt (cả khung hoặc phóng to). Lai: không xuất (phase 10 "
+                 "Wilson 95 % > 0,5) ở lượt **cả khung** (đúng cách web hiển thị; chốt trước khi chấm, 26/11). Lượt phóng to chỉ "
+                 "báo cáo, không quyết định (tránh 'đạt ở lượt nào cũng được' làm lỏng tiêu chí). Lai: không xuất (phase 10 "
                  "không qua lọc) nên không thay classic. classic_vs_raw chỉ là chỉ số §5, không đổi mặc định của Owner "
                  "(Deferred 17).")
 DECISION_KEYS = ("format", "rule", "guard_fp", "rounds", "offline_ship", "offline_reason", "hybrid_replaces_classic",
@@ -141,11 +142,13 @@ def decision(rounds: dict[str, dict[str, Any]], guard: dict[str, Any]) -> dict[s
     if not rounds:
         raise AbScoreError("cần ít nhất một lượt đã chấm")
     guard_pass = guard.get("decision") == "pass"
-    ok_rounds = [r for r, res in rounds.items()
-                 if all(res["comparisons"].get(c, {}).get("passes") for c in ("offline_vs_raw", "offline_vs_classic"))]
-    ship = guard_pass and bool(ok_rounds)
+    if "full" not in rounds:
+        raise AbScoreError("thiếu lượt 'full' (cả khung) — lượt duy nhất quyết định ship")
+    full_ok = all(rounds["full"]["comparisons"].get(c, {}).get("passes")
+                  for c in ("offline_vs_raw", "offline_vs_classic"))
+    ship = guard_pass and full_ok
     reason = ("guard_fp loại offline (Kill (d))" if not guard_pass else
-              f"đạt ở lượt {', '.join(ok_rounds)}" if ok_rounds else "không lượt nào thắng cả gốc lẫn classic")
+              "đạt ở lượt cả khung" if full_ok else "lượt cả khung không thắng cả gốc lẫn classic")
     return {"format": DECISION_FORMAT, "rule": DECISION_RULE,
             "guard_fp": {"decision": guard.get("decision"), "diff": guard.get("diff", {}).get("diff"),
                          "ci95": guard.get("diff", {}).get("ci95")},
