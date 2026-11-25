@@ -1,0 +1,119 @@
+{
+ "phase": "12",
+ "step": "probe",
+ "created": "2026-11-25T17:51:49+00:00",
+ "killed": "onnx",
+ "kill_criteria": {
+  "max_vram_gb": 7.0,
+  "max_s_per_frame": 1.0
+ },
+ "measurements": {
+  "temporal_window": 5,
+  "frame_size": [
+   640,
+   480
+  ],
+  "opset": 19,
+  "onnxruntime": "1.24.4",
+  "torch": "2.6.0+cu124",
+  "contract_opset": 17,
+  "weights_sha256_ok": true,
+  "params": 7322927,
+  "machine_before": {
+   "time": "2026-11-25T17:51:03+00:00",
+   "host": "Nghaiz-PC",
+   "os": "Windows-11-10.0.26300-SP0",
+   "cpu_count": 32,
+   "gpu": {
+    "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "driver_version": "610.88",
+    "temperature.gpu": "77",
+    "clocks.sm": "780 MHz",
+    "clocks.max.sm": "3105 MHz",
+    "power.draw": "15.16 W",
+    "pstate": "P0",
+    "memory.used": "1090 MiB",
+    "memory.total": "8188 MiB"
+   },
+   "cpu": {
+    "percent": 18.1,
+    "freq_mhz": 2501.0,
+    "ram_avail_gb": 21.5
+   }
+  },
+  "torch_fp16_s_per_frame": 3.337406399998872,
+  "torch_fp16_peak_vram_gb": 3.082,
+  "torch_out_shape": [
+   960,
+   1280,
+   3
+  ],
+  "deformconv_symbolic": "đăng ký riêng (xla.enhance.vsr.register_deform_conv_onnx; torchvision không có)",
+  "onnx_export_ok": true,
+  "onnx_export_error": null,
+  "onnx_ops": [
+   "Add",
+   "AveragePool",
+   "Cast",
+   "Clip",
+   "Concat",
+   "Constant",
+   "ConstantOfShape",
+   "Conv",
+   "DeformConv",
+   "DepthToSpace",
+   "Div",
+   "Equal",
+   "Expand",
+   "Gather",
+   "GridSample",
+   "LeakyRelu",
+   "Mul",
+   "Range",
+   "Relu",
+   "Reshape",
+   "Resize",
+   "Round",
+   "Shape",
+   "Sigmoid",
+   "Slice",
+   "Sub",
+   "Tanh",
+   "Tile",
+   "Transpose",
+   "Unsqueeze",
+   "Where"
+  ],
+  "onnx_has_deformconv": true,
+  "ort_cpu_ok": false,
+  "ort_cpu_error": "NotImplemented: [ONNXRuntimeError] : 9 : NOT_IMPLEMENTED : Failed to find kernel for DeformConv(19) (node:'/net/backward_1/DeformConv' ep:'CPUExecutionProvider'). Kernel not found",
+  "ort_cuda_ok": false,
+  "ort_cuda_error": "NotImplemented: [ONNXRuntimeError] : 9 : NOT_IMPLEMENTED : Failed to find kernel for DeformConv(19) (node:'/net/backward_1/DeformConv' ep:'CPUExecutionProvider'). Kernel not found",
+  "machine_after": {
+   "time": "2026-11-25T17:51:49+00:00",
+   "host": "Nghaiz-PC",
+   "os": "Windows-11-10.0.26300-SP0",
+   "cpu_count": 32,
+   "gpu": {
+    "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "driver_version": "610.88",
+    "temperature.gpu": "77",
+    "clocks.sm": "210 MHz",
+    "clocks.max.sm": "3105 MHz",
+    "power.draw": "11.97 W",
+    "pstate": "P4",
+    "memory.used": "1257 MiB",
+    "memory.total": "8188 MiB"
+   },
+   "cpu": {
+    "percent": 19.8,
+    "freq_mhz": 2501.0,
+    "ram_avail_gb": 16.9
+   }
+  }
+ },
+ "gpu_seconds": 47.2,
+ "wait_lock_seconds": 1236.2,
+ "gpu_hours_used_total": 0.013,
+ "onnx": "D:/DevCache/runs/xla/v2/vsr/probe/basicvsrpp_t5_opset19.onnx"
+}

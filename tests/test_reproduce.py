@@ -47,6 +47,43 @@ def test_bang_trong_bao_cao_khop_file_da_dung():
         assert body == (ROOT / path).read_text(encoding="utf-8"), f"{path}: chạy scripts/reproduce.py --write"
 
 
+V2_TABLES = ("results/reproduce/tables/t7_v2_nhan_dien.md", "results/reproduce/tables/t8_v2_ab.md",
+             "results/reproduce/tables/t9_v2_ms.md")
+V2_FIG = "results/reproduce/fig/f4_v2_bao_nham_recall.svg"
+V2_CSV = tuple(f"results/v2/system/preds/system_{st}_test.csv" for st in ("detector", "verifier", "track"))
+
+
+def test_v2_bang_hinh_co_trong_manifest():
+    """Phase 17 AI v2: t7–t9 + f4 được dựng và có sha256; ba CSV cả hệ nằm trong đầu vào được `--check` chấm lại."""
+    for rel in (*V2_TABLES, V2_FIG):
+        assert rel in MANIFEST["outputs"], f"{rel}: thiếu trong manifest (chạy scripts/reproduce.py --write)"
+        assert (ROOT / rel).is_file(), rel
+    assert set(V2_CSV) <= set(MANIFEST["inputs"]), sorted(set(V2_CSV) - set(MANIFEST["inputs"]))
+
+
+def test_v2_moi_bang_co_khoi_trong_bao_cao():
+    blocks = dict(BLOCK_RE.findall(REPORT.read_text(encoding="utf-8")))
+    for rel in V2_TABLES:
+        assert rel in blocks, f"BAO_CAO_DO_AN.md thiếu khối <!-- bang: {rel} -->"
+        assert blocks[rel] == (ROOT / rel).read_text(encoding="utf-8"), f"{rel}: chạy scripts/reproduce.py --write"
+    assert V2_FIG in REPORT.read_text(encoding="utf-8")
+
+
+NUM_RE = re.compile(r"[+−-]?\d+,\d+|\d+/\d+")
+
+
+def test_slide_so_v2_lay_tu_bang():
+    """Số trong phần v2 của slide (giữa `<!-- v2 -->` và `<!-- /v2 -->`) phải có nguyên văn trong t7–t9: không gõ tay."""
+    html = SLIDE.read_text(encoding="utf-8")
+    parts = re.findall(r"<!-- v2 -->(.*?)<!-- /v2 -->", html, flags=re.DOTALL)
+    assert parts, "slide không có phần v2"
+    tables = "".join((ROOT / rel).read_text(encoding="utf-8") for rel in V2_TABLES).replace("−", "-")
+    nums = {n.replace("−", "-").lstrip("+") for p in parts for n in NUM_RE.findall(re.sub(r"<[^>]+>", " ", p))}
+    assert nums, "phần v2 của slide không có số nào"
+    missing = sorted(n for n in nums if n not in tables)
+    assert not missing, f"số trên slide không có trong t7–t9: {missing}"
+
+
 def test_slide_local_khong_tai_tu_mang():
     html = SLIDE.read_text(encoding="utf-8")
     assert html.lstrip().lower().startswith("<!doctype html>")

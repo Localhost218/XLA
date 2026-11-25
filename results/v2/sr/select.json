@@ -1,0 +1,173 @@
+{
+ "created": "2026-11-25T17:21:48+00:00",
+ "split": "dev",
+ "n_runs": 9,
+ "n_frames_dev": 163,
+ "n_frames_stats": 82,
+ "n_frames_cal": 150,
+ "detector": "models/release/detector-v1.0.0",
+ "conf_threshold": 0.07669,
+ "fp_cal_raw": {
+  "n_frames": 150,
+  "n_boxes": 15,
+  "fp_per_frame": 0.1,
+  "frames_with_fp": 9
+ },
+ "measured_on": "ảnh ra hạ ×½ INTER_AREA về 640×480",
+ "raw_stats": {
+  "pink_frac": 0.010336701323744008,
+  "dark_channel_15px": 140.38315320773398,
+  "blocking_ratio_8x8": 2.5799962456633403
+ },
+ "flicker_max": 1.15,
+ "rule": "loại: s/khung ORT CUDA > max_s_per_frame (bench; fine-tune cùng kiến trúc với gốc của nó) hoặc báo nhầm detector v1 trên cal sau SR (hạ ×½) > trên khung gốc. Trong số còn lại: có ứng viên qua flicker_ratio ≤ flicker_max → điểm (pink_frac_drop + dark_channel_drop + blocking_excess_drop) cao nhất trong số đó; không ai qua → flicker_ratio thấp nhất (hoà thì điểm cao hơn), như luật chọn checkpoint phase 13 (xla.enhance.train_net.SELECT_RULE): nhấp nháy tăng là dấu hiệu mạng bịa chi tiết khác nhau giữa các khung. Không còn ai → null (Kill (d))",
+ "candidates": [
+  {
+   "candidate": "ref_bicubic",
+   "kind": "reference",
+   "base": null,
+   "ckpt": null,
+   "pass_speed": true,
+   "flicker_ratio": 0.993305677386803,
+   "pass_flicker": true,
+   "stats": {
+    "pink_frac": 0.010314267054930165,
+    "dark_channel_15px": 140.82954047614393,
+    "blocking_ratio_8x8": 2.317604959011078
+   },
+   "pink_frac_drop": 0.0021703508799572144,
+   "dark_channel_drop": -0.0031797780446589765,
+   "blocking_excess_drop": 0.1660708292013067,
+   "score": 0.16506140203660494,
+   "fp_cal_raw": 0.1,
+   "fp_cal_offline": 0.1,
+   "fp_cal_detail": {
+    "n_frames": 150,
+    "n_boxes": 15,
+    "fp_per_frame": 0.1,
+    "frames_with_fp": 9
+   },
+   "pass_fp": true,
+   "sample": null
+  },
+  {
+   "candidate": "realesrgan_x2plus",
+   "kind": "zero-shot",
+   "base": "realesrgan_x2plus",
+   "ckpt": null,
+   "s_per_frame": 0.4057845549998092,
+   "peak_vram_mb": 2064.0,
+   "hours_per_flight": 0.761,
+   "pass_speed": true,
+   "flicker_ratio": 0.8305458880661192,
+   "pass_flicker": true,
+   "stats": {
+    "pink_frac": 0.01082150139410048,
+    "dark_channel_15px": 145.84084242104439,
+    "blocking_ratio_8x8": 1.224739595157344
+   },
+   "pink_frac_drop": -0.04690084923348407,
+   "dark_channel_drop": -0.03887709521123456,
+   "blocking_excess_drop": 0.8577594119136719,
+   "score": 0.7719814674689532,
+   "fp_cal_raw": 0.1,
+   "fp_cal_offline": 0.14666666666666667,
+   "fp_cal_detail": {
+    "n_frames": 150,
+    "n_boxes": 22,
+    "fp_per_frame": 0.14666666666666667,
+    "frames_with_fp": 18
+   },
+   "pass_fp": false,
+   "sample": "results/v2/sr/samples/realesrgan_x2plus.jpg"
+  },
+  {
+   "candidate": "ft_l1_percep",
+   "kind": "fine-tune",
+   "base": "realesrgan_x2plus",
+   "ckpt": "D:\\DevCache\\runs\\xla\\v2\\sr\\l1_percep\\final.pt",
+   "s_per_frame": 0.4057845549998092,
+   "peak_vram_mb": 2064.0,
+   "hours_per_flight": 0.761,
+   "pass_speed": true,
+   "flicker_ratio": 1.348012612144038,
+   "pass_flicker": false,
+   "stats": {
+    "pink_frac": 7.735954763393789e-07,
+    "dark_channel_15px": 93.94228871886077,
+    "blocking_ratio_8x8": 1.3820399191321395
+   },
+   "pink_frac_drop": 0.9999251603144843,
+   "dark_channel_drop": 0.3308150830616526,
+   "blocking_excess_drop": 0.7582020082764531,
+   "score": 2.0889422516525897,
+   "fp_cal_raw": 0.1,
+   "fp_cal_offline": 0.06666666666666667,
+   "fp_cal_detail": {
+    "n_frames": 150,
+    "n_boxes": 10,
+    "fp_per_frame": 0.06666666666666667,
+    "frames_with_fp": 9
+   },
+   "pass_fp": true,
+   "sample": "results/v2/sr/samples/ft_l1_percep.jpg"
+  },
+  {
+   "candidate": "ft_l1_percep_gan",
+   "kind": "fine-tune",
+   "base": "realesrgan_x2plus",
+   "ckpt": "D:\\DevCache\\runs\\xla\\v2\\sr\\l1_percep_gan\\final.pt",
+   "s_per_frame": 0.4057845549998092,
+   "peak_vram_mb": 2064.0,
+   "hours_per_flight": 0.761,
+   "pass_speed": true,
+   "flicker_ratio": 1.5529889353319606,
+   "pass_flicker": false,
+   "stats": {
+    "pink_frac": 3.5829685219929127e-06,
+    "dark_channel_15px": 73.25778697134928,
+    "blocking_ratio_8x8": 1.1309130860538017
+   },
+   "pink_frac_drop": 0.9996533740881375,
+   "dark_channel_drop": 0.47815827399926675,
+   "blocking_excess_drop": 0.9171434195409499,
+   "score": 2.394955067628354,
+   "fp_cal_raw": 0.1,
+   "fp_cal_offline": 0.09333333333333334,
+   "fp_cal_detail": {
+    "n_frames": 150,
+    "n_boxes": 14,
+    "fp_per_frame": 0.09333333333333334,
+    "frames_with_fp": 14
+   },
+   "pass_fp": true,
+   "sample": "results/v2/sr/samples/ft_l1_percep_gan.jpg"
+  },
+  {
+   "candidate": "swinir_m_x2_real",
+   "kind": "zero-shot",
+   "base": "swinir_m_x2_real",
+   "ckpt": null,
+   "s_per_frame": 17.39854528499982,
+   "peak_vram_mb": 7052.0,
+   "hours_per_flight": 32.621,
+   "pass_speed": false,
+   "skipped": "quá chậm (bench), không đo select",
+   "fp_cal_raw": 0.1,
+   "fp_cal_offline": null,
+   "pass_flicker": false,
+   "score": null,
+   "pass_fp": null
+  }
+ ],
+ "chosen": "ft_l1_percep",
+ "chosen_how": "không ai qua flicker_max: flicker_ratio thấp nhất trong số qua tốc độ + báo nhầm",
+ "gpu_seconds": 406.4,
+ "wait_lock_seconds": 2904.5,
+ "rescored_at": "2026-11-25T17:22:57+00:00",
+ "rescored_from": {
+  "chosen": "ft_l1_percep_gan",
+  "chosen_how": "không ai qua flicker_max: điểm cao nhất trong số qua tốc độ + báo nhầm",
+  "rule": "loại: s/khung ORT CUDA > max_s_per_frame (bench; fine-tune cùng kiến trúc với gốc của nó) hoặc báo nhầm detector v1 trên cal sau SR (hạ ×½) > trên khung gốc. Trong số còn lại: ưu tiên flicker_ratio ≤ flicker_max, rồi điểm (pink_frac_drop + dark_channel_drop + blocking_excess_drop) cao nhất. Không còn ai → null (Kill (d))"
+ }
+}

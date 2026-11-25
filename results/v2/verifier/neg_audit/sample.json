@@ -1,0 +1,2808 @@
+{
+ "seed": 20261126,
+ "n": 200,
+ "type": "ext_neg_det",
+ "pool": 9444,
+ "rows": [
+  {
+   "idx": 0,
+   "id": "d02-d2b2ba8334",
+   "image": "d0__visdrone__0000345_00393_d_0000311_w0.jpg",
+   "box": [
+    135.79,
+    439.9,
+    149.69,
+    465.14
+   ],
+   "score": 0.05299000069499016,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 1,
+   "id": "d02-c5da0ebbb1",
+   "image": "d0__visdrone__9999982_00000_d_0000173_w1.jpg",
+   "box": [
+    410.47,
+    195.62,
+    423.71,
+    211.85
+   ],
+   "score": 0.06617999821901321,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 2,
+   "id": "d02-0e7687fa7b",
+   "image": "d0__visdrone__0000325_01801_d_0000671_w0.jpg",
+   "box": [
+    264.74,
+    42.53,
+    281.95,
+    62.96
+   ],
+   "score": 0.3724600076675415,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 3,
+   "id": "d02-2469156892",
+   "image": "d0__visdrone__9999962_00000_d_0000060_w0.jpg",
+   "box": [
+    37.23,
+    157.82,
+    57.91,
+    179.55
+   ],
+   "score": 0.057840000838041306,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 4,
+   "id": "d02-83bc8b7ef4",
+   "image": "d0__heridal__train_BRK_2046_t11_w0.jpg",
+   "box": [
+    16.24,
+    457.86,
+    27.66,
+    478.42
+   ],
+   "score": 0.07636000216007233,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 5,
+   "id": "d02-92335120c2",
+   "image": "d0__visdrone__9999942_00000_d_0000171_w1.jpg",
+   "box": [
+    343.15,
+    216.02,
+    361.44,
+    235.93
+   ],
+   "score": 0.06666000187397003,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 6,
+   "id": "d02-664bae5681",
+   "image": "d2__wisard__210417_MtErie_Enterprise_VIS_0003_00000234_w0.jpg",
+   "box": [
+    40.98,
+    182.74,
+    48.26,
+    195.88
+   ],
+   "score": 0.1640399992465973,
+   "source": "wisard",
+   "degrade": "d2"
+  },
+  {
+   "idx": 7,
+   "id": "d02-8509a11fbd",
+   "image": "d2__visdrone__9999951_00000_d_0000249_w0.jpg",
+   "box": [
+    379.94,
+    240.31,
+    411.14,
+    293.07
+   ],
+   "score": 0.06021000072360039,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 8,
+   "id": "d02-2ed9c8c55a",
+   "image": "d2__heridal__train_VRD_3013_t02_w0.jpg",
+   "box": [
+    255.1,
+    50.73,
+    268.53,
+    79.41
+   ],
+   "score": 0.06827999651432037,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 9,
+   "id": "d02-b5c2966837",
+   "image": "d0__visdrone__9999962_00000_d_0000030_w0.jpg",
+   "box": [
+    133.37,
+    207.01,
+    154.45,
+    237.06
+   ],
+   "score": 0.06787999719381332,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 10,
+   "id": "d02-9ae827b3f8",
+   "image": "d2__visdrone__9999972_00000_d_0000151_w1.jpg",
+   "box": [
+    427.63,
+    281.34,
+    442.25,
+    304.07
+   ],
+   "score": 0.05429999902844429,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 11,
+   "id": "d02-6f881373a5",
+   "image": "d2__visdrone__9999982_00000_d_0000073_w1.jpg",
+   "box": [
+    53.15,
+    399.04,
+    63.8,
+    409.98
+   ],
+   "score": 0.0880500003695488,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 12,
+   "id": "d02-f168950fff",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000008_w1.jpg",
+   "box": [
+    405.47,
+    247.42,
+    420.08,
+    263.64
+   ],
+   "score": 0.06858000159263611,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 13,
+   "id": "d02-3983ceeefa",
+   "image": "d0__visdrone__9999999_00265_d_0000115_w0.jpg",
+   "box": [
+    579.59,
+    420.38,
+    587.63,
+    433.1
+   ],
+   "score": 0.1354999989271164,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 14,
+   "id": "d02-edbf5986cc",
+   "image": "d0__heridal__train_MED_4039_t02_w0.jpg",
+   "box": [
+    624.84,
+    394.1,
+    639.44,
+    417.36
+   ],
+   "score": 0.0572500005364418,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 15,
+   "id": "d02-fcaafaed63",
+   "image": "d0__visdrone__9999942_00000_d_0000020_w0.jpg",
+   "box": [
+    603.21,
+    437.59,
+    611.39,
+    448.53
+   ],
+   "score": 0.11891999840736389,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 16,
+   "id": "d02-b482ff450c",
+   "image": "d0__visdrone__9999942_00000_d_0000053_w1.jpg",
+   "box": [
+    207.02,
+    361.92,
+    214.96,
+    374.51
+   ],
+   "score": 0.05017000064253807,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 17,
+   "id": "d02-af58c1c0b4",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000163_w0.jpg",
+   "box": [
+    208.2,
+    350.26,
+    219.5,
+    370.07
+   ],
+   "score": 0.06015999987721443,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 18,
+   "id": "d02-a4a845d929",
+   "image": "d2__heridal__train_MED_4067_t04_w0.jpg",
+   "box": [
+    222.13,
+    207.31,
+    238.56,
+    224.23
+   ],
+   "score": 0.07941000163555145,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 19,
+   "id": "d02-a5ce2b0ef3",
+   "image": "d2__heridal__train_MED_1002_t04_w0.jpg",
+   "box": [
+    331.91,
+    320.44,
+    347.69,
+    340.86
+   ],
+   "score": 0.06036999821662903,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 20,
+   "id": "d02-5c2a2b7683",
+   "image": "d2__visdrone__9999977_00000_d_0000050_w1.jpg",
+   "box": [
+    325.74,
+    28.58,
+    336.54,
+    39.39
+   ],
+   "score": 0.09362000226974487,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 21,
+   "id": "d02-d9e968b03a",
+   "image": "d0__visdrone__9999942_00000_d_0000159_w1.jpg",
+   "box": [
+    192.42,
+    58.39,
+    220.26,
+    118.84
+   ],
+   "score": 0.07181999832391739,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 22,
+   "id": "d02-21ded9306f",
+   "image": "d2__wisard__210417_MtErie_Enterprise_VIS_0003_00000166_w0.jpg",
+   "box": [
+    381.07,
+    340.94,
+    390.66,
+    360.58
+   ],
+   "score": 0.08517999947071075,
+   "source": "wisard",
+   "degrade": "d2"
+  },
+  {
+   "idx": 23,
+   "id": "d02-fe1cec3ca8",
+   "image": "d0__visdrone__9999982_00000_d_0000054_w1.jpg",
+   "box": [
+    484.04,
+    135.83,
+    519.07,
+    155.73
+   ],
+   "score": 0.08038999885320663,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 24,
+   "id": "d02-6b847e4b58",
+   "image": "d2__visdrone__9999984_00000_d_0000076_w1.jpg",
+   "box": [
+    288.12,
+    410.85,
+    318.43,
+    453.5
+   ],
+   "score": 0.05784999951720238,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 25,
+   "id": "d02-2f8c1f393b",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000263_w0.jpg",
+   "box": [
+    111.37,
+    102.8,
+    121.98,
+    118.84
+   ],
+   "score": 0.07122000306844711,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 26,
+   "id": "d02-9d98075f2a",
+   "image": "d0__visdrone__9999942_00000_d_0000008_w1.jpg",
+   "box": [
+    440.55,
+    331.43,
+    453.26,
+    351.67
+   ],
+   "score": 0.07942000031471252,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 27,
+   "id": "d02-b12af5c26c",
+   "image": "d0__visdrone__9999972_00000_d_0000089_w1.jpg",
+   "box": [
+    314.22,
+    67.55,
+    327.84,
+    82.45
+   ],
+   "score": 0.06057000160217285,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 28,
+   "id": "d02-743e391e7d",
+   "image": "d0__visdrone__9999942_00000_d_0000141_w1.jpg",
+   "box": [
+    323.21,
+    326.76,
+    348.97,
+    343.0
+   ],
+   "score": 0.05900999903678894,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 29,
+   "id": "d02-e8f3da3246",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000229_w1.jpg",
+   "box": [
+    255.16,
+    466.42,
+    272.77,
+    480.0
+   ],
+   "score": 0.18227000534534454,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 30,
+   "id": "d02-a35b97f631",
+   "image": "d2__visdrone__9999942_00000_d_0000099_w1.jpg",
+   "box": [
+    65.67,
+    59.1,
+    88.46,
+    81.29
+   ],
+   "score": 0.1324699968099594,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 31,
+   "id": "d02-767b8cc769",
+   "image": "d0__visdrone__9999982_00000_d_0000173_w1.jpg",
+   "box": [
+    168.33,
+    264.27,
+    186.91,
+    285.47
+   ],
+   "score": 0.068060003221035,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 32,
+   "id": "d02-10bee8cae0",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000016_w0.jpg",
+   "box": [
+    305.98,
+    68.12,
+    317.34,
+    83.68
+   ],
+   "score": 0.1230200007557869,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 33,
+   "id": "d02-b98e93626e",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000175_w1.jpg",
+   "box": [
+    402.44,
+    442.42,
+    421.27,
+    467.81
+   ],
+   "score": 0.06052999943494797,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 34,
+   "id": "d02-85c32517b8",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000035_w0.jpg",
+   "box": [
+    629.3,
+    444.69,
+    639.71,
+    474.15
+   ],
+   "score": 0.07150000333786011,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 35,
+   "id": "d02-0c8a8b9724",
+   "image": "d0__visdrone__9999966_00000_d_0000034_w0.jpg",
+   "box": [
+    590.02,
+    113.59,
+    604.57,
+    131.4
+   ],
+   "score": 0.08911000192165375,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 36,
+   "id": "d02-4f8b676fd9",
+   "image": "d0__heridal__train_BRK_2040_t04_w0.jpg",
+   "box": [
+    133.76,
+    350.61,
+    153.02,
+    375.01
+   ],
+   "score": 0.08145999908447266,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 37,
+   "id": "d02-cc635e6c8f",
+   "image": "d0__visdrone__9999981_00000_d_0000009_w0.jpg",
+   "box": [
+    131.03,
+    275.87,
+    143.89,
+    313.59
+   ],
+   "score": 0.06689000129699707,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 38,
+   "id": "d02-986e89201b",
+   "image": "d0__visdrone__9999981_00000_d_0000101_w1.jpg",
+   "box": [
+    16.0,
+    412.81,
+    22.75,
+    431.73
+   ],
+   "score": 0.05778000131249428,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 39,
+   "id": "d02-517a51db5f",
+   "image": "d0__visdrone__9999955_00000_d_0000111_w0.jpg",
+   "box": [
+    70.71,
+    134.99,
+    88.19,
+    157.97
+   ],
+   "score": 0.33032000064849854,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 40,
+   "id": "d02-3b37093c58",
+   "image": "d0__visdrone__9999982_00000_d_0000242_w1.jpg",
+   "box": [
+    108.92,
+    262.17,
+    115.07,
+    269.98
+   ],
+   "score": 0.07683999836444855,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 41,
+   "id": "d02-3c6624db1b",
+   "image": "d2__heridal__train_MED_1002_t04_w0.jpg",
+   "box": [
+    184.23,
+    136.35,
+    200.06,
+    164.85
+   ],
+   "score": 0.22860999405384064,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 42,
+   "id": "d02-5fb4e368b8",
+   "image": "d0__visdrone__9999982_00000_d_0000225_w1.jpg",
+   "box": [
+    202.85,
+    109.47,
+    218.64,
+    124.87
+   ],
+   "score": 0.05592000111937523,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 43,
+   "id": "d02-99812680fc",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000060_w1.jpg",
+   "box": [
+    528.86,
+    340.95,
+    542.2,
+    364.79
+   ],
+   "score": 0.2521899938583374,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 44,
+   "id": "d02-ce978d8725",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000175_w0.jpg",
+   "box": [
+    111.73,
+    404.9,
+    122.23,
+    419.5
+   ],
+   "score": 0.10638999938964844,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 45,
+   "id": "d02-9839f6a828",
+   "image": "d2__visdrone__9999982_00000_d_0000247_w0.jpg",
+   "box": [
+    292.45,
+    160.39,
+    298.68,
+    171.73
+   ],
+   "score": 0.3135800063610077,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 46,
+   "id": "d02-b338b0bee9",
+   "image": "d2__visdrone__9999942_00000_d_0000151_w1.jpg",
+   "box": [
+    222.5,
+    232.18,
+    237.88,
+    264.25
+   ],
+   "score": 0.1324699968099594,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 47,
+   "id": "d02-fe78d2ad23",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000178_w1.jpg",
+   "box": [
+    625.97,
+    111.23,
+    639.3,
+    136.22
+   ],
+   "score": 0.052299998700618744,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 48,
+   "id": "d02-c9637312cb",
+   "image": "d0__visdrone__0000318_03401_d_0000571_w0.jpg",
+   "box": [
+    241.82,
+    142.02,
+    254.52,
+    182.67
+   ],
+   "score": 0.6255499720573425,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 49,
+   "id": "d02-bfb82a72bd",
+   "image": "d2__visdrone__9999982_00000_d_0000140_w1.jpg",
+   "box": [
+    474.27,
+    43.41,
+    486.66,
+    58.43
+   ],
+   "score": 0.08737000077962875,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 50,
+   "id": "d02-29e956838d",
+   "image": "d0__heridal__train_BRK_2109_t00_w0.jpg",
+   "box": [
+    51.22,
+    42.7,
+    60.29,
+    53.33
+   ],
+   "score": 0.07694999873638153,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 51,
+   "id": "d02-c2ad352611",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000220_w1.jpg",
+   "box": [
+    19.98,
+    225.91,
+    39.29,
+    253.54
+   ],
+   "score": 0.11112000048160553,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 52,
+   "id": "d02-e91bb40659",
+   "image": "d0__visdrone__9999984_00000_d_0000101_w1.jpg",
+   "box": [
+    191.16,
+    267.0,
+    211.32,
+    281.5
+   ],
+   "score": 0.2152000069618225,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 53,
+   "id": "d02-003358beab",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000229_w1.jpg",
+   "box": [
+    183.79,
+    123.05,
+    197.99,
+    139.7
+   ],
+   "score": 0.06029000133275986,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 54,
+   "id": "d02-da593441ca",
+   "image": "d2__visdrone__9999955_00000_d_0000320_w0.jpg",
+   "box": [
+    520.85,
+    192.44,
+    537.18,
+    207.21
+   ],
+   "score": 0.05508999899029732,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 55,
+   "id": "d02-3ca59d7011",
+   "image": "d2__heridal__train_MED_4028_t00_w0.jpg",
+   "box": [
+    218.45,
+    286.86,
+    231.59,
+    302.69
+   ],
+   "score": 0.06926000118255615,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 56,
+   "id": "d02-1250d753fe",
+   "image": "d0__heridal__train_GOR_2001_t09_w0.jpg",
+   "box": [
+    281.41,
+    93.94,
+    288.82,
+    102.72
+   ],
+   "score": 0.14282000064849854,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 57,
+   "id": "d02-ec0aca6589",
+   "image": "d0__heridal__train_ZRI_2014_t12_w0.jpg",
+   "box": [
+    231.81,
+    21.38,
+    250.24,
+    44.01
+   ],
+   "score": 0.13853999972343445,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 58,
+   "id": "d02-5ae0695fbd",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000199_w1.jpg",
+   "box": [
+    75.5,
+    205.61,
+    91.03,
+    241.25
+   ],
+   "score": 0.06253000348806381,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 59,
+   "id": "d02-f0c12adaf1",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000042_w0.jpg",
+   "box": [
+    336.44,
+    146.74,
+    357.63,
+    177.38
+   ],
+   "score": 0.0733100026845932,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 60,
+   "id": "d02-f6dd0f7c75",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000169_w0.jpg",
+   "box": [
+    257.3,
+    367.84,
+    270.9,
+    389.5
+   ],
+   "score": 0.07908999919891357,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 61,
+   "id": "d02-258bf0a6ff",
+   "image": "d2__heridal__train_BRA_1069_t03_w0.jpg",
+   "box": [
+    209.49,
+    452.87,
+    223.84,
+    471.25
+   ],
+   "score": 0.0865200012922287,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 62,
+   "id": "d02-bb2f29d63b",
+   "image": "d0__visdrone__9999999_00530_d_0000237_w0.jpg",
+   "box": [
+    326.97,
+    92.6,
+    343.06,
+    108.27
+   ],
+   "score": 0.058880001306533813,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 63,
+   "id": "d02-7e3ac719b2",
+   "image": "d0__visdrone__9999962_00000_d_0000037_w0.jpg",
+   "box": [
+    514.84,
+    229.46,
+    526.98,
+    246.53
+   ],
+   "score": 0.054749999195337296,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 64,
+   "id": "d02-dcd295e512",
+   "image": "d0__visdrone__9999981_00000_d_0000017_w0.jpg",
+   "box": [
+    187.51,
+    448.3,
+    212.36,
+    480.0
+   ],
+   "score": 0.06476999819278717,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 65,
+   "id": "d02-344e7d4ef0",
+   "image": "d2__visdrone__9999942_00000_d_0000155_w0.jpg",
+   "box": [
+    227.87,
+    372.66,
+    247.79,
+    395.56
+   ],
+   "score": 0.058570001274347305,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 66,
+   "id": "d02-d2bb2b23da",
+   "image": "d0__visdrone__9999982_00000_d_0000248_w0.jpg",
+   "box": [
+    73.18,
+    223.73,
+    86.57,
+    250.77
+   ],
+   "score": 0.18741999566555023,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 67,
+   "id": "d02-bed473b48a",
+   "image": "d0__visdrone__9999942_00000_d_0000136_w0.jpg",
+   "box": [
+    289.22,
+    49.43,
+    314.72,
+    71.52
+   ],
+   "score": 0.1708499938249588,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 68,
+   "id": "d02-fcd7e97235",
+   "image": "d0__heridal__train_MED_4062_t02_w0.jpg",
+   "box": [
+    27.73,
+    155.99,
+    49.47,
+    185.86
+   ],
+   "score": 0.14928999543190002,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 69,
+   "id": "d02-917869cd67",
+   "image": "d0__heridal__train_ZRI_2014_t12_w0.jpg",
+   "box": [
+    412.28,
+    419.45,
+    444.57,
+    452.97
+   ],
+   "score": 0.15012000501155853,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 70,
+   "id": "d02-b112e7746b",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000052_w1.jpg",
+   "box": [
+    28.54,
+    317.3,
+    40.81,
+    333.86
+   ],
+   "score": 0.05463999882340431,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 71,
+   "id": "d02-fa3638ac23",
+   "image": "d0__visdrone__9999942_00000_d_0000107_w1.jpg",
+   "box": [
+    44.2,
+    237.29,
+    75.84,
+    254.87
+   ],
+   "score": 0.19235000014305115,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 72,
+   "id": "d02-2eaa324c26",
+   "image": "d2__heridal__train_BRK_2080_t10_w0.jpg",
+   "box": [
+    228.46,
+    244.09,
+    243.17,
+    267.94
+   ],
+   "score": 0.059289999306201935,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 73,
+   "id": "d02-78df0e574f",
+   "image": "d0__visdrone__0000214_02445_d_0000254_w1.jpg",
+   "box": [
+    443.89,
+    38.08,
+    453.14,
+    51.91
+   ],
+   "score": 0.058329999446868896,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 74,
+   "id": "d02-8497fff9d5",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000016_w1.jpg",
+   "box": [
+    630.61,
+    30.75,
+    639.82,
+    48.38
+   ],
+   "score": 0.08850999921560287,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 75,
+   "id": "d02-7335a4d8bf",
+   "image": "d0__visdrone__0000076_01601_d_0000006_w1.jpg",
+   "box": [
+    322.01,
+    287.33,
+    334.72,
+    299.43
+   ],
+   "score": 0.07197999954223633,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 76,
+   "id": "d02-4f581e0be3",
+   "image": "d2__visdrone__9999998_00368_d_0000320_w0.jpg",
+   "box": [
+    387.13,
+    445.95,
+    402.71,
+    474.71
+   ],
+   "score": 0.21926000714302063,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 77,
+   "id": "d02-9608e712f3",
+   "image": "d2__heridal__train_JAS_0176_t06_w0.jpg",
+   "box": [
+    99.2,
+    136.47,
+    122.09,
+    169.46
+   ],
+   "score": 0.0701799988746643,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 78,
+   "id": "d02-728ab2dfd4",
+   "image": "d0__visdrone__9999942_00000_d_0000188_w0.jpg",
+   "box": [
+    287.81,
+    245.91,
+    302.5,
+    265.64
+   ],
+   "score": 0.17288999259471893,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 79,
+   "id": "d02-e14d7f3840",
+   "image": "d2__visdrone__9999942_00000_d_0000087_w1.jpg",
+   "box": [
+    202.66,
+    70.56,
+    220.18,
+    89.23
+   ],
+   "score": 0.14535999298095703,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 80,
+   "id": "d02-4b1d53c11e",
+   "image": "d0__visdrone__9999969_00000_d_0000010_w1.jpg",
+   "box": [
+    267.49,
+    1.02,
+    282.07,
+    18.99
+   ],
+   "score": 0.07410000264644623,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 81,
+   "id": "d02-5fe5565c17",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000221_w0.jpg",
+   "box": [
+    399.37,
+    447.02,
+    409.87,
+    461.46
+   ],
+   "score": 0.06268999725580215,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 82,
+   "id": "d02-9af92384a3",
+   "image": "d0__visdrone__9999942_00000_d_0000167_w1.jpg",
+   "box": [
+    489.44,
+    58.95,
+    512.58,
+    79.51
+   ],
+   "score": 0.057270001620054245,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 83,
+   "id": "d02-5fda9b5b6c",
+   "image": "d2__heridal__train_MED_4050_t06_w0.jpg",
+   "box": [
+    35.9,
+    95.29,
+    48.72,
+    114.01
+   ],
+   "score": 0.07677000015974045,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 84,
+   "id": "d02-f5e6903164",
+   "image": "d2__heridal__train_JAS_0179_t13_w0.jpg",
+   "box": [
+    546.98,
+    384.64,
+    560.37,
+    403.47
+   ],
+   "score": 0.06408999860286713,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 85,
+   "id": "d02-e648fc9206",
+   "image": "d0__heridal__train_MED_4062_t02_w0.jpg",
+   "box": [
+    133.91,
+    214.53,
+    145.57,
+    231.06
+   ],
+   "score": 0.0820700004696846,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 86,
+   "id": "d02-612daa48e9",
+   "image": "d0__visdrone__9999966_00000_d_0000045_w0.jpg",
+   "box": [
+    524.06,
+    28.28,
+    539.98,
+    50.31
+   ],
+   "score": 0.314520001411438,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 87,
+   "id": "d02-ab395462e2",
+   "image": "d0__visdrone__9999981_00000_d_0000135_w1.jpg",
+   "box": [
+    548.21,
+    440.81,
+    553.7,
+    451.09
+   ],
+   "score": 0.1400199979543686,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 88,
+   "id": "d02-81cc91dd2a",
+   "image": "d0__visdrone__9999982_00000_d_0000228_w1.jpg",
+   "box": [
+    16.35,
+    430.47,
+    25.91,
+    444.78
+   ],
+   "score": 0.25022000074386597,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 89,
+   "id": "d02-0ae2f43bc7",
+   "image": "d2__visdrone__9999999_00053_d_0000013_w1.jpg",
+   "box": [
+    77.46,
+    112.53,
+    94.29,
+    141.77
+   ],
+   "score": 0.05558000132441521,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 90,
+   "id": "d02-c974fc5bb6",
+   "image": "d2__visdrone__0000345_01373_d_0000316_w0.jpg",
+   "box": [
+    234.23,
+    217.26,
+    250.29,
+    254.44
+   ],
+   "score": 0.7410899996757507,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 91,
+   "id": "d02-44e49d700a",
+   "image": "d0__heridal__train_BRK_2022_t00_w0.jpg",
+   "box": [
+    616.18,
+    387.72,
+    628.69,
+    409.27
+   ],
+   "score": 0.15178999304771423,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 92,
+   "id": "d02-c62c455c75",
+   "image": "d0__visdrone__9999982_00000_d_0000080_w1.jpg",
+   "box": [
+    140.6,
+    356.62,
+    152.93,
+    371.65
+   ],
+   "score": 0.06536000221967697,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 93,
+   "id": "d02-a0c8c89d48",
+   "image": "d2__heridal__train_MED_4050_t06_w0.jpg",
+   "box": [
+    494.53,
+    270.43,
+    520.75,
+    303.18
+   ],
+   "score": 0.1920900046825409,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 94,
+   "id": "d02-c0aa2d0355",
+   "image": "d2__visdrone__9999942_00000_d_0000136_w1.jpg",
+   "box": [
+    177.06,
+    162.06,
+    189.76,
+    181.72
+   ],
+   "score": 0.15076999366283417,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 95,
+   "id": "d02-f522df350b",
+   "image": "d0__visdrone__9999942_00000_d_0000052_w0.jpg",
+   "box": [
+    188.17,
+    0.31,
+    205.98,
+    20.51
+   ],
+   "score": 0.05827999860048294,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 96,
+   "id": "d02-bfd9665eb3",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000009_w0.jpg",
+   "box": [
+    555.44,
+    5.23,
+    574.42,
+    29.75
+   ],
+   "score": 0.053040001541376114,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 97,
+   "id": "d02-7c8007b7f1",
+   "image": "d0__visdrone__9999962_00000_d_0000074_w0.jpg",
+   "box": [
+    600.22,
+    466.43,
+    611.85,
+    479.52
+   ],
+   "score": 0.1530500054359436,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 98,
+   "id": "d02-2df2532aab",
+   "image": "d0__visdrone__9999981_00000_d_0000017_w0.jpg",
+   "box": [
+    204.85,
+    152.96,
+    215.06,
+    176.81
+   ],
+   "score": 0.1545500010251999,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 99,
+   "id": "d02-03eb684c1c",
+   "image": "d0__visdrone__9999991_00000_d_0000006_w0.jpg",
+   "box": [
+    464.57,
+    27.52,
+    487.34,
+    61.13
+   ],
+   "score": 0.06637000292539597,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 100,
+   "id": "d02-b0da2353ec",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000241_w1.jpg",
+   "box": [
+    234.06,
+    239.4,
+    242.15,
+    251.6
+   ],
+   "score": 0.10863000154495239,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 101,
+   "id": "d02-12e524a84b",
+   "image": "d0__visdrone__9999982_00000_d_0000253_w0.jpg",
+   "box": [
+    159.72,
+    252.68,
+    168.02,
+    264.0
+   ],
+   "score": 0.4376400113105774,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 102,
+   "id": "d02-e6017d7b25",
+   "image": "d2__heridal__train_JAS_0147_t08_w0.jpg",
+   "box": [
+    218.19,
+    134.45,
+    230.65,
+    150.69
+   ],
+   "score": 0.07017000019550323,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 103,
+   "id": "d02-91df66737b",
+   "image": "d0__visdrone__0000039_00000_d_0000055_w1.jpg",
+   "box": [
+    238.02,
+    234.16,
+    276.17,
+    306.34
+   ],
+   "score": 0.06729999929666519,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 104,
+   "id": "d02-3e01130e7c",
+   "image": "d2__visdrone__9999990_00000_d_0000075_w1.jpg",
+   "box": [
+    518.45,
+    254.88,
+    541.08,
+    278.04
+   ],
+   "score": 0.088189996778965,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 105,
+   "id": "d02-b0513553c0",
+   "image": "d0__visdrone__9999942_00000_d_0000103_w0.jpg",
+   "box": [
+    610.45,
+    61.01,
+    627.57,
+    81.38
+   ],
+   "score": 0.09677000343799591,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 106,
+   "id": "d02-401607017b",
+   "image": "d2__heridal__train_MED_4050_t06_w0.jpg",
+   "box": [
+    168.32,
+    439.46,
+    196.73,
+    470.52
+   ],
+   "score": 0.09410999715328217,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 107,
+   "id": "d02-c8a4303a1b",
+   "image": "d0__visdrone__0000080_00002_d_0000001_w0.jpg",
+   "box": [
+    624.88,
+    172.26,
+    639.97,
+    195.46
+   ],
+   "score": 0.05933000147342682,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 108,
+   "id": "d02-64511497cd",
+   "image": "d2__heridal__train_GOR_2058_t09_w0.jpg",
+   "box": [
+    595.82,
+    338.25,
+    606.8,
+    360.52
+   ],
+   "score": 0.06779000163078308,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 109,
+   "id": "d02-28f16a87be",
+   "image": "d2__visdrone__9999990_00000_d_0000075_w1.jpg",
+   "box": [
+    529.9,
+    254.56,
+    540.77,
+    266.1
+   ],
+   "score": 0.11242999881505966,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 110,
+   "id": "d02-2ea51c456d",
+   "image": "d0__visdrone__9999962_00000_d_0000035_w1.jpg",
+   "box": [
+    347.78,
+    246.22,
+    374.58,
+    305.22
+   ],
+   "score": 0.0955900028347969,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 111,
+   "id": "d02-3c5d924c75",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000041_w0.jpg",
+   "box": [
+    564.57,
+    18.07,
+    586.49,
+    37.34
+   ],
+   "score": 0.15846000611782074,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 112,
+   "id": "d02-7b46a8e106",
+   "image": "d0__visdrone__9999982_00000_d_0000253_w0.jpg",
+   "box": [
+    252.97,
+    0.0,
+    258.82,
+    9.62
+   ],
+   "score": 0.11766999959945679,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 113,
+   "id": "d02-1146704cba",
+   "image": "d0__visdrone__9999982_00000_d_0000248_w0.jpg",
+   "box": [
+    76.42,
+    257.99,
+    89.69,
+    274.01
+   ],
+   "score": 0.4638400077819824,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 114,
+   "id": "d02-18a391da8d",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000220_w1.jpg",
+   "box": [
+    40.24,
+    108.03,
+    51.07,
+    125.98
+   ],
+   "score": 0.3511500060558319,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 115,
+   "id": "d02-1193c8aacc",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000221_w1.jpg",
+   "box": [
+    498.15,
+    374.71,
+    511.59,
+    392.57
+   ],
+   "score": 0.05781000107526779,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 116,
+   "id": "d02-cc9a26b260",
+   "image": "d2__visdrone__9999951_00000_d_0000080_w1.jpg",
+   "box": [
+    627.29,
+    228.53,
+    640.0,
+    253.54
+   ],
+   "score": 0.09151999652385712,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 117,
+   "id": "d02-05c72861c7",
+   "image": "d0__visdrone__9999962_00000_d_0000060_w0.jpg",
+   "box": [
+    37.7,
+    162.56,
+    51.13,
+    177.32
+   ],
+   "score": 0.12070000171661377,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 118,
+   "id": "d02-f956d3c096",
+   "image": "d0__visdrone__9999966_00000_d_0000034_w0.jpg",
+   "box": [
+    180.37,
+    150.86,
+    201.25,
+    180.25
+   ],
+   "score": 0.09847000241279602,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 119,
+   "id": "d02-1b3c0e5cc2",
+   "image": "d2__visdrone__0000261_04201_d_0000134_w1.jpg",
+   "box": [
+    604.17,
+    426.91,
+    618.81,
+    453.98
+   ],
+   "score": 0.10294999927282333,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 120,
+   "id": "d02-3a76670b8e",
+   "image": "d2__visdrone__9999962_00000_d_0000057_w0.jpg",
+   "box": [
+    382.49,
+    19.0,
+    406.16,
+    52.66
+   ],
+   "score": 0.34641000628471375,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 121,
+   "id": "d02-76f6d83903",
+   "image": "d0__heridal__train_MED_4039_t02_w0.jpg",
+   "box": [
+    74.17,
+    0.0,
+    90.16,
+    20.38
+   ],
+   "score": 0.08041000366210938,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 122,
+   "id": "d02-524298c7b1",
+   "image": "d2__visdrone__9999977_00000_d_0000050_w1.jpg",
+   "box": [
+    245.63,
+    26.54,
+    258.24,
+    38.16
+   ],
+   "score": 0.10284999758005142,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 123,
+   "id": "d02-e374f4836d",
+   "image": "d0__visdrone__9999942_00000_d_0000068_w1.jpg",
+   "box": [
+    449.07,
+    23.07,
+    455.89,
+    34.15
+   ],
+   "score": 0.05260000005364418,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 124,
+   "id": "d02-58a2c3a13f",
+   "image": "d0__visdrone__9999942_00000_d_0000050_w1.jpg",
+   "box": [
+    74.74,
+    220.98,
+    83.16,
+    235.58
+   ],
+   "score": 0.10503999888896942,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 125,
+   "id": "d02-eb717cfa19",
+   "image": "d2__wisard__210417_MtErie_Enterprise_VIS_0003_00000241_w1.jpg",
+   "box": [
+    316.16,
+    151.28,
+    355.39,
+    188.57
+   ],
+   "score": 0.07844000309705734,
+   "source": "wisard",
+   "degrade": "d2"
+  },
+  {
+   "idx": 126,
+   "id": "d02-468e3a1f1e",
+   "image": "d0__visdrone__9999942_00000_d_0000257_w1.jpg",
+   "box": [
+    174.26,
+    283.24,
+    181.26,
+    295.5
+   ],
+   "score": 0.05370999872684479,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 127,
+   "id": "d02-1e354649ec",
+   "image": "d2__visdrone__9999955_00000_d_0000039_w0.jpg",
+   "box": [
+    347.71,
+    155.65,
+    367.6,
+    181.98
+   ],
+   "score": 0.06419000029563904,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 128,
+   "id": "d02-d9a959692a",
+   "image": "d0__visdrone__0000305_00601_d_0000216_w1.jpg",
+   "box": [
+    23.81,
+    303.81,
+    35.9,
+    319.43
+   ],
+   "score": 0.059220001101493835,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 129,
+   "id": "d02-c46e41f259",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000198_w0.jpg",
+   "box": [
+    562.06,
+    465.85,
+    579.68,
+    480.0
+   ],
+   "score": 0.08058000355958939,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 130,
+   "id": "d02-778adece1b",
+   "image": "d0__visdrone__9999943_00000_d_0000069_w1.jpg",
+   "box": [
+    215.3,
+    468.18,
+    232.01,
+    480.0
+   ],
+   "score": 0.09581000357866287,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 131,
+   "id": "d02-8ffdf61049",
+   "image": "d0__visdrone__9999955_00000_d_0000229_w1.jpg",
+   "box": [
+    122.79,
+    296.18,
+    130.45,
+    311.69
+   ],
+   "score": 0.44767001271247864,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 132,
+   "id": "d02-79ad233183",
+   "image": "d0__visdrone__9999982_00000_d_0000249_w0.jpg",
+   "box": [
+    217.71,
+    273.53,
+    232.57,
+    294.23
+   ],
+   "score": 0.053700000047683716,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 133,
+   "id": "d02-19ce532a67",
+   "image": "d2__visdrone__9999955_00000_d_0000327_w0.jpg",
+   "box": [
+    631.56,
+    131.52,
+    640.0,
+    160.02
+   ],
+   "score": 0.07108999788761139,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 134,
+   "id": "d02-0d2fc813b6",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000016_w0.jpg",
+   "box": [
+    500.11,
+    224.45,
+    513.53,
+    246.88
+   ],
+   "score": 0.05521000176668167,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 135,
+   "id": "d02-9dea10699f",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000196_w1.jpg",
+   "box": [
+    180.13,
+    256.06,
+    194.69,
+    273.0
+   ],
+   "score": 0.08399999886751175,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 136,
+   "id": "d02-e9adbccc1b",
+   "image": "d2__visdrone__9999962_00000_d_0000068_w1.jpg",
+   "box": [
+    528.18,
+    223.72,
+    550.28,
+    254.32
+   ],
+   "score": 0.149959996342659,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 137,
+   "id": "d02-f0a8585baf",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000004_w1.jpg",
+   "box": [
+    146.32,
+    270.62,
+    154.34,
+    284.1
+   ],
+   "score": 0.05039000138640404,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 138,
+   "id": "d02-8cd28db656",
+   "image": "d0__visdrone__9999981_00000_d_0000073_w1.jpg",
+   "box": [
+    369.17,
+    257.74,
+    378.44,
+    269.8
+   ],
+   "score": 0.18854999542236328,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 139,
+   "id": "d02-07b20bbb7a",
+   "image": "d0__visdrone__9999982_00000_d_0000087_w0.jpg",
+   "box": [
+    246.92,
+    172.22,
+    256.42,
+    181.56
+   ],
+   "score": 0.08410000056028366,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 140,
+   "id": "d02-f181b6eda4",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000038_w1.jpg",
+   "box": [
+    110.76,
+    95.37,
+    122.93,
+    119.49
+   ],
+   "score": 0.05423000082373619,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 141,
+   "id": "d02-c31725e466",
+   "image": "d0__visdrone__9999942_00000_d_0000141_w1.jpg",
+   "box": [
+    35.84,
+    264.22,
+    66.02,
+    286.43
+   ],
+   "score": 0.05988999828696251,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 142,
+   "id": "d02-9aa9ef095a",
+   "image": "d0__visdrone__9999982_00000_d_0000140_w1.jpg",
+   "box": [
+    629.12,
+    415.51,
+    640.0,
+    433.49
+   ],
+   "score": 0.1031000018119812,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 143,
+   "id": "d02-7ff6e4478c",
+   "image": "d2__heridal__train_CAP_0026_t11_w0.jpg",
+   "box": [
+    400.1,
+    306.03,
+    419.15,
+    327.96
+   ],
+   "score": 0.07558999955654144,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 144,
+   "id": "d02-21756e3a65",
+   "image": "d0__heridal__train_ZRI_2023_t08_w0.jpg",
+   "box": [
+    612.99,
+    386.75,
+    627.32,
+    411.73
+   ],
+   "score": 0.11080999672412872,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 145,
+   "id": "d02-7247e4dfa3",
+   "image": "d0__visdrone__9999942_00000_d_0000170_w1.jpg",
+   "box": [
+    280.51,
+    210.68,
+    290.65,
+    223.32
+   ],
+   "score": 0.10591000318527222,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 146,
+   "id": "d02-2bd51075e0",
+   "image": "d0__visdrone__9999955_00000_d_0000250_w0.jpg",
+   "box": [
+    119.93,
+    18.8,
+    133.18,
+    32.78
+   ],
+   "score": 0.1269499957561493,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 147,
+   "id": "d02-9e3bb608d5",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000211_w1.jpg",
+   "box": [
+    557.51,
+    339.41,
+    573.63,
+    375.12
+   ],
+   "score": 0.12343999743461609,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 148,
+   "id": "d02-af5e525189",
+   "image": "d0__visdrone__9999942_00000_d_0000250_w0.jpg",
+   "box": [
+    74.39,
+    423.89,
+    94.37,
+    442.07
+   ],
+   "score": 0.07806000113487244,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 149,
+   "id": "d02-d19c6c31ad",
+   "image": "d0__visdrone__9999981_00000_d_0000101_w1.jpg",
+   "box": [
+    16.24,
+    408.6,
+    27.68,
+    435.7
+   ],
+   "score": 0.052560001611709595,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 150,
+   "id": "d02-47076b332f",
+   "image": "d0__heridal__test_ZRI_0003_t05_w0.jpg",
+   "box": [
+    237.26,
+    36.22,
+    251.16,
+    51.18
+   ],
+   "score": 0.20255999267101288,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 151,
+   "id": "d02-2e72a2e960",
+   "image": "d2__visdrone__0000345_01765_d_0000318_w1.jpg",
+   "box": [
+    111.84,
+    129.05,
+    137.08,
+    155.48
+   ],
+   "score": 0.25854000449180603,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 152,
+   "id": "d02-91ec777293",
+   "image": "d2__visdrone__9999981_00000_d_0000035_w0.jpg",
+   "box": [
+    224.18,
+    370.42,
+    232.92,
+    382.57
+   ],
+   "score": 0.056759998202323914,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 153,
+   "id": "d02-2444e9f3f9",
+   "image": "d0__visdrone__9999942_00000_d_0000257_w1.jpg",
+   "box": [
+    350.99,
+    346.77,
+    381.89,
+    375.39
+   ],
+   "score": 0.1145000010728836,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 154,
+   "id": "d02-d5fe27c29b",
+   "image": "d2__heridal__train_VRD_3081_t13_w0.jpg",
+   "box": [
+    281.35,
+    420.95,
+    294.98,
+    437.91
+   ],
+   "score": 0.1492300033569336,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 155,
+   "id": "d02-df5f506fda",
+   "image": "d2__visdrone__9999999_00267_d_0000116_w1.jpg",
+   "box": [
+    452.04,
+    38.36,
+    473.24,
+    74.49
+   ],
+   "score": 0.11853999644517899,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 156,
+   "id": "d02-552c3da9ec",
+   "image": "d0__visdrone__9999942_00000_d_0000031_w1.jpg",
+   "box": [
+    85.79,
+    458.77,
+    118.94,
+    479.81
+   ],
+   "score": 0.06864999979734421,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 157,
+   "id": "d02-062a82a1b5",
+   "image": "d0__heridal__train_ZRI_2018_t01_w0.jpg",
+   "box": [
+    621.62,
+    73.19,
+    640.0,
+    113.18
+   ],
+   "score": 0.31025001406669617,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 158,
+   "id": "d02-0001273b36",
+   "image": "d0__visdrone__9999972_00000_d_0000071_w1.jpg",
+   "box": [
+    76.09,
+    49.51,
+    91.37,
+    71.12
+   ],
+   "score": 0.06913000345230103,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 159,
+   "id": "d02-8787d16544",
+   "image": "d0__visdrone__9999943_00000_d_0000028_w0.jpg",
+   "box": [
+    521.91,
+    145.63,
+    545.82,
+    167.56
+   ],
+   "score": 0.0847800001502037,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 160,
+   "id": "d02-0b335967cb",
+   "image": "d2__heridal__train_BRK_2101_t02_w0.jpg",
+   "box": [
+    192.53,
+    300.84,
+    207.53,
+    321.13
+   ],
+   "score": 0.06941000372171402,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 161,
+   "id": "d02-cb05dfb9b2",
+   "image": "d2__heridal__train_VRD_2019_t01_w0.jpg",
+   "box": [
+    358.56,
+    331.21,
+    367.35,
+    342.74
+   ],
+   "score": 0.1205499991774559,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 162,
+   "id": "d02-48433926fd",
+   "image": "d0__visdrone__9999942_00000_d_0000071_w0.jpg",
+   "box": [
+    421.9,
+    21.95,
+    429.96,
+    34.4
+   ],
+   "score": 0.12922999262809753,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 163,
+   "id": "d02-f5d11b90f1",
+   "image": "d2__visdrone__9999962_00000_d_0000025_w0.jpg",
+   "box": [
+    303.84,
+    78.48,
+    315.83,
+    92.15
+   ],
+   "score": 0.07229000329971313,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 164,
+   "id": "d02-f3de7f8196",
+   "image": "d2__visdrone__9999955_00000_d_0000095_w1.jpg",
+   "box": [
+    628.83,
+    185.28,
+    640.0,
+    201.59
+   ],
+   "score": 0.05894000083208084,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 165,
+   "id": "d02-bab877e77b",
+   "image": "d0__visdrone__9999942_00000_d_0000136_w0.jpg",
+   "box": [
+    316.33,
+    156.68,
+    328.37,
+    172.28
+   ],
+   "score": 0.29642999172210693,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 166,
+   "id": "d02-21e6d35443",
+   "image": "d0__visdrone__0000334_01373_d_0000028_w0.jpg",
+   "box": [
+    288.42,
+    366.95,
+    301.01,
+    376.35
+   ],
+   "score": 0.177839994430542,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 167,
+   "id": "d02-6fc30d6f85",
+   "image": "d0__visdrone__0000334_03921_d_0000041_w0.jpg",
+   "box": [
+    160.22,
+    367.24,
+    175.49,
+    385.43
+   ],
+   "score": 0.05378999933600426,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 168,
+   "id": "d02-d1c216763b",
+   "image": "d0__heridal__train_BRK_2022_t00_w0.jpg",
+   "box": [
+    622.37,
+    459.57,
+    636.91,
+    477.77
+   ],
+   "score": 0.054349999874830246,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 169,
+   "id": "d02-5307441840",
+   "image": "d0__visdrone__9999984_00000_d_0000097_w1.jpg",
+   "box": [
+    97.42,
+    4.16,
+    109.82,
+    37.2
+   ],
+   "score": 0.05590000003576279,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 170,
+   "id": "d02-cc7e85b07c",
+   "image": "d0__visdrone__9999982_00000_d_0000070_w0.jpg",
+   "box": [
+    609.36,
+    175.53,
+    622.22,
+    190.1
+   ],
+   "score": 0.07535000145435333,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 171,
+   "id": "d02-86fb09510d",
+   "image": "d2__visdrone__0000334_02745_d_0000035_w0.jpg",
+   "box": [
+    488.89,
+    144.83,
+    502.61,
+    159.61
+   ],
+   "score": 0.15174999833106995,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 172,
+   "id": "d02-f4c207c40e",
+   "image": "d2__visdrone__9999942_00000_d_0000155_w0.jpg",
+   "box": [
+    135.4,
+    191.87,
+    157.32,
+    236.47
+   ],
+   "score": 0.06545999646186829,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 173,
+   "id": "d02-6eba6999cf",
+   "image": "d0__visdrone__9999953_00000_d_0000173_w0.jpg",
+   "box": [
+    412.78,
+    305.1,
+    420.0,
+    313.72
+   ],
+   "score": 0.10083000361919403,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 174,
+   "id": "d02-f713b3aada",
+   "image": "d0__heridal__train_CAP_0028_t08_w0.jpg",
+   "box": [
+    105.48,
+    213.96,
+    118.35,
+    226.76
+   ],
+   "score": 0.21922999620437622,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 175,
+   "id": "d02-393c578022",
+   "image": "d2__visdrone__9999956_00000_d_0000029_w1.jpg",
+   "box": [
+    487.23,
+    234.93,
+    495.95,
+    243.78
+   ],
+   "score": 0.07863999903202057,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 176,
+   "id": "d02-8730d1b5bf",
+   "image": "d0__visdrone__9999972_00000_d_0000020_w0.jpg",
+   "box": [
+    154.24,
+    27.78,
+    186.61,
+    56.23
+   ],
+   "score": 0.38582998514175415,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 177,
+   "id": "d02-ce68e11122",
+   "image": "d2__visdrone__9999956_00000_d_0000048_w1.jpg",
+   "box": [
+    271.66,
+    366.87,
+    285.11,
+    379.46
+   ],
+   "score": 0.0753600001335144,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 178,
+   "id": "d02-7ecba91c78",
+   "image": "d0__visdrone__9999990_00000_d_0000033_w0.jpg",
+   "box": [
+    295.72,
+    437.78,
+    308.65,
+    455.63
+   ],
+   "score": 0.14956000447273254,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 179,
+   "id": "d02-57697228c1",
+   "image": "d2__visdrone__9999966_00000_d_0000004_w1.jpg",
+   "box": [
+    284.26,
+    174.24,
+    306.08,
+    202.4
+   ],
+   "score": 0.08620999753475189,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 180,
+   "id": "d02-efbbc882e2",
+   "image": "d2__visdrone__0000031_00000_d_0000037_w1.jpg",
+   "box": [
+    538.17,
+    267.46,
+    558.94,
+    298.89
+   ],
+   "score": 0.4406999945640564,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 181,
+   "id": "d02-9b3e27724b",
+   "image": "d0__wisard__210417_MtErie_Enterprise_VIS_0003_00000044_w1.jpg",
+   "box": [
+    522.52,
+    140.19,
+    531.3,
+    153.91
+   ],
+   "score": 0.06796000152826309,
+   "source": "wisard",
+   "degrade": "d0"
+  },
+  {
+   "idx": 182,
+   "id": "d02-4a7cdb3c27",
+   "image": "d0__visdrone__9999982_00000_d_0000077_w0.jpg",
+   "box": [
+    267.78,
+    22.57,
+    289.24,
+    50.49
+   ],
+   "score": 0.09516999870538712,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 183,
+   "id": "d02-6df6696f2e",
+   "image": "d2__heridal__train_VRD_3131_t00_w0.jpg",
+   "box": [
+    63.45,
+    84.25,
+    84.18,
+    124.34
+   ],
+   "score": 0.07919000089168549,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 184,
+   "id": "d02-88a8c9de36",
+   "image": "d2__wisard__210417_MtErie_Enterprise_VIS_0003_00000008_w1.jpg",
+   "box": [
+    240.01,
+    20.93,
+    257.21,
+    45.45
+   ],
+   "score": 0.05033000186085701,
+   "source": "wisard",
+   "degrade": "d2"
+  },
+  {
+   "idx": 185,
+   "id": "d02-81ea14bc94",
+   "image": "d0__visdrone__9999942_00000_d_0000171_w1.jpg",
+   "box": [
+    333.26,
+    188.19,
+    344.16,
+    202.94
+   ],
+   "score": 0.1042499989271164,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 186,
+   "id": "d02-483a9e6f7f",
+   "image": "d0__visdrone__9999981_00000_d_0000135_w1.jpg",
+   "box": [
+    468.7,
+    186.59,
+    483.12,
+    203.47
+   ],
+   "score": 0.059859998524188995,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 187,
+   "id": "d02-61171fa093",
+   "image": "d0__visdrone__9999942_00000_d_0000135_w0.jpg",
+   "box": [
+    208.28,
+    411.67,
+    235.01,
+    439.71
+   ],
+   "score": 0.0810599997639656,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 188,
+   "id": "d02-e7c6de775f",
+   "image": "d0__visdrone__9999981_00000_d_0000124_w1.jpg",
+   "box": [
+    89.47,
+    287.27,
+    101.97,
+    295.31
+   ],
+   "score": 0.065700002014637,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 189,
+   "id": "d02-7f83ca1800",
+   "image": "d2__wisard__210417_MtErie_Enterprise_VIS_0003_00000217_w0.jpg",
+   "box": [
+    113.0,
+    383.96,
+    130.95,
+    411.81
+   ],
+   "score": 0.0982000008225441,
+   "source": "wisard",
+   "degrade": "d2"
+  },
+  {
+   "idx": 190,
+   "id": "d02-c38e1503be",
+   "image": "d2__heridal__train_GOR_1055_t13_w0.jpg",
+   "box": [
+    456.07,
+    187.74,
+    467.16,
+    206.8
+   ],
+   "score": 0.1499900072813034,
+   "source": "heridal",
+   "degrade": "d2"
+  },
+  {
+   "idx": 191,
+   "id": "d02-be4f86b7b2",
+   "image": "d0__visdrone__9999955_00000_d_0000209_w0.jpg",
+   "box": [
+    464.9,
+    232.08,
+    477.26,
+    246.49
+   ],
+   "score": 0.09505999833345413,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 192,
+   "id": "d02-45567313e9",
+   "image": "d0__visdrone__9999982_00000_d_0000054_w1.jpg",
+   "box": [
+    21.16,
+    197.38,
+    45.91,
+    221.82
+   ],
+   "score": 0.2974900007247925,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 193,
+   "id": "d02-8e29d9fbe4",
+   "image": "d0__heridal__train_BRK_2110_t14_w0.jpg",
+   "box": [
+    617.21,
+    345.45,
+    625.5,
+    358.05
+   ],
+   "score": 0.06165999919176102,
+   "source": "heridal",
+   "degrade": "d0"
+  },
+  {
+   "idx": 194,
+   "id": "d02-6c731632f3",
+   "image": "d0__visdrone__9999982_00000_d_0000071_w1.jpg",
+   "box": [
+    205.23,
+    460.09,
+    215.59,
+    472.13
+   ],
+   "score": 0.05534999817609787,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 195,
+   "id": "d02-b71a0429b8",
+   "image": "d0__visdrone__9999962_00000_d_0000082_w1.jpg",
+   "box": [
+    567.24,
+    176.97,
+    574.57,
+    187.86
+   ],
+   "score": 0.10204999893903732,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 196,
+   "id": "d02-70b2be3c13",
+   "image": "d2__wisard__210417_MtErie_Enterprise_VIS_0003_00000169_w0.jpg",
+   "box": [
+    624.94,
+    350.57,
+    640.0,
+    391.3
+   ],
+   "score": 0.10373999923467636,
+   "source": "wisard",
+   "degrade": "d2"
+  },
+  {
+   "idx": 197,
+   "id": "d02-137b063f83",
+   "image": "d0__visdrone__9999962_00000_d_0000053_w0.jpg",
+   "box": [
+    16.16,
+    199.24,
+    44.54,
+    263.74
+   ],
+   "score": 0.0801599994301796,
+   "source": "visdrone",
+   "degrade": "d0"
+  },
+  {
+   "idx": 198,
+   "id": "d02-97cc590b37",
+   "image": "d2__visdrone__9999953_00000_d_0000116_w1.jpg",
+   "box": [
+    178.43,
+    95.47,
+    204.53,
+    133.29
+   ],
+   "score": 0.21344999969005585,
+   "source": "visdrone",
+   "degrade": "d2"
+  },
+  {
+   "idx": 199,
+   "id": "d02-95b1cbbf41",
+   "image": "d2__visdrone__9999955_00000_d_0000386_w1.jpg",
+   "box": [
+    218.07,
+    449.43,
+    225.4,
+    457.96
+   ],
+   "score": 0.18369999527931213,
+   "source": "visdrone",
+   "degrade": "d2"
+  }
+ ]
+}

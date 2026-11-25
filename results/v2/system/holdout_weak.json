@@ -1,0 +1,40 @@
+{
+ "created": "2026-11-25T18:37:40+00:00",
+ "what": "B2 trên holdout yếu (cùng buổi), không phải holdout chặt của score.json",
+ "bundles": {
+  "detector": "detector-v1.0.1",
+  "detector_onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+  "recommended_track": {
+   "k": 1,
+   "n": 1,
+   "iou": 0.3,
+   "max_gap": 1
+  },
+  "verifier": "verifier-v1.0.0",
+  "verifier_conf_threshold": 0.35
+ },
+ "blank": {
+  "rule": "test + cal + mine",
+  "n": 433
+ },
+ "rule": {
+  "min_dist_s": 30.0,
+  "min_gap_s": 0.5,
+  "block_s": 30.0
+ },
+ "replays": {},
+ "kind": "weak_same_day",
+ "label": "holdout yếu: cùng buổi bay với test, không độc lập; agent duyệt",
+ "approved_by": "agent",
+ "owner_approved": false,
+ "n_frames": 0,
+ "n_sessions": 0,
+ "n_blocks": 0,
+ "target": 0.05,
+ "verdict": "không đủ chứng minh (0 khung)",
+ "by_stage": {
+  "detector": null,
+  "verifier": null,
+  "track": null
+ }
+}

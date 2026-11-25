@@ -15,6 +15,8 @@ Lệnh (mã thoát 0 xong / 1 dữ liệu thiếu hoặc sai / 2 sai cách gọi
     python -m xla.camera.sessions split --json             # -> data/real/neg_flight_split.json
     python -m xla.camera.sessions review --json            # trang duyệt holdout results/v2/neg-holdout/review/
     python -m xla.camera.sessions apply-review <json> --json   # áp file "Xuất JSON" của chủ dự án
+    python -m xla.camera.sessions weak-holdout --sheets --json   # holdout YẾU cùng buổi (agent duyệt) -> khối holdout_weak
+    python -m xla.camera.sessions score-weak --iotcv D:/IOTCV-wt/iotcv --json   # B2 trên holdout yếu -> holdout_weak.json
 
 Gán phiên (seed ``SEED``): phiên chứa khung dev/test v1 không bao giờ là ``holdout``/``cal``; phiên còn lại xáo theo seed,
 lấy ``holdout`` tới khi đủ ``HOLDOUT_MIN_SESSIONS`` phiên và ``HOLDOUT_MIN_FRAMES`` khung, rồi ``CAL_MIN_SESSIONS``
@@ -27,6 +29,10 @@ trên xuống (đo trên dev-val v1, README), nên **mọi** khung neg dự ki�
 (``sessions sheets``), vùng nghi ngờ phóng bằng ``xla.detect.review crop``; kết quả ở ``AGENT_REVIEW_REL``
 (``frame,verdict,reason``), khung ``person`` bị loại khỏi neg. ``mine``/``cal`` chỉ lấy khung ``dev`` của ``split.json``
 (không lấy khung đệm cạnh khối test); khung ``devpool`` (phase 04) không vào ``mine``.
+
+Holdout **yếu** (``weak-holdout``, quyết định chủ dự án 26/11/2026, không thay holdout chặt): khung bay không thuộc
+``split.json`` v1, cách mọi khối dev/test v1 ≥ ``WEAK_MIN_DIST_S``, agent soát từng khung; nằm ở khoá gốc ``holdout_weak``
+(``kind: "weak_same_day"``, ``approved_by: "agent"``, ``owner_approved: false``), ngoài ``frames``, nên đường chặt không đổi.
 """
 
 from __future__ import annotations
@@ -34,6 +40,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import itertools
 import json
 import os
 import subprocess
@@ -559,7 +566,7 @@ def check_split(neg_doc: dict[str, Any], rows: list[dict[str, Any]], split_v1: d
                 ) -> list[str]:
     """Lỗi hợp đồng của ``neg_flight_split.json`` (rỗng = đạt): khoá, enum, phiên/khối cal + holdout sạch dev/test."""
     errs = []
-    if set(neg_doc) - {"seed", "cal_mode", "sessions", "frames"} or neg_doc.get("seed") != SEED:
+    if set(neg_doc) - {"seed", "cal_mode", "sessions", "frames", WEAK_KEY} or neg_doc.get("seed") != SEED:
         errs.append(f"khoá/seed sai: {sorted(neg_doc)} seed={neg_doc.get('seed')}")
     if neg_doc.get("cal_mode") not in ("session", "block"):
         errs.append(f"cal_mode lạ {neg_doc.get('cal_mode')!r}")
@@ -643,6 +650,9 @@ def cmd_split(args: argparse.Namespace) -> int:
     if errs:
         print(json.dumps(report, ensure_ascii=False))
         return 1
+    old = root / NEG_SPLIT_REL
+    if old.exists() and WEAK_KEY in (prev := _load(old)):  # khối holdout yếu do `weak-holdout` quản, giữ nguyên
+        doc[WEAK_KEY] = prev[WEAK_KEY]
     _dump(root / NEG_SPLIT_REL, doc)
     _dump(root / SPLIT_REPORT_REL, report)
     out = {k: report[k] for k in ("cal_mode", "counts", "planned", "removed_person", "cal_blocks", "kill_a",
@@ -896,6 +906,296 @@ def cmd_apply_review(args: argparse.Namespace) -> int:
     return 0
 
 
+# ---------------------------------------------------------------- holdout yếu "cùng buổi" (quyết định chủ dự án 26/11)
+
+WEAK_KEY = "holdout_weak"
+"""Khoá gốc của ``neg_flight_split.json`` chứa holdout yếu. Không nằm trong ``frames``: đường holdout chặt (``split`` =
+``holdout``, ``approved``) và mọi bên đọc ``frames`` (system, train, verify, detection) không thấy nó."""
+WEAK_KIND = "weak_same_day"
+WEAK_LABEL = "holdout yếu: cùng buổi bay với test, không độc lập; agent duyệt"
+WEAK_MIN_DIST_S = 30.0
+"""Khung holdout yếu cách mọi khối ``dev``/``test`` v1 ít nhất 30 s (khoảng giờ thật của các khung trong khối)."""
+WEAK_MIN_GAP_S = 0.5
+WEAK_DIST_STEPS = (0.0, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 30.0)
+WEAK_BLOCK_S = 30.0
+"""Cụm bootstrap theo khối: ``<phiên>/<floor((t - t_start) / 30 s)>``."""
+WEAK_DIR_REL = OUT_REL / "weak"
+WEAK_PLAN_REL = WEAK_DIR_REL / "plan.json"
+WEAK_REVIEW_REL = WEAK_DIR_REL / "agent_review.csv"
+WEAK_SHEETS_INDEX_REL = WEAK_DIR_REL / "agent_review_sheets.csv"
+WEAK_SCORE_REL = Path("results/v2/system/holdout_weak.json")
+WEAK_FRAME_KEYS = {"frame", "session", "t_unix", "dist_s", "block", "approved", "approved_by"}
+
+
+def v1_block_intervals(split_v1: dict[str, dict[str, Any]]) -> list[tuple[float, float]]:
+    """``[(t đầu, t cuối)]`` của mỗi khối có khung ``dev``/``test`` v1 (theo ``t_unix`` của chính các khung đó)."""
+    ts: dict[int, list[float]] = defaultdict(list)
+    for v in split_v1.values():
+        if v["split"] in ("dev", "test") and v.get("t_unix") is not None:
+            ts[v["block"]].append(float(v["t_unix"]))
+    return sorted((min(x), max(x)) for x in ts.values())
+
+
+def dist_to_blocks(t: float, intervals: list[tuple[float, float]]) -> float:
+    """Giây tới khối dev/test v1 gần nhất (0 nếu nằm trong khối); không có khối → vô cực."""
+    return min((0.0 if a <= t <= b else min(abs(t - a), abs(t - b)) for a, b in intervals), default=float("inf"))
+
+
+def _spaced(rows: list[dict[str, Any]], gap: float) -> list[dict[str, Any]]:
+    out, last = [], {}
+    for r in rows:
+        t = float(r["t_unix"])
+        if t - last.get(r["session"], -1e18) >= gap - 1e-9:
+            out.append(r)
+            last[r["session"]] = t
+    return out
+
+
+def plan_weak_holdout(rows: list[dict[str, Any]], split_v1: dict[str, dict[str, Any]], neg_doc: dict[str, Any],
+                      devpool: set[str], sessions: list[dict[str, Any]], min_dist_s: float = WEAK_MIN_DIST_S,
+                      min_gap_s: float = WEAK_MIN_GAP_S) -> dict[str, Any]:
+    """Ứng viên holdout yếu: khung bay (đã nhập, trong phiên) **không** thuộc ``split.json`` v1, không là mine/cal/
+    devpool/khung giữ lại, cách mọi khối dev/test v1 ≥ ``min_dist_s``, cách nhau ≥ ``min_gap_s`` trong phiên. Thuần.
+
+    ``dist_hist``: số khung còn lại (sau giãn cách) ở từng mức khoảng cách ``WEAK_DIST_STEPS`` (để báo cáo luật cứng tới
+    đâu, không dùng để chọn)."""
+    iv = v1_block_intervals(split_v1)
+    start = {s["id"]: float(s["t_start"]) for s in sessions}
+    taken = {x["frame"] for x in neg_doc["frames"]} | reserved_frames(neg_doc, rows, split_v1) | set(devpool)
+    skipped: Counter[str] = Counter()
+    pool = []
+    for r in sorted(rows, key=lambda r: (r["session"], float(r["t_unix"]), r["frame"])):
+        if not r["session"]:
+            skipped["outside_session"] += 1
+        elif r["frame"] in split_v1:
+            skipped[f"v1_{split_v1[r['frame']]['split']}"] += 1
+        elif r["frame"] in taken:
+            skipped["neg_or_reserved"] += 1
+        else:
+            pool.append(r | {"dist_s": dist_to_blocks(float(r["t_unix"]), iv)})
+    hist = {f"{d:g}": len(_spaced([r for r in pool if r["dist_s"] >= d], min_gap_s)) for d in WEAK_DIST_STEPS}
+    hist_s = {f"{d:g}": dict(sorted(Counter(r["session"] for r in _spaced([r for r in pool if r["dist_s"] >= d],
+                                                                           min_gap_s)).items()))
+              for d in WEAK_DIST_STEPS}
+    near = [r for r in pool if r["dist_s"] < min_dist_s]
+    skipped["near_v1_block"] += len(near)
+    far = [r for r in pool if r["dist_s"] >= min_dist_s]
+    kept = _spaced(far, min_gap_s)
+    skipped["spacing"] += len(far) - len(kept)
+    cands = [{"frame": r["frame"], "session": r["session"], "t_unix": float(r["t_unix"]),
+              "dist_s": round(r["dist_s"], 3),
+              "block": f"{r['session']}/{int((float(r['t_unix']) - start[r['session']]) // WEAK_BLOCK_S)}"}
+             for r in kept]
+    return {"kind": WEAK_KIND, "rule": {"min_dist_s": min_dist_s, "min_gap_s": min_gap_s, "block_s": WEAK_BLOCK_S},
+            "not_in_v1": len(pool), "candidates": cands, "by_session": dict(Counter(c["session"] for c in cands)),
+            "dist_hist": hist, "dist_hist_by_session": hist_s, "skipped": dict(sorted(skipped.items()))}
+
+
+def build_weak_section(plan: dict[str, Any], review: dict[str, dict[str, str]],
+                       allow_unreviewed: bool = False) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Khối ``holdout_weak`` của ``neg_flight_split.json`` + báo cáo. Chỉ khung agent soát ``no_person`` được giữ
+    (``approved: true``, ``approved_by: "agent"``; KHÔNG phải chủ dự án duyệt). Ứng viên chưa soát → ``ValueError``."""
+    cands = plan["candidates"]
+    unreviewed = [c["frame"] for c in cands if c["frame"] not in review]
+    if unreviewed and not allow_unreviewed:
+        raise ValueError(f"{len(unreviewed)} khung holdout yếu chưa soát ({WEAK_REVIEW_REL}): {unreviewed[:3]}")
+    kept = [c | {"approved": True, "approved_by": "agent"} for c in cands
+            if review.get(c["frame"], {}).get("verdict") == "no_person"]
+    dropped = [{"frame": c["frame"], "session": c["session"], "reason": review[c["frame"]].get("reason", "")}
+               for c in cands if review.get(c["frame"], {}).get("verdict") == "person"]
+    section = {"kind": WEAK_KIND, "label": WEAK_LABEL, "approved_by": "agent", "owner_approved": False,
+               "rule": plan["rule"], "frames": sorted(kept, key=lambda x: x["frame"])}
+    report = {"candidates": len(cands), "kept": len(kept), "dropped_person_or_doubt": dropped,
+              "unreviewed": len(unreviewed),
+              "per_session": {s: {"candidates": n, "kept": sum(k["session"] == s for k in kept)}
+                              for s, n in sorted(plan["by_session"].items())}}
+    return section, report
+
+
+def check_weak_section(section: dict[str, Any], neg_doc: dict[str, Any], rows: list[dict[str, Any]],
+                       split_v1: dict[str, dict[str, Any]], devpool: set[str]) -> list[str]:
+    """Lỗi của khối ``holdout_weak`` (rỗng = đạt): nhãn, luật khoảng cách / giãn cách, không chạm v1/neg/devpool."""
+    errs = []
+    if section.get("kind") != WEAK_KIND or section.get("approved_by") != "agent" or section.get("owner_approved"):
+        errs.append(f"kind/approved_by/owner_approved sai: {section.get('kind')!r} {section.get('approved_by')!r}")
+    if section.get("label") != WEAK_LABEL:
+        errs.append("thiếu nhãn holdout yếu")
+    rule = section.get("rule", {})
+    iv = v1_block_intervals(split_v1)
+    sess_of = {r["frame"]: r["session"] for r in rows}
+    taken = {x["frame"] for x in neg_doc["frames"]} | reserved_frames(neg_doc, rows, split_v1) | set(devpool)
+    seen: set[str] = set()
+    for x in section.get("frames", []):
+        f = x.get("frame")
+        if set(x) != WEAK_FRAME_KEYS or x.get("approved") is not True or x.get("approved_by") != "agent":
+            errs.append(f"dòng holdout yếu sai dạng: {x}")
+            continue
+        if f in seen:
+            errs.append(f"khung lặp {f}")
+        seen.add(f)
+        if f in split_v1:
+            errs.append(f"{f}: có trong split.json v1 ({split_v1[f]['split']})")
+        if f in taken:
+            errs.append(f"{f}: là khung mine/cal/devpool/giữ lại")
+        if sess_of.get(f) != x["session"] or not x["session"]:
+            errs.append(f"{f}: session {x['session']!r} khác {sess_of.get(f)!r}")
+        if dist_to_blocks(float(x["t_unix"]), iv) < float(rule.get("min_dist_s", WEAK_MIN_DIST_S)) - 1e-9:
+            errs.append(f"{f}: gần khối dev/test v1 hơn {rule.get('min_dist_s')} s")
+    by: dict[str, list[float]] = defaultdict(list)
+    for x in section.get("frames", []):
+        by[x.get("session", "")].append(float(x.get("t_unix", 0.0)))
+    for s, ts in by.items():
+        ts.sort()
+        if any(b - a < float(rule.get("min_gap_s", WEAK_MIN_GAP_S)) - 1e-9 for a, b in itertools.pairwise(ts)):
+            errs.append(f"phiên {s}: hai khung holdout yếu cách nhau < {rule.get('min_gap_s')} s")
+    return errs
+
+
+def weak_frames(neg_doc: dict[str, Any]) -> list[dict[str, Any]]:
+    """Khung holdout yếu agent đã duyệt (rỗng khi chưa có khối)."""
+    return [x for x in neg_doc.get(WEAK_KEY, {}).get("frames", []) if x.get("approved") is True]
+
+
+def _cluster_ci(per: np.ndarray, groups: list[str], boot_n: int, rng: np.random.Generator) -> list[float | None]:
+    keys = sorted(set(groups))
+    if len(keys) < 2:
+        return [None, None]
+    idx = {k: [i for i, g in enumerate(groups) if g == k] for k in keys}
+    boots = []
+    for _ in range(boot_n):
+        ii = [i for k in rng.choice(keys, size=len(keys), replace=True) for i in idx[k]]
+        boots.append(float(per[ii].mean()))
+    return [float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5))]
+
+
+def weak_report(csvs: dict[str, str], frames: list[dict[str, Any]], boot_n: int = 2000,
+                seed: int = SEED) -> dict[str, Any]:
+    """B2 trên holdout yếu: báo nhầm/khung theo tầng, theo phiên; CI 95 % bootstrap theo phiên VÀ theo khối 30 s."""
+    from xla.eval import system as Y
+
+    base = {"kind": WEAK_KIND, "label": WEAK_LABEL, "approved_by": "agent", "owner_approved": False,
+            "n_frames": len(frames), "n_sessions": len({x["session"] for x in frames}),
+            "n_blocks": len({x["block"] for x in frames}), "target": Y.B2_MAX}
+    if not frames:
+        return base | {"verdict": "không đủ chứng minh (0 khung)", "by_stage": {s: None for s in Y.STAGES}}
+    names = [x["frame"] for x in frames]
+    sess = [x["session"] for x in frames]
+    blocks = [x["block"] for x in frames]
+    by_stage = {}
+    for stage in Y.STAGES:
+        rng = np.random.default_rng(seed)
+        counts = Y.read_rows(Path(csvs[stage]))
+        per = np.asarray([counts.get(f, 0) for f in names], float)
+        by_stage[stage] = {
+            "fp": int(per.sum()), "fp_per_frame": float(per.mean()),
+            "ci95_session": _cluster_ci(per, sess, boot_n, rng), "ci95_block": _cluster_ci(per, blocks, boot_n, rng),
+            "by_session": {s: {"n": sess.count(s), "fp": int(per[[i for i, g in enumerate(sess) if g == s]].sum()),
+                               "fp_per_frame": float(per[[i for i, g in enumerate(sess) if g == s]].mean())}
+                           for s in sorted(set(sess))}}
+    fp = by_stage["track"]["fp_per_frame"]
+    enough = len(frames) >= KILL_A_MIN_HOLDOUT
+    return base | {"by_stage": by_stage, "verdict": ("đạt" if fp <= Y.B2_MAX else "không đạt")
+                   + ("" if enough else f" (không đủ chứng minh: < {KILL_A_MIN_HOLDOUT} khung)") + " — " + WEAK_LABEL}
+
+
+def score_weak(iotcv: Path, runs: Path, runner: Any = None, root: Path | None = None, boot_n: int = 2000,
+               rec_frames: Any = None, out: Path | None = None) -> dict[str, Any]:
+    """Chấm B2 trên holdout yếu bằng ĐÚNG đường holdout của ``xla.eval.system.score`` (``_replay_set`` ba tầng qua
+    IOT-CV, ``--blank`` = test + cal + mine, meta chỉ đọc), không chấm lại test, không đụng ``score.json``. 0 khung →
+    ghi "không đủ chứng minh", không gọi IOT-CV, không lấy khoá GPU. Có khung → giữ khoá D6 MỘT lần cho cả việc."""
+    import contextlib
+
+    from xla.eval import system as Y
+
+    root = root or repo_root()
+    runner = runner or Y.run_iotcv
+    rec_frames = rec_frames or Y.recording_frames
+    frames = weak_frames(load_neg_split(root))
+    out = out or root / WEAK_SCORE_REL
+    sets = Y.load_frame_sets(root)
+    blank = Y.score_holdout_blank(sets)
+    names = frozenset(x["frame"] for x in frames)
+    Y.check_disjoint(names, blank | sets.devpool | sets.holdout, "holdout yếu")
+    replays: dict[str, Any] = {}
+    csvs: dict[str, str] = {}
+    if frames:
+        log = runs / "score_weak.log"
+        det_onnx = Y.install_bundle(iotcv, root / Y.RELEASE_REL / Y.DETECTOR_SYSTEM, runner, log)
+        ver_onnx = Y.install_bundle(iotcv, root / Y.RELEASE_REL / Y.VERIFIER_SYSTEM, runner, log)
+        with Y.held_gpu("v2 holdout yếu score") if runner is Y.run_iotcv else contextlib.nullcontext():
+            hold = Y._replay_set("holdout_weak", names, blank, iotcv, runs, det_onnx, ver_onnx, runner, log,
+                                 runs / "preds", rec_frames)
+        replays, csvs = hold["replays"], hold["csv"]
+    det_meta = Y._meta(root, Y.DETECTOR_SYSTEM)
+    ver_meta = Y._meta(root, Y.VERIFIER_SYSTEM)
+    doc = {"created": Y.utc_now(), "what": "B2 trên holdout yếu (cùng buổi), không phải holdout chặt của score.json",
+           "bundles": {"detector": Y.DETECTOR_SYSTEM, "detector_onnx_sha256": det_meta["onnx_sha256"],
+                       "recommended_track": det_meta.get("recommended_track"), "verifier": Y.VERIFIER_SYSTEM,
+                       "verifier_conf_threshold": ver_meta["conf_threshold"]},
+           "blank": {"rule": "test + cal + mine", "n": len(blank)}, "rule": load_neg_split(root).get(WEAK_KEY, {}).get(
+               "rule"), "replays": replays} | weak_report(csvs, frames, boot_n)
+    Y.write_json(out, doc)
+    return doc
+
+
+def cmd_weak_holdout(args: argparse.Namespace) -> int:
+    from xla.paths import cache_dir
+
+    root = repo_root()
+    rows = flight_rows(root)
+    split_v1 = load_split_v1(root)
+    p = root / NEG_SPLIT_REL
+    neg_doc = _load(p)
+    devpool_p = root / DEVPOOL_JSON_REL
+    devpool = set(_load(devpool_p)["frames"]) if devpool_p.exists() else set()
+    plan = plan_weak_holdout(rows, split_v1, neg_doc, devpool, load_sessions(root), args.min_dist_s, args.min_gap_s)
+    names = [c["frame"] for c in plan["candidates"]]
+    raw_p = root / PRELABEL_RAW_REL
+    raw = _load(raw_p)["frames"] if raw_p.exists() else {}
+    plan["prelabel_covered"] = sum(f in raw for f in names)
+    if args.prelabel and plan["prelabel_covered"] < len(names):
+        plan["prelabel_run"] = run_prelabel(names, raw_p, lock_timeout=args.lock_timeout, label="v2 holdout yếu prelabel")
+    if args.sheets and names:
+        out_dir = Path(args.out) if args.out else cache_dir() / "xla-neg-review-weak"
+        index = neg_sheets([c | {"split": "weak"} for c in plan["candidates"]], out_dir)
+        (root / WEAK_SHEETS_INDEX_REL).parent.mkdir(parents=True, exist_ok=True)
+        with (root / WEAK_SHEETS_INDEX_REL).open("w", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=("sheet", "cell", "frame", "session", "split"), lineterminator="\n",
+                               extrasaction="ignore")
+            w.writeheader()
+            w.writerows(index)
+        plan["sheets_dir"] = str(out_dir)
+    _dump(root / WEAK_PLAN_REL, plan)
+    review = read_agent_review(root / WEAK_REVIEW_REL)
+    try:
+        section, report = build_weak_section(plan, review, allow_unreviewed=False)
+    except ValueError as e:
+        print(json.dumps({k: plan[k] for k in ("not_in_v1", "by_session", "dist_hist")} | {"unreviewed": str(e)},
+                         ensure_ascii=False))
+        print(f"LỖI: {e}", file=sys.stderr)
+        return 1
+    errs = check_weak_section(section, neg_doc, rows, split_v1, devpool)
+    if errs:
+        raise ValueError(f"holdout yếu lệch luật: {errs[:3]}")
+    if not args.dry_run:
+        _dump(p, neg_doc | {WEAK_KEY: section})
+    out = {"rule": plan["rule"], "not_in_v1": plan["not_in_v1"], "dist_hist": plan["dist_hist"]} | report | {
+        "dry_run": args.dry_run, "label": WEAK_LABEL}
+    print(json.dumps(out, ensure_ascii=False) if args.json else out)
+    return 0
+
+
+def cmd_score_weak(args: argparse.Namespace) -> int:
+    from xla.eval.system import RUNS_DEFAULT
+
+    runs = Path(args.runs) if args.runs else RUNS_DEFAULT.parent / "holdout-weak"
+    doc = score_weak(Path(args.iotcv), runs, boot_n=args.boot_n)
+    out = {k: doc[k] for k in ("n_frames", "n_sessions", "n_blocks", "verdict", "label")}
+    out["fp_per_frame"] = {s: (v or {}).get("fp_per_frame") for s, v in doc["by_stage"].items()}
+    print(json.dumps(out, ensure_ascii=False) if args.json else out)
+    return 0
+
+
 # ---------------------------------------------------------------- CLI
 
 
@@ -925,11 +1225,26 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--allow-unseen", action="store_true", help="chấp nhận lưới chưa đánh dấu Đã xem")
     a.add_argument("--dry-run", action="store_true", help="chỉ kiểm, không ghi")
     a.add_argument("--json", action="store_true")
+    w = sub.add_parser("weak-holdout", help="holdout yếu cùng buổi (agent duyệt) -> khối holdout_weak")
+    w.add_argument("--min-dist-s", type=float, default=WEAK_MIN_DIST_S, help="giây tối thiểu tới khối dev/test v1")
+    w.add_argument("--min-gap-s", type=float, default=WEAK_MIN_GAP_S)
+    w.add_argument("--prelabel", action="store_true", help="nhãn trước cho ứng viên chưa có (GPU, gpu_lock)")
+    w.add_argument("--lock-timeout", type=float, default=6 * 3600.0)
+    w.add_argument("--sheets", action="store_true", help="ảnh ghép 4×4 ứng viên để agent soát")
+    w.add_argument("--out", help="thư mục ảnh ghép (mặc định cache ngoài repo)")
+    w.add_argument("--dry-run", action="store_true", help="không ghi neg_flight_split.json")
+    w.add_argument("--json", action="store_true")
+    g = sub.add_parser("score-weak", help="B2 trên holdout yếu qua IOT-CV -> results/v2/system/holdout_weak.json")
+    g.add_argument("--iotcv", required=True)
+    g.add_argument("--runs", help="thư mục cache/CSV (mặc định D:/DevCache/runs/xla/v2/holdout-weak)")
+    g.add_argument("--boot-n", type=int, default=2000)
+    g.add_argument("--json", action="store_true")
     return ap
 
 
 COMMANDS = {"index": "cmd_index", "prelabel": "cmd_prelabel", "sheets": "cmd_sheets", "split": "cmd_split",
-            "review": "cmd_review", "apply-review": "cmd_apply_review"}
+            "review": "cmd_review", "apply-review": "cmd_apply_review", "weak-holdout": "cmd_weak_holdout",
+            "score-weak": "cmd_score_weak"}
 
 
 def main(argv: list[str] | None = None) -> int:

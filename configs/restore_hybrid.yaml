@@ -1,0 +1,46 @@
+# AI v2 phase 10 bước 4 (tuỳ chọn): lai classic → NAFNet-w16 sửa màu sau classic. Đọc bằng xla/enhance/train_net.py
+# (khối data/train) qua python -m xla.enhance.export_classic hybrid (khối hybrid). Đầu vào mạng = output classic trên
+# cặp D2 (dựng sẵn dưới XLA_DATA_ROOT/<input_set>), đích = D0. Trần GPU 30 phút (quyết định chủ dự án 25/11).
+version: "1.0.0"
+candidate: nafnet              # khoá xla.enhance.net.CANDIDATES
+variant: nafnet_w16            # xla.enhance.net.VARIANTS: width 16, 1 khối mỗi tầng (~16 ms riêng mạng, phase 13 v1)
+arch_kwargs: {width: 16, middle_blk_num: 1, enc_blk_nums: [1, 1, 1, 1], dec_blk_nums: [1, 1, 1, 1]}
+init: random                   # khác width 32 nên không nạp được trọng số công bố (VARIANTS.nafnet_w16.init)
+
+data:
+  input_set: v2_classic_d2     # = classic(D2), dựng bởi lệnh hybrid (JPEG q100 4:4:4), cùng tên file với d2
+  target_set: d0
+  patch: 256
+  grid: 8                      # gốc patch trên lưới 8 px tính từ crop_left (giữ pha khối JPEG)
+  flip: true
+
+train:
+  batch: 8
+  workers: 4                   # trần 4 (RAM lật bit dưới tải)
+  lr: 1.0e-3                   # khởi tạo ngẫu nhiên: lr gốc của công thức NAFNet
+  lr_min: 1.0e-6
+  betas: [0.9, 0.9]
+  weight_decay: 0.0
+  warmup_steps: 100
+  smoke_steps: 200             # đo s/bước trước, rồi chạy tiếp (resume last.pt) số bước vừa trần còn lại
+  max_steps: 200               # ghi đè lúc chạy: smoke_steps + số bước vừa trần (lệnh hybrid tính)
+  ssim_weight: 1.0             # loss = L1 + w·(1 − SSIM)
+  grad_clip: 0.01
+  amp: bf16
+  ckpt_every: 500              # ghi đè lúc chạy: ~3 checkpoint trong phần sau smoke
+  last_every: 100
+  val_every: 1000000           # không đo val giữa chừng (tốn trần GPU); train_net vẫn đo ở bước 0 và cuối
+  val_n: 50
+  seed: 20261125
+  budget_gpu_hours: 0.5
+
+hybrid:
+  classic_params: configs/enhance_classic.yaml
+  input_jpeg_quality: 100
+  gpu_cap_s: 1800              # trần 30 phút GPU cho cả bước 4 (smoke + huấn luyện + đo dev)
+  final_val_reserve_s: 120     # dành cho val tổng hợp cuối của train_net (đo hết cặp val)
+  eval_reserve_s: 240          # dành cho đo dev mọi checkpoint
+  run_id: v2-classic-hybrid-w16
+  parity_n: 50                 # khung dev đo dark channel trung vị + % hồng (cùng tập parity của bundle classic)
+  ms_max: 30.0                 # tổng ms classic + mạng (ORT CUDA) để được A/B
+  # luật "hơn classic": không kém ở cả ba chỉ số dev (dark channel trung vị, % hồng, flicker_ratio) và tốt hơn ít nhất một

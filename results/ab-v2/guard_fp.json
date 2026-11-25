@@ -1,0 +1,823 @@
+{
+ "cal_raw": {
+  "n_frames": 150,
+  "n_boxes": 15,
+  "fp_per_frame": 0.1,
+  "frames_with_fp": 9
+ },
+ "cal_offline": {
+  "n_frames": 150,
+  "n_boxes": 10,
+  "fp_per_frame": 0.06666666666666667,
+  "frames_with_fp": 9
+ },
+ "diff": {
+  "diff": -0.03333333333333334,
+  "ci95": [
+   -0.12330766923307666,
+   0.039215686274509796
+  ],
+  "n_boot": 10000,
+  "n_blocks": 16,
+  "n_sessions": 2,
+  "seed": 20261125
+ },
+ "block_frames": 10,
+ "decision": "pass",
+ "rule": "Chỉ dựa trên cal: cận dưới CI 95 % (bootstrap ghép cặp theo khối trong phiên) của hiệu báo nhầm/khung (offline − gốc) > 0 → reject (Kill (d): không vào A/B, không ship); còn lại → pass. Holdout chỉ ghi.",
+ "per_frame": [
+  {
+   "frame": "20261102-100941_004_01949.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01950.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01951.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01952.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01953.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01954.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01955.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01956.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01957.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01958.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01959.jpg",
+   "raw": 1,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01960.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01961.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01962.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01963.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01964.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01965.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01966.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01967.jpg",
+   "raw": 0,
+   "offline": 1
+  },
+  {
+   "frame": "20261102-100941_004_01968.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01969.jpg",
+   "raw": 0,
+   "offline": 1
+  },
+  {
+   "frame": "20261102-100941_004_01970.jpg",
+   "raw": 0,
+   "offline": 1
+  },
+  {
+   "frame": "20261102-100941_004_01971.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01972.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01973.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01974.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01975.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01976.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01977.jpg",
+   "raw": 1,
+   "offline": 1
+  },
+  {
+   "frame": "20261102-100941_004_01978.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01979.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01980.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01981.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01982.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01983.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01984.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01985.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01986.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01987.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01988.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01989.jpg",
+   "raw": 0,
+   "offline": 1
+  },
+  {
+   "frame": "20261102-100941_004_01990.jpg",
+   "raw": 0,
+   "offline": 1
+  },
+  {
+   "frame": "20261102-100941_004_01991.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01992.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01993.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01994.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01995.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01996.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01997.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01998.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_01999.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02000.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02001.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02002.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02003.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02004.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02005.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02006.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02007.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02008.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02009.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02010.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02011.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02012.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02013.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02014.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02015.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02016.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02017.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02018.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02019.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02020.jpg",
+   "raw": 1,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02021.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02022.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02023.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02024.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_004_02025.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01404.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01405.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01406.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01407.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01408.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01409.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01410.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01411.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01412.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01413.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01414.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01415.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01416.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01417.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01418.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01419.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01420.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01421.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01422.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01423.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01424.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01425.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01426.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01427.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01428.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01429.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01430.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01431.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01432.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01433.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01434.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01435.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01436.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01437.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01438.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01439.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01440.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01441.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01442.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01443.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01444.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01445.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01446.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01447.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01448.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01449.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01450.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01451.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01452.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01453.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01454.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01455.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01456.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01457.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01458.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01475.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01476.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01477.jpg",
+   "raw": 2,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01478.jpg",
+   "raw": 2,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01479.jpg",
+   "raw": 2,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01480.jpg",
+   "raw": 3,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01481.jpg",
+   "raw": 2,
+   "offline": 1
+  },
+  {
+   "frame": "20261102-100941_007_01482.jpg",
+   "raw": 1,
+   "offline": 2
+  },
+  {
+   "frame": "20261102-100941_007_01483.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01484.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01485.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01486.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01501.jpg",
+   "raw": 0,
+   "offline": 1
+  },
+  {
+   "frame": "20261102-100941_007_01502.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01524.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01536.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01537.jpg",
+   "raw": 0,
+   "offline": 0
+  },
+  {
+   "frame": "20261102-100941_007_01552.jpg",
+   "raw": 0,
+   "offline": 0
+  }
+ ],
+ "created": "2026-11-25T18:36:39+00:00",
+ "seed": 20261125,
+ "bundle": {
+  "path": "models/release/enhancer-offline-v1.0.0",
+  "version": "1.0.0",
+  "onnx_sha256": "e93b3eaa714a003df0c6a77c11dacefc7b22666143dc8c490957dc1a5b53afc8",
+  "providers": [
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ]
+ },
+ "detector": {
+  "path": "models/release/detector-v1.0.1",
+  "version": "1.0.1",
+  "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+  "conf_threshold": 0.07669,
+  "providers": [
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ]
+ },
+ "measured_on": "cal (neg_flight_split.json), ảnh offline 1280×960 hạ ×½ INTER_AREA về 640×480",
+ "holdout": {
+  "n_frames": 0,
+  "status": "0 khung / không đủ chứng minh",
+  "fp_holdout_raw": null,
+  "fp_holdout_offline": null
+ },
+ "gpu_seconds": 64.9,
+ "wait_lock_seconds": 0.0,
+ "nvidia_path_dirs": 0,
+ "machine": {
+  "time": "2026-11-25T18:36:39+00:00",
+  "host": "Nghaiz-PC",
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "temperature.gpu": "87",
+   "clocks.sm": "2025 MHz",
+   "clocks.max.sm": "3105 MHz",
+   "power.draw": "61.64 W",
+   "pstate": "P0"
+  }
+ }
+}

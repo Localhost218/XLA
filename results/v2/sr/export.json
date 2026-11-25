@@ -1,0 +1,38 @@
+{
+ "chosen": "ft_l1_percep",
+ "bundle": "models/release/enhancer-offline-v1.0.0",
+ "parity": {
+  "n_frames": 5,
+  "frames": [
+   "20261102-100941_002_00400.jpg",
+   "20261102-100941_004_01926.jpg",
+   "20261102-100941_007_00744.jpg",
+   "20261102-100941_002_00425.jpg",
+   "20261102-100941_007_00543.jpg"
+  ],
+  "reference": "PyTorch fp32 (CUDA, TF32 tắt)",
+  "ort_cpu_vs_torch_mae_worst": 0.11848876953125,
+  "ort_cpu_vs_torch_abs_max": 3,
+  "ort_cuda_vs_cpu_mae_worst": 0.13093505859375,
+  "ort_cuda_vs_cpu_abs_max": 6,
+  "mae_max_allowed": 1.0,
+  "ok": true
+ },
+ "s_per_frame": {
+  "mean": 0.40432211000024837,
+  "p50": 0.37808584999947925,
+  "p95": 0.5259280100022806,
+  "n": 20,
+  "providers": [
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ]
+ },
+ "peak_vram_mb": 2064.0,
+ "errors": [],
+ "ok": true,
+ "onnx_sha256": "e93b3eaa714a003df0c6a77c11dacefc7b22666143dc8c490957dc1a5b53afc8",
+ "gpu_seconds": 22.4,
+ "wait_lock_seconds": 1210.2,
+ "created": "2026-11-25T17:52:38+00:00"
+}

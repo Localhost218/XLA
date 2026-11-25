@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thử mù A/B — ảnh nào rõ hơn?</title>
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font: 16px/1.4 system-ui, "Segoe UI", sans-serif; background: #f4f4f5; color: #18181b;
+  display: flex; flex-direction: column; }
+header { display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: #fff;
+  border-bottom: 1px solid #e4e4e7; }
+header h1 { font-size: 18px; margin: 0; white-space: nowrap; }
+.progress { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; }
+.bar { flex: 1; height: 10px; background: #e4e4e7; border-radius: 5px; overflow: hidden; }
+.bar > div { height: 100%; width: 0; background: #2563eb; transition: width .15s; }
+#count { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
+button { font: inherit; padding: 7px 14px; border-radius: 8px; border: 1px solid #d4d4d8; background: #fff;
+  cursor: pointer; }
+button:hover { background: #f4f4f5; }
+button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+button.primary:hover { background: #1d4ed8; }
+main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px 16px; min-height: 0; }
+figure { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; min-height: 0; cursor: pointer; border-radius: 10px; padding: 6px; border: 4px solid transparent; }
+figure:hover { background: #e4e4e7; }
+figure.picked { border-color: #2563eb; background: #dbeafe; }
+figure img { width: 100%; height: auto; max-height: calc(100vh - 170px); object-fit: contain; display: block;
+  background: #000; }
+figcaption { font-weight: 600; }
+kbd { border: 1px solid #a1a1aa; border-bottom-width: 2px; border-radius: 4px; padding: 0 6px; background: #fff;
+  font: 14px ui-monospace, monospace; }
+footer { padding: 8px 16px; background: #fff; border-top: 1px solid #e4e4e7; font-size: 15px; }
+#warn { display: none; padding: 8px 16px; background: #fef3c7; color: #92400e; }
+#done { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+  font-size: 20px; }
+#done button { font-size: 18px; padding: 10px 22px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Ảnh nào rõ hơn?</h1>
+  <div class="progress"><div class="bar"><div id="bar"></div></div><span id="count"></span></div>
+  <button id="back" title="Phím Backspace">Quay lại</button>
+  <button id="export" class="primary">Xuất kết quả</button>
+  <button id="reset">Làm lại</button>
+</header>
+<div id="warn"></div>
+<main id="pair">
+  <figure id="L"><img id="imgL" alt="Ảnh trái"><figcaption><kbd>&larr;</kbd> Trái rõ hơn</figcaption></figure>
+  <figure id="R"><img id="imgR" alt="Ảnh phải"><figcaption>Phải rõ hơn <kbd>&rarr;</kbd></figcaption></figure>
+</main>
+<div id="done">
+  <div>Đã chấm xong <b id="doneN"></b> cặp. Cảm ơn!</div>
+  <button class="primary" id="export2">Xuất kết quả (tải file JSON)</button>
+  <div style="font-size:15px">Bấm Quay lại nếu muốn sửa lựa chọn.</div>
+</div>
+<footer>Chọn ảnh <b>rõ hơn, dễ nhìn hơn</b> (thấy người, vật, mặt đất rõ hơn).
+Bấm <kbd>&larr;</kbd> nếu ảnh trái rõ hơn, <kbd>&rarr;</kbd> nếu ảnh phải rõ hơn, hoặc bấm vào ảnh.
+Không có lựa chọn hoà: phân vân thì chọn ảnh dễ nhìn hơn. <kbd>Backspace</kbd> = quay lại cặp trước.</footer>
+<script>
+"use strict";
+const PAIRS = [{"id":"01","l":"img/0c5fa04f564f.jpg","r":"img/e8aa8ac7ce29.jpg"},{"id":"02","l":"img/27458c9c4e85.jpg","r":"img/a965c5acc0c6.jpg"},{"id":"03","l":"img/4a458a7aa383.jpg","r":"img/5f987fa594b5.jpg"},{"id":"04","l":"img/bfe956794aab.jpg","r":"img/37e3726059db.jpg"},{"id":"05","l":"img/c7a32a3257d4.jpg","r":"img/496878ae1a50.jpg"},{"id":"06","l":"img/1bbcf931e70c.jpg","r":"img/b2bf632421dc.jpg"},{"id":"07","l":"img/332af25b4149.jpg","r":"img/1e989c71d65e.jpg"},{"id":"08","l":"img/2bce9264f745.jpg","r":"img/23d970db7f36.jpg"},{"id":"09","l":"img/9d7e3c86999a.jpg","r":"img/5ffe12301456.jpg"},{"id":"10","l":"img/21f365ef69ee.jpg","r":"img/627700e04268.jpg"},{"id":"11","l":"img/21661f1b2b1b.jpg","r":"img/a5c1298194bb.jpg"},{"id":"12","l":"img/a07868c54fde.jpg","r":"img/520254c059d3.jpg"},{"id":"13","l":"img/820ea6e83351.jpg","r":"img/675026b30d21.jpg"},{"id":"14","l":"img/223cde455343.jpg","r":"img/3fed6bf5deef.jpg"},{"id":"15","l":"img/280e949ce263.jpg","r":"img/7529d8186167.jpg"},{"id":"16","l":"img/0098ae9b8c4f.jpg","r":"img/ea316d4db173.jpg"},{"id":"17","l":"img/f0448d973fc1.jpg","r":"img/44e2bdd10e17.jpg"},{"id":"18","l":"img/daa69c066d96.jpg","r":"img/3f712378b558.jpg"},{"id":"19","l":"img/428a0536a579.jpg","r":"img/e5e4eb8e5d7d.jpg"},{"id":"20","l":"img/0af1d215577a.jpg","r":"img/c3d3240ee0c2.jpg"},{"id":"21","l":"img/7a4f1e454e00.jpg","r":"img/0751f5301659.jpg"},{"id":"22","l":"img/65388075dca0.jpg","r":"img/7a8f7691cf71.jpg"},{"id":"23","l":"img/63922209a2b1.jpg","r":"img/af27745c680d.jpg"},{"id":"24","l":"img/540c94d49249.jpg","r":"img/7772282b628d.jpg"},{"id":"25","l":"img/a1e41208825b.jpg","r":"img/87f7acc4c136.jpg"},{"id":"26","l":"img/743f90c989ca.jpg","r":"img/2155c90a07a9.jpg"},{"id":"27","l":"img/f305aa9df0d3.jpg","r":"img/8f8250deb998.jpg"},{"id":"28","l":"img/4e6dd2f084e7.jpg","r":"img/a7a15eb5e362.jpg"},{"id":"29","l":"img/30ac747a5c4b.jpg","r":"img/ab704974d5ca.jpg"},{"id":"30","l":"img/c728df77a834.jpg","r":"img/a92592458bf6.jpg"},{"id":"31","l":"img/4a6a813fd1eb.jpg","r":"img/164fa5ba3a9d.jpg"},{"id":"32","l":"img/c9c45f1dd78c.jpg","r":"img/36456f239923.jpg"},{"id":"33","l":"img/36fccb861b42.jpg","r":"img/39f75196473a.jpg"},{"id":"34","l":"img/efbd94da88d1.jpg","r":"img/dc498ca55e87.jpg"},{"id":"35","l":"img/1c2b0dcfbee3.jpg","r":"img/c42a6ca9f7dd.jpg"},{"id":"36","l":"img/139fd3083eba.jpg","r":"img/9b0c22e045b6.jpg"},{"id":"37","l":"img/16dab45c268c.jpg","r":"img/7efe5bce91ae.jpg"},{"id":"38","l":"img/e17b4537a4a1.jpg","r":"img/40e9f737a3c1.jpg"},{"id":"39","l":"img/55995e938d4b.jpg","r":"img/eff77fbc82c9.jpg"},{"id":"40","l":"img/7e7402f2a08e.jpg","r":"img/eb671dd85fe2.jpg"},{"id":"41","l":"img/cab90a682807.jpg","r":"img/8f1db67e0fd9.jpg"},{"id":"42","l":"img/cee1eee7edad.jpg","r":"img/8717eed03ff3.jpg"},{"id":"43","l":"img/b725deb538ee.jpg","r":"img/5cc45ea15f36.jpg"},{"id":"44","l":"img/f3734e7b170c.jpg","r":"img/ba749f468886.jpg"},{"id":"45","l":"img/40bd2f280d75.jpg","r":"img/897d79e3ec1a.jpg"},{"id":"46","l":"img/6aaed204e5e9.jpg","r":"img/e32334870f0c.jpg"},{"id":"47","l":"img/3d528792f111.jpg","r":"img/5180a6486f52.jpg"},{"id":"48","l":"img/29dac2e9b5d9.jpg","r":"img/b919d187eaa1.jpg"},{"id":"49","l":"img/f47c2f36cbfd.jpg","r":"img/66a027921172.jpg"},{"id":"50","l":"img/eaefe1eb0eb3.jpg","r":"img/76a075d5e027.jpg"},{"id":"51","l":"img/9014285c10b9.jpg","r":"img/6315652aefb7.jpg"},{"id":"52","l":"img/f75399fcb209.jpg","r":"img/92675d642730.jpg"},{"id":"53","l":"img/1a930795f872.jpg","r":"img/f77e17d9e42d.jpg"},{"id":"54","l":"img/d264249e6d58.jpg","r":"img/dce39a06dd3d.jpg"},{"id":"55","l":"img/721567a3feca.jpg","r":"img/47ab2dc0cf80.jpg"},{"id":"56","l":"img/efa04ca6d3f3.jpg","r":"img/e1b3b1e47cba.jpg"},{"id":"57","l":"img/e5e4eb8e5d7d.jpg","r":"img/428a0536a579.jpg"},{"id":"58","l":"img/59e45aff5414.jpg","r":"img/e30f428e1e04.jpg"},{"id":"59","l":"img/69bffa7e8a0a.jpg","r":"img/59600a01c34c.jpg"},{"id":"60","l":"img/d5406ce2b302.jpg","r":"img/b5e09d88549c.jpg"},{"id":"61","l":"img/0fef2c9a7b04.jpg","r":"img/82ed886e8973.jpg"},{"id":"62","l":"img/520254c059d3.jpg","r":"img/a07868c54fde.jpg"},{"id":"63","l":"img/52ee5f6c92ed.jpg","r":"img/b48464b758ba.jpg"},{"id":"64","l":"img/96a57efeb951.jpg","r":"img/0e778a86427b.jpg"},{"id":"65","l":"img/40e9f737a3c1.jpg","r":"img/e17b4537a4a1.jpg"},{"id":"66","l":"img/9375b95d3481.jpg","r":"img/3f959b0a04c8.jpg"},{"id":"67","l":"img/4172dd199ecd.jpg","r":"img/c31ba1d38f9f.jpg"},{"id":"68","l":"img/303cad6962d4.jpg","r":"img/19f0ed31282b.jpg"},{"id":"69","l":"img/f77e17d9e42d.jpg","r":"img/1a930795f872.jpg"},{"id":"70","l":"img/ac0e8a0c43c7.jpg","r":"img/b321585bd2a4.jpg"},{"id":"71","l":"img/c3d3240ee0c2.jpg","r":"img/0af1d215577a.jpg"},{"id":"72","l":"img/95da8bb419aa.jpg","r":"img/38280a9f7cb7.jpg"},{"id":"73","l":"img/e84a519be988.jpg","r":"img/568a0a44cca6.jpg"},{"id":"74","l":"img/572c584aef62.jpg","r":"img/5a7ce4f5f2b1.jpg"},{"id":"75","l":"img/1e9e7dfb7062.jpg","r":"img/26861d985d35.jpg"},{"id":"76","l":"img/92ccd05ba6bd.jpg","r":"img/0ca6239f5d73.jpg"},{"id":"77","l":"img/e6dcc808936b.jpg","r":"img/5bf8872d0e94.jpg"},{"id":"78","l":"img/e2bd547a0a6a.jpg","r":"img/956bc4036783.jpg"},{"id":"79","l":"img/e7ea8a3cddfa.jpg","r":"img/bcc437081dad.jpg"},{"id":"80","l":"img/79d7149ed073.jpg","r":"img/61ec16418787.jpg"}];
+const KEY_ID = "44b680a7f41e0cdd";
+const FORMAT = "xla-ab-export-v1";
+const STORE = "xla-ab-" + KEY_ID;
+const $ = (id) => document.getElementById(id);
+let state = { key_id: KEY_ID, idx: 0, choices: {} };
+let busy = false;
+let shownAt = performance.now();
+
+function warn(msg) { const w = $("warn"); w.textContent = msg; w.style.display = "block"; }
+function load() {
+  try {
+    const saved = localStorage.getItem(STORE);
+    if (!saved) return;
+    const s = JSON.parse(saved);
+    if (s && s.key_id === KEY_ID && s.choices && typeof s.idx === "number") state = s;
+  } catch (e) {
+    warn("Trình duyệt không đọc được tiến độ đã lưu (" + e + "). Đừng đóng tab trước khi bấm Xuất kết quả.");
+  }
+}
+function save() {
+  try { localStorage.setItem(STORE, JSON.stringify(state)); }
+  catch (e) { warn("Không lưu được tiến độ (" + e + "). Đừng đóng tab trước khi bấm Xuất kết quả."); }
+}
+function answered() { return PAIRS.filter((p) => state.choices[p.id]).length; }
+function render() {
+  const n = answered();
+  $("count").textContent = "Cặp " + Math.min(state.idx + 1, PAIRS.length) + " / " + PAIRS.length +
+    " · đã chấm " + n;
+  $("bar").style.width = (100 * n / PAIRS.length) + "%";
+  const done = state.idx >= PAIRS.length;
+  $("pair").style.display = done ? "none" : "grid";
+  $("done").style.display = done ? "flex" : "none";
+  $("doneN").textContent = n + " / " + PAIRS.length;
+  $("back").disabled = state.idx === 0;
+  $("L").classList.remove("picked");
+  $("R").classList.remove("picked");
+  if (done) return;
+  const p = PAIRS[state.idx];
+  $("imgL").src = p.l;
+  $("imgR").src = p.r;
+  const c = state.choices[p.id];
+  if (c) $(c.c).classList.add("picked");
+  shownAt = performance.now();
+  const nx = PAIRS[state.idx + 1];
+  if (nx) { new Image().src = nx.l; new Image().src = nx.r; }
+}
+function choose(side) {
+  if (busy || state.idx >= PAIRS.length) return;
+  const p = PAIRS[state.idx];
+  state.choices[p.id] = { c: side, ms: Math.round(performance.now() - shownAt), at: new Date().toISOString() };
+  busy = true;
+  $(side).classList.add("picked");
+  state.idx += 1;
+  save();
+  setTimeout(() => { busy = false; render(); }, 150);
+}
+function back() {
+  if (busy || state.idx === 0) return;
+  state.idx -= 1;
+  save();
+  render();
+}
+function exportResult() {
+  const n = answered();
+  if (n < PAIRS.length && !confirm("Mới chấm " + n + "/" + PAIRS.length + " cặp. Vẫn xuất?")) return;
+  const out = {
+    format: FORMAT, key_id: KEY_ID, n_pairs: PAIRS.length, n_answered: n, complete: n === PAIRS.length,
+    exported_at: new Date().toISOString(),
+    choices: PAIRS.filter((p) => state.choices[p.id]).map((p) => ({
+      id: p.id, choice: state.choices[p.id].c === "L" ? "left" : "right",
+      ms: state.choices[p.id].ms, at: state.choices[p.id].at })),
+  };
+  const blob = new Blob([JSON.stringify(out, null, 1)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ab_result-" + KEY_ID + ".json";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function reset() {
+  if (!confirm("Xoá mọi lựa chọn và chấm lại từ đầu?")) return;
+  state = { key_id: KEY_ID, idx: 0, choices: {} };
+  save();
+  render();
+}
+document.addEventListener("keydown", (e) => {
+  if (e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (e.key === "ArrowLeft") { e.preventDefault(); choose("L"); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); choose("R"); }
+  else if (e.key === "Backspace") { e.preventDefault(); back(); }
+});
+$("L").addEventListener("click", () => choose("L"));
+$("R").addEventListener("click", () => choose("R"));
+$("back").addEventListener("click", back);
+$("export").addEventListener("click", exportResult);
+$("export2").addEventListener("click", exportResult);
+$("reset").addEventListener("click", reset);
+for (const id of ["imgL", "imgR"]) {
+  $(id).addEventListener("error", (e) => warn("Không mở được ảnh " + e.target.getAttribute("src") +
+    " — thư mục img/ phải nằm cạnh file HTML."));
+}
+load();
+if (state.idx > PAIRS.length) state.idx = PAIRS.length;
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+{
+  "format": "xla-ab-v2-decision-v1",
+  "rule": "offline ship ⇔ guard_fp trên cal = pass VÀ offline_vs_raw lẫn offline_vs_classic đều passes (cận dưới Wilson 95 % > 0,5) ở lượt **cả khung** (đúng cách web hiển thị; chốt trước khi chấm, 26/11). Lượt phóng to chỉ báo cáo, không quyết định (tránh 'đạt ở lượt nào cũng được' làm lỏng tiêu chí). Lai: không xuất (phase 10 không qua lọc) nên không thay classic. classic_vs_raw chỉ là chỉ số §5, không đổi mặc định của Owner (Deferred 17).",
+  "guard_fp": {
+    "decision": "pass",
+    "diff": -0.03333333333333334,
+    "ci95": [
+      -0.12330766923307666,
+      0.039215686274509796
+    ]
+  },
+  "rounds": {
+    "full": {
+      "offline_vs_raw": {
+        "n": 25,
+        "wins": 25,
+        "win_rate": 1.0,
+        "ci95_wilson": [
+          0.866808,
+          1.0
+        ],
+        "passes": true
+      },
+      "offline_vs_classic": {
+        "n": 25,
+        "wins": 16,
+        "win_rate": 0.64,
+        "ci95_wilson": [
+          0.445185,
+          0.797521
+        ],
+        "passes": false
+      },
+      "classic_vs_raw": {
+        "n": 25,
+        "wins": 25,
+        "win_rate": 1.0,
+        "ci95_wilson": [
+          0.866808,
+          1.0
+        ],
+        "passes": true
+      },
+      "consistency": 1.0
+    }
+  },
+  "offline_ship": false,
+  "offline_reason": "lượt cả khung không thắng cả gốc lẫn classic",
+  "hybrid_replaces_classic": false,
+  "classic_vs_raw_metric": {
+    "full": true
+  },
+  "classic_default_unchanged": true,
+  "limits": [
+    "25 cặp mỗi so sánh → CI rộng",
+    "ảnh SR ×2 không có lưới khối JPEG nên có thể nhận ra được",
+    "lượt phóng to không chấm (chủ dự án chấm lượt cả khung lúc 01:49 26/11; lượt phóng to không quyết định theo luật chốt trước)"
+  ],
+  "created": "2026-11-25T18:50:35+00:00"
+}

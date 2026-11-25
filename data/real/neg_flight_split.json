@@ -1420,5 +1420,17 @@
    "split": "mine",
    "approved": false
   }
- ]
+ ],
+ "holdout_weak": {
+  "kind": "weak_same_day",
+  "label": "holdout yếu: cùng buổi bay với test, không độc lập; agent duyệt",
+  "approved_by": "agent",
+  "owner_approved": false,
+  "rule": {
+   "min_dist_s": 30.0,
+   "min_gap_s": 0.5,
+   "block_s": 30.0
+  },
+  "frames": []
+ }
 }

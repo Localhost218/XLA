@@ -18,8 +18,11 @@ Báo cáo ngắn (PDF) và slide nộp bài chỉ lưu trên Google Drive của 
 | Bundle ship `detector-v1.0.0` (ONNX) | mAP50 0,120; 23,6 ms/khung trung vị trong IOT-CV (RTX 4060 Laptop) |
 | Làm rõ: cổ điển vs mạng `enhancer-v1.0.0` | người chấm mù chọn cổ điển 24/25 lượt; mạng không bật mặc định |
 | Làm rõ trước khi nhận diện (E4) | bộ đã tinh chỉnh giảm mAP50 0,085 [−0,139; −0,011] → nhận diện luôn chạy trên khung gốc |
+| **v2** cả hệ detector → verifier → track | mAP50 0,120 → 0,210 (+0,090 [+0,026; +0,189]); báo nhầm khung bay trống 0,881 → 0,289; recall 0,396 không đổi. Đích mAP50 ≥ 0,30 và recall ≥ 0,6 không đạt; báo nhầm trên tập giữ kín chưa đo được (0 khung) |
+| **v2** ảnh rõ, A/B mù lượt cả khung | classic ONNX thắng gốc 25/25 (bật mặc định); offline ×2 thắng gốc 25/25, thắng classic 16/25 → không ship |
+| **v2** trong IOT-CV, p95 tổng cùng lúc đo | có Ảnh rõ 99,1 → 89,5 ms (đạt trần +5 ms); chỉ nhận diện 64,0 → 72,4 ms (không đạt) |
 
-Bảng đầy đủ kèm CI 95 %: `results/reproduce/tables/`. Detector là YOLO11s (`configs/train_e1.yaml`), thầy E2 là YOLO11m (`configs/selftrain_e2.yaml`). CI GitHub chạy `pytest -m "not gpu and not data"` trên mọi push.
+Bảng đầy đủ kèm CI 95 %: `results/reproduce/tables/` (v2: `t7`–`t9`, hình `f4`; tổng hợp v2 ở `results/v2/README.md`). Detector là YOLO11s (`configs/train_e1.yaml`), thầy E2 là YOLO11m (`configs/selftrain_e2.yaml`). CI GitHub chạy `pytest -m "not gpu and not data"` trên mọi push.
 
 Ngân sách thời gian trong IOT-CV (p95 tổng ≤ 50 ms, detector ≤ 30 ms) **không đạt ở nhịp camera thật** trên laptop này: GPU hạ
 xung giữa hai khung, tổng p95 54,1 ms (lần đo tốt nhất). Chạy hết tốc lực thì đạt (44,9 ms, 23,6 khung/s). Nhóm chấp nhận giới
@@ -32,10 +35,11 @@ hạn này; chi tiết ở báo cáo mục 4.5.
 | `xla/camera/` | trích khung bay, đo hồ sơ camera, chia tập theo khối thời gian |
 | `xla/degrade/` | bộ làm xấu D1 (ngẫu nhiên), D2 (bản sao camera), hiệu chỉnh, so độ giống thật |
 | `xla/detect/` | mốc, huấn luyện E1 (YOLO11s), tự huấn luyện E2 (thầy YOLO11m, trò YOLO11s), xuất ONNX |
-| `xla/enhance/` | bộ lọc cổ điển, mạng NAFNet, xuất ONNX |
+| `xla/enhance/` | bộ lọc cổ điển, mạng NAFNet, xuất ONNX; v2: classic thành ONNX, siêu phân giải ×2 offline |
+| `xla/verify/` | v2: verifier từng hộp (khai thác âm khó, huấn luyện, xuất ONNX có RoiAlign) |
 | `xla/eval/` | chấm nhận diện (bootstrap theo khối), C2ST, KID, A/B, E4 |
 | `xla/contract.py` | kiểm bundle theo hợp đồng với IOT-CV |
-| `models/release/` | `meta.json` + golden của `detector-v1.0.0`, `enhancer-v1.0.0`; file `.onnx` lấy từ GitHub Release |
+| `models/release/` | `meta.json` + golden của mọi bundle (v1: `detector-v1.0.0`, `enhancer-v1.0.0`; v2: `detector-v1.0.1`, `verifier-v1.0.0`, `enhancer-v2.0.0`, `enhancer-offline-v1.0.0` không ship); file `.onnx` lấy từ GitHub Release |
 | `results/` | mọi kết quả đo; `results/reproduce/` là bảng/hình của báo cáo |
 | `configs/` | đường dẫn dùng chung (`paths.yaml`), hồ sơ camera, cấu hình huấn luyện |
 | `tests/` | pytest; đánh dấu `gpu` (cần CUDA) và `data` (cần dữ liệu local) |
@@ -124,18 +128,19 @@ Sau `uv sync` lần đầu, chạy mọi lệnh bằng `uv run --no-sync` để 
 | Liệt kê các bước huấn luyện lại | `uv run --no-sync python scripts/reproduce.py --full --dry-run` | không (chỉ in) |
 | Kiểm một bundle theo hợp đồng | `uv run --no-sync python -m xla.contract validate <thư mục bundle>` | không bắt buộc |
 
-`--check` làm hai việc: chấm lại 15 tệp dự đoán đã lưu và so sha256 của 9 bảng/hình với `results/reproduce/manifest.json`. Mã
+`--check` làm hai việc: chấm lại 18 tệp dự đoán đã lưu (15 của v1, 3 tầng cả hệ v2) và so sha256 của 13 bảng/hình với
+`results/reproduce/manifest.json`. Mã
 thoát: 0 đạt, 1 lệch, 2 thiếu dữ liệu. Bảng và hình trong `BAO_CAO_DO_AN.md` chỉ lấy từ đây, không dán tay.
 
-`--full` chạy lại 17 bước GPU (hồ sơ camera, hiệu chỉnh D2, E1, E2, xuất ONNX, NAFNet, chấm làm rõ), ước 6,6 giờ trên RTX 4060
-Laptop. Thêm `--dry-run` để xem danh sách trước.
+`--full` chạy lại 17 bước GPU của v1 (hồ sơ camera, hiệu chỉnh D2, E1, E2, xuất ONNX, NAFNet, chấm làm rõ), ước 6,6 giờ trên RTX 4060
+Laptop. Thêm `--dry-run` để xem danh sách trước. Lệnh GPU của v2 ghi trong README từng thư mục `results/v2/*/`.
 
 ## Kết quả mong đợi
 
-Test CPU (khoảng 30 s):
+Test CPU (khoảng 2 phút):
 
 ```
-290 passed, 45 deselected in 26.20s
+477 passed, 72 deselected in 101.30s
 ```
 
 `reproduce.py --check --json` (khoảng 10 s) in một object, `pass` là kết luận:
@@ -143,8 +148,8 @@ Test CPU (khoảng 30 s):
 ```json
 {"pass": true,
  "rescore": [{"name": "baseline_edge16", "mAP50": 0.126482, "ref": "results/baseline/baseline.json",
-              "max_abs_diff": 0.0, "pass": true}, "... 15 mục ..."],
- "outputs_mismatch": [], "committed_stale": [], "assets_mismatch": [], "n_outputs": 9}
+              "max_abs_diff": 0.0, "pass": true}, "... 18 mục ..."],
+ "outputs_mismatch": [], "committed_stale": [], "assets_mismatch": [], "n_outputs": 13}
 ```
 
 Không `--json` thì in từng dòng `OK  chấm lại <tên>: <mAP50>` và dòng cuối `ĐẠT`.
@@ -190,10 +195,13 @@ xem trên); nó cần GPU và bản ghi của IOT-CV nên CI không chạy.
 
 ## Hợp đồng với IOT-CV
 
-`docs/hop-dong-model.md` (v1.0). Detector: input `frame` uint8 [480, 640, 3] BGR, output `boxes` [N, 4] + `scores` [N].
-Enhancer: output `frame_out` uint8 [480, 640, 3]. IOT-CV kiểm sha256, phiên bản hợp đồng, tên và kiểu I/O rồi mới nạp.
+`docs/hop-dong-model.md` (v1.1; bundle v1.0 vẫn nạp được). Detector: input `frame` uint8 [480, 640, 3] BGR, output `boxes`
+[N, 4] + `scores` [N], meta v1.1 có thể thêm `recommended_track`. Verifier: input `frame` + `boxes` [N, 4], output `scores` [N].
+Enhancer: output `frame_out` uint8 [480, 640, 3]; enhancer-offline: ×2, [960, 1280, 3]. IOT-CV kiểm sha256, phiên bản hợp
+đồng, tên và kiểu I/O rồi mới nạp.
 
-Tải bundle từ GitHub Release **`models-v1.0.0`**:
+Bundle v2 ở GitHub Release **`models-v2.0.0`** (`detector-v1.0.1`, `verifier-v1.0.0`, `enhancer-v2.0.0`), bundle v1 ở
+**`models-v1.0.0`**. Ví dụ với v1:
 
 ```powershell
 gh release download models-v1.0.0 --repo Localhost218/XLA --dir D:\DevCache\tmp\models
@@ -202,7 +210,8 @@ uv run --no-sync python -m xla.contract validate D:\DevCache\tmp\models\detector
 ```
 
 Phía IOT-CV chép bundle bằng `scripts/vision/lay_model.py --from <thư mục bundle>` vào `models/vision/<bundle>/`.
-`enhancer-v1.0.0` đúng hợp đồng nhưng không đạt A/B, nên IOT-CV để "Ảnh rõ" tắt mặc định.
+`enhancer-v1.0.0` đúng hợp đồng nhưng không đạt A/B. Từ v2, IOT-CV chạy `enhancer-v2.0.0` (classic ONNX) và bật "Ảnh rõ" mặc
+định theo quyết định chủ dự án; `enhancer-offline-v1.0.0` không ship (thua classic ở A/B), API offline của IOT-CV trả 503.
 
 ## Tài liệu
 
@@ -216,6 +225,8 @@ Phía IOT-CV chép bundle bằng `scripts/vision/lay_model.py --from <thư mục
 | Báo cáo brainstorm gốc | [`plans/reports/261118-brainstorm-ai-anh-chat-luong-thap.md`](plans/reports/261118-brainstorm-ai-anh-chat-luong-thap.md) |
 | Bảng kết quả của báo cáo | [`results/reproduce/tables/`](results/reproduce/tables/) |
 | A/B làm rõ ảnh, quyết định không ship enhancer | [`results/ab/README.md`](results/ab/README.md) |
+| Plan AI v2 + tổng hợp kết quả v2 | [`plans/261125-ai-v2/plan.md`](plans/261125-ai-v2/plan.md), [`results/v2/README.md`](results/v2/README.md) |
+| A/B v2 và quyết định offline | [`results/ab-v2/README.md`](results/ab-v2/README.md) |
 | E1, E2, mạng làm rõ | [`results/e1/README.md`](results/e1/README.md), [`results/e2/README.md`](results/e2/README.md), [`results/restore/README.md`](results/restore/README.md) |
 | Mã và báo cáo bản cũ của nhóm | [`archive/README.md`](archive/README.md) |
 
@@ -225,4 +236,7 @@ Phía IOT-CV chép bundle bằng `scripts/vision/lay_model.py --from <thư mục
 - NOMAD: CC BY 4.0, ghi công tác giả bộ dữ liệu.
 - `pyiqa` (MUSIQ, NIQE): PolyForm Noncommercial 1.0.0; chỉ dùng mô tả trong đồ án.
 - Ultralytics YOLO11 (YOLO11s, thầy YOLO11m): AGPL-3.0. NAFNet: MIT. DINOv2: Apache-2.0.
+- HERIDAL: CC BY 3.0. WiSARD (Multi-Modal Sample): MIT. TinyPerson: bộ dữ liệu không ghi giấy phép (mã MIT). Ảnh của
+  ba bộ không có trong repo; model v2 học từ chúng và từ trọng số ImageNet (torchvision), nên chỉ dùng nghiên cứu.
+- Real-ESRGAN: BSD-3-Clause; kiến trúc RRDBNet vendor từ BasicSR (Apache-2.0).
 - Khung bay trong `data/real/` là của nhóm.
