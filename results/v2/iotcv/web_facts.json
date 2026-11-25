@@ -1,0 +1,65 @@
+{
+ "facts": {
+  "flight": {
+   "visibility": "visible",
+   "theme": "day",
+   "enhancedPressed": "true",
+   "enhancedTitle": "Tắt ảnh rõ (về khung gốc của camera)",
+   "videoEnhancedKey": null,
+   "videoSrc": [
+    "/api/video/stream?variant=enhanced"
+   ],
+   "scroll": {
+    "doc": {
+     "sh": 900,
+     "ch": 900
+    },
+    "scrollers": [
+     {
+      "tag": "DIV",
+      "cls": "size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-vis",
+      "sh": 673,
+      "ch": 238
+     }
+    ]
+   }
+  },
+  "vision": {
+   "detector": "Detector hộp người trên khung gốc v1.0.1 · CUDA · p50 51.1 · p95 74.2 ms đang chạy",
+   "verifier": "Verifier lọc hộp nhầm sau detector v1.0.0 · CUDA · p50 0.0 · p95 6.0 ms đang chạy",
+   "enhancer": "Ảnh rõ enhancer trực tiếp v2.0.0 · CUDA · p50 19.1 · p95 33.8 ms đang chạy",
+   "enhancer_offline": "Ảnh rõ offline ×2, dựng lại cả chuyến (Lịch sử bay) ENHANCER_OFFLINE_ONNX chưa đặt (tắt) tắt"
+  },
+  "flightsListText": "GIÁM SÁT · XEM LẠI Lịch sử bay Phát lại từng chuyến từ log: đường bay trên bản đồ, độ cao, hình camera đã ghi, sóng và mất gói, pin, GPS, sự kiện. Dữ liệu ghép từ log FC tải về, tlog và video của laptop, giờ đã chỉnh theo GPS. Các chuyến 16 chuyến · mới nhất ở trên Thứ Hai, 02/11/2026 9 chuyến ",
+  "flight_pick": {
+   "id": "20261102-101046",
+   "start": 1793589046.98,
+   "duration_s": 124.6,
+   "video_coverage_pct": 88.8
+  },
+  "flights": {
+   "source": "enhanced",
+   "enhancedImg": 1,
+   "model": "Model trên laptop detector 204.8 ms · enhancer 111.1 ms 205 ms",
+   "people": "Người phát hiện detector trên khung gốc (D5) 0",
+   "note": "Enhancer v2.0.0 dựng ảnh rõ bên phải; luồng trực tiếp bật \"Ảnh rõ\" sẵn, người xem tắt được. Số đo trên không thay được mắt người xem: hãy so hai bên.",
+   "offline": {
+    "source": "offline",
+    "startDisabled": true,
+    "reason": "Không dựng được: ENHANCER_OFFLINE_ONNX chưa đặt (tắt)",
+    "bar": "Dựng ảnh rõ offline cho chuyến này 0/11908 khung chưa dựng Không dựng được: ENHANCER_OFFLINE_ONNX chưa đặt (tắt)"
+   },
+   "offlineApi": {
+    "status": 200,
+    "body": "{\"rec\":\"20261102-100941\",\"state\":\"none\",\"done\":0,\"total\":11908,\"bundle_version\":null,\"s_per_frame\":null,\"reason\":\"ENHANCER_OFFLINE_ONNX chưa đặt (tắt)\"}"
+   },
+   "offlinePost": {
+    "status": 422,
+    "body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"rec\"],\"msg\":\"Field required\",\"input\":null}]}"
+   }
+  }
+ },
+ "consoleErrors": [
+  "Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ]
+}

@@ -1,0 +1,645 @@
+{
+ "format": "iotcv-bench-v1-v2",
+ "created": "2026-11-25T19:30:55+00:00",
+ "recording": "20261102-100941",
+ "start": 284,
+ "frames": 600,
+ "warmup": 30,
+ "order": [
+  "v1",
+  "v2",
+  "v2",
+  "v1"
+ ],
+ "pooled_over": "hai lượt mỗi cấu hình (ABBA), gộp mọi khung rồi lấy phân vị",
+ "bundles": {
+  "v1": {
+   "detector": {
+    "bundle": "detector-v1.0.0",
+    "version": "1.0.0",
+    "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ]
+   },
+   "enhancer": {
+    "bundle": "enhancer-v1.0.0",
+    "version": "1.0.0",
+    "onnx_sha256": "1728de3e976112a208ffb43f57113ba3d31f81aa9e6e9ee43cbcc1cf2fff382e",
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ]
+   }
+  },
+  "v2": {
+   "detector": {
+    "bundle": "detector-v1.0.1",
+    "version": "1.0.1",
+    "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ]
+   },
+   "verifier": {
+    "bundle": "verifier-v1.0.0",
+    "version": "1.0.0",
+    "onnx_sha256": "d566343a5487775b9f6334d9df0bb0a1d9c9b2d2b76e2b8bfa4738facc012d58",
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ]
+   },
+   "enhancer": {
+    "bundle": "enhancer-v2.0.0",
+    "version": "2.0.0",
+    "onnx_sha256": "83d96e8b0f628d0e6cc271ed9550220962de897cac2d57ed306a1db51cb5477b",
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ]
+   }
+  }
+ },
+ "machine_start": {
+  "clock_mhz": 780.0,
+  "clock_max_mhz": 3105.0,
+  "temp_c": 67.0,
+  "power_w": 13.57,
+  "pstate": "P0",
+  "util_pct": 19.0
+ },
+ "machine_end": {
+  "clock_mhz": 780.0,
+  "clock_max_mhz": 3105.0,
+  "temp_c": 71.0,
+  "power_w": 22.14,
+  "pstate": "P0",
+  "util_pct": 22.0
+ },
+ "steps": {
+  "realtime": {
+   "decode": {
+    "v1_p50": 0.6,
+    "v1_p95": 0.76,
+    "v2_p50": 0.6,
+    "v2_p95": 0.78,
+    "n_v1": 1104,
+    "n_v2": 1147
+   },
+   "detector": {
+    "v1_p50": 53.24,
+    "v1_p95": 63.29,
+    "v2_p50": 57.39,
+    "v2_p95": 63.44,
+    "n_v1": 1104,
+    "n_v2": 1147
+   },
+   "encode": {
+    "v1_p50": 0.58,
+    "v1_p95": 0.64,
+    "v2_p50": 0.59,
+    "v2_p95": 0.69,
+    "n_v1": 1104,
+    "n_v2": 1147
+   },
+   "enhancer": {
+    "v1_p50": 29.74,
+    "v1_p95": 34.43,
+    "v2_p50": 15.37,
+    "v2_p95": 19.31,
+    "n_v1": 1104,
+    "n_v2": 1147
+   },
+   "total": {
+    "v1_p50": 84.5,
+    "v1_p95": 99.14,
+    "v2_p50": 76.27,
+    "v2_p95": 89.49,
+    "n_v1": 1104,
+    "n_v2": 1147
+   },
+   "verifier": {
+    "v1_p50": null,
+    "v1_p95": null,
+    "v2_p50": 0.03,
+    "v2_p95": 8.91,
+    "n_v1": 0,
+    "n_v2": 1147
+   }
+  },
+  "realtime_detector_only": {
+   "decode": {
+    "v1_p50": 0.65,
+    "v1_p95": 0.8,
+    "v2_p50": 0.63,
+    "v2_p95": 0.86,
+    "n_v1": 1195,
+    "n_v2": 1196
+   },
+   "detector": {
+    "v1_p50": 60.04,
+    "v1_p95": 63.28,
+    "v2_p50": 59.62,
+    "v2_p95": 63.27,
+    "n_v1": 1195,
+    "n_v2": 1196
+   },
+   "encode": {
+    "v1_p50": null,
+    "v1_p95": null,
+    "v2_p50": null,
+    "v2_p95": null,
+    "n_v1": 0,
+    "n_v2": 0
+   },
+   "enhancer": {
+    "v1_p50": null,
+    "v1_p95": null,
+    "v2_p50": null,
+    "v2_p95": null,
+    "n_v1": 0,
+    "n_v2": 0
+   },
+   "total": {
+    "v1_p50": 60.79,
+    "v1_p95": 64.04,
+    "v2_p50": 61.1,
+    "v2_p95": 72.43,
+    "n_v1": 1195,
+    "n_v2": 1196
+   },
+   "verifier": {
+    "v1_p50": null,
+    "v1_p95": null,
+    "v2_p50": 0.03,
+    "v2_p95": 9.42,
+    "n_v1": 0,
+    "n_v2": 1196
+   }
+  }
+ },
+ "ceiling": {
+  "realtime": {
+   "v1_p95": 99.14,
+   "v2_p95": 89.49,
+   "delta_ms": -9.65,
+   "max_delta_ms": 5.0,
+   "pass": true
+  },
+  "realtime_detector_only": {
+   "v1_p95": 64.04,
+   "v2_p95": 72.43,
+   "delta_ms": 8.39,
+   "max_delta_ms": 5.0,
+   "pass": false
+  }
+ },
+ "errors": {
+  "v1": 0,
+  "v2": 0
+ },
+ "golden_cuda": {
+  "v1/detector": true,
+  "v1/enhancer": true,
+  "v2/detector": true,
+  "v2/verifier": true,
+  "v2/enhancer": true
+ },
+ "phase09": {
+  "system_p95_realtime": 173.3,
+  "note": "phase 09 (trước sửa verifier theo bậc 78a16af), GPU 780 MHz"
+ },
+ "runs": [
+  {
+   "round": 0,
+   "config": "v1",
+   "machine_before": {
+    "clock_mhz": 780.0,
+    "clock_max_mhz": 3105.0,
+    "temp_c": 67.0,
+    "power_w": 13.57,
+    "pstate": "P0",
+    "util_pct": 19.0
+   },
+   "realtime": {
+    "frames_in": 600,
+    "frames_processed": 553,
+    "frames_dropped": 47,
+    "dropped_frac": 0.0783,
+    "input_fps": 7.21,
+    "processed_fps": 6.64,
+    "errors": 0,
+    "ms": {
+     "decode": {
+      "p50": 0.58,
+      "p95": 0.77,
+      "n": 553
+     },
+     "detector": {
+      "p50": 52.98,
+      "p95": 62.89,
+      "n": 553
+     },
+     "enhancer": {
+      "p50": 29.58,
+      "p95": 34.38,
+      "n": 553
+     },
+     "encode": {
+      "p50": 0.56,
+      "p95": 0.61,
+      "n": 553
+     },
+     "total": {
+      "p50": 84.18,
+      "p95": 98.18,
+      "n": 553
+     }
+    }
+   },
+   "realtime_detector_only": {
+    "frames_in": 600,
+    "frames_processed": 597,
+    "frames_dropped": 3,
+    "dropped_frac": 0.005,
+    "input_fps": 7.21,
+    "processed_fps": 7.17,
+    "errors": 0,
+    "ms": {
+     "decode": {
+      "p50": 0.63,
+      "p95": 0.81,
+      "n": 597
+     },
+     "detector": {
+      "p50": 59.79,
+      "p95": 62.63,
+      "n": 597
+     },
+     "total": {
+      "p50": 60.53,
+      "p95": 63.48,
+      "n": 597
+     }
+    }
+   },
+   "machine_during": {
+    "samples": 82,
+    "clock_max_mhz": 3105.0,
+    "pstates": [
+     "P0",
+     "P4"
+    ],
+    "clock_mhz": {
+     "min": 465.0,
+     "median": 780.0,
+     "max": 2355.0
+    },
+    "temp_c": {
+     "min": 67.0,
+     "median": 70.0,
+     "max": 75.0
+    },
+    "power_w": {
+     "min": 10.09,
+     "median": 19.365000000000002,
+     "max": 64.15
+    },
+    "util_pct": {
+     "min": 6.0,
+     "median": 53.0,
+     "max": 100.0
+    }
+   }
+  },
+  {
+   "round": 1,
+   "config": "v2",
+   "machine_before": {
+    "clock_mhz": 780.0,
+    "clock_max_mhz": 3105.0,
+    "temp_c": 71.0,
+    "power_w": 22.03,
+    "pstate": "P0",
+    "util_pct": 7.0
+   },
+   "realtime": {
+    "frames_in": 600,
+    "frames_processed": 575,
+    "frames_dropped": 25,
+    "dropped_frac": 0.0417,
+    "input_fps": 7.21,
+    "processed_fps": 6.91,
+    "errors": 0,
+    "ms": {
+     "decode": {
+      "p50": 0.61,
+      "p95": 0.76,
+      "n": 575
+     },
+     "detector": {
+      "p50": 57.39,
+      "p95": 62.75,
+      "n": 575
+     },
+     "verifier": {
+      "p50": 0.03,
+      "p95": 8.81,
+      "n": 575
+     },
+     "enhancer": {
+      "p50": 15.24,
+      "p95": 19.45,
+      "n": 575
+     },
+     "encode": {
+      "p50": 0.59,
+      "p95": 0.65,
+      "n": 575
+     },
+     "total": {
+      "p50": 76.32,
+      "p95": 87.9,
+      "n": 575
+     }
+    }
+   },
+   "realtime_detector_only": {
+    "frames_in": 600,
+    "frames_processed": 598,
+    "frames_dropped": 2,
+    "dropped_frac": 0.0033,
+    "input_fps": 7.21,
+    "processed_fps": 7.18,
+    "errors": 0,
+    "ms": {
+     "decode": {
+      "p50": 0.61,
+      "p95": 0.8,
+      "n": 598
+     },
+     "detector": {
+      "p50": 60.06,
+      "p95": 64.06,
+      "n": 598
+     },
+     "verifier": {
+      "p50": 0.03,
+      "p95": 9.52,
+      "n": 598
+     },
+     "total": {
+      "p50": 62.01,
+      "p95": 73.98,
+      "n": 598
+     }
+    }
+   },
+   "machine_during": {
+    "samples": 82,
+    "clock_max_mhz": 3105.0,
+    "pstates": [
+     "P0",
+     "P4"
+    ],
+    "clock_mhz": {
+     "min": 270.0,
+     "median": 802.5,
+     "max": 1365.0
+    },
+    "temp_c": {
+     "min": 70.0,
+     "median": 72.0,
+     "max": 73.0
+    },
+    "power_w": {
+     "min": 10.27,
+     "median": 21.045,
+     "max": 42.8
+    },
+    "util_pct": {
+     "min": 6.0,
+     "median": 48.5,
+     "max": 100.0
+    }
+   }
+  },
+  {
+   "round": 2,
+   "config": "v2",
+   "machine_before": {
+    "clock_mhz": 780.0,
+    "clock_max_mhz": 3105.0,
+    "temp_c": 72.0,
+    "power_w": 23.0,
+    "pstate": "P0",
+    "util_pct": 49.0
+   },
+   "realtime": {
+    "frames_in": 600,
+    "frames_processed": 572,
+    "frames_dropped": 28,
+    "dropped_frac": 0.0467,
+    "input_fps": 7.21,
+    "processed_fps": 6.87,
+    "errors": 0,
+    "ms": {
+     "decode": {
+      "p50": 0.6,
+      "p95": 0.81,
+      "n": 572
+     },
+     "detector": {
+      "p50": 57.4,
+      "p95": 63.84,
+      "n": 572
+     },
+     "verifier": {
+      "p50": 0.03,
+      "p95": 9.22,
+      "n": 572
+     },
+     "enhancer": {
+      "p50": 15.57,
+      "p95": 19.13,
+      "n": 572
+     },
+     "encode": {
+      "p50": 0.59,
+      "p95": 0.75,
+      "n": 572
+     },
+     "total": {
+      "p50": 76.18,
+      "p95": 91.25,
+      "n": 572
+     }
+    }
+   },
+   "realtime_detector_only": {
+    "frames_in": 600,
+    "frames_processed": 598,
+    "frames_dropped": 2,
+    "dropped_frac": 0.0033,
+    "input_fps": 7.21,
+    "processed_fps": 7.18,
+    "errors": 0,
+    "ms": {
+     "decode": {
+      "p50": 0.65,
+      "p95": 0.91,
+      "n": 598
+     },
+     "detector": {
+      "p50": 58.9,
+      "p95": 62.36,
+      "n": 598
+     },
+     "verifier": {
+      "p50": 0.03,
+      "p95": 9.13,
+      "n": 598
+     },
+     "total": {
+      "p50": 60.64,
+      "p95": 70.35,
+      "n": 598
+     }
+    }
+   },
+   "machine_during": {
+    "samples": 82,
+    "clock_max_mhz": 3105.0,
+    "pstates": [
+     "P0",
+     "P4"
+    ],
+    "clock_mhz": {
+     "min": 375.0,
+     "median": 780.0,
+     "max": 2505.0
+    },
+    "temp_c": {
+     "min": 71.0,
+     "median": 72.0,
+     "max": 77.0
+    },
+    "power_w": {
+     "min": 10.48,
+     "median": 21.57,
+     "max": 56.92
+    },
+    "util_pct": {
+     "min": 5.0,
+     "median": 52.5,
+     "max": 99.0
+    }
+   }
+  },
+  {
+   "round": 3,
+   "config": "v1",
+   "machine_before": {
+    "clock_mhz": 780.0,
+    "clock_max_mhz": 3105.0,
+    "temp_c": 73.0,
+    "power_w": 22.47,
+    "pstate": "P0",
+    "util_pct": 7.0
+   },
+   "realtime": {
+    "frames_in": 600,
+    "frames_processed": 551,
+    "frames_dropped": 49,
+    "dropped_frac": 0.0817,
+    "input_fps": 7.21,
+    "processed_fps": 6.62,
+    "errors": 0,
+    "ms": {
+     "decode": {
+      "p50": 0.62,
+      "p95": 0.76,
+      "n": 551
+     },
+     "detector": {
+      "p50": 53.42,
+      "p95": 63.68,
+      "n": 551
+     },
+     "enhancer": {
+      "p50": 29.87,
+      "p95": 34.52,
+      "n": 551
+     },
+     "encode": {
+      "p50": 0.6,
+      "p95": 0.65,
+      "n": 551
+     },
+     "total": {
+      "p50": 84.82,
+      "p95": 99.4,
+      "n": 551
+     }
+    }
+   },
+   "realtime_detector_only": {
+    "frames_in": 600,
+    "frames_processed": 598,
+    "frames_dropped": 2,
+    "dropped_frac": 0.0033,
+    "input_fps": 7.21,
+    "processed_fps": 7.18,
+    "errors": 0,
+    "ms": {
+     "decode": {
+      "p50": 0.66,
+      "p95": 0.78,
+      "n": 598
+     },
+     "detector": {
+      "p50": 60.29,
+      "p95": 63.83,
+      "n": 598
+     },
+     "total": {
+      "p50": 61.06,
+      "p95": 64.64,
+      "n": 598
+     }
+    }
+   },
+   "machine_during": {
+    "samples": 82,
+    "clock_max_mhz": 3105.0,
+    "pstates": [
+     "P0",
+     "P4"
+    ],
+    "clock_mhz": {
+     "min": 390.0,
+     "median": 780.0,
+     "max": 1200.0
+    },
+    "temp_c": {
+     "min": 70.0,
+     "median": 72.0,
+     "max": 75.0
+    },
+    "power_w": {
+     "min": 10.34,
+     "median": 20.35,
+     "max": 34.23
+    },
+    "util_pct": {
+     "min": 7.0,
+     "median": 78.0,
+     "max": 100.0
+    }
+   }
+  }
+ ]
+}
