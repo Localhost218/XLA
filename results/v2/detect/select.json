@@ -1,0 +1,496 @@
+{
+ "phase": "06",
+ "created": "2026-11-25T12:32:31+00:00",
+ "candidates": {
+  "C3": {
+   "op_threshold": 0.02711,
+   "threshold_source": "F1 tối đa trên devpool OOF",
+   "metrics": {
+    "mAP50": {
+     "value": 0.320566,
+     "ci95": [
+      0.210464,
+      0.446295
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.153995,
+     "ci95": [
+      0.104382,
+      0.213803
+     ]
+    },
+    "AP_small": {
+     "value": 0.14435,
+     "ci95": [
+      0.107239,
+      0.183724
+     ]
+    },
+    "AR_small": {
+     "value": 0.445802,
+     "ci95": [
+      0.416789,
+      0.48044
+     ]
+    },
+    "precision@op": {
+     "value": 0.348,
+     "ci95": [
+      0.249961,
+      0.436499
+     ]
+    },
+    "recall@op": {
+     "value": 0.399083,
+     "ci95": [
+      0.291952,
+      0.506688
+     ]
+    },
+    "f1@op": {
+     "value": 0.371795,
+     "ci95": [
+      0.27174,
+      0.461051
+     ]
+    },
+    "fp_per_devpool_empty_frame@op": {
+     "value": 0.544444,
+     "ci95": [
+      0.287374,
+      0.866667
+     ]
+    },
+    "fp_per_mine_frame@op": {
+     "value": 0.411765,
+     "ci95": [
+      0.289709,
+      0.569644
+     ]
+    }
+   },
+   "n": {
+    "frames": 160,
+    "frames_with_person": 70,
+    "gt_boxes": 218,
+    "neg_split_frames": 85,
+    "negative_frames": 175,
+    "negative_frames_flight": 90,
+    "negative_frames_indoor": 85,
+    "labels_missing": 0,
+    "pred_frames_other_splits": 0
+   },
+   "map50_by_fold": [
+    0.4488,
+    0.2096
+   ],
+   "f1_threshold": {
+    "thr": 0.02711,
+    "f1_devval": 0.3717948717948718,
+    "precision_devval": 0.348,
+    "recall_devval": 0.39908256880733944,
+    "n_frames_devval": 160,
+    "source": "devpool OOF",
+    "devval_labels_sha256": "af661f50b1c46572f13603633f973040f579e9af8a3299ce98e7a70634bb75ac"
+   },
+   "vs_v1": {
+    "mAP50": {
+     "a": 0.340276,
+     "b": 0.320566,
+     "diff": -0.01971,
+     "ci95": [
+      -0.059039,
+      0.020806
+     ],
+     "p_diff_gt_0": 0.179,
+     "p_b_better": 0.179,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "AR_small": {
+     "a": 0.387023,
+     "b": 0.445802,
+     "diff": 0.058779,
+     "ci95": [
+      -0.01245,
+      0.122607
+     ],
+     "p_diff_gt_0": 0.951,
+     "p_b_better": 0.951,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.394495,
+     "b": 0.399083,
+     "diff": 0.004587,
+     "ci95": [
+      -0.053171,
+      0.069051
+     ],
+     "p_diff_gt_0": 0.511,
+     "p_b_better": 0.511,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.255556,
+     "b": 0.544444,
+     "diff": 0.288889,
+     "ci95": [
+      0.012468,
+      0.639645
+     ],
+     "p_diff_gt_0": 0.9795,
+     "p_b_better": 0.0195,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   },
+   "train_done": {
+    "finished": "2026-11-25T12:14:41+00:00",
+    "select": "val",
+    "selected_from": "best_val50.pt",
+    "best_sha256": "b7ad4a1aa805be1d38f81a0e8553332e7bce41c463db7c276704ad10bc9b254d",
+    "epochs_run": 11,
+    "stopped": null,
+    "best_epoch": 11
+   }
+  },
+  "C1": {
+   "op_threshold": 0.05045,
+   "threshold_source": "F1 tối đa trên devpool OOF",
+   "metrics": {
+    "mAP50": {
+     "value": 0.30565,
+     "ci95": [
+      0.20793,
+      0.41695
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.131405,
+     "ci95": [
+      0.089892,
+      0.181241
+     ]
+    },
+    "AP_small": {
+     "value": 0.195025,
+     "ci95": [
+      0.148229,
+      0.232089
+     ]
+    },
+    "AR_small": {
+     "value": 0.348855,
+     "ci95": [
+      0.28577,
+      0.402947
+     ]
+    },
+    "precision@op": {
+     "value": 0.373206,
+     "ci95": [
+      0.292723,
+      0.474391
+     ]
+    },
+    "recall@op": {
+     "value": 0.357798,
+     "ci95": [
+      0.271287,
+      0.445441
+     ]
+    },
+    "f1@op": {
+     "value": 0.36534,
+     "ci95": [
+      0.283446,
+      0.456302
+     ]
+    },
+    "fp_per_devpool_empty_frame@op": {
+     "value": 0.344444,
+     "ci95": [
+      0.219239,
+      0.472621
+     ]
+    },
+    "fp_per_mine_frame@op": {
+     "value": 0.211765,
+     "ci95": [
+      0.119756,
+      0.322392
+     ]
+    }
+   },
+   "n": {
+    "frames": 160,
+    "frames_with_person": 70,
+    "gt_boxes": 218,
+    "neg_split_frames": 85,
+    "negative_frames": 175,
+    "negative_frames_flight": 90,
+    "negative_frames_indoor": 85,
+    "labels_missing": 0,
+    "pred_frames_other_splits": 0
+   },
+   "map50_by_fold": [
+    0.3822,
+    0.2351
+   ],
+   "f1_threshold": {
+    "thr": 0.05045,
+    "f1_devval": 0.36533957845433257,
+    "precision_devval": 0.37320574162679426,
+    "recall_devval": 0.3577981651376147,
+    "n_frames_devval": 160,
+    "source": "devpool OOF",
+    "devval_labels_sha256": "af661f50b1c46572f13603633f973040f579e9af8a3299ce98e7a70634bb75ac"
+   },
+   "vs_v1": {
+    "mAP50": {
+     "a": 0.340276,
+     "b": 0.30565,
+     "diff": -0.034626,
+     "ci95": [
+      -0.092887,
+      0.014163
+     ],
+     "p_diff_gt_0": 0.0965,
+     "p_b_better": 0.0965,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "AR_small": {
+     "a": 0.387023,
+     "b": 0.348855,
+     "diff": -0.038168,
+     "ci95": [
+      -0.141225,
+      0.030046
+     ],
+     "p_diff_gt_0": 0.1585,
+     "p_b_better": 0.1585,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "recall@op": {
+     "a": 0.394495,
+     "b": 0.357798,
+     "diff": -0.036697,
+     "ci95": [
+      -0.105858,
+      0.020011
+     ],
+     "p_diff_gt_0": 0.0975,
+     "p_b_better": 0.0975,
+     "higher_is_better": true,
+     "n_valid_samples": 2000
+    },
+    "fp_per_neg_flight@op": {
+     "a": 0.255556,
+     "b": 0.344444,
+     "diff": 0.088889,
+     "ci95": [
+      -0.036815,
+      0.206057
+     ],
+     "p_diff_gt_0": 0.9165,
+     "p_b_better": 0.072,
+     "higher_is_better": false,
+     "n_valid_samples": 2000
+    }
+   },
+   "train_done": {
+    "finished": "2026-11-25T11:38:23+00:00",
+    "select": "val",
+    "selected_from": "best_val50.pt",
+    "best_sha256": "7fbc9649196a7b8f72fd92862f9562a71554c7a3cd154d66e4f2b8ce4d415b3c",
+    "epochs_run": 11,
+    "stopped": null,
+    "best_epoch": 11
+   }
+  }
+ },
+ "v1": {
+  "op_threshold": 0.05966,
+  "threshold_source": "F1 tối đa trên devpool OOF",
+  "metrics": {
+   "mAP50": {
+    "value": 0.340276,
+    "ci95": [
+     0.246399,
+     0.443306
+    ]
+   },
+   "mAP50_95": {
+    "value": 0.146936,
+    "ci95": [
+     0.099855,
+     0.199781
+    ]
+   },
+   "AP_small": {
+    "value": 0.121736,
+    "ci95": [
+     0.096307,
+     0.151613
+    ]
+   },
+   "AR_small": {
+    "value": 0.387023,
+    "ci95": [
+     0.32699,
+     0.461101
+    ]
+   },
+   "precision@op": {
+    "value": 0.467391,
+    "ci95": [
+     0.42786,
+     0.510638
+    ]
+   },
+   "recall@op": {
+    "value": 0.394495,
+    "ci95": [
+     0.288514,
+     0.510281
+    ]
+   },
+   "f1@op": {
+    "value": 0.427861,
+    "ci95": [
+     0.349761,
+     0.503625
+    ]
+   },
+   "fp_per_devpool_empty_frame@op": {
+    "value": 0.255556,
+    "ci95": [
+     0.19323,
+     0.321638
+    ]
+   },
+   "fp_per_mine_frame@op": {
+    "value": 0.341176,
+    "ci95": [
+     0.25777,
+     0.451818
+    ]
+   }
+  },
+  "n": {
+   "frames": 160,
+   "frames_with_person": 70,
+   "gt_boxes": 218,
+   "neg_split_frames": 85,
+   "negative_frames": 175,
+   "negative_frames_flight": 90,
+   "negative_frames_indoor": 85,
+   "labels_missing": 0,
+   "pred_frames_other_splits": 0
+  },
+  "map50_by_fold": [
+   0.4337,
+   0.2479
+  ]
+ },
+ "pairwise": {
+  "C1_minus_C3": {
+   "mAP50": {
+    "a": 0.320566,
+    "b": 0.30565,
+    "diff": -0.014916,
+    "ci95": [
+     -0.060116,
+     0.018294
+    ],
+    "p_diff_gt_0": 0.2275,
+    "p_b_better": 0.2275,
+    "higher_is_better": true,
+    "n_valid_samples": 2000
+   },
+   "AR_small": {
+    "a": 0.445802,
+    "b": 0.348855,
+    "diff": -0.096947,
+    "ci95": [
+     -0.17331,
+     -0.041279
+    ],
+    "p_diff_gt_0": 0.0,
+    "p_b_better": 0.0,
+    "higher_is_better": true,
+    "n_valid_samples": 2000
+   }
+  }
+ },
+ "winner": "C3",
+ "final_model": "C3",
+ "extension": null,
+ "winner_rule": "cận dưới CI 95 % mAP50 OOF cao nhất, không ứng viên đơn giản hơn nào có CI chồng",
+ "ranking_key": "cận dưới CI mAP50 OOF; CI chồng → C3 < C1 < C2",
+ "kill_b": {
+  "triggered": true,
+  "winner_minus_v1_map50": {
+   "a": 0.340276,
+   "b": 0.320566,
+   "diff": -0.01971,
+   "ci95": [
+    -0.059039,
+    0.020806
+   ],
+   "p_diff_gt_0": 0.179,
+   "p_b_better": 0.179,
+   "higher_is_better": true,
+   "n_valid_samples": 2000
+  },
+  "v1_path": "pt (cùng đường với trò)",
+  "info_winner_pt_minus_v1_onnx_map50": {
+   "a": 0.228568,
+   "b": 0.320566,
+   "diff": 0.091998,
+   "ci95": [
+    0.023751,
+    0.165813
+   ],
+   "p_diff_gt_0": 0.997,
+   "p_b_better": 0.997,
+   "higher_is_better": true,
+   "n_valid_samples": 2000
+  },
+  "rule": "xuất v2 chỉ khi cận dưới CI 95 % hiệu mAP50 OOF ghép cặp (trò − v1, cùng đường .pt) > 0; `finalize` kiểm lại trên đường ONNX của bundle",
+  "note": "v1 (.pt E2 r1 best_devval) đã học nhãn giả khung dev và được chọn checkpoint trên dev-val v1 (86/160 khung devpool) nên trên devpool v1 KHÔNG phải OOF — lợi thế cho v1"
+ },
+ "oof_threshold": 0.05098,
+ "oof_threshold_info": {
+  "thr": 0.05098,
+  "score_floor": 0.05,
+  "f1_oof": 0.3511,
+  "precision_oof": 0.4177,
+  "recall_oof": 0.3028,
+  "rule": "F1 tối đa trên OOF devpool, ngưỡng ≥ score_floor",
+  "unconstrained_thr": 0.02711
+ },
+ "c2_gate": {
+  "run_c2": false,
+  "teacher_map50": 0.197292,
+  "v1_map50": 0.228568,
+  "diff": -0.031276,
+  "diff_ci95": [
+   -0.092054,
+   0.051843
+  ],
+  "rule": "chạy C2 chỉ khi cận dưới CI 95 % hiệu mAP50 (thầy − v1) trên devpool > 0 (chủ dự án 25/11)"
+ },
+ "bootstrap": {
+  "n": 2000,
+  "seed": 20261118,
+  "unit": "khối 30 s split.json (mỗi khối nằm trong một phiên = một fold)"
+ },
+ "gpu_used_h": 1.314
+}

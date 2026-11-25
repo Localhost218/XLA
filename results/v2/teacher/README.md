@@ -67,6 +67,10 @@ Lưu ý công bằng: v1 đã học nhãn giả khung dev ở E2 (trừ dev-val 
 **không** phải OOF — số của v1 ở đây có lợi thế. Khung `mine` nằm trong tập train của thầy (ảnh nền) nên báo nhầm trên
 mine của thầy là trong mẫu.
 
+Bổ sung (phase 06): bảng trên so thầy đường `.pt` (conf 0,001) với v1 đường ONNX (graph bỏ hộp < 0,05) — khác đường, lợi
+cho thầy. Cùng đường `.pt`, v1 (E2 r1) đạt mAP50 devpool **0,340** (`results/v2/detect/preds/v1_pt_devpool.csv`), nên
+thầy còn kém xa hơn; kết luận dưới không đổi.
+
 **Hệ quả cho phase 06 (quy tắc chủ dự án 25/11):** thầy không rõ ràng hơn v1 trên devpool (cận dưới CI hiệu mAP50
 −0,092 ≤ 0) → **bỏ C2** (không chạy fold), giờ GPU dồn cho C1/C3.
 

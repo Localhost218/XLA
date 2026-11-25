@@ -1,0 +1,82 @@
+# Phase 06 AI v2 — trò YOLO11s @1280, chọn bằng OOF k-fold theo phiên trên devpool, xuất detector-v2.0.0.
+# Đọc bằng `python -m xla.detect.kfold smoke|run|select|export|score-test|tiling --config configs/student_v2.yaml`.
+#
+# TRẦN GPU: plan ghi 6 giờ; chủ dự án CẮT xuống 2 giờ cho cả phase 06 (mọi lần huấn luyện + xuất + đo + cắt ô), quyết
+# định 25/11/2026 vì tốc độ; được nới thêm tối đa 45 phút MỘT lần nếu đường val/OOF của ứng viên thắng còn đang lên khi chạm
+# trần (`extension_h` + khối `extension`), tổng 05 + 06 ≤ 3 h 45. C2 chỉ chạy khi thầy phase 05 rõ ràng hơn v1 trên devpool
+# (`kfold.c2_gate`); bỏ C2 thì giờ dồn cho C1/C3 (nhiều epoch hơn). Giờ GPU dùng thật: results/v2/detect/README.md.
+
+version: 2
+runs_dir: D:/DevCache/runs/xla/v2/detect/student   # run + trọng số + ONNX từng fold, ngoài repo
+datasets_dir: D:/DevCache/datasets/xla
+pseudo_dir: D:/DevCache/datasets/xla/pseudo_v2      # nhãn giả phase 05 (manifest.json + labels/)
+lock_timeout_s: 21600
+gpu_cap_h: 2.0
+extension_h: 0.75             # nới tối đa 45 phút MỘT lần, chỉ qua `kfold extend` khi val còn đang lên (chủ dự án 25/11)
+seed: 20261125
+
+data:
+  n_source_train: 3000        # ảnh nguồn mỗi epoch, như nhau mọi ứng viên (d0 train có 3006 ảnh)
+  n_source_val: 500           # ảnh val tập nguồn để dừng sớm + chọn checkpoint (mAP50), không khung thật nào
+  mine_max_frac: 0.10
+
+candidates:                   # Deferred 9
+  C1: {source_set: d02x, mine: true, pseudo: false}       # D0 + D2 trộn (VisDrone + ngoài) + nền mine
+  C3: {source_set: d0, mine: true, pseudo: false}         # D0 + nền mine (giống E1-D0)
+  C2: {source_set: d02x, mine: true, pseudo: true, enabled: true}   # C1 + nhãn giả dev (phase 05), k-fold theo phiên
+
+student:
+  init_weights: D:/DevCache/runs/xla/e1/d0/weights/last.pt   # YOLO11s @1280 E1-D0 epoch cuối: không khung thật, không chọn bằng dev-val
+  batch: 4
+  epochs: 11                  # như nhau mọi ứng viên: smoke 0,051 h/epoch (×~1,25 thực tế) ; C2 bỏ → 2 run × ~44 phút
+  early_stop_patience: 5      # epoch không tăng mAP50 val → dừng (chủ dự án 25/11)
+  run_budget_min: 44          # C2 bỏ (cổng C2, teacher.json) → giờ dồn cho C1/C3; cap_s = budget × budget_slack
+  budget_slack: 1.15
+
+train:                        # công thức E1 (results/e1/README.md E1-3) + cos_lr
+  imgsz: 1280
+  workers: 4
+  seed: 20261118
+  deterministic: true
+  device: 0
+  optimizer: AdamW            # như E1 (auto đổi sang SGD lr 0,01 khi số bước > 10 000)
+  lr0: 0.002
+  cos_lr: true
+  warmup_epochs: 1.0
+  close_mosaic: 2
+  hsv_h: 0.0
+  hsv_s: 0.0
+  hsv_v: 0.0
+  mosaic: 1.0
+  amp: true
+  val: true
+  plots: false
+  cache: false
+  patience: 1000
+
+extension:                    # `kfold extend`: học tiếp từ last.pt của run thắng (cùng dữ liệu) → <thắng>_ext = model ship
+  max_h: 0.75
+  epochs: 12                  # ~3,45 phút/epoch đo ở C1 → ~41 phút; callback dừng ở 0,93 × max_h
+  lr0: 0.001                  # khởi động lại cos LR ở nửa lr0 (đã qua một chu kỳ 11 epoch)
+  warmup_epochs: 0.5
+
+smoke:
+  n_train: 240                # ~60 bước batch 4: chỉ đo VRAM + giây/ảnh
+  n_val: 60
+
+predict:
+  conf: 0.001
+  max_det: 300
+
+v1:                           # đối chứng Kill (b); chỉ đọc
+  bundle: D:/XLA/models/release/detector-v1.0.0                 # đường ONNX (score_floor 0,05)
+  pt: D:/DevCache/runs/xla/e2/r1/weights/best_devval.pt         # cùng đường .pt với trò (train_run e2/r1 của meta v1)
+
+export:
+  out: models/release/detector-v2.0.0
+  version: 2.0.0
+
+tiling:                       # Deferred 15: chỉ đo. Ô 640 trên khung 640×480 = một ô (không cắt); 320 mới thật sự cắt
+  slices: [640, 320]
+  overlap: 0.2
+  max_s: 300

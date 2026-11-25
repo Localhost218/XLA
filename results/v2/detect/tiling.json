@@ -1,0 +1,85 @@
+{
+ "created": "2026-11-25T12:24:26+00:00",
+ "winner": "C3",
+ "weights": "D:/DevCache/runs/xla/v2/detect/student/C3/weights/best.pt",
+ "results": {
+  "640": {
+   "slice": 640,
+   "overlap": 0.2,
+   "mAP50": {
+    "value": 0.362867,
+    "ci95": [
+     0.063126,
+     0.506865
+    ]
+   },
+   "AR_small": {
+    "value": 0.448235,
+    "ci95": [
+     0.35037,
+     0.7
+    ]
+   },
+   "recall@0.05098": {
+    "value": 0.449664,
+    "ci95": [
+     0.249432,
+     0.563218
+    ]
+   },
+   "ms_p50": 19.5,
+   "ms_p95": 21.0,
+   "note": "PyTorch + SAHI (không phải ORT), gồm đường chuẩn khung nguyên"
+  },
+  "320": {
+   "slice": 320,
+   "overlap": 0.2,
+   "mAP50": {
+    "value": 0.293479,
+    "ci95": [
+     0.034567,
+     0.448431
+    ]
+   },
+   "AR_small": {
+    "value": 0.430588,
+    "ci95": [
+     0.343704,
+     0.7
+    ]
+   },
+   "recall@0.05098": {
+    "value": 0.442953,
+    "ci95": [
+     0.23605,
+     0.563218
+    ]
+   },
+   "ms_p50": 174.2,
+   "ms_p95": 186.3,
+   "note": "PyTorch + SAHI (không phải ORT), gồm đường chuẩn khung nguyên"
+  }
+ },
+ "machine": {
+  "time": "2026-11-25T12:24:27+00:00",
+  "host": "Nghaiz-PC",
+  "os": "Windows-11-10.0.26300-SP0",
+  "cpu_count": 32,
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "driver_version": "610.88",
+   "temperature.gpu": "67",
+   "clocks.sm": "210 MHz",
+   "clocks.max.sm": "3105 MHz",
+   "power.draw": "10.20 W",
+   "pstate": "P4",
+   "memory.used": "1500 MiB",
+   "memory.total": "8188 MiB"
+  },
+  "cpu": {
+   "percent": 0.6,
+   "freq_mhz": 2501.0,
+   "ram_avail_gb": 25.0
+  }
+ }
+}

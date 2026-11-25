@@ -1,0 +1,150 @@
+{
+ "created": "2026-11-25T12:28:06+00:00",
+ "model": "C3",
+ "path": "ONNX (ORT CUDA), khung nguyên uint8",
+ "oof_onnx": {
+  "op_threshold": 0.05628,
+  "threshold_source": "F1 tối đa trên devpool OOF",
+  "metrics": {
+   "mAP50": {
+    "value": 0.188046,
+    "ci95": [
+     0.120235,
+     0.264852
+    ]
+   },
+   "mAP50_95": {
+    "value": 0.101769,
+    "ci95": [
+     0.066867,
+     0.140689
+    ]
+   },
+   "AP_small": {
+    "value": 0.095263,
+    "ci95": [
+     0.064972,
+     0.127479
+    ]
+   },
+   "AR_small": {
+    "value": 0.174809,
+    "ci95": [
+     0.135423,
+     0.202999
+    ]
+   },
+   "precision@op": {
+    "value": 0.405229,
+    "ci95": [
+     0.284671,
+     0.513087
+    ]
+   },
+   "recall@op": {
+    "value": 0.284404,
+    "ci95": [
+     0.211999,
+     0.359383
+    ]
+   },
+   "f1@op": {
+    "value": 0.334232,
+    "ci95": [
+     0.246897,
+     0.41405
+    ]
+   },
+   "fp_per_devpool_empty_frame@op": {
+    "value": 0.3,
+    "ci95": [
+     0.137134,
+     0.483389
+    ]
+   },
+   "fp_per_mine_frame@op": {
+    "value": 0.176471,
+    "ci95": [
+     0.096382,
+     0.288138
+    ]
+   }
+  },
+  "n": {
+   "frames": 160,
+   "frames_with_person": 70,
+   "gt_boxes": 218,
+   "neg_split_frames": 85,
+   "negative_frames": 175,
+   "negative_frames_flight": 90,
+   "negative_frames_indoor": 85,
+   "labels_missing": 0,
+   "pred_frames_other_splits": 0
+  },
+  "map50_by_fold": [
+   0.2559,
+   0.1295
+  ]
+ },
+ "vs_v1_onnx": {
+  "mAP50": {
+   "a": 0.228568,
+   "b": 0.188046,
+   "diff": -0.040522,
+   "ci95": [
+    -0.078092,
+    0.01751
+   ],
+   "p_diff_gt_0": 0.068,
+   "p_b_better": 0.068,
+   "higher_is_better": true,
+   "n_valid_samples": 2000
+  },
+  "AR_small": {
+   "a": 0.171756,
+   "b": 0.174809,
+   "diff": 0.003053,
+   "ci95": [
+    -0.033185,
+    0.035621
+   ],
+   "p_diff_gt_0": 0.542,
+   "p_b_better": 0.542,
+   "higher_is_better": true,
+   "n_valid_samples": 2000
+  },
+  "recall@op": {
+   "a": 0.316514,
+   "b": 0.284404,
+   "diff": -0.03211,
+   "ci95": [
+    -0.084864,
+    0.04095
+   ],
+   "p_diff_gt_0": 0.146,
+   "p_b_better": 0.146,
+   "higher_is_better": true,
+   "n_valid_samples": 2000
+  },
+  "fp_per_neg_flight@op": {
+   "a": 0.277778,
+   "b": 0.3,
+   "diff": 0.022222,
+   "ci95": [
+    -0.187182,
+    0.276929
+   ],
+   "p_diff_gt_0": 0.5565,
+   "p_b_better": 0.426,
+   "higher_is_better": false,
+   "n_valid_samples": 2000
+  }
+ },
+ "kill_b": {
+  "triggered": true,
+  "rule": "cận dưới CI 95 % hiệu mAP50 OOF ghép cặp ONNX v2 − ONNX v1 > 0"
+ },
+ "conf_threshold": 0.05628,
+ "threshold_rule": "F1 tối đa trên OOF devpool đường ONNX (≥ score_floor)",
+ "exported": false
+}

@@ -1147,6 +1147,8 @@ def onnx_predict(onnx_path: Path, frames: list[str], root: Path, cuda: bool = Fa
     from xla import contract as C
     from xla.detect import export_onnx as X
 
+    if cuda:
+        import torch  # noqa: F401 — nạp DLL CUDA/cuDNN của torch trước khi tạo session ORT CUDA (như export_onnx)
     sess = X.ort_session(onnx_path, cuda=cuda)
     out = {}
     for f in frames:
