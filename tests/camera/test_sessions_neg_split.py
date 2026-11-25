@@ -303,6 +303,9 @@ NOT_TRAINING_INDEX = (
     # parity ONNX của enhancer-v2.0.0 classic (phase 10, e6b5035): 6 khung cal chỉ nằm ở frames/parity (đã đo 26/11),
     # cùng loại với restore/export.json; classic không học từ dữ liệu.
     "results/v2/classic/export.json",
+    # phase 14 v2: guard_fp đo báo nhầm trên đúng 150 khung cal (vai trò của cal theo thiết kế); trang A/B lấy khung dev v1
+    # có nhãn người nên dính 4 + 3 khung thuộc khối cal 13/21 (đã chấm 26/11, không dựng lại). Cả hai chỉ đánh giá.
+    "results/ab-v2/", "results/ab-v2-zoom/",
 )
 FRAME_TOKEN = re.compile(r"\d{8}-\d{6}_\d{3}_\d{5}")
 
