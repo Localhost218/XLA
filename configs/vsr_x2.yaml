@@ -1,0 +1,28 @@
+# Phase 12 AI v2 (tuỳ chọn): mạng video BasicVSR++ cho ảnh rõ offline, biến thể video của §11
+# (docs/hop-dong-model.md: `frames` uint8 [T,480,640,3] → `frame_out` [960,1280,3] của khung giữa). Đọc bằng xla/enhance/vsr.py.
+version: "1.0.0"
+weights_dir: D:/DevCache/weights/vsr
+runs_dir: D:/DevCache/runs/xla/v2/vsr
+results_dir: results/v2/vsr
+gpu_budget_hours: 1.0                        # trần cả phase TÍNH CẢ probe (quyết định chủ dự án 25/11; plan ghi 4 h)
+
+model:
+  arch: basicvsrpp
+  kwargs: {mid_channels: 64, num_blocks: 7, max_residue_magnitude: 10}
+  weights: basicvsr_plusplus_c64n7_8x1_600k_reds4_20210217-db622b2f.pth
+  # OpenMMLab đặt 8 ký tự đầu sha256 vào tên file: db622b2f khớp sha256 đủ dưới đây (đã kiểm lúc tải 25/11)
+  sha256: db622b2fd4caae0a4c63ab5e54f1cfef7a62a0f3b8ad101aba2eae068d928549
+  url: https://download.openmmlab.com/mmediting/restorers/basicvsr_plusplus/basicvsr_plusplus_c64n7_8x1_600k_reds4_20210217-db622b2f.pth
+  license: Apache-2.0 (MMEditing / mmagic)
+  native_scale: 4                            # REDS4 là ×4; ×2 của §11 = hạ ra ×½ (avg-pool 2) trong graph
+
+probe:
+  temporal_window: 5
+  frame_size: [640, 480]                     # [w, h]; mạng nhận 624×480 (bỏ crop_left)
+  opset: 19                                  # DeformConv có từ opset 19 (hợp đồng §4 đang chốt opset 17)
+  warmup: 2
+  iters: 5
+  n_frames: 9                                # khung dev liên tiếp cho đo tốc độ / chạy thử ORT
+  kill:                                      # plan phase 12 bước 1
+    max_vram_gb: 7.0
+    max_s_per_frame: 1.0
