@@ -2,6 +2,9 @@
  "format": "xla-reproduce-v1",
  "note": "sha256 của mọi bảng/hình báo cáo dùng; dựng lại bằng scripts/reproduce.py --write",
  "inputs": [
+  "results/ab-v2/ab_score.json",
+  "results/ab-v2/decision.json",
+  "results/ab-v2/guard_fp.json",
   "results/baseline/baseline.json",
   "results/baseline/pred/edge16.csv",
   "results/e1/e1.json",
@@ -37,7 +40,16 @@
   "results/e4/preds/bundle_raw.csv",
   "results/e4/preds/coco_classic.csv",
   "results/e4/preds/coco_net.csv",
-  "results/e4/preds/coco_raw.csv"
+  "results/e4/preds/coco_raw.csv",
+  "results/v2/iotcv/bench.json",
+  "results/v2/sr/bench.json",
+  "results/v2/sr/export.json",
+  "results/v2/system/calibrate.json",
+  "results/v2/system/holdout_weak.json",
+  "results/v2/system/preds/system_detector_test.csv",
+  "results/v2/system/preds/system_track_test.csv",
+  "results/v2/system/preds/system_verifier_test.csv",
+  "results/v2/system/score.json"
  ],
  "rescore_tolerance": 1e-06,
  "outputs": {
@@ -47,9 +59,13 @@
   "results/reproduce/tables/t4_ab.md": "bf49161332c4a05f33e9fb425bcd57b22216d4ab9375f519ed29a93c6d91b056",
   "results/reproduce/tables/t5_e4.md": "ae8f42e2b85711aa82c6460a74dd3788d01d05b8dfe29c71b4e807d9871675ff",
   "results/reproduce/tables/t6_iotcv_ms.md": "fe495bdea2850d43b0ce9af17d9a47ba87b9b7b6e8f57f4748305533a75c8dbe",
+  "results/reproduce/tables/t7_v2_nhan_dien.md": "b666ebb20aa96ce914fe0bbf94d9dc9e95151f4a92f3b42b27dbd4816b19a6dd",
+  "results/reproduce/tables/t8_v2_ab.md": "02a271dbc76471a136401225ef5bc7a1c43481b624ee075dedc934e6a72546c6",
+  "results/reproduce/tables/t9_v2_ms.md": "eaff437b815043b46316a636b8bbab6fd3034e4d2a0702eed81ea5fc1afab831",
   "results/reproduce/fig/f1_nhan_dien.svg": "07ac5d2f8763510437a9f911695c52226634d10d1b1d9feb97a53e3c74cef6aa",
   "results/reproduce/fig/f2_ab.svg": "3a188d8f98298138a8b4569e2aee94fd44d8c2083cb8b744da3c08c28b5a113c",
-  "results/reproduce/fig/f3_e4.svg": "8cc4aef3e826eab4b46e30eed3c62bd949700b5bf8e21e8938ddb4c9c1d72665"
+  "results/reproduce/fig/f3_e4.svg": "8cc4aef3e826eab4b46e30eed3c62bd949700b5bf8e21e8938ddb4c9c1d72665",
+  "results/reproduce/fig/f4_v2_bao_nham_recall.svg": "753e40685dce088c66b02ef7c97bddfefd60ab7fb8afeb81c41fc8f5e9fd8c4c"
  },
  "assets": {
   "results/ab/img/a9e6ccce4250.jpg": "0ca92685d3972827209477ffddc600bbe5e19934b15d9ad63d99bf6108b66883",

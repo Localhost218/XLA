@@ -140,12 +140,58 @@
 </section>
 
 <section class="slide">
+  <h2>Bản v2: lọc ba tầng, ảnh rõ hai tầng</h2>
+  <ul>
+    <li><b>Nhận diện:</b> detector → bộ xác minh từng hộp (EfficientNet-B0, cắt vùng ngay trong ONNX) → lọc theo track</li>
+    <li><b>Ảnh rõ trực tiếp:</b> bộ cổ điển xuất ONNX, thay mạng NAFNet; <b>offline:</b> siêu phân giải ×2 sau chuyến bay</li>
+    <li>Thêm dữ liệu ngoài HERIDAL, WiSARD, TinyPerson (chỉ dùng nghiên cứu); chọn model bằng k-fold theo phiên bay</li>
+    <li>Tập test v1 giữ nguyên, chỉ chấm một lần; đích đặt trước khi chạy</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>v2 nhận diện: báo nhầm giảm, đích chưa đạt</h2>
+  <div class="row">
+    <!-- v2 -->
+    <table>
+      <tr><th>198 khung test</th><th>v1</th><th>v2 cả hệ</th></tr>
+      <tr><td>mAP50</td><td>0,120</td><td class="good">0,210</td></tr>
+      <tr><td>Báo nhầm / khung bay trống</td><td>0,881</td><td class="good">0,289</td></tr>
+      <tr><td>Recall ở ngưỡng vận hành</td><td>0,396</td><td>0,396</td></tr>
+      <tr><td>Hiệu mAP50 [CI 95 %]</td><td colspan="2">+0,090 [+0,026; +0,189]</td></tr>
+      <tr><td>Hiệu báo nhầm [CI 95 %]</td><td colspan="2">−0,591 [−1,033; −0,273]</td></tr>
+    </table>
+    <!-- /v2 -->
+    <figure><img src="../../results/reproduce/fig/f4_v2_bao_nham_recall.svg" alt="báo nhầm và recall"><figcaption>Điểm vận hành chọn trên khung cal, không trên test</figcaption></figure>
+  </div>
+  <p>Cải thiện là của bộ xác minh, CI không chạm 0. Đích mAP50 ≥ 0,30 và recall ≥ 0,6 <span class="bad">không đạt</span>; báo nhầm trên tập giữ kín <span class="bad">chưa đo được</span> (không có phiên bay trống). Detector vẫn là v1.</p>
+</section>
+
+<section class="slide">
+  <h2>v2 ảnh rõ: thử mù A/B và thời gian</h2>
+  <!-- v2 -->
+  <table>
+    <tr><th>Lượt cả khung, 25 cặp mỗi so sánh</th><th>Thắng</th><th>Kết luận</th></tr>
+    <tr><td>Cổ điển (ONNX) vs gốc</td><td>25/25</td><td class="good">đạt (mặc định bật theo quyết định có từ trước)</td></tr>
+    <tr><td>Offline ×2 vs gốc</td><td>25/25</td><td class="good">đạt</td></tr>
+    <tr><td>Offline ×2 vs cổ điển</td><td>16/25</td><td class="bad">không đạt (cận dưới 0,445): không ship</td></tr>
+    <tr><th>Trong IOT-CV, p95 tổng (cùng lúc đo, GPU hạ xung)</th><th>v1 → v2</th><th>Trần +5 ms</th></tr>
+    <tr><td>Có người xem Ảnh rõ</td><td>99,1 → 89,5 ms</td><td class="good">đạt</td></tr>
+    <tr><td>Chỉ nhận diện</td><td>64,0 → 72,4 ms</td><td class="bad">không đạt</td></tr>
+  </table>
+  <p class="mute">Offline tốn 0,758 giờ GPU cho chuyến 20 phút.</p>
+  <!-- /v2 -->
+  <p class="mute">Lần thử v1 (mạng NAFNet), mạng thắng gốc 11/25 ở lượt cả khung. Chủ dự án nhận xét kết quả làm rõ lần này tốt hơn rõ rệt: đây là cảm nhận, không phải số đo.</p>
+</section>
+
+<section class="slide">
   <h2>Việc tiếp và tái lập</h2>
   <ul>
     <li>Sửa tận gốc ở cảm biến: phơi sáng, cân bằng trắng, đo bảng lượng tử ở q40</li>
     <li>Thêm khung bay có người, nhiều buổi, để dev-val chọn đúng model</li>
     <li>Mạng làm rõ: ràng buộc màu và ràng buộc thời gian</li>
-    <li><code>python scripts/reproduce.py --check</code> chấm lại 15 tệp dự đoán và so sha256 9 bảng/hình</li>
+    <li>v2: bay một buổi trên bãi trống để có tập giữ kín đo báo nhầm</li>
+    <li><code>python scripts/reproduce.py --check</code> chấm lại 18 tệp dự đoán và so sha256 13 bảng/hình</li>
   </ul>
   <!-- cite -->
   <p class="mute">Tham khảo: He 2011 (dark channel), Wang 2021 (Real-ESRGAN), Chen 2022 (NAFNet), Zhu 2022 (VisDrone),
