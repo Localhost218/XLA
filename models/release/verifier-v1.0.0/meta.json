@@ -70,7 +70,7 @@
  "crop_px": 96,
  "context_scale": 1.5,
  "min_side_px": 32.0,
- "conf_threshold": 0.375,
+ "conf_threshold": 0.35,
  "input_variant": "raw",
  "backbone": "efficientnet_b0",
  "detector": {

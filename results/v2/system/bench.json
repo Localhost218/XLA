@@ -1,0 +1,504 @@
+{
+ "created": "2026-11-25T17:52:54+00:00",
+ "recording": "20261102-100941",
+ "frames": 600,
+ "machine_v1": {
+  "time": "2026-11-25T17:52:55+00:00",
+  "host": "Nghaiz-PC",
+  "os": "Windows-11-10.0.26300-SP0",
+  "cpu_count": 32,
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "driver_version": "610.88",
+   "temperature.gpu": "74",
+   "clocks.sm": "210 MHz",
+   "clocks.max.sm": "3105 MHz",
+   "power.draw": "11.44 W",
+   "pstate": "P4",
+   "memory.used": "985 MiB",
+   "memory.total": "8188 MiB"
+  },
+  "cpu": {
+   "percent": 5.0,
+   "freq_mhz": 2501.0,
+   "ram_avail_gb": 23.8
+  }
+ },
+ "v1": {
+  "machine": {
+   "gpu_util_idle_pct": 7.0,
+   "gpu_temp_c": 74.0,
+   "gpu_clock_mhz": 780.0,
+   "gpu_clock_max_mhz": 3105.0,
+   "gpu_power_w": 15.09
+  },
+  "detector": {
+   "version": "1.0.0",
+   "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+   "providers": [
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+   ]
+  },
+  "enhancer": {
+   "version": "1.0.0",
+   "onnx_sha256": "1728de3e976112a208ffb43f57113ba3d31f81aa9e6e9ee43cbcc1cf2fff382e",
+   "providers": [
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+   ]
+  },
+  "realtime": {
+   "frames_in": 600,
+   "frames_processed": 536,
+   "frames_dropped": 64,
+   "dropped_frac": 0.1067,
+   "input_fps": 7.21,
+   "processed_fps": 6.44,
+   "errors": 0,
+   "ms": {
+    "decode": {
+     "p50": 0.84,
+     "p95": 1.69,
+     "n": 536
+    },
+    "detector": {
+     "p50": 56.96,
+     "p95": 64.11,
+     "n": 536
+    },
+    "enhancer": {
+     "p50": 32.4,
+     "p95": 36.93,
+     "n": 536
+    },
+    "encode": {
+     "p50": 0.82,
+     "p95": 1.86,
+     "n": 536
+    },
+    "total": {
+     "p50": 91.92,
+     "p95": 102.82,
+     "n": 536
+    }
+   }
+  },
+  "maxrate": {
+   "frames": 600,
+   "fps": 20.73,
+   "ms": {
+    "decode": {
+     "p50": 0.64,
+     "p95": 0.74,
+     "n": 600
+    },
+    "detector": {
+     "p50": 29.16,
+     "p95": 41.33,
+     "n": 600
+    },
+    "enhancer": {
+     "p50": 15.41,
+     "p95": 23.64,
+     "n": 600
+    },
+    "encode": {
+     "p50": 0.63,
+     "p95": 0.72,
+     "n": 600
+    },
+    "total": {
+     "p50": 45.85,
+     "p95": 65.95,
+     "n": 600
+    }
+   }
+  },
+  "realtime_detector_only": {
+   "frames_in": 600,
+   "frames_processed": 597,
+   "frames_dropped": 3,
+   "dropped_frac": 0.005,
+   "input_fps": 7.21,
+   "processed_fps": 7.17,
+   "errors": 0,
+   "ms": {
+    "decode": {
+     "p50": 0.77,
+     "p95": 1.53,
+     "n": 597
+    },
+    "detector": {
+     "p50": 60.12,
+     "p95": 64.92,
+     "n": 597
+    },
+    "total": {
+     "p50": 61.04,
+     "p95": 66.11,
+     "n": 597
+    }
+   }
+  },
+  "recording": "20261102-100941",
+  "start": 284,
+  "created": "2026-11-25T17:56:16+00:00",
+  "budget_ms": {
+   "total": {
+    "p95": 102.82,
+    "max": 50.0,
+    "pass": false
+   },
+   "detector": {
+    "p95": 64.11,
+    "max": 30.0,
+    "pass": false
+   },
+   "enhancer": {
+    "p95": 36.93,
+    "max": 30.0,
+    "pass": false
+   }
+  },
+  "golden": {
+   "detector": {
+    "pass": true,
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ]
+   },
+   "enhancer": {
+    "pass": true,
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ]
+   }
+  },
+  "gpu": true,
+  "pass": false,
+  "file": "D:\\IOTCV-wt\\iotcv\\logs\\vision-bench\\20261126-005616.json",
+  "exit": 1,
+  "verifier_onnx": null,
+  "_wall_s": 201.2
+ },
+ "machine_system": {
+  "time": "2026-11-25T17:56:17+00:00",
+  "host": "Nghaiz-PC",
+  "os": "Windows-11-10.0.26300-SP0",
+  "cpu_count": 32,
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "driver_version": "610.88",
+   "temperature.gpu": "76",
+   "clocks.sm": "780 MHz",
+   "clocks.max.sm": "3105 MHz",
+   "power.draw": "15.03 W",
+   "pstate": "P0",
+   "memory.used": "988 MiB",
+   "memory.total": "8188 MiB"
+  },
+  "cpu": {
+   "percent": 18.0,
+   "freq_mhz": 2501.0,
+   "ram_avail_gb": 19.6
+  }
+ },
+ "system": {
+  "machine": {
+   "gpu_util_idle_pct": 11.0,
+   "gpu_temp_c": 76.0,
+   "gpu_clock_mhz": 780.0,
+   "gpu_clock_max_mhz": 3105.0,
+   "gpu_power_w": 15.44
+  },
+  "detector": {
+   "version": "1.0.1",
+   "onnx_sha256": "23b1da69165ffe05760bda23b4a41c858930e8a8fd8b0aebc039f1e0c5c59aef",
+   "providers": [
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+   ]
+  },
+  "enhancer": {
+   "version": "1.0.0",
+   "onnx_sha256": "1728de3e976112a208ffb43f57113ba3d31f81aa9e6e9ee43cbcc1cf2fff382e",
+   "providers": [
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+   ]
+  },
+  "realtime": {
+   "frames_in": 600,
+   "frames_processed": 452,
+   "frames_dropped": 148,
+   "dropped_frac": 0.2467,
+   "input_fps": 7.21,
+   "processed_fps": 5.43,
+   "errors": 0,
+   "ms": {
+    "decode": {
+     "p50": 0.71,
+     "p95": 0.91,
+     "n": 452
+    },
+    "detector": {
+     "p50": 59.6,
+     "p95": 63.85,
+     "n": 452
+    },
+    "verifier": {
+     "p50": 0.03,
+     "p95": 76.27,
+     "n": 452
+    },
+    "enhancer": {
+     "p50": 32.91,
+     "p95": 35.59,
+     "n": 452
+    },
+    "encode": {
+     "p50": 0.65,
+     "p95": 0.83,
+     "n": 452
+    },
+    "total": {
+     "p50": 96.13,
+     "p95": 173.29,
+     "n": 452
+    }
+   }
+  },
+  "maxrate": {
+   "frames": 600,
+   "fps": 9.1,
+   "ms": {
+    "decode": {
+     "p50": 0.76,
+     "p95": 1.46,
+     "n": 600
+    },
+    "detector": {
+     "p50": 57.57,
+     "p95": 63.27,
+     "n": 600
+    },
+    "verifier": {
+     "p50": 0.05,
+     "p95": 115.96,
+     "n": 600
+    },
+    "enhancer": {
+     "p50": 32.44,
+     "p95": 35.94,
+     "n": 600
+    },
+    "encode": {
+     "p50": 0.76,
+     "p95": 1.54,
+     "n": 600
+    },
+    "total": {
+     "p50": 94.63,
+     "p95": 213.27,
+     "n": 600
+    }
+   }
+  },
+  "realtime_detector_only": {
+   "frames_in": 600,
+   "frames_processed": 560,
+   "frames_dropped": 40,
+   "dropped_frac": 0.0667,
+   "input_fps": 7.21,
+   "processed_fps": 6.73,
+   "errors": 0,
+   "ms": {
+    "decode": {
+     "p50": 0.74,
+     "p95": 0.98,
+     "n": 560
+    },
+    "detector": {
+     "p50": 58.56,
+     "p95": 64.73,
+     "n": 560
+    },
+    "verifier": {
+     "p50": 0.04,
+     "p95": 77.1,
+     "n": 560
+    },
+    "total": {
+     "p50": 61.84,
+     "p95": 140.52,
+     "n": 560
+    }
+   }
+  },
+  "recording": "20261102-100941",
+  "start": 284,
+  "created": "2026-11-25T18:00:16+00:00",
+  "budget_ms": {
+   "total": {
+    "p95": 173.29,
+    "max": 50.0,
+    "pass": false
+   },
+   "detector": {
+    "p95": 63.85,
+    "max": 30.0,
+    "pass": false
+   },
+   "enhancer": {
+    "p95": 35.59,
+    "max": 30.0,
+    "pass": false
+   }
+  },
+  "golden": {
+   "detector": {
+    "pass": true,
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ]
+   },
+   "enhancer": {
+    "pass": true,
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ]
+   }
+  },
+  "gpu": true,
+  "pass": false,
+  "file": "D:\\IOTCV-wt\\iotcv\\logs\\vision-bench\\20261126-010016.json",
+  "exit": 1,
+  "verifier_onnx": "D:\\IOTCV-wt\\iotcv\\models\\vision\\verifier-v1.0.0\\verifier.onnx",
+  "_wall_s": 239.4
+ },
+ "steps": {
+  "realtime": {
+   "decode": {
+    "v1_p95": 1.69,
+    "system_p95": 0.91,
+    "v1_p50": 0.84,
+    "system_p50": 0.71
+   },
+   "detector": {
+    "v1_p95": 64.11,
+    "system_p95": 63.85,
+    "v1_p50": 56.96,
+    "system_p50": 59.6
+   },
+   "encode": {
+    "v1_p95": 1.86,
+    "system_p95": 0.83,
+    "v1_p50": 0.82,
+    "system_p50": 0.65
+   },
+   "enhancer": {
+    "v1_p95": 36.93,
+    "system_p95": 35.59,
+    "v1_p50": 32.4,
+    "system_p50": 32.91
+   },
+   "total": {
+    "v1_p95": 102.82,
+    "system_p95": 173.29,
+    "v1_p50": 91.92,
+    "system_p50": 96.13
+   },
+   "verifier": {
+    "v1_p95": null,
+    "system_p95": 76.27,
+    "v1_p50": null,
+    "system_p50": 0.03
+   }
+  },
+  "realtime_detector_only": {
+   "decode": {
+    "v1_p95": 1.53,
+    "system_p95": 0.98,
+    "v1_p50": 0.77,
+    "system_p50": 0.74
+   },
+   "detector": {
+    "v1_p95": 64.92,
+    "system_p95": 64.73,
+    "v1_p50": 60.12,
+    "system_p50": 58.56
+   },
+   "total": {
+    "v1_p95": 66.11,
+    "system_p95": 140.52,
+    "v1_p50": 61.04,
+    "system_p50": 61.84
+   },
+   "verifier": {
+    "v1_p95": null,
+    "system_p95": 77.1,
+    "v1_p50": null,
+    "system_p50": 0.04
+   }
+  },
+  "maxrate": {
+   "decode": {
+    "v1_p95": 0.74,
+    "system_p95": 1.46,
+    "v1_p50": 0.64,
+    "system_p50": 0.76
+   },
+   "detector": {
+    "v1_p95": 41.33,
+    "system_p95": 63.27,
+    "v1_p50": 29.16,
+    "system_p50": 57.57
+   },
+   "encode": {
+    "v1_p95": 0.72,
+    "system_p95": 1.54,
+    "v1_p50": 0.63,
+    "system_p50": 0.76
+   },
+   "enhancer": {
+    "v1_p95": 23.64,
+    "system_p95": 35.94,
+    "v1_p50": 15.41,
+    "system_p50": 32.44
+   },
+   "total": {
+    "v1_p95": 65.95,
+    "system_p95": 213.27,
+    "v1_p50": 45.85,
+    "system_p50": 94.63
+   },
+   "verifier": {
+    "v1_p95": null,
+    "system_p95": 115.96,
+    "v1_p50": null,
+    "system_p50": 0.05
+   }
+  }
+ },
+ "ceiling": {
+  "realtime": {
+   "v1_p95": 102.82,
+   "system_p95": 173.29,
+   "delta_ms": 70.47,
+   "max_delta_ms": 5.0,
+   "pass": false
+  },
+  "realtime_detector_only": {
+   "v1_p95": 66.11,
+   "system_p95": 140.52,
+   "delta_ms": 74.41,
+   "max_delta_ms": 5.0,
+   "pass": false
+  }
+ }
+}
