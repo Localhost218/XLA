@@ -75,9 +75,29 @@ Máy: AMD Ryzen 9 7945HX, RTX 4060 Laptop GPU, onnxruntime-gpu 1.24.4, torch 2.6
 
 | Đường chạy (bundle cuối) | p50 ms | p95 ms |
 |---|---|---|
-| ORT CUDA EP (`meta.ms_per_frame`) | 15,4 | 18,4 |
+| ORT CUDA EP, A/B sạch (`meta.ms_per_frame`, `ms_ab.json`) | 19,3 | 25,3 |
 | ORT CPU EP, 4 luồng (`meta.ms_per_frame_cpu`) | 29,3 | 30,6 |
 | numpy classic, cv2 4 luồng (tham chiếu) | 9,6 | 10,2 |
+
+**A/B sạch với NAFNet v1** (26/11, GPU rảnh, `python -m xla.enhance.export_classic ab-ms --a models/release/enhancer-v2.0.0
+--b D:\XLA\models\release\enhancer-v1.0.0`): hai session ORT CUDA trong cùng tiến trình, cùng khung dev, warm-up 30 lần
+mỗi model, rồi 10 vòng xen kẽ (vòng chẵn v2 → v1, lẻ v1 → v2), mỗi khối 5 lần làm nóng + 100 lần đo, giữ `gpu_lock` suốt
+lượt (95,5 s). Mỗi vòng ghi `gpu_state` và `% Processor Performance` lúc đầu và lúc cuối (`ms_ab.json` `rows`). GPU 66–68 °C,
+CPU 172–188 %, không hạ xung.
+
+| Bundle | p50 ms | p95 ms | n |
+|---|---|---|---|
+| enhancer-v2.0.0 (classic ONNX) | 19,27 | 25,35 | 1 000 |
+| enhancer-v1.0.0 (NAFNet fp16) | 20,61 | 27,89 | 1 000 |
+| hiệu v2 − v1 | −1,34 | −2,55 | |
+
+Thứ tự trong vòng ảnh hưởng mạnh: mỗi vòng bắt đầu sau 2 s đọc `% Processor Performance`, GPU xuống xung (SM 270–945 MHz
+lúc vào vòng, 1 140–1 665 MHz lúc ra), nên model chạy trước chịu phần tăng xung. Trung vị p50 theo vị trí: chạy trước v2
+22,2 / v1 21,9 ms (ngang nhau); chạy sau, GPU đã nóng xung, v2 16,2 / v1 19,9 ms. Xen kẽ ABAB triệt phần này trong số gộp.
+Hiệu p50 từng vòng dao động −7,8 … +3,3 ms tuỳ thứ tự. Kết luận: classic ONNX không chậm hơn NAFNet v1 (nhanh hơn
+1,3 ms p50, 2,5 ms p95), khác với số cao 26,7–30,1 ms đo lúc GPU bị các lane khác tranh. Số 15,4 / 18,4 ms của lần xuất là
+lúc GPU vừa xong job khác, đang xung cao, nên không phải số đại diện; `meta.ms_per_frame` đã thay bằng số A/B gộp ở trên
+(`ms_per_frame_source` ghi số cũ).
 
 Ba cách dựng graph đã đo trên ORT CUDA (parity như nhau, MAE ≤ 0,018):
 
@@ -85,12 +105,11 @@ Ba cách dựng graph đã đo trên ORT CUDA (parity như nhau, MAE ≤ 0,018):
 |---|---|---|---|
 | Gauss = lát dịch, đệm = lát + lật + nối | 795 | 26,9 / 27,6 | cùng lần giữ khoá với dòng dưới |
 | Gauss = `Conv` tách đúng TF32, đệm = lát + lật + nối | 627 | 30,1 / 31,7 | như trên |
-| **Gauss = lát dịch, đệm = một `Gather` mỗi trục (bundle)** | 703 | 15,4 / 18,4 | lần giữ khoá khác, GPU đang ở xung cao |
+| **Gauss = lát dịch, đệm = một `Gather` mỗi trục (bundle)** | 703 | 15,4 / 18,4 (A/B sạch: 19,3 / 25,3) | lần giữ khoá khác, GPU đang ở xung cao |
 
 Hai dòng đầu là A/B sạch. Dòng cuối không cùng lần đo với hai dòng trên: lúc đó GPU vừa chạy job khác nên đang ở SM
 2 145 MHz (hai lần trước bắt đầu ở 780 MHz), nên phần giảm từ 26,9 xuống 15,4 ms là gộp cả việc bỏ `Concat`/`Slice`
-của đệm (profile ORT: ~4,5 ms/khung) lẫn xung GPU; chưa tách được hai phần. Số chính thức của bundle là dòng cuối, kèm
-điều kiện trên. Graph bị chi phối bởi số lần gọi kernel (~700 nút nhỏ trên ảnh 480×624; profile: tổng thời gian kernel
+của đệm (profile ORT: ~4,5 ms/khung) lẫn xung GPU; chưa tách được hai phần. Số chính thức của bundle là số A/B sạch ở trên. Graph bị chi phối bởi số lần gọi kernel (~700 nút nhỏ trên ảnh 480×624; profile: tổng thời gian kernel
 14,1 ms trong 30 ms/lần ở bản `Conv`), không phải phép tính.
 
 ## 4. Nhấp nháy và chỉ số dev

@@ -762,6 +762,8 @@ def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     if argv[:1] == ["hybrid"]:
         return hybrid_main(argv[1:])
+    if argv[:1] == ["ab-ms"]:
+        return ab_ms_main(argv[1:])
     ap = argparse.ArgumentParser(prog="python -m xla.enhance.export_classic", description=__doc__.splitlines()[0])
     ap.add_argument("--params", default=str(DEFAULT_PARAMS_REL), help="config classic (mặc định configs/enhance_classic.yaml)")
     ap.add_argument("--out", required=True, help="thư mục bundle enhancer-vX.Y.Z")
@@ -961,6 +963,101 @@ def hybrid_main(argv: list[str]) -> int:
     rp.parent.mkdir(parents=True, exist_ok=True)
     rp.write_text(json.dumps(rep, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(rep, ensure_ascii=False) if args.json else json.dumps(rep, indent=2, ensure_ascii=False))
+    return 0
+
+
+# ----------------------------------------------------------------------------- A/B ms sạch (cùng tiến trình, xen kẽ)
+
+AB_REPORT_REL = Path("results/v2/classic/ms_ab.json")
+
+
+def _times(sess: Any, feed: dict[str, np.ndarray], warmup: int, iters: int) -> np.ndarray:
+    for _ in range(warmup):
+        sess.run(None, feed)
+    t = np.empty(iters)
+    for i in range(iters):
+        t0 = time.perf_counter()
+        sess.run(None, feed)
+        t[i] = (time.perf_counter() - t0) * 1000.0
+    return t
+
+
+def _pct(t: np.ndarray) -> dict[str, float]:
+    return {"p50": round(float(np.percentile(t, 50)), 3), "p95": round(float(np.percentile(t, 95)), 3),
+            "mean": round(float(t.mean()), 3), "min": round(float(t.min()), 3), "n": int(t.size)}
+
+
+def ab_ms(models: dict[str, Path], rounds: int = 10, iters: int = 100, warmup: int = 30,
+          block_warmup: int = 5) -> dict[str, Any]:
+    """ms ORT CUDA EP của nhiều ``enhancer.onnx`` trong CÙNG tiến trình, cùng khung dev, giữ ``xla.gpu_lock`` suốt lượt:
+    warm-up ``warmup`` lần mỗi model, rồi ``rounds`` vòng xen kẽ (vòng chẵn A→B, lẻ B→A để triệt thứ tự), mỗi khối
+    ``block_warmup`` + ``iters`` lần ``sess.run`` (gồm chép vào/ra); ``gpu_state`` + ``cpu_perf_check`` đầu/cuối mỗi vòng."""
+    import onnxruntime as ort
+
+    from xla.enhance.net import cpu_perf_check, gpu_state
+    from xla.gpu_lock import gpu_lock
+
+    name = pick_frames(50)["parity"][0]
+    feed = {contract.INPUT_NAME: contract.decode_frame(repo_root() / "data" / "real" / "frames" / name)}
+    keys = list(models)
+    raw: dict[str, list[np.ndarray]] = {k: [] for k in keys}
+    rows = []
+    t_wait = time.time()
+    with gpu_lock("v2 phase10 classic ab-ms", timeout_s=GPU_LOCK_TIMEOUT_S):
+        t0 = time.time()
+        sess = {k: cuda_session(p) for k, p in models.items()}
+        for k in keys:
+            _times(sess[k], feed, warmup, 0)
+        for r in range(rounds):
+            order = keys if r % 2 == 0 else keys[::-1]
+            row: dict[str, Any] = {"round": r, "order": order, "gpu_start": gpu_state(), "cpu_perf_start": cpu_perf_check(2)}
+            for k in order:
+                t = _times(sess[k], feed, block_warmup, iters)
+                raw[k].append(t)
+                row[k] = _pct(t)
+            row["gpu_end"] = gpu_state()
+            row["cpu_perf_end"] = cpu_perf_check(2)
+            rows.append(row)
+        providers = {k: s.get_providers() for k, s in sess.items()}
+        gpu_s = time.time() - t0
+    total = {k: _pct(np.concatenate(v)) for k, v in raw.items()}
+    a, b = keys[0], keys[1]
+    per_round = [rw[a]["p50"] - rw[b]["p50"] for rw in rows]
+    return {"frame": name, "models": {k: str(p) for k, p in models.items()}, "rounds": rounds, "iters": iters,
+            "warmup": warmup, "block_warmup": block_warmup, "providers": providers, "total": total,
+            "diff_ms": {f"{a}-{b}_p50": round(total[a]["p50"] - total[b]["p50"], 3),
+                        f"{a}-{b}_p95": round(total[a]["p95"] - total[b]["p95"], 3),
+                        "per_round_p50_diff_min": round(min(per_round), 3),
+                        "per_round_p50_diff_max": round(max(per_round), 3)},
+            "runtime": f"onnxruntime-gpu {ort.__version__} CUDA EP", "machine": machine(), "rows": rows,
+            "gpu_seconds": round(gpu_s, 1), "wait_lock_seconds": round(t0 - t_wait, 1)}
+
+
+def ab_ms_main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="python -m xla.enhance.export_classic ab-ms",
+                                 description="A/B ms ORT CUDA xen kẽ trong một tiến trình")
+    ap.add_argument("--a", required=True, help="thư mục bundle A")
+    ap.add_argument("--b", required=True, help="thư mục bundle B")
+    ap.add_argument("--rounds", type=int, default=10)
+    ap.add_argument("--iters", type=int, default=100)
+    ap.add_argument("--report", default=str(AB_REPORT_REL))
+    ap.add_argument("--json", action="store_true")
+    args = ap.parse_args(argv)
+    models = {}
+    for d in (args.a, args.b):
+        dp = Path(d) if Path(d).is_absolute() else repo_root() / d
+        onnx_p = dp / "enhancer.onnx"
+        if not onnx_p.is_file():
+            print(f"lỗi: không có {onnx_p}", file=sys.stderr)
+            return 2
+        models[dp.name] = onnx_p
+    if len(models) != 2 or args.rounds < 2 or args.iters < 10:
+        ap.error("cần hai bundle khác tên, --rounds ≥ 2, --iters ≥ 10")
+    rep = ab_ms(models, args.rounds, args.iters)
+    rp = repo_root() / args.report
+    rp.parent.mkdir(parents=True, exist_ok=True)
+    rp.write_text(json.dumps(rep, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(json.dumps(rep, ensure_ascii=False) if args.json else json.dumps(rep["total"], indent=2))
     return 0
 
 

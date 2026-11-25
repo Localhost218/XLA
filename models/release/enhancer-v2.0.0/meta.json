@@ -18,8 +18,8 @@
   "ms_per_frame": {
     "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
     "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
-    "p50": 15.438,
-    "p95": 18.411
+    "p50": 19.268,
+    "p95": 25.345
   },
   "created": "2026-11-25T17:27:10+00:00",
   "network": "classic",
@@ -88,5 +88,6 @@
     "000.jpg": "20261102-100941_002_00428.jpg",
     "001.jpg": "20261102-100941_004_01947.jpg",
     "002.jpg": "20261102-100941_007_00765.jpg"
-  }
+  },
+  "ms_per_frame_source": "results/v2/classic/ms_ab.json: A/B xen kẽ với enhancer-v1.0.0 trong một tiến trình, giữ gpu_lock, 10 vòng × 100 lần, gộp 1000 lần; số cũ của lần xuất (GPU đang xung cao) p50 15.438, p95 18.411"
 }
