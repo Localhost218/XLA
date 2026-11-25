@@ -1,0 +1,6 @@
+{"step": "bench", "gpu_seconds": 502.0, "at": "2026-11-25T15:04:22+00:00", "note": "realesrgan_x2plus,swinir_m_x2_real"}
+{"step": "train l1_percep", "gpu_seconds": 1463.6, "at": "2026-11-25T15:33:15+00:00", "note": "steps 2481, stop time_budget"}
+{"step": "train l1_percep_gan", "gpu_seconds": 1352.8, "at": "2026-11-25T16:26:09+00:00", "note": "steps 206, stop time_budget"}
+{"step": "select", "gpu_seconds": 406.4, "at": "2026-11-25T17:21:31+00:00", "note": "4 ứng viên"}
+{"step": "export", "gpu_seconds": 21.0, "at": "2026-11-25T17:26:59+00:00", "note": "enhancer-offline-v1.0.0"}
+{"step": "export", "gpu_seconds": 22.4, "at": "2026-11-25T17:51:00+00:00", "note": "enhancer-offline-v1.0.0"}

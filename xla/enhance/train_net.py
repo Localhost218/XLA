@@ -27,7 +27,7 @@ import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import cv2
 import numpy as np
@@ -89,9 +89,13 @@ def to_tensor_rgb(img_bgr: np.ndarray) -> torch.Tensor:
 
 
 class PairPatches(Dataset):
-    """Patch cùng cửa sổ (D2 vào, D0 đích), gốc trên lưới ``grid`` tính từ ``crop_left``, có lật ngẫu nhiên."""
+    """Patch cùng cửa sổ (D2 vào, D0 đích), gốc trên lưới ``grid`` tính từ ``crop_left``, có lật ngẫu nhiên.
 
-    def __init__(self, names: list[str], cfg: dict[str, Any], crop_left: int, length: int) -> None:
+    ``scale`` > 1 (phase 11 AI v2, SR): đích là ảnh HR không có dải mép, cột ``x`` (≥ ``crop_left``) của ảnh vào ứng với
+    cột ``(x − crop_left)·scale`` của đích; patch đích cạnh ``patch·scale``. ``scale`` 1 giữ nguyên hành vi phase 13.
+    """
+
+    def __init__(self, names: list[str], cfg: dict[str, Any], crop_left: int, length: int, scale: int = 1) -> None:
         root = data_root()
         self.src = root / cfg["data"]["input_set"] / "train" / "images"
         self.dst = root / cfg["data"]["target_set"] / "train" / "images"
@@ -101,6 +105,7 @@ class PairPatches(Dataset):
         self.grid = int(cfg["data"]["grid"])
         self.flip = bool(cfg["data"]["flip"])
         self.length = length
+        self.scale = int(scale)
 
     def __len__(self) -> int:
         return self.length
@@ -109,13 +114,15 @@ class PairPatches(Dataset):
         rng = random.Random((torch.initial_seed() + i * 7919) % (2**32))
         n = self.names[rng.randrange(len(self.names))]
         a, b = _read(self.src / n), _read(self.dst / n)
-        if a.shape != b.shape:
-            raise ValueError(f"cặp lệch cỡ {n}: {a.shape} / {b.shape}")
         h, w = a.shape[:2]
-        p, g, cl = self.patch, self.grid, self.crop_left
+        p, g, cl, sc = self.patch, self.grid, self.crop_left, self.scale
+        want = a.shape if sc == 1 else (h * sc, (w - cl) * sc, a.shape[2])
+        if b.shape != want:
+            raise ValueError(f"cặp lệch cỡ {n}: {a.shape} / {b.shape} (scale {sc}, cần đích {want})")
         x0 = cl + g * rng.randrange((w - cl - p) // g + 1)
         y0 = g * rng.randrange((h - p) // g + 1)
-        a, b = a[y0 : y0 + p, x0 : x0 + p], b[y0 : y0 + p, x0 : x0 + p]
+        bx = x0 if sc == 1 else (x0 - cl) * sc
+        a, b = a[y0 : y0 + p, x0 : x0 + p], b[y0 * sc : (y0 + p) * sc, bx : bx + p * sc]
         if self.flip and rng.random() < 0.5:
             a, b = a[:, ::-1], b[:, ::-1]
         if self.flip and rng.random() < 0.5:
@@ -141,6 +148,47 @@ def ssim(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     sxy = F.conv2d(x * y, k, groups=3) - mx * my
     s = ((2 * mx * my + c1) * (2 * sxy + c2)) / ((mx**2 + my**2 + c1) * (sxx + syy + c2))
     return s.mean()
+
+
+class PerceptualLoss(torch.nn.Module):
+    """Loss cảm nhận kiểu Real-ESRGAN (phase 11 AI v2): L1 giữa đặc trưng VGG19 TRƯỚC ReLU, ảnh vào RGB 0–1.
+
+    Tầng mặc định conv1_2, conv2_2, conv3_4, conv4_4, conv5_4 trọng số 0,1 / 0,1 / 1 / 1 / 1 (``layer_weights`` theo
+    chỉ số trong ``torchvision.models.vgg19().features``), chuẩn hoá ImageNet, VGG đóng băng. Trọng số ImageNet của
+    torchvision lấy từ ``TORCH_HOME`` (không có → torchvision tải, lỗi mạng thì ném lỗi, không im lặng).
+    """
+
+    DEFAULT_LAYERS: ClassVar[dict[int, float]] = {2: 0.1, 7: 0.1, 16: 1.0, 25: 1.0, 34: 1.0}
+
+    def __init__(self, layer_weights: dict[int, float] | None = None) -> None:
+        super().__init__()
+        from torchvision.models import VGG19_Weights, vgg19
+
+        self.layer_weights = {int(k): float(v) for k, v in (layer_weights or self.DEFAULT_LAYERS).items()}
+        feats = vgg19(weights=VGG19_Weights.IMAGENET1K_V1).features[: max(self.layer_weights) + 1]
+        self.features = feats.eval().requires_grad_(False)
+        self.register_buffer("mean", torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1), persistent=False)
+        self.register_buffer("std", torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1), persistent=False)
+
+    def train(self, mode: bool = True) -> PerceptualLoss:  # VGG luôn eval
+        super().train(mode)
+        self.features.eval()
+        return self
+
+    def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+        x, y = (x - self.mean) / self.std, (y - self.mean) / self.std
+        loss = x.new_zeros(())
+        for i, layer in enumerate(self.features):
+            x, y = layer(x), layer(y.detach())
+            if i in self.layer_weights:
+                loss = loss + self.layer_weights[i] * F.l1_loss(x.float(), y.float())
+        return loss
+
+
+def gan_loss(pred: torch.Tensor, target_real: bool) -> torch.Tensor:
+    """Loss GAN "vanilla" (BCE trên logit, như Real-ESRGAN ``gan_type: vanilla``)."""
+    tgt = torch.ones_like(pred) if target_real else torch.zeros_like(pred)
+    return F.binary_cross_entropy_with_logits(pred.float(), tgt.float())
 
 
 def psnr(x: torch.Tensor, y: torch.Tensor) -> float:

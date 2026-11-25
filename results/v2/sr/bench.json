@@ -1,0 +1,143 @@
+{
+ "created": "2026-11-25T15:04:22+00:00",
+ "n_frames": 20,
+ "frame_size": [
+  640,
+  480
+ ],
+ "output_size": [
+  1280,
+  960
+ ],
+ "precision": "fp16",
+ "recording_fps": {
+  "recording": "20261102-100941",
+  "frames": 11908,
+  "segments": 8,
+  "seconds_in_segments": 2117.1,
+  "fps": 5.624784192236525,
+  "fps_wall_span": 5.576919384051743
+ },
+ "flight_minutes": 20,
+ "max_s_per_frame": 0.5,
+ "candidates": [
+  {
+   "candidate": "realesrgan_x2plus",
+   "arch": "rrdbnet",
+   "params": 16703171,
+   "weights": "RealESRGAN_x2plus.pth",
+   "sha256_ok": true,
+   "license": "BSD-3-Clause (Real-ESRGAN); kiến trúc RRDBNet Apache-2.0 (BasicSR)",
+   "torch_fp16": {
+    "mean": 0.3301790950003124,
+    "p50": 0.2989499000013893,
+    "p95": 0.44533629000052316,
+    "n": 20,
+    "peak_vram_mb": 665.4
+   },
+   "out_shape": [
+    960,
+    1280,
+    3
+   ],
+   "export_s": 5.7,
+   "ort_cuda_fp16": {
+    "mean": 0.4057845549998092,
+    "p50": 0.38530994999928225,
+    "p95": 0.5365297299975282,
+    "n": 20,
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ],
+    "peak_vram_mb": 2064.0
+   },
+   "hours_per_flight": 0.761,
+   "pass_speed": true
+  },
+  {
+   "candidate": "swinir_m_x2_real",
+   "arch": "swinir",
+   "params": 11678631,
+   "weights": "003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x2_GAN.pth",
+   "sha256_ok": true,
+   "license": "Apache-2.0 (SwinIR)",
+   "torch_fp16": {
+    "mean": 2.6994782749996373,
+    "p50": 2.8459315999989485,
+    "p95": 2.8526433300015923,
+    "n": 20,
+    "peak_vram_mb": 2160.8
+   },
+   "out_shape": [
+    960,
+    1280,
+    3
+   ],
+   "export_s": 18.3,
+   "ort_cuda_fp16": {
+    "mean": 17.39854528499982,
+    "p50": 17.216333500000474,
+    "p95": 17.90762917499851,
+    "n": 20,
+    "providers": [
+     "CUDAExecutionProvider",
+     "CPUExecutionProvider"
+    ],
+    "peak_vram_mb": 7052.0
+   },
+   "hours_per_flight": 32.621,
+   "pass_speed": false
+  }
+ ],
+ "any_pass_speed": true,
+ "note": "s/khung = mean của session.run gồm chép host↔GPU; VRAM ORT = đỉnh cudaMemGetInfo trừ nền; VRAM PyTorch = max_memory_allocated",
+ "machine": {
+  "before": {
+   "time": "2026-11-25T14:56:01+00:00",
+   "host": "Nghaiz-PC",
+   "os": "Windows-11-10.0.26300-SP0",
+   "cpu_count": 32,
+   "gpu": {
+    "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "driver_version": "610.88",
+    "temperature.gpu": "66",
+    "clocks.sm": "210 MHz",
+    "clocks.max.sm": "3105 MHz",
+    "power.draw": "9.77 W",
+    "pstate": "P4",
+    "memory.used": "1636 MiB",
+    "memory.total": "8188 MiB"
+   },
+   "cpu": {
+    "percent": 0.4,
+    "freq_mhz": 2501.0,
+    "ram_avail_gb": 23.0
+   }
+  },
+  "after": {
+   "time": "2026-11-25T15:04:22+00:00",
+   "host": "Nghaiz-PC",
+   "os": "Windows-11-10.0.26300-SP0",
+   "cpu_count": 32,
+   "gpu": {
+    "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "driver_version": "610.88",
+    "temperature.gpu": "81",
+    "clocks.sm": "780 MHz",
+    "clocks.max.sm": "3105 MHz",
+    "power.draw": "36.38 W",
+    "pstate": "P0",
+    "memory.used": "1480 MiB",
+    "memory.total": "8188 MiB"
+   },
+   "cpu": {
+    "percent": 3.0,
+    "freq_mhz": 2501.0,
+    "ram_avail_gb": 20.9
+   }
+  }
+ },
+ "gpu_seconds": 502.0,
+ "wait_lock_seconds": 0.0
+}

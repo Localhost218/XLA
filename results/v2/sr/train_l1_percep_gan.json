@@ -1,0 +1,29 @@
+{
+ "variant": "l1_percep_gan",
+ "base": "realesrgan_x2plus",
+ "gan_weight": 0.1,
+ "steps": 206,
+ "steps_this_run": 206,
+ "stop": "time_budget",
+ "time_budget_s": 1320.0,
+ "batch": 8,
+ "patch_lr": 128,
+ "s_per_step": 6.440582203633577,
+ "vram_peak_gb": 5.84,
+ "val_synthetic_start": {
+  "kind": "số tổng hợp (cặp sr_pairs val, ảnh tự sinh)",
+  "n": 19,
+  "psnr": 13.900325657536214,
+  "psnr_bicubic": 14.032358652560887
+ },
+ "val_synthetic_end": {
+  "kind": "số tổng hợp (cặp sr_pairs val, ảnh tự sinh)",
+  "n": 19,
+  "psnr": 15.97700253483233,
+  "psnr_bicubic": 14.032358652560887
+ },
+ "final": "D:\\DevCache\\runs\\xla\\v2\\sr\\l1_percep_gan\\final.pt",
+ "gpu_seconds": 1352.8,
+ "wait_lock_seconds": 1802.3,
+ "finished": "2026-11-25T16:26:09+00:00"
+}
