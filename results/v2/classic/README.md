@@ -125,7 +125,27 @@ ONNX nhấp nháy đúng như numpy (lệch 0,00005). Classic tự nó tăng nh�
 khung tăng theo), như mọi checkpoint NAFNet v1 (1,65–2,0).
 
 Trên 50 khung dev parity (ONNX = numpy tới 4 chữ số): dark channel trung vị 141,5 → 56,0 (giảm 60,4 %), % điểm hồng
-0,70 % → 0,060 % (giảm 91,4 %). `meta.metrics` (tập test thật) để `null`: lane không đụng khung test, phase 14 đo.
+0,70 % → 0,060 % (giảm 91,4 %). `meta.metrics` (tập test thật) lúc xuất để `null` vì lane không đụng khung test; đã đo
+26/11/2026 ở §4.1.
+
+### 4.1 Chỉ số trên tập test thật (`meta.metrics`, 26/11/2026)
+
+`python -m xla.enhance.split_metrics --bundle models/release/enhancer-v2.0.0 --write-meta --json` (ORT CPU 1.24.4, 4 luồng,
+75 s; chi tiết ở khoá `metrics_test` của `meta.json`). Cùng định nghĩa với `metrics_dev` của `enhancer-v1.0.0` và
+`enhancer-offline-v1.0.0` (`train_net.score_of` trên trung bình `measure_image`; `temporal.flicker_ratio`):
+
+| Chỉ số | Gốc | classic ONNX | `meta.metrics` |
+|---|---|---|---|
+| % điểm hồng (198 khung test) | 0,943 % | 0,102 % | `pink_frac_drop` 0,892 |
+| dark channel 15 px, trung bình (198 khung test) | 140,2 | 69,8 | `dark_channel_drop` 0,502 |
+| nhấp nháy (95 chuỗi liền kề, 1 346 khung) | | | `flicker_ratio` 2,179 |
+
+- Khung `test` cách nhau ≥ 1 s nên không có chuỗi < 250 ms; `flicker_ratio` đo trên mọi khung bay của 13 khối 30 s test
+  (1 434 khung = 198 test + 1 236 khung khối test không được chọn, khớp `data/real/README.md`), khối dựng lại đúng như
+  `xla.camera.split`. Các khung này không thuộc dev; classic không huấn luyện.
+- Theo định nghĩa của §4 (`dev_quality`: trung vị dark channel) trên cùng 198 khung: 139,0 → 56,5, giảm 59,4 % (dev 60,4 %);
+  % hồng giảm 89,2 % (dev 91,4 %). Nhấp nháy test 2,18 ≈ dev 2,19: không lệch dev ↔ test.
+- `onnx_sha256` không đổi; `python -m xla.contract validate models/release/enhancer-v2.0.0` → `[]`.
 
 ## 5. Bước 4 — lai classic → NAFNet-w16 (trần 30 phút GPU)
 
