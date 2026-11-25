@@ -85,5 +85,23 @@
   "000.jpg": "20261102-100941_002_00400.jpg",
   "001.jpg": "20261102-100941_004_01926.jpg",
   "002.jpg": "20261102-100941_007_00744.jpg"
+ },
+ "metrics": {
+  "fp_cal_raw": 0.1,
+  "fp_cal_offline": 0.06666666666666667,
+  "fp_holdout_raw": null,
+  "fp_holdout_offline": null,
+  "fp_cal_diff": -0.03333333333333334,
+  "fp_cal_diff_ci95": [
+   -0.12330766923307666,
+   0.039215686274509796
+  ],
+  "fp_cal_n_frames": 150,
+  "fp_holdout_n_frames": 0,
+  "fp_holdout_status": "0 khung / không đủ chứng minh",
+  "guard_decision": "pass",
+  "guard_detector": "1.0.1",
+  "guard_conf_threshold": 0.07669,
+  "guard_measured": "2026-11-25T18:36:39+00:00"
  }
 }

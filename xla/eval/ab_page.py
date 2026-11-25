@@ -3,6 +3,8 @@
 AX::
 
     python -m xla.eval.ab_page build --pairs 55 --seed 20261118 --json
+    # v2 (AI v2 phase 14, D13): khung dev, 25 cặp mỗi so sánh + 5 lặp, ảnh ở độ phân giải gốc, trình duyệt phóng
+    python -m xla.eval.ab_page build --comparisons offline_vs_raw,offline_vs_classic,classic_vs_raw         --per-comparison 25 --repeats 5 --seed 20261125 [--zoom 2 --out-dir results/ab-v2-zoom] --json
     # exit 0 dựng xong; 1 dữ liệu sai / bundle sai / đã có trang (thêm --force); 2 sai cách gọi
 
 Cấu trúc ``--pairs N`` = ``(N − repeats)/2`` cặp mạng-vs-gốc + cùng số cặp mạng-vs-cổ-điển + ``--repeats`` (mặc định 5)
@@ -46,6 +48,7 @@ from xla.eval.enhance_eval import (
     limit_cpu_threads,
     maybe_gpu,
 )
+from xla.eval.guard_fp import GuardError
 from xla.paths import repo_root
 
 COMPARISONS = {"net_vs_raw": ("net", "raw"), "net_vs_classic": ("net", "classic")}
@@ -67,9 +70,9 @@ def select_frames(cands: list[dict[str, Any]], n: int, rng: np.random.Generator)
     """``n`` khung khác nhau, lần lượt từng tầng (bin độ cao, có người) theo thứ tự ngẫu nhiên — rải đều các tầng."""
     if len(cands) < n:
         raise AbPageError(f"cần {n} khung test khác nhau, chỉ có {len(cands)}")
-    strata: dict[tuple[str, bool], list[dict[str, Any]]] = {}
-    for c in cands:
-        strata.setdefault((c["alt_bin"], c["has_person"]), []).append(c)
+    strata: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
+    for c in cands:  # v2 truyền "stratum" (phiên, bin độ cao, có người); v1 mặc định (bin độ cao, có người)
+        strata.setdefault(tuple(c.get("stratum") or (c["alt_bin"], c["has_person"])), []).append(c)
     keys = sorted(strata)
     keys = [keys[i] for i in rng.permutation(len(keys))]
     pools = {k: [strata[k][i] for i in rng.permutation(len(strata[k]))] for k in keys}
@@ -329,9 +332,9 @@ let shownAt = performance.now();
 function warn(msg) { const w = $("warn"); w.textContent = msg; w.style.display = "block"; }
 function load() {
   try {
-    const raw = localStorage.getItem(STORE);
-    if (!raw) return;
-    const s = JSON.parse(raw);
+    const saved = localStorage.getItem(STORE);
+    if (!saved) return;
+    const s = JSON.parse(saved);
     if (s && s.key_id === KEY_ID && s.choices && typeof s.idx === "number") state = s;
   } catch (e) {
     warn("Trình duyệt không đọc được tiến độ đã lưu (" + e + "). Đừng đóng tab trước khi bấm Xuất kết quả.");
@@ -435,6 +438,291 @@ def render_html(public_pairs: list[dict[str, str]], key_id: str) -> str:
     return _HTML.replace("__PAIRS__", data).replace("__KEY_ID__", key_id).replace("__FORMAT__", EXPORT_FORMAT)
 
 
+# ---------------------------------------------------------------- v2 (AI v2 phase 14, D13)
+
+COMPARISONS_V2 = {"offline_vs_raw": ("offline", "raw"), "offline_vs_classic": ("offline", "classic"),
+                  "classic_vs_raw": ("classic", "raw")}
+"""D13: (biến thể đang chấm, đối chứng). Lai vs classic không có: lai không qua lọc phase 10."""
+OUT_V2_REL = Path("results/ab-v2")
+CLASSIC_V2_REL = Path("models/release/enhancer-v2.0.0")
+OFFLINE_REL = Path("models/release/enhancer-offline-v1.0.0")
+GUARD_REL = Path("results/ab-v2/guard_fp.json")
+DEV_LABEL_DIRS = ("devpool", "devval")
+VARIANT_WORDS = ("raw", "classic", "offline", "enhancer", "original", "goc", "net", "hybrid", "detector")
+"""Tên biến thể / bundle không được xuất hiện trong HTML hay tên ảnh (kiểm ở test + ``check_page``)."""
+
+
+def plan_pairs_v2(frames: list[dict[str, Any]], comparisons: dict[str, tuple[str, str]], n_repeats: int,
+                  rng: np.random.Generator) -> list[dict[str, Any]]:
+    """Cặp v2: khung xếp theo tầng rồi chia so sánh xoay vòng (mỗi so sánh đúng ``len/k`` cặp, mỗi tầng lệch ≤ 1),
+    trái/phải ngẫu nhiên, xáo thứ tự, chèn ``n_repeats`` cặp lặp đổi bên (cách ≥ ``MIN_REPEAT_GAP``; có ≥ k cặp lặp
+    thì mọi so sánh đều có ít nhất một cặp lặp)."""
+    names = list(comparisons)
+    if len(frames) % len(names):
+        raise AbPageError(f"số khung gốc {len(frames)} phải chia hết cho {len(names)}")
+    by_stratum = sorted(frames, key=lambda f: (tuple(str(x) for x in f["stratum"]), f["frame"]))
+    offset = int(rng.integers(len(names)))
+    orig = []
+    for i, f in enumerate(by_stratum):
+        comp = names[(i + offset) % len(names)]
+        a, b = comparisons[comp]
+        left, right = (a, b) if rng.random() < 0.5 else (b, a)
+        orig.append({"comparison": comp, "frame": f["frame"], "session": f["session"], "alt_m": f["alt_m"],
+                     "alt_bin": f["alt_bin"], "has_person": f["has_person"], "block": f["block"], "left": left,
+                     "right": right, "repeat_of": None})
+    order = [orig[i] for i in rng.permutation(len(orig))]
+    eligible = list(range(max(0, len(order) - MIN_REPEAT_GAP)))
+    if n_repeats > len(eligible):
+        raise AbPageError(f"{n_repeats} cặp lặp cần ≥ {n_repeats + MIN_REPEAT_GAP} cặp gốc")
+    need = min(n_repeats, len(names))
+    chosen: list[int] = []
+    for _ in range(500):  # tất định theo rng
+        chosen = sorted(int(i) for i in rng.choice(eligible, n_repeats, replace=False)) if n_repeats else []
+        if len({order[i]["comparison"] for i in chosen}) >= need:
+            break
+    else:
+        raise AbPageError("không xếp được cặp lặp phủ mọi so sánh")
+    seq = list(order)
+    for pos in chosen:
+        src = order[pos]
+        cur = next(i for i, p in enumerate(seq) if p is src)
+        at = int(rng.integers(cur + MIN_REPEAT_GAP + 1, len(seq) + 1))
+        seq.insert(at, src | {"left": src["right"], "right": src["left"], "repeat_of": src})
+    for i, p in enumerate(seq):
+        p["id"] = f"{i + 1:02d}"
+    for p in seq:
+        if p["repeat_of"] is not None:
+            p["repeat_of"] = p["repeat_of"]["id"]
+    return seq
+
+
+def display_v2(img: np.ndarray, crop_left: int, region: tuple[int, int, int, int] | None = None) -> bytes:
+    """Ảnh hiển thị v2 ở **độ phân giải gốc của biến thể** (640×480 hoặc 1280×960): cắt dải mép ``[0, s·crop_left)``,
+    (tuỳ chọn) cắt ``region`` (toạ độ thang 640×480 sau cắt mép, nhân ``s``), JPEG q95 4:4:4, không đổi cỡ. Trang
+    phóng mọi ảnh về cùng một cỡ hiển thị bằng trình duyệt, như trang Lịch sử bay (gốc/classic phóng, offline gốc)."""
+    import cv2
+
+    s = img.shape[1] // 640
+    if img.shape[:2] != (480 * s, 640 * s) or s not in (1, 2):
+        raise AbPageError(f"ảnh biến thể shape {img.shape}, cần 480×640 hoặc 960×1280")
+    view = img[:, crop_left * s:]
+    if region is not None:
+        x0, y0, w, h = (v * s for v in region)
+        view = view[y0:y0 + h, x0:x0 + w]
+    ok, buf = cv2.imencode(".jpg", np.ascontiguousarray(view),
+                           [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY,
+                            cv2.IMWRITE_JPEG_SAMPLING_FACTOR, cv2.IMWRITE_JPEG_SAMPLING_FACTOR_444])
+    if not ok:
+        raise AbPageError("không mã hoá được JPEG")
+    return buf.tobytes()
+
+
+def build_v2(cands: list[dict[str, Any]], load: Callable[[str], np.ndarray], fns: dict[str, Fn], out_dir: Path, *,
+             comparisons: dict[str, tuple[str, str]], per_comparison: int, n_repeats: int, seed: int, crop_left: int,
+             variants_info: dict[str, Any], force: bool = False, zoom: int = 1) -> dict[str, Any]:
+    """Trang v2 vào ``out_dir``. ``cands``: ``{"frame","session","alt_m","alt_bin","has_person","block","boxes",
+    "stratum"}`` — chỉ khung dev. ``fns[variant](khung 640×480) → ảnh 640×480 hoặc 1280×960``."""
+    if per_comparison <= 0 or n_repeats < 0 or zoom < 1:
+        raise UsageError("--per-comparison > 0, --repeats ≥ 0, --zoom ≥ 1")
+    missing = {v for ab in comparisons.values() for v in ab} - set(fns)
+    if missing:
+        raise UsageError(f"thiếu hàm biến thể {sorted(missing)}")
+    img_dir = out_dir / "img"
+    html_p, key_p = out_dir / "ab-test.html", out_dir / "ab_key.json"
+    old_imgs = sorted(img_dir.glob("*.jpg")) if img_dir.is_dir() else []
+    if (html_p.exists() or key_p.exists() or old_imgs) and not force:
+        raise AbPageError(f"đã có trang thử ở {out_dir}; thêm --force để dựng lại (kết quả chấm cũ sẽ lệch khoá mới)")
+    rng = np.random.default_rng(seed)
+    pairs = plan_pairs_v2(select_frames(cands, per_comparison * len(comparisons), rng), comparisons, n_repeats, rng)
+    codes: set[str] = set()
+
+    def new_code() -> str:
+        while True:
+            c = rng.bytes(CODE_BYTES).hex()
+            if c not in codes:
+                codes.add(c)
+                return c
+
+    images: dict[str, bytes] = {}
+    boxes_of = {c["frame"]: c.get("boxes") for c in cands}
+    by_id = {p["id"]: p for p in pairs}
+    for p in pairs:
+        if p["repeat_of"] is not None:
+            continue
+        img = load(p["frame"])
+        region = None
+        if zoom > 1:
+            boxes = boxes_of.get(p["frame"])
+            boxes = np.zeros((0, 4)) if boxes is None else np.asarray(boxes, dtype=float).reshape(-1, 4)
+            region = pick_region(img.shape[1] - crop_left, img.shape[0], zoom, boxes, crop_left, rng)
+            p["region"] = list(region)
+        for side in ("left", "right"):
+            name = f"img/{new_code()}.jpg"
+            images[name] = display_v2(fns[p[side]](img), crop_left, region)
+            p[f"{side}_img"] = name
+    for p in pairs:
+        if p["repeat_of"] is not None:
+            src = by_id[p["repeat_of"]]
+            p["left_img"], p["right_img"] = src["right_img"], src["left_img"]
+            if "region" in src:
+                p["region"] = src["region"]
+    for f in old_imgs:
+        f.unlink()
+    img_dir.mkdir(parents=True, exist_ok=True)
+    for name, data in images.items():
+        (out_dir / name).write_bytes(data)
+    kid = key_id_of(pairs)
+    strata: dict[str, int] = {}
+    for p in pairs:
+        if p["repeat_of"] is None:
+            k = f"{p['comparison']}|{p['session']}|{p['alt_bin']}|{'nguoi' if p['has_person'] else 'khong_nguoi'}"
+            strata[k] = strata.get(k, 0) + 1
+    region_txt = (f"; vùng 1/{zoom} (pairs[].region, thang 640×480 sau khi cắt cột [0, {crop_left})), tâm = người lớn "
+                  "nhất theo nhãn dev hoặc ngẫu nhiên khi không có người" if zoom > 1 else "")
+    key = {"format": KEY_FORMAT, "version": 2, "key_id": kid, "seed": seed,
+           "created": datetime.now(UTC).isoformat(timespec="seconds"), "crop_left": crop_left, "zoom": zoom,
+           "frames_split": "dev", "comparisons": {c: list(ab) for c, ab in comparisons.items()},
+           "per_comparison": per_comparison,
+           "display": (f"mỗi biến thể ở độ phân giải gốc (gốc/classic 640×480, offline 1280×960), cắt dải mép "
+                       f"[0, s·{crop_left}){region_txt}; JPEG q{JPEG_QUALITY} 4:4:4; trình duyệt phóng mọi ảnh về "
+                       "cùng cỡ hiển thị (CSS width 100 %, nội suy của trình duyệt như trang Lịch sử bay)"),
+           "min_repeat_gap": MIN_REPEAT_GAP, "variants": variants_info, "n_pairs": len(pairs), "strata": strata,
+           "images_sha256": {n: hashlib.sha256(d).hexdigest() for n, d in sorted(images.items())}, "pairs": pairs}
+    key_p.write_text(json.dumps(key, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
+    public = [{"id": p["id"], "l": p["left_img"], "r": p["right_img"]} for p in pairs]
+    html_p.write_text(render_html(public, kid), encoding="utf-8", newline="\n")
+    return {"out_dir": str(out_dir), "html": str(html_p), "key": str(key_p), "key_id": kid, "n_pairs": len(pairs),
+            "by_comparison": {c: sum(p["comparison"] == c and p["repeat_of"] is None for p in pairs)
+                              for c in comparisons},
+            "repeats_by_comparison": {c: sum(p["comparison"] == c and p["repeat_of"] is not None for p in pairs)
+                                      for c in comparisons},
+            "n_repeats": n_repeats, "n_images": len(images), "zoom": zoom, "strata": strata}
+
+
+def check_page(out_dir: Path) -> dict[str, Any]:
+    """Kiểm tĩnh một trang đã dựng: mọi ảnh có, không lộ tên biến thể trong HTML/tên ảnh, cặp lặp đổi bên."""
+    import re
+
+    html = (out_dir / "ab-test.html").read_text(encoding="utf-8")
+    key = json.loads((out_dir / "ab_key.json").read_text(encoding="utf-8"))
+    m = re.search(r"const PAIRS = (\[.*?\]);", html)
+    if not m:
+        raise AbPageError("HTML không có PAIRS")
+    public = json.loads(m.group(1))
+    low = html.lower()
+    leaks = sorted({w for w in VARIANT_WORDS if re.search(rf"\b{w}\b", low)})
+    leaks += sorted({str(p[s]) for p in public for s in ("l", "r") if not re.fullmatch(r"img/[0-9a-f]{12}\.jpg", p[s])})
+    missing = sorted({p[s] for p in public for s in ("l", "r") if not (out_dir / p[s]).is_file()})
+    pairs = {p["id"]: p for p in key["pairs"]}
+    bad_rep = [p["id"] for p in pairs.values() if p.get("repeat_of") and not (
+        p["left"] == pairs[p["repeat_of"]]["right"] and p["right"] == pairs[p["repeat_of"]]["left"]
+        and p["left_img"] == pairs[p["repeat_of"]]["right_img"])]
+    return {"n_pairs_html": len(public), "n_pairs_key": len(pairs), "leaks": leaks, "missing_images": missing,
+            "bad_repeats": bad_rep,
+            "ok": not leaks and not missing and not bad_rep and len(public) == len(pairs)}
+
+
+def dev_candidates(root: Path, split_json: Path, labels_dir: Path) -> list[dict[str, Any]]:
+    """Khung **dev** có nhãn người (``devpool`` ưu tiên, rồi ``devval``) và có độ cao; không bao giờ khung test."""
+    from xla.detect.selftrain import frame_sessions
+    from xla.eval.detection import read_yolo_label
+
+    rows = json.loads(split_json.read_text(encoding="utf-8"))["frames"]
+    sessions = frame_sessions(root)
+    labs: dict[str, Path] = {}
+    for d in DEV_LABEL_DIRS:
+        for p in sorted((labels_dir / d).glob("*.txt")):
+            labs.setdefault(p.stem, p)
+    out = []
+    for r in rows:
+        stem = Path(r["frame"]).stem
+        if r["split"] != "dev" or r.get("alt_m") is None or stem not in labs:
+            continue
+        sess = sessions.get(r["frame"]) or f"block{r['block']}"
+        boxes = read_yolo_label(labs[stem])
+        ab = alt_bin(float(r["alt_m"]))
+        out.append({"frame": r["frame"], "session": sess, "alt_m": float(r["alt_m"]), "alt_bin": ab,
+                    "has_person": len(boxes) > 0, "block": int(r["block"]), "boxes": boxes,
+                    "stratum": [sess, ab, len(boxes) > 0]})
+    if any(r["split"] == "test" and Path(r["frame"]).stem in {Path(c["frame"]).stem for c in out} for r in rows):
+        raise AbPageError("khung ứng viên rơi vào tập test")
+    return out
+
+
+def guard_ok(root: Path, offline_sha: str) -> dict[str, Any]:
+    """Offline chỉ vào A/B khi ``guard_fp`` trên cal đã ``pass`` cho đúng file ONNX này (Kill (d))."""
+    p = root / GUARD_REL
+    if not p.is_file():
+        raise AbPageError(f"chưa có {GUARD_REL}: chạy python -m xla.eval.guard_fp trước")
+    g = json.loads(p.read_text(encoding="utf-8"))
+    if g["bundle"]["onnx_sha256"] != offline_sha:
+        raise AbPageError(f"{GUARD_REL} đo bundle khác (sha256 khác enhancer-offline đang dùng)")
+    if g["decision"] != "pass":
+        raise AbPageError(f"guard_fp đã loại offline ({g['decision']}): bỏ các so sánh offline_*")
+    return {"decision": g["decision"], "diff": g["diff"]["diff"], "ci95": g["diff"]["ci95"]}
+
+
+def v2_variants(root: Path, a: argparse.Namespace, names: set[str]) -> tuple[dict[str, Fn], dict[str, Any], int]:
+    """Hàm biến thể v2 qua ORT (CUDA, đọc provider sau lần chạy đầu) + thông tin bundle cho khoá."""
+    from xla.eval.guard_fp import add_nvidia_path, open_bundle, ort_cuda, require_cuda
+
+    add_nvidia_path()
+    fns: dict[str, Fn] = {"raw": lambda f: f}
+    info: dict[str, Any] = {"raw": {"what": "khung gốc camera"}}
+    crop = 16
+    specs = {"classic": (a.classic_bundle or root / CLASSIC_V2_REL, "enhancer"),
+             "offline": (a.offline_bundle or root / OFFLINE_REL, "enhancer-offline")}
+    for v in sorted(names - {"raw"}):
+        path, kind = specs[v]
+        meta, onnx_p = open_bundle(path, kind)
+        if v == "offline":
+            info["guard_fp"] = guard_ok(root, meta["onnx_sha256"])
+        sess = ort_cuda(onnx_p)
+        crop = int(meta["crop_left"])
+        state = {"checked": False}
+
+        def run(f: np.ndarray, sess: Any = sess, v: str = v, state: dict[str, bool] = state) -> np.ndarray:
+            out = sess.run(["frame_out"], {"frame": f})[0]
+            if not state["checked"]:
+                info[v]["providers"] = require_cuda(sess, v)
+                state["checked"] = True
+            return out
+
+        fns[v] = run
+        info[v] = {"bundle": path.relative_to(root).as_posix() if path.is_relative_to(root) else str(path),
+                   "version": meta["version"], "onnx_sha256": meta["onnx_sha256"]}
+    return fns, info, crop
+
+
+def cmd_build_v2(a: argparse.Namespace) -> dict[str, Any]:
+    limit_cpu_threads()
+    root = repo_root()
+    names = [c.strip() for c in a.comparisons.split(",") if c.strip()]
+    bad = [c for c in names if c not in COMPARISONS_V2]
+    if not names or bad:
+        raise UsageError(f"--comparisons chỉ nhận {sorted(COMPARISONS_V2)}, gặp {bad or a.comparisons!r}")
+    comps = {c: COMPARISONS_V2[c] for c in names}
+    split_json = a.split_json or root / SPLIT_REL
+    cands = dev_candidates(root, split_json, a.labels_dir or root / LABELS_REL)
+    frames_dir = a.frames_dir or root / FRAMES_REL
+
+    def load(frame: str) -> np.ndarray:
+        from xla.contract import decode_frame
+
+        p = frames_dir / frame
+        if not p.is_file():
+            raise AbPageError(f"thiếu khung {p}")
+        return decode_frame(p)
+
+    used = {v for ab in comps.values() for v in ab}
+    with maybe_gpu(bool(used - {"raw"}), "ab_page v2", a.lock_timeout) as lock:
+        fns, info, crop = v2_variants(root, a, used)
+        res = build_v2(cands, load, fns, a.out_dir or root / OUT_V2_REL, comparisons=comps,
+                       per_comparison=a.per_comparison, n_repeats=a.repeats, seed=a.seed, crop_left=crop,
+                       variants_info=info, force=a.force, zoom=a.zoom)
+    return res | {"gpu": lock, "check": check_page(Path(res["out_dir"])), "variants": info}
+
+
 # ---------------------------------------------------------------- CLI
 
 
@@ -484,7 +772,12 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m xla.eval.ab_page", description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     b = sub.add_parser("build", help="dựng ab-test.html + img/ + ab_key.json")
-    b.add_argument("--pairs", type=int, required=True, help="tổng số lượt, vd. 55 = 25 + 25 + 5 lặp")
+    b.add_argument("--pairs", type=int, default=None, help="v1: tổng số lượt, vd. 55 = 25 + 25 + 5 lặp")
+    b.add_argument("--comparisons", default=None,
+                   help=f"v2 (D13, khung dev): danh sách cách nhau dấu phẩy trong {sorted(COMPARISONS_V2)}")
+    b.add_argument("--per-comparison", type=int, default=25, help="v2: số cặp không lặp mỗi so sánh")
+    b.add_argument("--classic-bundle", type=Path, default=None, help=f"v2: mặc định {CLASSIC_V2_REL}")
+    b.add_argument("--offline-bundle", type=Path, default=None, help=f"v2: mặc định {OFFLINE_REL}")
     b.add_argument("--repeats", type=int, default=5)
     b.add_argument("--seed", type=int, required=True)
     b.add_argument("--zoom", type=int, default=1,
@@ -499,11 +792,16 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
     try:
-        res = cmd_build(a)
+        if a.comparisons:
+            res = cmd_build_v2(a)
+        elif a.pairs is None:
+            raise UsageError("cần --pairs (v1) hoặc --comparisons (v2)")
+        else:
+            res = cmd_build(a)
     except UsageError as e:
         print(f"LỖI cách gọi: {e}", file=sys.stderr)
         return 2
-    except (AbPageError, EvalError, EvalInputError, TimeoutError, ValueError) as e:
+    except (AbPageError, EvalError, EvalInputError, GuardError, TimeoutError, ValueError, KeyError) as e:
         print(f"LỖI: {e}", file=sys.stderr)
         return 1
     print(json.dumps(res, ensure_ascii=False) if a.json else json.dumps(res, ensure_ascii=False, indent=1))

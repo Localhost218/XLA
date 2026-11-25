@@ -57,8 +57,21 @@ def chosen_variant(pair: dict[str, Any], choice: str) -> str:
     return pair["left"] if choice == "left" else pair["right"]
 
 
+def comparison_specs(key: dict[str, Any]) -> dict[str, tuple[str, str, float | None]]:
+    """``{so sánh: (biến thể đang chấm, đối chứng, ngưỡng tỉ lệ thắng cũ)}``. Khoá v2 (D13) ghi ``comparisons``; khoá
+    v1 dùng ``CRITERIA`` (mạng vs gốc / cổ điển)."""
+    if key.get("version") == 2:
+        comps = key.get("comparisons")
+        if not isinstance(comps, dict) or not comps:
+            raise AbScoreError("khoá v2 thiếu 'comparisons'")
+        return {c: (str(ab[0]), str(ab[1]), None) for c, ab in comps.items()}
+    return {c: ("net", "classic" if c.endswith("classic") else "raw", crit) for c, crit in CRITERIA.items()}
+
+
 def score(export: dict[str, Any], key: dict[str, Any]) -> dict[str, Any]:
-    """Chấm một file xuất theo khoá; lỗi dạng/thiếu lượt/lệch khoá → ``AbScoreError``."""
+    """Chấm một file xuất theo khoá; lỗi dạng/thiếu lượt/lệch khoá → ``AbScoreError``.
+
+    Khoá v2: mỗi so sánh ``passes`` = cận dưới Wilson 95 % > 0,5 (D13; 25 cặp → ≥ 18/25)."""
     if key.get("format") != KEY_FORMAT:
         raise AbScoreError(f"khoá không đúng dạng {KEY_FORMAT}")
     if export.get("format") != EXPORT_FORMAT:
@@ -81,16 +94,22 @@ def score(export: dict[str, Any], key: dict[str, Any]) -> dict[str, Any]:
         raise AbScoreError(f"thiếu {len(missing)}/{len(pairs)} lượt (vd. {missing[:5]}) — chấm hết rồi Xuất lại")
 
     comps: dict[str, Any] = {}
-    for comp, crit in CRITERIA.items():
+    for comp, (cand, base, crit) in comparison_specs(key).items():
         orig = [p for p in pairs.values() if p["comparison"] == comp and p.get("repeat_of") is None]
         if not orig:
             raise AbScoreError(f"khoá không có cặp {comp}")
-        wins = sum(chosen_variant(p, choices[p["id"]]) == "net" for p in orig)
+        wins = sum(chosen_variant(p, choices[p["id"]]) == cand for p in orig)
         n = len(orig)
         lo, hi = wilson(wins, n)
-        comps[comp] = {"n": n, "net_wins": wins, "win_rate": round(wins / n, 6), "ci95_wilson": [round(lo, 6),
-                       round(hi, 6)], "criterion_min": crit, "meets_criterion": wins / n >= crit,
-                       "ci_lower_meets_criterion": lo >= crit, "verdict_vs_50": _verdict(lo, hi)}
+        row = {"n": n, "win_rate": round(wins / n, 6), "ci95_wilson": [round(lo, 6), round(hi, 6)],
+               "verdict_vs_50": _verdict(lo, hi)}
+        if crit is None:
+            row |= {"candidate": cand, "baseline": base, "wins": wins, "criterion": "cận dưới Wilson 95 % > 0,5",
+                    "passes": lo > 0.5}
+        else:
+            row |= {"net_wins": wins, "criterion_min": crit, "meets_criterion": wins / n >= crit,
+                    "ci_lower_meets_criterion": lo >= crit}
+        comps[comp] = row
     reps = [p for p in pairs.values() if p.get("repeat_of") is not None]
     agree = sum(chosen_variant(p, choices[p["id"]]) == chosen_variant(pairs[p["repeat_of"]], choices[p["repeat_of"]])
                 for p in reps)
@@ -104,6 +123,41 @@ def score(export: dict[str, Any], key: dict[str, Any]) -> dict[str, Any]:
         "side_bias": {"left_rate": round(left / len(originals), 6), "n": len(originals)},
         "exported_at": export.get("exported_at"),
     }
+
+
+DECISION_FORMAT = "xla-ab-v2-decision-v1"
+DECISION_RULE = ("offline ship ⇔ guard_fp trên cal = pass VÀ offline_vs_raw lẫn offline_vs_classic đều passes (cận dưới "
+                 "Wilson 95 % > 0,5) trong cùng ít nhất một lượt (cả khung hoặc phóng to). Lai: không xuất (phase 10 "
+                 "không qua lọc) nên không thay classic. classic_vs_raw chỉ là chỉ số §5, không đổi mặc định của Owner "
+                 "(Deferred 17).")
+DECISION_KEYS = ("format", "rule", "guard_fp", "rounds", "offline_ship", "offline_reason", "hybrid_replaces_classic",
+                 "classic_vs_raw_metric", "classic_default_unchanged", "limits", "created")
+
+
+def decision(rounds: dict[str, dict[str, Any]], guard: dict[str, Any]) -> dict[str, Any]:
+    """``decision.json`` (máy đọc được) từ kết quả ``score`` của từng lượt (``{"full": ..., "zoom": ...}``) + guard_fp."""
+    from datetime import UTC, datetime
+
+    if not rounds:
+        raise AbScoreError("cần ít nhất một lượt đã chấm")
+    guard_pass = guard.get("decision") == "pass"
+    ok_rounds = [r for r, res in rounds.items()
+                 if all(res["comparisons"].get(c, {}).get("passes") for c in ("offline_vs_raw", "offline_vs_classic"))]
+    ship = guard_pass and bool(ok_rounds)
+    reason = ("guard_fp loại offline (Kill (d))" if not guard_pass else
+              f"đạt ở lượt {', '.join(ok_rounds)}" if ok_rounds else "không lượt nào thắng cả gốc lẫn classic")
+    return {"format": DECISION_FORMAT, "rule": DECISION_RULE,
+            "guard_fp": {"decision": guard.get("decision"), "diff": guard.get("diff", {}).get("diff"),
+                         "ci95": guard.get("diff", {}).get("ci95")},
+            "rounds": {r: {c: {k: v.get(k) for k in ("n", "wins", "win_rate", "ci95_wilson", "passes")}
+                           for c, v in res["comparisons"].items()} | {"consistency": res["consistency"]["rate"]}
+                       for r, res in rounds.items()},
+            "offline_ship": ship, "offline_reason": reason, "hybrid_replaces_classic": False,
+            "classic_vs_raw_metric": {r: res["comparisons"].get("classic_vs_raw", {}).get("passes")
+                                      for r, res in rounds.items()},
+            "classic_default_unchanged": True,
+            "limits": ["25 cặp mỗi so sánh → CI rộng", "ảnh SR ×2 không có lưới khối JPEG nên có thể nhận ra được"],
+            "created": datetime.now(UTC).isoformat(timespec="seconds")}
 
 
 def main(argv: list[str] | None = None) -> int:
