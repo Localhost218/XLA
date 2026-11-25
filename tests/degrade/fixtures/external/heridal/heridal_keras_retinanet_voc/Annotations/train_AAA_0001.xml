@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<annotation>
+   <folder>SAR</folder>
+   <filename>AAA_0001</filename>
+   <size><width>2400</width><height>1800</height><depth>3</depth></size>
+   <object><name>person</name><bndbox><xmin>100</xmin><xmax>160</xmax><ymin>100</ymin><ymax>180</ymax></bndbox></object>
+   <object><name>person</name><bndbox><xmin>1200</xmin><xmax>1260</xmax><ymin>500</ymin><ymax>560</ymax></bndbox></object>
+   <object><name>Person</name><bndbox><xmin>1250</xmin><xmax>1330</xmax><ymin>100</ymin><ymax>160</ymax></bndbox></object>
+</annotation>

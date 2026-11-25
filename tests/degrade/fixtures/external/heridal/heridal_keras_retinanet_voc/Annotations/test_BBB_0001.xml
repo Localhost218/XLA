@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<annotation>
+   <object><name>person</name><bndbox><xmin>700</xmin><xmax>760</xmax><ymin>600</ymin><ymax>650</ymax></bndbox></object>
+</annotation>

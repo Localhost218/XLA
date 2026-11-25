@@ -1,0 +1,6 @@
+{"type": "instances",
+ "categories": [{"id": 1, "name": "sea_person", "supercategory": "person"},
+                {"id": 2, "name": "earth_person", "supercategory": "person"}],
+ "images": [{"file_name": "labeled_images/youtube_V0002_I0000005.jpg", "width": 1920, "height": 1080, "id": 7}],
+ "annotations": [
+   {"bbox": [960, 540, 16, 30], "category_id": 2, "image_id": 7, "id": 9, "ignore": false, "uncertain": false, "logo": false}]}

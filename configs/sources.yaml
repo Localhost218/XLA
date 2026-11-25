@@ -40,6 +40,49 @@ downloads:                       # file đã tải (D:/IOT_Tools/downloads), sha
     reason: >-
       2026-11-18 03:36: cloud.cs.uni-tuebingen.de không trả lời (curl timeout 20 s); datasetninja.com/pog DOWNLOAD.md
       chỉ trỏ lại trang dự án Tübingen; giấy phép chưa rõ. Bỏ theo phase 05 bước 1 (Deferred 2).
+  # --- AI v2 phase 02 (25/11/2026): ảnh người nhìn từ drone có giấy phép rõ. Tên file tương đối tính từ
+  # <downloads_dir>/datasets (configs/paths.yaml). Chỉ dùng nghiên cứu; không ảnh nào của các bộ này vào git.
+  heridal:
+    license: "CC BY 3.0"
+    use: research
+    url: https://zenodo.org/records/5662351
+    citation: >-
+      Božić-Štulić, Marušić, Gotovac: "Deep Learning Approach in Aerial Imagery for Supporting Land Search and
+      Rescue Missions", IJCV 2019. Bản Zenodo 5662351 = HERIDAL định dạng VOC cho keras-retinanet (nhóm AIR).
+    retrieved: 2026-11-25
+    files:
+      - name: heridal/heridal_keras_retinanet_voc.zip
+        bytes: 8311735812
+        sha256: 63ea51b29d67f9b95cc600674c6ccfa719688594404b5311a9164fb41a0448a3
+  tinyperson:
+    license: "dataset không ghi giấy phép; mã MIT (ucas-vg/PointTinyBenchmark)"
+    use: research
+    url: https://github.com/ucas-vg/PointTinyBenchmark
+    note: "ảnh + json tải từ Google Drive trong README TinyBenchmark; không tải params/, coco/, annotations/corner/"
+    citation: "Yu et al., Scale Match for Tiny Person Detection, WACV 2020"
+    retrieved: 2026-11-25
+    files:
+      - {name: tinyperson/train.tar.gz, bytes: 369521204,
+         sha256: 8ae1ba954aeaabb8fac6bde88c9de21bcd8874a8a1e3f239259707b61a9c3ced}
+      - {name: tinyperson/test.tar.gz, bytes: 573919805,
+         sha256: 73af8f535146f3b4d20ab34a98c4b69c00cbc6df6bed64f5cb2bc652a6272712}
+      - {name: tinyperson/tiny_set_train.json, bytes: 10838570,
+         sha256: 4c2683bf695d6be08667c52e262ec4f1790ebeeba04cb5200424a05464a5eeea}
+      - {name: tinyperson/tiny_set_test.json, bytes: 7995907,
+         sha256: 0cfcbbcc7433ad5bdc6b856df1d109188cda48035506bda1f16b7e2261c63d57}
+  wisard:
+    license: "MIT"
+    use: research
+    url: https://sites.google.com/uw.edu/wisard
+    citation: "Broyles et al., WiSARD: A Labeled Visual and Thermal Image Dataset for Wilderness Search and Rescue, IROS 2022"
+    retrieved: 2026-11-25
+    files:
+      - name: wisard/WiSARD_Multi_Modal_Sample.zip
+        bytes: 1018780195
+        sha256: fd9bd786d53dc6fb9fcec20f2ae8f38df96db15c7edac348ba5a303c2285fc04
+  sard:
+    status: unavailable
+    reason: "paid subscription: IEEE DataPort đòi gói thuê bao trả phí kể cả khi đã đăng nhập (25/11/2026, Deferred 31)"
 
 visdrone:
   root: visdrone
@@ -52,6 +95,55 @@ nomad:
   root: nomad
   min_visibility: 30             # hộp visibility < 30 % coi là vùng bỏ qua (không dương, không âm)
   val_actor_mod: 10              # diễn viên số chia hết cho 10 → val (tách theo người, tránh rò cảnh)
+
+# AI v2 phase 02: nguồn ngoài có giấy phép (khối downloads ở trên). CHỈ vào tập trộn d02x (`build --set d02x`);
+# d0/d1/d2 v1 vẫn chỉ VisDrone. `python -m xla.degrade.sources extract` kiểm sha256 file nén rồi giải nén phần
+# include vào <data_root>/<root>/<bộ>/, ghi manifest.jsonl (đường dẫn tương đối + sha256 + bytes từng file) và
+# extract.json (sha256 file nén, sha256 manifest). Không ảnh nào vào git.
+external:
+  root: external                     # tương đối data_root (configs/paths.yaml) → D:/DevCache/datasets/xla/external
+  archive_dir: datasets              # tương đối downloads_dir → D:/IOT_Tools/downloads/datasets
+  view_labels_file: configs/view_external.yaml
+  accept_views: [nadir, near]        # như VisDrone (nadir.accept_views)
+  min_probe_nadir: 0.8               # probe CLIP fit trên nhãn VisDrone (`probe-external`), cùng ngưỡng VisDrone
+  probe_scores_file: probe_scores.jsonl   # tương đối external root
+  clip_cache: clip_emb_external_ViT-B-32.npz   # tương đối cache_dir/degrade (đặc trưng CLIP ảnh ngoài)
+  sets:
+    heridal:
+      archives: [heridal/heridal_keras_retinanet_voc.zip]
+      include: ["heridal_keras_retinanet_voc/JPEGImages/*", "heridal_keras_retinanet_voc/Annotations/*",
+                "heridal_keras_retinanet_voc/ImageSets/Main/*"]
+      exclude: ["__MACOSX/*"]
+      subdir: heridal_keras_retinanet_voc
+      classes: [person]
+      # Chia theo NƠI BAY (mã trong tên ảnh), không theo ảnh. ImageSets/Main/val.txt của bộ là ảnh ngẫu nhiên từ
+      # train (cùng nơi) nên không dùng. val = 4 nơi chỉ có trong test gốc (BLI, CAB, GRO, MOB) + RAK, TRS
+      # + SB (217/1684 ảnh = 12,9 %).
+      val_groups: [BLI, CAB, GRO, MOB, RAK, SB, TRS]
+      # Ảnh 4000×3000: cắt ô 1280×960 (cùng tỉ lệ 4:3 với khung) chồng mép 160 px TRƯỚC khi đặt cửa sổ / làm xấu.
+      tile: {w: 1280, h: 960, overlap: 160, min_keep_area_frac: 0.5, neg_tiles_per_image: 1}
+      windows_per_image: 1           # mỗi ô một cửa sổ (đã nhiều ô mỗi ảnh)
+      use: [detector, verifier]
+      d02x: true
+    tinyperson:
+      archives: [tinyperson/train.tar.gz, tinyperson/test.tar.gz, tinyperson/tiny_set_train.json,
+                 tinyperson/tiny_set_test.json]
+      # Chỉ ảnh có trong json (labeled_images + pure_bg_images); no_label_images / labeled_dense_images không nhãn.
+      include: ["train/labeled_images/*", "train/pure_bg_images/*", "test/labeled_images/*", "test/pure_bg_images/*",
+                "tiny_set_*.json"]
+      splits: {train: train, test: val}   # json gốc; nhóm = video (bb_V0032…), train/test không chung video nào
+      ignore_flags: [ignore, uncertain, logo]   # hộp mang cờ → vùng bỏ qua (như category 0 VisDrone)
+      # Sau lọc góc chỉ 173/1532 ảnh (< 200, Risk phase 02): KHÔNG vào d02x, chỉ làm lớp dương cho verifier (phase 07
+      # đọc bằng sources.select_external(cfg, for_d02x=False) rồi lọc source == "tinyperson"). results/v2/data/README.md.
+      use: [verifier]
+      d02x: false
+    wisard:
+      archives: [wisard/WiSARD_Multi_Modal_Sample.zip]
+      include: ["*_VIS_*/*"]         # chỉ RGB; *_IR_* (nhiệt) không giải nén
+      exclude: ["*_IR_*/*"]
+      split: train                   # một chuyến bay = một cảnh: không chia val từ bộ này
+      use: [detector, verifier]
+      d02x: true
 
 keep_images_without_person: true  # ảnh nadir không người vẫn dùng cho cửa sổ âm
 

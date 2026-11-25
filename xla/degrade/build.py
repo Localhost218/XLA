@@ -9,6 +9,11 @@ hồ sơ). Chạy lại cùng khoá thì ảnh đã có file đúng sha256 đư�
 
     python -m xla.degrade.build --set d2 --seed 20261118 --limit 50 --json
     python -m xla.degrade.build --set all --profile D:/XLA-wt/data/configs/camera_profile.yaml --workers 8
+    python -m xla.degrade.build --set d02x --workers 4 --json      # AI v2: VisDrone + nguồn ngoài, mỗi cửa sổ D0 + D2
+
+Tập trộn (``MIXED_SETS``, vd. ``d02x``): mỗi đơn vị sinh một ảnh cho từng biến thể (``d0``, ``d2``) cùng cửa sổ; ảnh
+tên ``<biến thể>__<đơn vị>.jpg``, RNG làm xấu giống hệt tập đơn tương ứng (``d2`` của d02x = ``d2`` với cùng nguồn).
+Nguồn ngoài (``external`` trong configs/sources.yaml) chỉ vào tập trộn.
 """
 
 from __future__ import annotations
@@ -33,6 +38,8 @@ from xla import paths
 from xla.degrade import d1_random, d2_camera, geometry, sources
 
 SETS = ("d0", "d1", "d2")
+MIXED_SETS = {"d02x": ("d0", "d2")}      # tập trộn → biến thể; nguồn = VisDrone + external (AI v2 phase 02)
+VARIANT_SEP = "@"
 DEFAULT_SEED = 20261118
 D0_JPEG_QUALITY = 95                     # D0 "sạch": Pillow q95, 4:4:4
 
@@ -86,37 +93,79 @@ def _init_worker(state: dict) -> None:
     _W.update(state)
 
 
+def split_unit(unit: str) -> tuple[str, str | None]:
+    """``"<khoá>#<w>@<biến thể>"`` (tập trộn) → (đơn vị gốc, biến thể); đơn vị tập đơn → (đơn vị, None)."""
+    base, sep, variant = unit.partition(VARIANT_SEP)
+    return base, (variant if sep else None)
+
+
+_LAST_IMAGE: dict = {}                   # ảnh lớn vừa giải mã (mỗi tiến trình một ảnh): các ô của nó dùng lại
+
+
+def _read(path: str, cache: bool) -> np.ndarray:
+    if cache and _LAST_IMAGE.get("path") == path:
+        return _LAST_IMAGE["img"]
+    img = cv2.imread(path, cv2.IMREAD_COLOR)
+    if img is None:
+        raise RuntimeError(f"không đọc được {path}")
+    if cache:
+        _LAST_IMAGE.clear()
+        _LAST_IMAGE.update(path=path, img=img)
+    return img
+
+
+def _load_source(item: dict) -> np.ndarray:
+    """Ảnh nguồn (BGR) của một đơn vị; ``crop`` → cắt ô (bản sao). Ảnh có ô được giữ lại trong tiến trình để ô kế
+    tiếp của cùng ảnh không giải mã lại (JPEG 12 MP HERIDAL ~1,7 s/lần trên máy dự án, đo 25/11)."""
+    crop = item.get("crop")
+    img = _read(item["image"], cache=bool(crop))
+    if crop:                                        # ô cắt của ảnh lớn (HERIDAL), cắt trước mọi khâu
+        x0, y0, x1, y1 = (int(v) for v in crop)
+        if x1 > img.shape[1] or y1 > img.shape[0] or x0 < 0 or y0 < 0:
+            raise ValueError(f"{item['key']}: ô {crop} vượt ảnh {img.shape[1]}x{img.shape[0]}")
+        img = img[y0:y1, x0:x1].copy()
+    if (img.shape[1], img.shape[0]) != tuple(item["wh"]):
+        raise ValueError(f"{item['key']}: cỡ ảnh {img.shape[1]}x{img.shape[0]} khác chỉ mục {item['wh']}")
+    return img
+
+
 def render_unit(set_name: str, item: dict, unit: str, seed: int, ctx: dict) -> dict:
-    """Một đơn vị (ảnh nguồn, chỉ số cửa sổ) → bytes ảnh + nhãn + bản ghi manifest; ``None``-dict khi bỏ."""
+    """Một đơn vị (ảnh nguồn, chỉ số cửa sổ[, biến thể]) → bytes ảnh + nhãn + bản ghi manifest; ``None``-dict khi
+    bỏ. Hình học và RNG làm xấu tính theo đơn vị GỐC: biến thể ``d2`` của tập trộn ra đúng ảnh của tập ``d2``."""
+    base, variant = split_unit(unit)
+    kind = variant or set_name
     gcfg = geometry.GeomConfig(**ctx["geometry"])
     boxes = np.asarray(item["boxes"], np.float32).reshape(-1, 4)
     ignore = np.asarray(item["ignore"], np.float32).reshape(-1, 4)
     win = geometry.plan_window(tuple(item["wh"]), boxes, ignore, ctx["person_short_px"],
-                               rng_for(seed, "geom", unit), gcfg)
+                               rng_for(seed, "geom", base), gcfg)
     if win is None:
         return {"unit": unit, "skipped": "no_valid_window"}
-    img = cv2.imread(item["image"], cv2.IMREAD_COLOR)
-    if img is None:
-        raise RuntimeError(f"không đọc được {item['image']}")
-    if (img.shape[1], img.shape[0]) != tuple(item["wh"]):
-        raise ValueError(f"{item['key']}: cỡ ảnh {img.shape[1]}x{img.shape[0]} khác chỉ mục {item['wh']}")
-    window = geometry.apply_window(img, win)
-    rng = rng_for(seed, "d2" if set_name == "d2sr" else set_name, unit)   # d2sr: cùng tham số D2, chỉ khác nhiễu
+    window = geometry.apply_window(_load_source(item), win)
+    rng = rng_for(seed, "d2" if kind == "d2sr" else kind, base)   # d2sr: cùng tham số D2, chỉ khác nhiễu
     extra: dict = {}
-    if set_name == "d0":
+    if kind == "d0":
         data, params = encode_d0(pad_black(window)), {"jpeg": {"quality": D0_JPEG_QUALITY, "subsampling": "4:4:4"}}
-    elif set_name == "d1":
+    elif kind == "d1":
         frame01, q, params = d1_random.degrade(window, rng, ctx["d1"])
         data = d1_random.encode_final(frame01, q)
     else:
         frame, q, params = d2_camera.degrade(window, rng, ctx["d2"], ctx["profile"],
-                                             ctx.get("noise_pool") if set_name == "d2sr" else None)
+                                             ctx.get("noise_pool") if kind == "d2sr" else None)
         data, verified = d2_camera.encode_final(frame, q, ctx["profile"])
         params["jpeg"]["qtable_verified"] = verified
         extra = {"profile_id": ctx["profile"].get("profile_id"), "profile_version": ctx["profile"].get("profile_version"),
                  "d2_config_version": ctx["d2"].get("version")}
+    if variant:
+        extra["variant"] = variant
+    if item.get("group") is not None:
+        extra["group"] = item["group"]
+    if item.get("crop"):
+        extra["crop"] = list(item["crop"])
     fboxes = geometry.to_frame_boxes(win.boxes)
-    name = unit.replace("/", "__").replace("#", "_w")
+    name = base.replace("/", "__").replace("#", "_w")
+    if variant:
+        name = f"{variant}__{name}"
     return {
         "unit": unit, "name": name, "split": item["split"], "data": data,
         "label": geometry.yolo_lines(fboxes),
@@ -142,8 +191,16 @@ def _render_chunk(args: tuple) -> list[dict]:
 
 # ----------------------------------------------------------------------------- dựng tập
 
-def plan_units(items: list[sources.SourceItem], windows_per_image: int, seed: int, limit: int | None) -> list:
-    units = [(sources.asdict(it), f"{it.key}#{w}") for it in items for w in range(windows_per_image)]
+def plan_units(items: list[sources.SourceItem], windows_per_image: int, seed: int, limit: int | None,
+               variants: tuple[str, ...] | None = None, windows_by_source: dict[str, int] | None = None) -> list:
+    """Đơn vị = (ảnh, cửa sổ[, biến thể]). ``windows_by_source`` ghi đè số cửa sổ mỗi ảnh theo nguồn; ``variants``
+    (tập trộn) nhân mỗi cửa sổ thành một đơn vị mỗi biến thể."""
+    units = []
+    for it in items:
+        d = sources.asdict(it)
+        for w in range((windows_by_source or {}).get(it.source, windows_per_image)):
+            base = f"{it.key}#{w}"
+            units += [(d, f"{base}{VARIANT_SEP}{v}") for v in variants] if variants else [(d, base)]
     units.sort(key=lambda t: (fnv1a(f"{seed}:{t[1]}"), t[1]))       # thứ tự trộn tất định; --limit lấy đầu danh sách
     return units[:limit] if limit else units
 
@@ -157,7 +214,9 @@ def build_key(set_name: str, seed: int, ctx: dict) -> str:
     parts = {"set": set_name, "seed": seed, "geometry": ctx.get("geometry"), "person": ctx.get("person_short_px")}
     if set_name == "d1":
         parts["d1"] = ctx.get("d1")
-    if set_name in ("d2", "d2sr"):
+    if set_name in MIXED_SETS:
+        parts["variants"] = list(MIXED_SETS[set_name])
+    if set_name in ("d2", "d2sr") or "d2" in MIXED_SETS.get(set_name, ()):
         parts["d2"] = ctx.get("d2")
         parts["profile"] = [ctx["profile"].get("profile_id"), ctx["profile"].get("profile_version")]
     if set_name == "d2sr":
@@ -233,7 +292,9 @@ def build_set(set_name: str, units: list, seed: int, ctx: dict, root: Path, work
                 need = target - n_ok
                 batch = units[pos:pos + (need if not limit else need + max(4, need // 5))]
                 pos += len(batch)
-                todo = [u for u in batch if u[1] not in done]
+                # Gom đơn vị cùng ảnh nguồn vào cùng lô (ô HERIDAL dùng lại ảnh đã giải mã); thứ tự xử lý không đổi
+                # nội dung ảnh ra, thứ tự chọn (--limit) vẫn theo ``batch``.
+                todo = sorted((u for u in batch if u[1] not in done), key=lambda u: (u[0]["image"], u[1]))
                 chunk = max(1, min(32, len(todo) // max(1, workers * 4)))
                 jobs = [(set_name, todo[i:i + chunk], seed) for i in range(0, len(todo), chunk)]
                 for part in (map(_render_chunk, jobs) if ex is None else ex.map(_render_chunk, jobs)):
@@ -290,7 +351,10 @@ def make_context(set_names: list[str], profile_path: Path, src_cfg: dict, d1_cfg
            "person_short_px": d2_camera.get_field(profile, "person_box_px.short_side")}
     if "d1" in set_names:
         ctx["d1"] = yaml.safe_load(d1_cfg.read_text(encoding="utf-8"))
-    if "d2" in set_names or "d2sr" in set_names:
+    kinds = {k for s in set_names for k in MIXED_SETS.get(s, (s,))}
+    if "d1" in kinds and "d1" not in set_names:
+        ctx["d1"] = yaml.safe_load(d1_cfg.read_text(encoding="utf-8"))
+    if "d2" in kinds or "d2sr" in kinds:
         ctx["d2"] = d2_camera.load_config(d2_cfg)
         ctx["profile"] = profile
     if "d2sr" in set_names:
@@ -303,7 +367,7 @@ def make_context(set_names: list[str], profile_path: Path, src_cfg: dict, d1_cfg
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--set", required=True, choices=[*SETS, "d2sr", "all"])
+    ap.add_argument("--set", required=True, choices=[*SETS, "d2sr", *MIXED_SETS, "all"])
     ap.add_argument("--seed", type=int, default=DEFAULT_SEED)
     ap.add_argument("--limit", type=int, default=0, help="số ảnh ra tối đa (0 = đủ); chạy thử nhỏ")
     ap.add_argument("--profile", type=Path, default=_repo_cfg("camera_profile.yaml"))
@@ -317,11 +381,18 @@ def main(argv: list[str] | None = None) -> int:
 
     set_names = list(SETS) if a.set == "all" else [a.set]
     src_cfg = sources.load_config(a.sources)
-    items = sources.select(src_cfg)
-    units = plan_units(items, int(src_cfg["geometry"]["windows_per_image"]), a.seed, None)
+    mixed = MIXED_SETS.get(a.set)
+    items = sources.select(src_cfg, external=mixed is not None)
+    sources.check_group_split(items)
+    units = plan_units(items, int(src_cfg["geometry"]["windows_per_image"]), a.seed, None, mixed,
+                       sources.windows_by_source(src_cfg) if mixed else None)
     ctx = make_context(set_names, a.profile, src_cfg, a.d1_config, a.d2_config)
     root = a.out or paths.data_root()
-    summary = {"seed": a.seed, "source_images": len(items), "units": len(units), "profile": str(a.profile),
+    by_src: dict[str, int] = {}
+    for it in items:
+        by_src[it.source] = by_src.get(it.source, 0) + 1
+    summary = {"seed": a.seed, "source_images": len(items), "source_items_by_source": by_src, "units": len(units),
+               "profile": str(a.profile),
                "sets": [build_set(s, units, a.seed, ctx, root, a.workers, a.limit or None) for s in set_names]}
     print(json.dumps(summary, ensure_ascii=False, indent=None if a.json else 2))
     return 0

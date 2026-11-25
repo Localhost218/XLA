@@ -1,0 +1,2 @@
+number of humans: 2
+ number of images: 2
