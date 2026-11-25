@@ -1,0 +1,400 @@
+{
+ "phase": "05",
+ "created": "2026-11-25T10:56:53+00:00",
+ "teacher_weights": "D:/DevCache/runs/xla/v2/detect/teacher/weights/best.pt",
+ "teacher_sha256": "7a6a0a81aeddbc2f47fb3a15822656d6058f821f556b4e4f690ff3625afc7aba",
+ "pseudo_dir": "D:/DevCache/datasets/xla/pseudo_v2",
+ "pseudo": {
+  "n_frames": 880,
+  "n_used": 858,
+  "n_used_with_box": 119,
+  "n_boxes": 217,
+  "by_fold": [
+   {
+    "fold": 0,
+    "frames": 441,
+    "used": 432,
+    "boxes": 66
+   },
+   {
+    "fold": 1,
+    "frames": 439,
+    "used": 426,
+    "boxes": 151
+   }
+  ],
+  "dropped": {
+   "ok": 858,
+   "chuỗi ngắn hơn L": 20,
+   "có hộp ≥ τ_cao bị bỏ (lẻ / track ngắn)": 2
+  }
+ },
+ "per_fold": [
+  {
+   "fold": 0,
+   "sessions": [
+    "20261102-100941#5"
+   ],
+   "tau_high": 0.6,
+   "tau_high_rule": "nhỏ nhất đạt precision_min",
+   "quality_on_own_devpool": {
+    "precision": 1.0,
+    "recall": 0.0673076923076923,
+    "tp": 7,
+    "fp": 0,
+    "gt": 104,
+    "frames_used": 76,
+    "frames_devval": 82
+   }
+  },
+  {
+   "fold": 1,
+   "sessions": [
+    "20261102-100941#1",
+    "20261102-100941#2",
+    "20261102-100941#3",
+    "20261102-100941#4"
+   ],
+   "tau_high": 0.35,
+   "tau_high_rule": "không τ nào đạt 0.9: lấy precision cao nhất",
+   "quality_on_own_devpool": {
+    "precision": 0.6,
+    "recall": 0.12,
+    "tp": 12,
+    "fp": 8,
+    "gt": 100,
+    "frames_used": 68,
+    "frames_devval": 78
+   }
+  }
+ ],
+ "gpu_s_pseudo_and_devpool": 128.1,
+ "machine": {
+  "time": "2026-11-25T10:54:44+00:00",
+  "host": "Nghaiz-PC",
+  "os": "Windows-11-10.0.26300-SP0",
+  "cpu_count": 32,
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "driver_version": "610.88",
+   "temperature.gpu": "77",
+   "clocks.sm": "210 MHz",
+   "clocks.max.sm": "3105 MHz",
+   "power.draw": "11.94 W",
+   "pstate": "P4",
+   "memory.used": "1514 MiB",
+   "memory.total": "8188 MiB"
+  },
+  "cpu": {
+   "percent": 2.2,
+   "freq_mhz": 2501.0,
+   "ram_avail_gb": 24.7
+  }
+ },
+ "devpool": {
+  "teacher": {
+   "op_threshold": 0.04228,
+   "threshold_source": "F1 tối đa trên devpool OOF",
+   "metrics": {
+    "mAP50": {
+     "value": 0.197292,
+     "ci95": [
+      0.155521,
+      0.250707
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.081427,
+     "ci95": [
+      0.061984,
+      0.115376
+     ]
+    },
+    "AP_small": {
+     "value": 0.104428,
+     "ci95": [
+      0.067285,
+      0.151688
+     ]
+    },
+    "AR_small": {
+     "value": 0.379389,
+     "ci95": [
+      0.323942,
+      0.448886
+     ]
+    },
+    "precision@op": {
+     "value": 0.308081,
+     "ci95": [
+      0.2676,
+      0.348448
+     ]
+    },
+    "recall@op": {
+     "value": 0.279817,
+     "ci95": [
+      0.234273,
+      0.325956
+     ]
+    },
+    "f1@op": {
+     "value": 0.293269,
+     "ci95": [
+      0.250322,
+      0.329671
+     ]
+    },
+    "fp_per_devpool_empty_frame@op": {
+     "value": 0.277778,
+     "ci95": [
+      0.182388,
+      0.397543
+     ]
+    },
+    "fp_per_mine_frame@op": {
+     "value": 0.341176,
+     "ci95": [
+      0.210835,
+      0.470648
+     ]
+    }
+   },
+   "n": {
+    "frames": 160,
+    "frames_with_person": 70,
+    "gt_boxes": 218,
+    "neg_split_frames": 85,
+    "negative_frames": 175,
+    "negative_frames_flight": 90,
+    "negative_frames_indoor": 85,
+    "labels_missing": 0,
+    "pred_frames_other_splits": 0
+   },
+   "map50_by_fold": [
+    0.2507,
+    0.1705
+   ]
+  },
+  "v1": {
+   "op_threshold": 0.05772,
+   "threshold_source": "F1 tối đa trên devpool OOF",
+   "metrics": {
+    "mAP50": {
+     "value": 0.228568,
+     "ci95": [
+      0.143908,
+      0.311801
+     ]
+    },
+    "mAP50_95": {
+     "value": 0.104469,
+     "ci95": [
+      0.064124,
+      0.145104
+     ]
+    },
+    "AP_small": {
+     "value": 0.074033,
+     "ci95": [
+      0.045468,
+      0.100826
+     ]
+    },
+    "AR_small": {
+     "value": 0.171756,
+     "ci95": [
+      0.143587,
+      0.205183
+     ]
+    },
+    "precision@op": {
+     "value": 0.367021,
+     "ci95": [
+      0.324551,
+      0.394459
+     ]
+    },
+    "recall@op": {
+     "value": 0.316514,
+     "ci95": [
+      0.233623,
+      0.398043
+     ]
+    },
+    "f1@op": {
+     "value": 0.339901,
+     "ci95": [
+      0.275218,
+      0.390877
+     ]
+    },
+    "fp_per_devpool_empty_frame@op": {
+     "value": 0.277778,
+     "ci95": [
+      0.18679,
+      0.35246
+     ]
+    },
+    "fp_per_mine_frame@op": {
+     "value": 0.282353,
+     "ci95": [
+      0.204188,
+      0.36905
+     ]
+    }
+   },
+   "n": {
+    "frames": 160,
+    "frames_with_person": 70,
+    "gt_boxes": 218,
+    "neg_split_frames": 85,
+    "negative_frames": 175,
+    "negative_frames_flight": 90,
+    "negative_frames_indoor": 85,
+    "labels_missing": 0,
+    "pred_frames_other_splits": 0
+   },
+   "map50_by_fold": [
+    0.2922,
+    0.1733
+   ],
+   "onnx": "D:/XLA/models/release/detector-v1.0.0/detector.onnx"
+  },
+  "teacher_minus_v1": {
+   "mAP50": {
+    "a": 0.228568,
+    "b": 0.197292,
+    "diff": -0.031276,
+    "ci95": [
+     -0.092054,
+     0.051843
+    ],
+    "p_diff_gt_0": 0.2175,
+    "p_b_better": 0.2175,
+    "higher_is_better": true,
+    "n_valid_samples": 2000
+   },
+   "AR_small": {
+    "a": 0.171756,
+    "b": 0.379389,
+    "diff": 0.207634,
+    "ci95": [
+     0.15102,
+     0.285189
+    ],
+    "p_diff_gt_0": 1.0,
+    "p_b_better": 1.0,
+    "higher_is_better": true,
+    "n_valid_samples": 2000
+   },
+   "recall@op": {
+    "a": 0.316514,
+    "b": 0.279817,
+    "diff": -0.036697,
+    "ci95": [
+     -0.119962,
+     0.056838
+    ],
+    "p_diff_gt_0": 0.1975,
+    "p_b_better": 0.1975,
+    "higher_is_better": true,
+    "n_valid_samples": 2000
+   }
+  },
+  "note": "thầy không thấy khung devpool nào (OOF); v1 đã học nhãn giả khung dev (E2, trừ dev-val + đệm 0,3 s) nên với 74 khung devpool mới v1 KHÔNG phải OOF — lợi thế cho v1"
+ },
+ "teacher_aborted": [
+  {
+   "size": "l",
+   "weights_init": "yolo-weights/yolo11l.pt (COCO)",
+   "lock_since": "2026-11-25T17:07:07",
+   "killed": "2026-11-25T17:19:42",
+   "gpu_s": 755.0,
+   "epochs_done": 1,
+   "val_history": [
+    {
+     "epoch": 1,
+     "val_mAP50": 0.00519,
+     "val_mAP50_95": 0.00114,
+     "train_s": 648.31,
+     "val_save_s": 57.03,
+     "batches": 1843,
+     "median_batch_s": 0.3505,
+     "batch": 2,
+     "vram_peak_gb": 5.63,
+     "time": "2026-11-25T10:19:01+00:00"
+    }
+   ],
+   "reason": "epoch 1 val mAP50 0,0052 (d02x val 800 ảnh): đầu 1 lớp học từ đầu + optimizer auto chọn SGD lr 0,01 vì 20 epoch × 1843 bước > 10 000; trong ~0,6 giờ còn lại không kịp hội tụ. Đổi sang m khởi từ thầy E2 (đã học D2 4 epoch, mAP50 val D2 0,19) với AdamW lr 0,002 như E1"
+  }
+ ],
+ "gpu_hours": {
+  "smoke": 0.0195,
+  "teacher": 0.5689,
+  "teacher_aborted": 0.2097,
+  "pseudo_and_devpool": 0.0356,
+  "cap": 1.0,
+  "cap_note": "trần 1 giờ cả phase 05 do chủ dự án cắt 25/11 (plan gốc 6 giờ)",
+  "total": 0.8337
+ },
+ "teacher_train": {
+  "finished": "2026-11-25T10:54:28+00:00",
+  "select": "val",
+  "selected_from": "best_val50.pt",
+  "best_sha256": "7a6a0a81aeddbc2f47fb3a15822656d6058f821f556b4e4f690ff3625afc7aba",
+  "epochs_run": 4,
+  "stopped": null,
+  "best_epoch": 3
+ },
+ "teacher_val_history": [
+  {
+   "epoch": 1,
+   "val_mAP50": 0.13351,
+   "val_mAP50_95": 0.05106,
+   "train_s": 505.4,
+   "val_save_s": 52.89,
+   "batches": 1843,
+   "median_batch_s": 0.2711,
+   "batch": 2,
+   "vram_peak_gb": 4.41,
+   "time": "2026-11-25T10:29:41+00:00"
+  },
+  {
+   "epoch": 2,
+   "val_mAP50": 0.13996,
+   "val_mAP50_95": 0.05472,
+   "train_s": 501.93,
+   "val_save_s": 33.63,
+   "batches": 1843,
+   "median_batch_s": 0.2724,
+   "batch": 2,
+   "vram_peak_gb": 4.59,
+   "time": "2026-11-25T10:38:37+00:00"
+  },
+  {
+   "epoch": 3,
+   "val_mAP50": 0.20328,
+   "val_mAP50_95": 0.08308,
+   "train_s": 502.98,
+   "val_save_s": 34.59,
+   "batches": 1843,
+   "median_batch_s": 0.2718,
+   "batch": 2,
+   "vram_peak_gb": 4.59,
+   "time": "2026-11-25T10:47:35+00:00"
+  },
+  {
+   "epoch": 4,
+   "val_mAP50": 0.1928,
+   "val_mAP50_95": 0.08314,
+   "train_s": 350.65,
+   "val_save_s": 32.33,
+   "batches": 1252,
+   "median_batch_s": 0.2715,
+   "batch": 2,
+   "vram_peak_gb": 4.59,
+   "time": "2026-11-25T10:53:58+00:00"
+  }
+ ]
+}
