@@ -1,7 +1,7 @@
 # AI v2 phase 14: hàng rào báo nhầm + thử mù A/B v2
 
-Plan `plans/261125-ai-v2/phase-14-ab-mu-v2.md`, D13 (`plan.md`). Bước 1–3 xong 26/11/2026. Bước 4 (chủ dự án chấm hai lượt)
-và bước 5 (`ab_score`, `decision.json`) chưa làm.
+Plan `plans/261125-ai-v2/phase-14-ab-mu-v2.md`, D13 (`plan.md`). Bước 1–5 xong 26/11/2026: chủ dự án chấm lượt cả khung
+(lượt phóng to không chấm, không quyết định), `ab_score` + `decision.json` ở §4 (`offline_ship = false`).
 
 ```
 python -m xla.eval.guard_fp --bundle models/release/enhancer-offline-v1.0.0 --write-meta --json
