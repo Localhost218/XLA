@@ -1,0 +1,32 @@
+{
+ "manifest": "D:\\XLA-wt\\verifier\\results\\v2\\verifier\\manifest.jsonl",
+ "dropped_by_review": 0,
+ "n": 18766,
+ "by_type": {
+  "ext_neg_det": 9444,
+  "ext_pos_det": 3320,
+  "ext_pos_gt": 3725,
+  "real_neg_bg": 1888,
+  "real_neg_hard": 91,
+  "real_pos_det": 80,
+  "real_pos_gt": 218
+ },
+ "by_src_label": {
+  "d02x:0": 9444,
+  "d02x:1": 6320,
+  "devpool:0": 1267,
+  "devpool:1": 298,
+  "mine:0": 712,
+  "tinyperson:1": 725
+ },
+ "real_by_fold_type": {
+  "f0:real_neg_bg": 936,
+  "f0:real_neg_hard": 52,
+  "f0:real_pos_det": 44,
+  "f0:real_pos_gt": 110,
+  "f1:real_neg_bg": 952,
+  "f1:real_neg_hard": 39,
+  "f1:real_pos_det": 36,
+  "f1:real_pos_gt": 108
+ }
+}

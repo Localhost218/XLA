@@ -1,0 +1,128 @@
+{
+ "runs": {
+  "effb0_64_f0": {
+   "best_epoch": 2,
+   "best_val_loss": 0.37042,
+   "train_n": 16192,
+   "val_n": 1432,
+   "s": 32.4,
+   "epochs_run": 6
+  },
+  "effb0_64_f1": {
+   "best_epoch": 3,
+   "best_val_loss": 0.36427,
+   "train_n": 16199,
+   "val_n": 1432,
+   "s": 36.6,
+   "epochs_run": 7
+  },
+  "effb0_64_final": {
+   "best_epoch": 5,
+   "best_val_loss": 0.36979,
+   "train_n": 17334,
+   "val_n": 1432,
+   "s": 49.4,
+   "epochs_run": 9
+  },
+  "effb0_96_f0": {
+   "best_epoch": 1,
+   "best_val_loss": 0.35983,
+   "train_n": 16192,
+   "val_n": 1432,
+   "s": 50.4,
+   "epochs_run": 5
+  },
+  "effb0_96_f1": {
+   "best_epoch": 1,
+   "best_val_loss": 0.38595,
+   "train_n": 16199,
+   "val_n": 1432,
+   "s": 52.4,
+   "epochs_run": 5
+  },
+  "effb0_96_final": {
+   "best_epoch": 3,
+   "best_val_loss": 0.34705,
+   "train_n": 17334,
+   "val_n": 1432,
+   "s": 80.1,
+   "epochs_run": 7
+  },
+  "mnv3s_64_f0": {
+   "best_epoch": 5,
+   "best_val_loss": 0.38113,
+   "train_n": 16192,
+   "val_n": 1432,
+   "s": 23.3,
+   "epochs_run": 9
+  },
+  "mnv3s_64_f1": {
+   "best_epoch": 6,
+   "best_val_loss": 0.37058,
+   "train_n": 16199,
+   "val_n": 1432,
+   "s": 24.7,
+   "epochs_run": 10
+  },
+  "mnv3s_64_final": {
+   "best_epoch": 4,
+   "best_val_loss": 0.39419,
+   "train_n": 17334,
+   "val_n": 1432,
+   "s": 22.0,
+   "epochs_run": 8
+  },
+  "mnv3s_96_f0": {
+   "best_epoch": 2,
+   "best_val_loss": 0.44307,
+   "train_n": 16192,
+   "val_n": 1432,
+   "s": 18.6,
+   "epochs_run": 6
+  },
+  "mnv3s_96_f1": {
+   "best_epoch": 4,
+   "best_val_loss": 0.41035,
+   "train_n": 16199,
+   "val_n": 1432,
+   "s": 22.2,
+   "epochs_run": 8
+  },
+  "mnv3s_96_final": {
+   "best_epoch": 2,
+   "best_val_loss": 0.38997,
+   "train_n": 17334,
+   "val_n": 1432,
+   "s": 19.3,
+   "epochs_run": 6
+  }
+ },
+ "gpu_seconds": [
+  {
+   "what": "mine_detect",
+   "gpu_s": 158.6,
+   "at": "2026-11-25T20:29:07"
+  },
+  {
+   "what": "train mnv3s_64",
+   "gpu_s": 74.5,
+   "at": "2026-11-25T20:34:52"
+  },
+  {
+   "what": "train mnv3s_96,effb0_64,effb0_96",
+   "gpu_s": 371.7,
+   "at": "2026-11-25T20:41:14"
+  },
+  {
+   "what": "export parity+ms",
+   "gpu_s": 9.7,
+   "at": "2026-11-25T20:42:52"
+  },
+  {
+   "what": "ms other candidates",
+   "gpu_s": 15.0,
+   "at": "2026-11-25T20:43:27"
+  }
+ ],
+ "gpu_total_s": 629.5
+}
