@@ -110,6 +110,45 @@ Quyết định "có người" do agent soát **từng khung** trên ảnh ghép
 - **Phase 05 phải** loại `reserved_frames` (trọn khối cal) khỏi danh sách nhãn giả dev, và khi huấn luyện fold i thì
   loại mọi khung thật (mine lẫn dev giả) thuộc phiên của fold i.
 
+## 6. Holdout yếu "cùng buổi" (26/11/2026) — **0 khung, B2 vẫn không đủ chứng minh**
+
+**Nhãn bắt buộc: holdout yếu: cùng buổi bay với test, không độc lập; agent duyệt.** Quyết định chủ dự án 26/11 (không bay
+thêm được): lấy khung bay của `20261102-100941` **không** thuộc `split.json` v1 (không dev, không test), không là
+mine/cal/devpool/khung giữ lại, cách mọi khối dev/test v1 **≥ 30 s**, giãn cách ≥ 0,5 s trong phiên; agent soát từng khung
+(thay cho chủ dự án duyệt: `approved_by: "agent"`, `owner_approved: false`). Không thay holdout chặt, không dùng cal.
+
+```bash
+$PY -m xla.camera.sessions weak-holdout --sheets --json        # -> weak/plan.json + khối holdout_weak (exit 1 nếu còn ứng viên chưa soát)
+$PY -m xla.camera.sessions weak-holdout --min-dist-s 30 --prelabel --sheets --json   # thêm nhãn trước (GPU, khoá D6)
+$PY -m xla.camera.sessions score-weak --iotcv D:/IOTCV-wt/iotcv --json   # -> results/v2/system/holdout_weak.json
+```
+
+Lưu ở khoá gốc `holdout_weak` của `neg_flight_split.json` (`kind: "weak_same_day"`, `label`, `rule`, `frames`), **ngoài**
+`frames`: mọi bên đọc `frames` (system, train, verify, detection) và đường holdout chặt (`split: holdout`, `approved`) không
+thấy nó; `split` / `apply-review` giữ nguyên khối này. Soát của agent: `weak/agent_review.csv` (cùng dạng
+`frame,verdict,reason`), ảnh ghép 4×4 như mục 3 (`weak/agent_review_sheets.csv`, ảnh ở cache).
+
+**Kết quả: 0 ứng viên.** 1 602 khung bay đã nhập không thuộc `split.json` v1, **cả 1 602 đều nằm trong hoặc sát một khối
+dev/test v1**: chúng là khung không được lấy mẫu **bên trong** các khối test v1 (khối 30 s của test v1 chỉ lấy rải một phần khung
+vào `split.json`), cộng vài khung ở khe giữa hai khối. Khoảng cách tới khối dev/test v1 gần nhất (khoảng giờ thật của các khung
+trong khối), sau giãn cách 0,5 s (`weak/plan.json` → `dist_hist`, `dist_hist_by_session`):
+
+| ≥ khoảng cách | 0 s | 1 s | 2 s | 5 s | 10 s | 15 s | 20 s | **30 s** |
+|---|---|---|---|---|---|---|---|---|
+| khung | 326 | 53 | 37 | 8 | 0 | 0 | 0 | **0** |
+
+Theo phiên ở 0 s: #0 67, #1 74, #2 26, #3 20, #4 85, #5 54; ở 5 s chỉ còn #0 3, #3 3, #5 2. Không có ứng viên nên không chạy
+nhãn trước, không soát ảnh, không lấy khoá GPU; `holdout_weak.frames` = `[]`, `results/v2/system/holdout_weak.json` →
+**"không đủ chứng minh (0 khung)"** ở cả ba tầng.
+
+- Khung trong cửa sổ bay nhưng **chưa nhập** vì cao ≤ 3 m (`ALT_MIN_M`) mà cách khối ≥ 30 s: 209 khung (đếm tay từ
+  `frames.csv` của IOT-CV, giãn 0,5 s; #0 42, #1 38, #2 52, #3 39, #4 23, #5 15), độ cao lớn nhất 0,23–1,64 m = lúc hạ cánh,
+  sát đất. Không phải khung bay (định nghĩa §14.2 / phase 03), nên không phải ứng viên.
+- Muốn có số B2 từ dữ liệu này thì phải nới luật 30 s (chủ dự án quyết): khung còn lại ở 0–5 s là hàng xóm 0,2–5 s của khung
+  test v1 (gần như cùng cảnh với 159 khung bay trống của test, đã chấm ở `results/v2/system/README.md` §4), nên số đó gần như
+  chấm lại test, không phải tập giữ kín. Chạy lại: `weak-holdout --min-dist-s <s> --prelabel --sheets`, agent soát, rồi
+  `score-weak`.
+
 ## Lệch so với plan
 
 1. **Holdout 0 khung, cal theo khối (`cal_mode: block`)**: cả 6 phiên dính test v1. Kill (a) "không đủ chứng minh".

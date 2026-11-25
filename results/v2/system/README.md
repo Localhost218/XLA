@@ -154,6 +154,25 @@ test + cal + mine và báo báo nhầm/khung theo tầng / phiên / ngày, CI bo
 holdout, không dùng cal để báo B2. Số báo nhầm 0,289/khung ở mục 4 là trên khung bay trống của **test** (để so với v1),
 không phải B2.
 
+## 5b. Holdout yếu "cùng buổi" (26/11/2026) — `holdout_weak.json`
+
+**Nhãn: holdout yếu: cùng buổi bay với test, không độc lập; agent duyệt.** Không thay mục 5, không đổi số nào ở mục 3–4.
+Luật (chủ dự án 26/11): khung bay `20261102-100941` không thuộc `split.json` v1, không mine/cal/devpool, cách mọi khối dev/test
+v1 ≥ 30 s, giãn 0,5 s, agent soát từng khung. Chấm bằng **đúng** đường holdout của `score`: `xla.camera.sessions score-weak`
+gọi `_replay_set` ba tầng qua IOT-CV với `--blank` = test + cal + mine, meta chỉ đọc, không chấm lại test, không ghi
+`score.json` (test `test_score_weak_reuses_holdout_path_without_touching_score_json`); báo nhầm/khung theo tầng / phiên, CI
+95 % bootstrap theo phiên **và** theo khối 30 s.
+
+| Tầng | holdout yếu | Đích B2 | Đạt? |
+|---|---|---|---|
+| 1 detector | không đủ chứng minh (0 khung) | — | — |
+| 2 + verifier @0,35 | không đủ chứng minh (0 khung) | — | — |
+| 3 + track k1/n1 (B2) | **không đủ chứng minh (0 khung)** | ≤ 0,05 | **không đủ chứng minh** |
+
+0 khung vì cả 1 602 khung bay ngoài `split.json` v1 đều nằm trong / cách khối dev/test v1 < 10 s (≥ 5 s: 8 khung; ≥ 30 s: 0).
+Bảng khoảng cách và các đường đi tiếp: `results/v2/neg-holdout/README.md` mục 6. B2 vẫn chỉ có được bằng một buổi bay bãi
+trống, hoặc chủ dự án nới luật 30 s (khi đó tập gần như trùng cảnh với test).
+
 ## 6. ms trực tiếp (bước 5) — `bench.json`
 
 `replay_bench.py` của IOT-CV trên `logs/recordings/20261102-100941`, khung 284 → 884 (600 khung, warmup 30), có người
