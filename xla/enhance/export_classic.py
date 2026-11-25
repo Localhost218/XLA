@@ -9,9 +9,9 @@ Lệnh (AX-01)::
 numpy ``xla/enhance/classic.py`` là SSOT; file này dựng lại **cùng phép tính** bằng op ONNX opset 17 từ cùng tham số
 (``classic.load_params``), không sửa ``classic.py``:
 
-- lọc box / Gauss = tổng các lát dịch có trọng số cố định trên ảnh đệm phản chiếu (``BORDER_REFLECT_101`` như cv2), không
-  dùng ``Conv``/``MatMul`` — ORT CUDA EP mặc định cho TF32 trên Conv/MatMul, sai số TF32 (~1e-3 tương đối) làm lệch làm
-  tròn uint8; trung bình box dùng ``AveragePool`` (không bị TF32);
+- lọc Gauss = tổng các lát dịch có trọng số cố định trên ảnh đệm phản chiếu (``BORDER_REFLECT_101`` như cv2, đệm bằng
+  ``Gather`` chỉ số hằng), không ``Conv``/``MatMul`` — ORT CUDA EP có thể chạy chúng bằng TF32 (~1e-3 tương đối), đủ lệch
+  làm tròn uint8; trung bình box dùng ``AveragePool`` (không bị TF32);
 - erode / dilate = ``MaxPool`` (biên bỏ qua như cv2); phân vị = ``TopK`` + nội suy tuyến tính đúng công thức của
   ``np.percentile`` (``kthvalue``/``quantile`` không xuất được ở opset 17);
 - mọi phép uint8 / int16 của cv2 = phép float rồi ``Round`` (nửa về chẵn như ``cvRound``) + kẹp bão hoà ở đúng chỗ;
@@ -65,12 +65,14 @@ def _luma(b: torch.Tensor, g: torch.Tensor, r: torch.Tensor) -> torch.Tensor:
 
 
 def _reflect(x: torch.Tensor, r: int, dim: int) -> torch.Tensor:
-    """Đệm ``BORDER_REFLECT_101`` ``r`` điểm mỗi phía của trục ``dim`` bằng lát + lật + nối. Không dùng ``F.pad`` reflect:
-    exporter sinh ``If`` (luồng điều khiển theo shape) + ``pads`` tính ra, graph mất shape tĩnh."""
+    """Đệm ``BORDER_REFLECT_101`` ``r`` điểm mỗi phía của trục ``dim`` bằng một ``Gather`` chỉ số hằng. Không dùng
+    ``F.pad`` reflect: exporter sinh ``If`` (luồng điều khiển theo shape) + ``pads`` tính ra, graph mất shape tĩnh; lát +
+    lật + nối thì tốn 5 nút mỗi trục (đo ORT CUDA: ``Concat`` + ``Slice`` ~4,5 ms/khung)."""
     if r == 0:
         return x
     n = int(x.shape[dim])  # cỡ tĩnh (hợp đồng §1): hằng trong graph
-    return torch.cat([x.narrow(dim, 1, r).flip(dim), x, x.narrow(dim, n - 1 - r, r).flip(dim)], dim)
+    idx = list(range(r, 0, -1)) + list(range(n)) + list(range(n - 2, n - 2 - r, -1))
+    return x.index_select(dim, torch.tensor(idx, dtype=torch.long))
 
 
 def _pad_reflect(x: torch.Tensor, ry: int, rx: int) -> torch.Tensor:
@@ -78,41 +80,15 @@ def _pad_reflect(x: torch.Tensor, ry: int, rx: int) -> torch.Tensor:
     return _reflect(_reflect(x, rx, -1), ry, -2)
 
 
-def tf32_exact(a: np.ndarray) -> np.ndarray:
-    """Bỏ 13 bit thấp của mantissa float32: số còn lại biểu diễn đúng trong TF32 (10 bit mantissa)."""
-    return (np.ascontiguousarray(a, np.float32).view(np.int32) & np.int32(~0x1FFF)).view(np.float32)
-
-
-class GaussConv(nn.Module):
-    """``cv2.GaussianBlur(σ)`` = ``Conv`` tách được (hàng 1×K rồi cột K×1, như ``sepFilter2D``), biên phản chiếu, an
-    toàn với TF32.
-
-    ORT CUDA EP có thể chạy ``Conv`` fp32 bằng TF32 (10 bit mantissa) — lệch ~1e-3 tương đối, đủ đổi làm tròn uint8. Nên
-    mọi tích trong ``Conv`` được dựng đúng TF32: nhân tách ``k = k_a + k_b`` (mỗi phần đã ``tf32_exact``, dư ≤ 2⁻²²·k);
-    ảnh vào nguyên 0–255 đã đúng TF32, ảnh float tách ``x = x_hi + x_lo`` với ``x_hi = round(8x)/8`` (|x| < 256: ≤ 11 bit
-    có nghĩa) và bỏ tích ``x_lo·k_b`` (|x_lo| ≤ 1/16 → ≤ 2⁻¹⁵ mức). Cộng dồn của Conv vẫn fp32 ở cả hai chế độ."""
-
-    def __init__(self, sigma: float, depth_8u: bool) -> None:
-        super().__init__()
-        k = np.asarray(gauss_kernel(sigma, depth_8u), np.float32)
-        ka = tf32_exact(k)
-        kb = tf32_exact(k - ka)
-        self.r = len(k) // 2
-        self.integer_input = depth_8u
-        for name, v in (("row_a", ka[None, :]), ("row_b", kb[None, :]), ("col_a", ka[:, None]), ("col_b", kb[:, None])):
-            self.register_buffer(name, torch.from_numpy(np.ascontiguousarray(v))[None, None], persistent=False)
-
-    @staticmethod
-    def _conv(x: torch.Tensor, wa: torch.Tensor, wb: torch.Tensor, integer: bool) -> torch.Tensor:
-        if integer:
-            return F.conv2d(x, wa) + F.conv2d(x, wb)
-        hi = torch.round(x * 8.0) * 0.125
-        return F.conv2d(hi, wa) + F.conv2d(hi, wb) + F.conv2d(x - hi, wa)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:  # x [1, H, W]
-        xp = _pad_reflect(x, self.r, self.r).unsqueeze(0)
-        row = self._conv(xp, self.row_a, self.row_b, self.integer_input)
-        return self._conv(row, self.col_a, self.col_b, False).squeeze(0)
+def _sep_filter(x: torch.Tensor, kern: list[float]) -> torch.Tensor:
+    """Lọc tách được (hàng rồi cột, như ``sepFilter2D``) bằng tổng lát dịch có trọng số; x [..., H, W]. Không ``Conv``:
+    ORT CUDA EP có thể chạy ``Conv`` fp32 bằng TF32 (lệch ~1e-3 tương đối, đủ đổi làm tròn uint8); bản ``Conv`` tách đúng
+    TF32 đã thử, chậm hơn 3 ms/khung (p50 30,1 so với 26,9 ms, cùng lần giữ khoá GPU)."""
+    r = len(kern) // 2
+    h, w = int(x.shape[-2]), int(x.shape[-1])
+    xp = _pad_reflect(x, r, r)
+    row = sum(xp[..., i : i + w] * kern[i] for i in range(len(kern)))
+    return sum(row[..., i : i + h, :] * kern[i] for i in range(len(kern)))
 
 
 def _box_mean(x: torch.Tensor, k: int) -> torch.Tensor:
@@ -217,7 +193,7 @@ class Demagenta(nn.Module):
         self.passes = int(m["passes"])
         self.dil = int(m["dilate_px"])
         self.blur = int(m["blur_px"])
-        self.gauss = GaussConv(float(m["texture_sigma"]), depth_8u=True)
+        self.gk = gauss_kernel(float(m["texture_sigma"]), depth_8u=True)
         self.g_comp = float(np.float32(C._LUMA_G_COMP))
 
     def gate_active(self, p: torch.Tensor) -> torch.Tensor:
@@ -241,7 +217,7 @@ class Demagenta(nn.Module):
             excess = torch.clamp(_sat8(r * 0.5 + b * 0.5) - g, min=0.0)
             delta = _sat8(alpha * excess * (m["strength"] / 255.0))
             tex_w = _sat8(alpha * _ramp8(mx, sat_full, m["texture_sat_ramp"]) * _INV255)
-            hp = g - _sat8(self.gauss(g.unsqueeze(0)))[0]
+            hp = g - _sat8(_sep_filter(g, self.gk))
             inj = torch.round(hp * tex_w * (m["texture_gain"] / 255.0))
             g_up = _sat8(delta * self.g_comp)
             b = _sat8(b - delta + inj)
@@ -342,7 +318,7 @@ class Sharpen(nn.Module):
         super().__init__()
         s = params["sharpen"]
         self.s = {k: float(v) for k, v in s.items()}
-        self.gauss = GaussConv(float(s["sigma"]), depth_8u=False)
+        self.gk = gauss_kernel(float(s["sigma"]), depth_8u=False)
         self.h, self.w = h, w
         rh, rw = h - 2 * (h // 4), w - 2 * (w // 4)  # vùng giữa của classic.sharpen
         self.imm_scale = math.sqrt(math.pi / 2) / (6 * (rw - 2) * (rh - 2))
@@ -355,7 +331,7 @@ class Sharpen(nn.Module):
         conv = sum(reg[:, i : i + rh - 2, j : j + rw - 2] * _IMMERKAER[i][j]
                    for i in range(3) for j in range(3) if _IMMERKAER[i][j])
         sigma_n = torch.clamp(torch.abs(conv).sum() * self.imm_scale, min=self.s["noise_floor"])
-        det = y - self.gauss(y)
+        det = y - _sep_filter(y, self.gk)
         thr = self.s["coring_k"] * sigma_n
         det = (det - torch.clamp(det, min=-thr, max=thr)) * self.s["amount"]
         y8 = _sat8(torch.abs(y))

@@ -90,16 +90,16 @@ def test_percentile_topk_matches_numpy(q: float) -> None:
 
 
 @pytest.mark.parametrize(("sigma", "depth_8u"), [(2.0, True), (1.2, False)])
-def test_gauss_conv_matches_cv2(sigma: float, depth_8u: bool) -> None:
-    """``GaussConv`` = ``cv2.GaussianBlur(ksize=(0, 0), σ)`` (cạnh nhân theo depth, biên phản chiếu); bản 8U của cv2 tính
-    dấu phẩy tĩnh nên so sau làm tròn, lệch ≤ 1 mức."""
+def test_sep_filter_matches_cv2_gaussian(sigma: float, depth_8u: bool) -> None:
+    """Lọc Gauss của graph = ``cv2.GaussianBlur(ksize=(0, 0), σ)`` (cạnh nhân theo depth, biên phản chiếu); bản 8U của
+    cv2 tính dấu phẩy tĩnh nên so sau làm tròn, lệch ≤ 1 mức."""
     import cv2
 
     rng = np.random.default_rng(3)
     img = rng.integers(0, 256, (120, 156)).astype(np.uint8)
     x = img if depth_8u else (img.astype(np.float32) * np.float32(0.731))
     with torch.no_grad():
-        got = E.GaussConv(sigma, depth_8u)(torch.from_numpy(x.astype(np.float32))[None])[0].numpy()
+        got = E._sep_filter(torch.from_numpy(x.astype(np.float32))[None], E.gauss_kernel(sigma, depth_8u))[0].numpy()
     ref = cv2.GaussianBlur(x, (0, 0), sigma)
     if depth_8u:
         assert np.abs(np.round(got) - ref.astype(np.float32)).max() <= 1
@@ -118,17 +118,7 @@ def test_graph_io_contract(onnx_path: Path, params: dict) -> None:
     ops = {n.op_type for n in m.graph.node}
     assert not ops & {"If", "Loop", "Scan"}, f"graph còn luồng điều khiển: {ops & {'If', 'Loop', 'Scan'}}"
     assert {"Where", "TopK"} <= ops  # nhánh mức đen = Where, phân vị = TopK
-    assert not ops & {"MatMul", "Gemm"}, "MatMul/Gemm chạy TF32 trên ORT CUDA EP: lệch làm tròn uint8"
-    # Conv được phép chỉ khi mọi trọng số đúng TF32 (GaussConv tách k = k_a + k_b) — tích không lệch dù EP bật TF32
-    inits = {i.name: onnx.numpy_helper.to_array(i) for i in m.graph.initializer}
-    consts = {n.output[0]: onnx.numpy_helper.to_array(n.attribute[0].t) for n in m.graph.node
-              if n.op_type == "Constant" and n.attribute and n.attribute[0].type == onnx.AttributeProto.TENSOR}
-    convs = [n for n in m.graph.node if n.op_type == "Conv"]
-    assert convs
-    for n in convs:
-        w = inits.get(n.input[1], consts.get(n.input[1]))
-        assert w is not None, f"{n.name}: trọng số Conv không phải hằng"
-        assert np.array_equal(E.tf32_exact(w), w.astype(np.float32)), f"{n.name}: trọng số không đúng TF32"
+    assert not ops & {"Conv", "MatMul", "Gemm"}, "Conv/MatMul có thể chạy TF32 trên ORT CUDA EP: lệch làm tròn uint8"
     sess = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
     out = sess.run(None, {"frame": synth("haze")})[0]
     c = int(params["crop_left"])
