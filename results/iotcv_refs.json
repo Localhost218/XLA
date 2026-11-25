@@ -15,7 +15,7 @@
    "train.py"
   ],
   "note": "đều NotImplementedError; xoá chờ chủ dự án duyệt (Human steps)",
-  "delete_approved": null
+  "delete_approved": "2026-11-25 (thiết kế AI v2 §3 Nợ nhỏ + phase 16); đã xoá ở IOT-CV PR #61 (c82509a, 26/11/2026)"
  },
  "refs": [
   {
