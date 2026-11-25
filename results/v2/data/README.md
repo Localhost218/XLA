@@ -165,7 +165,7 @@ Kiểm (đều chạy được lại):
    trong XML (4000×3000, ảnh thật 4000×2250, hộp đều nằm trong ảnh): dùng cỡ ảnh thật.
 5. **`clip_embeddings` giải mã ảnh trước khi giữ khoá GPU** (4 luồng) và đặt `timeout_s` 6 giờ (D6); trước đây giải mã
    trong khối khoá, không timeout. Kết quả VisDrone cũ không đổi (đặc trưng VisDrone đọc từ cache).
-6. `xla/degrade/sources.py` giờ ~1 300 dòng (quy ước ≤ 200 dòng/file): phần nguồn ngoài nằm chung file vì lane chỉ được
-   sở hữu file này. Nên tách `xla/degrade/external.py` ở một phase sau.
+6. `xla/degrade/sources.py` từng ~1 300 dòng (quy ước ≤ 200 dòng/file) vì lane chỉ được sở hữu file này. Đã tách 26/11/2026:
+   phần nguồn ngoài (giải nén, trình đọc, cắt ô, lọc góc) sang `xla/degrade/external.py`, `sources` nhập lại mọi tên, CLI giữ.
 7. Không thêm gói Python nào (D8): giải nén bằng `zipfile`/`tarfile`, XML bằng `xml.etree` (expat 2.9.0 của venv chặn bom
    mở rộng thực thể), thumbnail bằng PIL/cv2 có sẵn.

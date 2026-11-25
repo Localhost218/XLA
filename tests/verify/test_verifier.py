@@ -22,6 +22,7 @@ from xla.verify import mine as M
 ROOT = repo_root()
 RES = ROOT / "results" / "v2" / "verifier"
 BUNDLE = ROOT / "models" / "release" / "verifier-v1.0.0"
+MIN_SCORE_SPREAD = 0.05
 
 
 @pytest.fixture(scope="module")
@@ -124,12 +125,19 @@ def test_graph_exports_with_dynamic_n_and_parity(tmp_path: Path, backbone: str, 
 
     torch.manual_seed(0)
     bb = T.build_backbone(backbone, pretrained=False)
-    with torch.no_grad():  # thống kê BN khác mặc định để điểm ra không hằng
+    # Backbone ngẫu nhiên mà để thống kê BN tuỳ ý (mean ~0, var ~1) thì tín hiệu tắt dần qua các khối: effb0 ra đặc
+    # trưng gần như không phụ thuộc ảnh (độ lệch giữa các vùng cắt ~1e-9), 4 điểm chỉ khác nhau 1 ulp float32 và CI
+    # Linux ra hằng 0,64185 (26/11/2026). Hiệu chỉnh lại BN bằng vài lô ngẫu nhiên (train mode, trung bình cộng dồn)
+    # cho mỗi tầng ra đúng thang đo, nên điểm khác nhau thật và phép so parity mới có nghĩa.
+    for m in bb.modules():
+        if isinstance(m, torch.nn.BatchNorm2d):
+            m.momentum = None
+    bb.train()
+    with torch.no_grad():
+        for _ in range(4):
+            bb(torch.randn(16, 3, crop_px, crop_px))
         for m in bb.modules():
-            if isinstance(m, torch.nn.BatchNorm2d):
-                m.running_mean.uniform_(-0.1, 0.1)
-                m.running_var.uniform_(0.5, 1.5)
-            elif isinstance(m, torch.nn.Linear):  # khởi tạo gốc std 0,01 -> điểm gần hằng 0,5
+            if isinstance(m, torch.nn.Linear) and m.out_features == 1:  # đầu ra; gốc std 0,01 -> điểm gần hằng 0,5
                 m.weight.normal_(0, 0.5)
     mod = E.graph_module(bb.eval(), crop_px, 1.5, 32.0)
     p = tmp_path / "verifier.onnx"
@@ -149,7 +157,9 @@ def test_graph_exports_with_dynamic_n_and_parity(tmp_path: Path, backbone: str, 
     out = s.run(None, {C.INPUT_NAME: frame, C.BOXES_NAME: np.zeros((0, 4), np.float32)})[0]
     assert out.shape == (0,) and out.dtype == np.float32
     many = s.run(None, {C.INPUT_NAME: frame, C.BOXES_NAME: feeds["many"][1]})[0]
-    assert many.shape == (4,) and np.all((many >= 0) & (many <= 1)) and np.ptp(many) > 0
+    assert many.shape == (4,) and np.all((many >= 0) & (many <= 1))
+    # Ngưỡng cỡ 1e6 lần nhiễu làm tròn float32 (1 ulp quanh 0,64 = 6e-8): điểm phải phụ thuộc nội dung vùng cắt thật.
+    assert np.ptp(many) > MIN_SCORE_SPREAD, f"điểm gần hằng {many} (ptp {np.ptp(many):.3g}) — graph không nhìn ảnh"
 
 
 def _select() -> dict:

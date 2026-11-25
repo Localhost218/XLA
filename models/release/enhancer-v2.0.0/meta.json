@@ -11,9 +11,9 @@
   "camera_profile_version": "1.2.0",
   "train_run": "classic enhance_classic.yaml@1.0.0 (không huấn luyện)",
   "metrics": {
-    "pink_frac_drop": null,
-    "dark_channel_drop": null,
-    "flicker_ratio": null
+    "pink_frac_drop": 0.8921277223210217,
+    "dark_channel_drop": 0.5022075881193291,
+    "flicker_ratio": 2.1790505387869685
   },
   "ms_per_frame": {
     "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
@@ -27,7 +27,7 @@
   "camera_profile_sha256": "0a4587101241450130f6d9cdc8354dd2cd54e44c2473594530ae57d962a7c574",
   "classic_params_version": "1.0.0",
   "precision": "fp32",
-  "metrics_note": "metrics (tập test thật) = null: lane classic không đụng khung test; phase 14 đo",
+  "metrics_note": "metrics = tập test thật (198 khung test; flicker trên chuỗi liền kề của các khối test), cùng định nghĩa metrics_dev của enhancer-v1.0.0 (train_net.score_of); đo bằng xla.enhance.split_metrics",
   "metrics_dev": {
     "dark_channel_median_raw": 141.5,
     "dark_channel_median": 56.0,
@@ -89,5 +89,34 @@
     "001.jpg": "20261102-100941_004_01947.jpg",
     "002.jpg": "20261102-100941_007_00765.jpg"
   },
-  "ms_per_frame_source": "results/v2/classic/ms_ab.json: A/B xen kẽ với enhancer-v1.0.0 trong một tiến trình, giữ gpu_lock, 10 vòng × 100 lần, gộp 1000 lần; số cũ của lần xuất (GPU đang xung cao) p50 15.438, p95 18.411"
+  "ms_per_frame_source": "results/v2/classic/ms_ab.json: A/B xen kẽ với enhancer-v1.0.0 trong một tiến trình, giữ gpu_lock, 10 vòng × 100 lần, gộp 1000 lần; số cũ của lần xuất (GPU đang xung cao) p50 15.438, p95 18.411",
+  "metrics_test": {
+    "split": "test",
+    "n_frames_stats": 198,
+    "n_runs_flicker": 95,
+    "n_frames_flicker": 1346,
+    "raw_stats": {
+      "pink_frac": 0.009434202468056634,
+      "dark_channel_15px": 140.24754243152682,
+      "blocking_ratio_8x8": 2.515433451744041
+    },
+    "out_stats": {
+      "pink_frac": 0.0010176889083139083,
+      "dark_channel_15px": 69.81416240732648,
+      "blocking_ratio_8x8": 2.0754280951288013
+    },
+    "blocking_excess_drop": 0.2903495076665084,
+    "classic_def": {
+      "dark_channel_median_raw": 139.0,
+      "dark_channel_median": 56.5,
+      "dark_channel_drop": 0.5935251798561151,
+      "pink_frac_raw": 0.009434202468056634,
+      "pink_frac": 0.0010176889083139083,
+      "pink_frac_drop": 0.8921277223210217
+    },
+    "n_test_block_frames": 1434,
+    "runtime": "onnxruntime CPU EP 1.24.4, 4 luồng",
+    "measured": "2026-11-25T19:36:58+00:00",
+    "command": "python -m xla.enhance.split_metrics --bundle models/release/enhancer-v2.0.0 --write-meta"
+  }
 }

@@ -153,8 +153,28 @@ với N = 0; `boxes.json`, `expected.json` từ ORT CPU). `verifier.onnx` ngoài
 1. **ms vs lọc**: giữ `effb0_96` (5,96 ms ở N = 5) hay đổi `mnv3s_64` (2,93 ms, lọc kém hơn)? Quyết của chủ dự án; phase 09
    đo cả hệ cùng k/n.
 2. Cal chỉ có 15 báo nhầm v1: mọi tỉ lệ cal ở đây rộng. Holdout = 0 (phase 03 Kill (a)), cần phiên bay trống mới để chấm sạch.
-3. Âm báo nhầm d02x là hộp có IoU < 0,1 với nhãn của bộ ngoài; người không nhãn trong VisDrone/HERIDAL có thể lọt làm âm
-   (không soát tay phần ngoài).
+3. Âm báo nhầm d02x là hộp có IoU < 0,1 với nhãn của bộ ngoài; người không nhãn trong VisDrone/HERIDAL có thể lọt làm âm.
+   **Đã soát tay 26/11/2026** (`neg_audit/`): 200 âm `ext_neg_det` rút ngẫu nhiên (seed 20261126) trong 9 444, mỗi ô ba
+   khung (vùng cắt verifier thấy | cùng hộp trên ảnh nguồn sạch độ phân giải thật | nguồn phóng 1,5×), agent xem từng ô.
+
+   | | Chắc có người | Có thể có người (`?`) | Tỉ lệ chắc [Wilson 95 %] | Gộp cả `?` [Wilson 95 %] |
+   |---|---|---|---|---|
+   | Cả mẫu (200) | 12 | 37 | **6,0 % [3,5; 10,2]** | 24,5 % [19,1; 30,9] |
+   | VisDrone (127) | 11 | 27 | 8,7 % [4,9; 14,8] | 29,9 % [22,6; 38,4] |
+   | HERIDAL (37) | 1 | 5 | 2,7 % [0,5; 13,8] | 16,2 % [7,7; 31,1] |
+   | WiSARD (36) | 0 | 5 | 0 % [0; 9,6] | 13,9 % [6,1; 28,7] |
+
+   Người chắc chắn: người lái / ngồi sau xe máy, người ngồi xổm hoặc ngồi giữa hàng hoá, người đứng rõ (một ca VisDrone
+   s 0,63), một đầu người HERIDAL sát người đã có nhãn. `?` phần lớn là vật nhỏ (cạnh ngắn 7–32 px, trung vị 13) không phân định được (xe máy có thể có
+   người lái, khối xám trong cỏ, vật trắng có bóng). Luật chốt trước khi đếm: đáng kể khi cận dưới Wilson của tỉ lệ chắc
+   > 5 %; ở đây 3,5 % → **không đáng kể theo luật**, nhưng cận trên 10,2 % (gộp `?` tới 31 %) nên không loại được mức lớn.
+   Ước số âm chứa người trong 9 444: ~570 [330; 960] (gộp `?` ~2 300). Ảnh hưởng có thể có: verifier học bác bỏ một phần
+   người nhỏ kiểu lái xe / ngồi (gần như chỉ từ VisDrone), tức **hạ recall**, không tăng báo nhầm; recall OOF trên dev thật
+   (§4) và số cả hệ (phase 09) đã đo trên mô hình đang ship nên đã chứa ảnh hưởng này. Không huấn luyện lại (không có
+   ngân sách GPU). Lần sau: bỏ âm d02x VisDrone có IoA với hộp người nới ×2, hoặc chỉ giữ âm d02x có điểm verifier thấp.
+   Chạy lại: `python -m xla.verify.neg_audit sheet --n 200 --seed 20261126` rồi `... score` (đọc `review.csv`, ghi
+   `audit.json`). Lượt soát đầu chỉ xem vùng cắt d02x (không có ảnh nguồn) ra 7 chắc / 38 `?`; số trên là lượt hai, có
+   ảnh nguồn sạch.
 
 ## 9. Tệp
 
