@@ -1,0 +1,195 @@
+{
+ "counts": {
+  "flights": 6,
+  "recordings_scanned": 11,
+  "recordings_with_flights": [
+   "20261102-100941"
+  ],
+  "sessions": 6,
+  "avi_chunks_total": 17775,
+  "csv_rows": 11908,
+  "avi_chunks_without_csv_row": 5867,
+  "csv_rows_with_jpeg": 11908,
+  "in_flight_window": 4769,
+  "alt_gt_3m": 2944,
+  "not_spike": 2915,
+  "spikes_removed": 29,
+  "undecodable": 0,
+  "final": 2915
+ },
+ "recordings": {
+  "20261101-175552": {
+   "start_local": "2026-11-01 17:55:52",
+   "end_local": "2026-11-01 18:36:16",
+   "sessions": 0,
+   "frames_kept": 0,
+   "rel_alt_max_m": 1.07
+  },
+  "20261101-183704": {
+   "start_local": "2026-11-01 18:37:04",
+   "end_local": "2026-11-01 18:54:32",
+   "sessions": 0,
+   "frames_kept": 0,
+   "rel_alt_max_m": 0.21
+  },
+  "20261101-185436": {
+   "start_local": "2026-11-01 18:54:36",
+   "end_local": "2026-11-01 18:58:16",
+   "sessions": 0,
+   "frames_kept": 0,
+   "rel_alt_max_m": -3.35
+  },
+  "20261101-185822": {
+   "start_local": "2026-11-01 18:58:22",
+   "end_local": "2026-11-01 19:05:20",
+   "sessions": 0,
+   "frames_kept": 0,
+   "rel_alt_max_m": -3.96
+  },
+  "20261101-190530": {
+   "start_local": "2026-11-01 19:05:30",
+   "end_local": "2026-11-01 19:12:25",
+   "sessions": 0,
+   "frames_kept": 0,
+   "rel_alt_max_m": -4.89
+  },
+  "20261101-191230": {
+   "start_local": "2026-11-01 19:12:30",
+   "end_local": "2026-11-01 19:45:33",
+   "sessions": 0,
+   "frames_kept": 0,
+   "rel_alt_max_m": 1.79
+  },
+  "20261102-033719": {
+   "start_local": "2026-11-02 03:37:19",
+   "end_local": "2026-11-02 04:01:17",
+   "sessions": 0,
+   "frames_kept": 0,
+   "rel_alt_max_m": 0.27
+  },
+  "20261102-040317": {
+   "start_local": "2026-11-02 04:03:17",
+   "end_local": "2026-11-02 04:29:25",
+   "sessions": 0,
+   "frames_kept": 0,
+   "rel_alt_max_m": null
+  },
+  "20261102-042928": {
+   "start_local": "2026-11-02 04:29:28",
+   "end_local": "2026-11-02 04:29:28",
+   "sessions": 0,
+   "frames_kept": 0,
+   "rel_alt_max_m": null
+  },
+  "20261102-043054": {
+   "start_local": "2026-11-02 04:30:54",
+   "end_local": "2026-11-02 05:35:10",
+   "sessions": 0,
+   "frames_kept": 0,
+   "rel_alt_max_m": -1.8
+  },
+  "20261102-100941": {
+   "start_local": "2026-11-02 10:09:41",
+   "end_local": "2026-11-02 10:45:16",
+   "sessions": 6,
+   "frames_kept": 2915,
+   "rel_alt_max_m": 57.75
+  }
+ },
+ "sessions": [
+  {
+   "id": "20261102-100941#0",
+   "flight_id": "20261102-101046",
+   "start_local": "2026-11-02 10:10:46",
+   "duration_s": 125.0,
+   "n_frames": 371,
+   "alt_median_m": 17.33,
+   "brightness_median": 163.2,
+   "v1_split": {
+    "none": 328,
+    "test": 43
+   },
+   "v1_devval": 0
+  },
+  {
+   "id": "20261102-100941#1",
+   "flight_id": "20261102-101435",
+   "start_local": "2026-11-02 10:14:35",
+   "duration_s": 153.0,
+   "n_frames": 616,
+   "alt_median_m": 9.27,
+   "brightness_median": 163.3,
+   "v1_split": {
+    "dev": 172,
+    "none": 407,
+    "test": 37
+   },
+   "v1_devval": 13
+  },
+  {
+   "id": "20261102-100941#2",
+   "flight_id": "20261102-102319",
+   "start_local": "2026-11-02 10:23:19",
+   "duration_s": 138.0,
+   "n_frames": 241,
+   "alt_median_m": 9.91,
+   "brightness_median": 163.1,
+   "v1_split": {
+    "dev": 93,
+    "none": 125,
+    "test": 23
+   },
+   "v1_devval": 9
+  },
+  {
+   "id": "20261102-100941#3",
+   "flight_id": "20261102-102636",
+   "start_local": "2026-11-02 10:26:36",
+   "duration_s": 159.0,
+   "n_frames": 323,
+   "alt_median_m": 10.08,
+   "brightness_median": 161.3,
+   "v1_split": {
+    "dev": 217,
+    "none": 96,
+    "test": 10
+   },
+   "v1_devval": 20
+  },
+  {
+   "id": "20261102-100941#4",
+   "flight_id": "20261102-103039",
+   "start_local": "2026-11-02 10:30:39",
+   "duration_s": 162.0,
+   "n_frames": 530,
+   "alt_median_m": 8.91,
+   "brightness_median": 165.4,
+   "v1_split": {
+    "dev": 80,
+    "none": 389,
+    "test": 61
+   },
+   "v1_devval": 6
+  },
+  {
+   "id": "20261102-100941#5",
+   "flight_id": "20261102-104039",
+   "start_local": "2026-11-02 10:40:39",
+   "duration_s": 214.0,
+   "n_frames": 834,
+   "alt_median_m": 13.86,
+   "brightness_median": 164.1,
+   "v1_split": {
+    "dev": 553,
+    "none": 257,
+    "test": 24
+   },
+   "v1_devval": 52
+  }
+ ],
+ "not_ingested": [],
+ "n_not_ingested": 0,
+ "stale_in_manifest": [],
+ "n_stale_in_manifest": 0,
+ "events_source": "uv run --no-sync python -m backend.flights --events (IOT-CV)"
+}

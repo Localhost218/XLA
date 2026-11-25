@@ -6,7 +6,7 @@ không có dòng CSV là khung lấp chỗ mất hình, không có độ cao, b�
 
 Lệnh::
 
-    python -m xla.camera.frames extract --json   # khung bay + mẫu âm -> data/real/frames/, manifest.csv
+    python -m xla.camera.frames extract --json   # khung bay (mọi lần ghi) + mẫu âm -> data/real/frames/, manifest.csv
     python -m xla.camera.frames prelim --json    # YOLO11s COCO @1280 đếm người sơ bộ (GPU, trong gpu_lock)
 
 ``extract`` exit 1 khi số khung bay cuối lệch quá ``FLIGHT_FRAMES_TOL`` so với ``FLIGHT_FRAMES_EXPECTED``.
@@ -185,43 +185,102 @@ def _write_frame(out_dir: Path, name: str, data: bytes) -> None:
     p.write_bytes(data)
 
 
-def extract_flight(out_dir: Path, events_text: str) -> tuple[list[dict[str, Any]], dict[str, int]]:
-    """Khung bay của ``REC_FLIGHT`` sau các bước lọc; trả (dòng manifest, số đếm từng bước)."""
-    flights = parse_flight_events(events_text)
-    if not flights:
-        raise RuntimeError("không đọc được chuyến bay nào từ flights_events.txt")
-    rec_dir = recordings_dir() / REC_FLIGHT
-    counts: dict[str, int] = {"flights": len(flights), "avi_chunks_total": count_avi_chunks(rec_dir)}
+def session_id(rec: str, i: int) -> str:
+    """Id phiên bay theo hợp đồng §14.2: ``<rec>#<i>`` (i đếm từ 0 theo giờ bắt đầu, trong một lần ghi)."""
+    return f"{rec}#{i}"
+
+
+def recording_time_range(rec_dir: Path) -> tuple[float, float] | None:
+    """Giờ Unix (đầu, cuối) theo cột ``unix_time`` của ``frames.csv``; ``None`` khi lần ghi không có dòng có giờ."""
+    t = [float(r["unix_time"]) for r in read_rows(rec_dir) if r.get("unix_time")]
+    return (min(t), max(t)) if t else None
+
+
+def flight_sessions(flights: list[FlightWindow], rec_ranges: dict[str, tuple[float, float]],
+                    ) -> list[tuple[str, str, FlightWindow]]:
+    """Phiên bay = cửa sổ chuyến (``bay: có`` + video) cắt theo khoảng giờ của từng lần ghi.
+
+    Trả ``(session_id, rec, cửa sổ đã cắt)`` theo thứ tự (rec, giờ bắt đầu). Một chuyến vắt qua hai lần ghi thành hai
+    phiên, mỗi phiên một lần ghi; lần ghi không giao chuyến nào thì không có phiên.
+    """
+    out = []
+    for rec in sorted(rec_ranges):
+        lo, hi = rec_ranges[rec]
+        wins = sorted((f for f in flights if f.t0 <= hi and f.t1 >= lo), key=lambda f: f.t0)
+        for i, f in enumerate(wins):
+            out.append((session_id(rec, i), rec, FlightWindow(f.flight_id, max(f.t0, lo), min(f.t1, hi))))
+    return out
+
+
+def all_recording_ranges() -> dict[str, tuple[float, float]]:
+    """Mọi lần ghi trong ``logs/recordings`` có ``frames.csv`` có giờ."""
+    out = {}
+    for d in sorted(p for p in recordings_dir().iterdir() if (p / "frames.csv").is_file()):
+        r = recording_time_range(d)
+        if r is not None:
+            out[d.name] = r
+    return out
+
+
+def _extract_flight_rec(rec: str, sessions: list[tuple[str, str, FlightWindow]], out_dir: Path | None,
+                        counts: dict[str, int]) -> list[dict[str, Any]]:
+    rec_dir = recordings_dir() / rec
+    wins = [(sid, w) for sid, r, w in sessions if r == rec]
+    n_chunks = count_avi_chunks(rec_dir)
     recs = list(_iter_rows_with_jpeg(rec_dir))
-    counts["csv_rows"] = len(recs)
-    counts["avi_chunks_without_csv_row"] = counts["avi_chunks_total"] - len(recs)
     t = np.array([float(r["unix_time"]) for r, *_ in recs])
     alt = np.array([_float_or_nan(r.get("rel_alt_m")) for r, *_ in recs])
     spike = spike_mask(t, alt)
     has_jpeg = np.array([d is not None for *_, d in recs])
-    counts["csv_rows_with_jpeg"] = int(has_jpeg.sum())
-    fid = np.array([next((f.flight_id for f in flights if f.t0 <= ti <= f.t1), "") for ti in t])
+    hit = [next(((sid, w) for sid, w in wins if w.t0 <= ti <= w.t1), ("", None)) for ti in t]
+    sid = np.array([h[0] for h in hit])
+    fid = np.array([h[1].flight_id if h[1] else "" for h in hit])
     in_win = has_jpeg & (fid != "")
-    counts["in_flight_window"] = int(in_win.sum())
     alt_ok = in_win & np.isfinite(alt) & (alt > ALT_MIN_M)
-    counts["alt_gt_3m"] = int(alt_ok.sum())
     keep = alt_ok & ~spike
-    counts["not_spike"] = int(keep.sum())
-    counts["spikes_removed"] = int((alt_ok & spike).sum())
+    step = {"avi_chunks_total": n_chunks, "csv_rows": len(recs), "avi_chunks_without_csv_row": n_chunks - len(recs),
+            "csv_rows_with_jpeg": int(has_jpeg.sum()), "in_flight_window": int(in_win.sum()),
+            "alt_gt_3m": int(alt_ok.sum()), "not_spike": int(keep.sum()), "spikes_removed": int((alt_ok & spike).sum())}
+    for k, v in step.items():
+        counts[k] = counts.get(k, 0) + v
     out: list[dict[str, Any]] = []
-    undecodable = 0
     for i in np.flatnonzero(keep):
         _row, seg, vf, data = recs[i]
         assert data is not None
         if not _decodes(data):
-            undecodable += 1
+            counts["undecodable"] = counts.get("undecodable", 0) + 1
             continue
-        name = frame_name(REC_FLIGHT, seg, vf)
-        _write_frame(out_dir, name, data)
-        out.append({"frame": name, "kind": "flight", "rec": REC_FLIGHT, "segment": seg, "video_frame": vf,
+        name = frame_name(rec, seg, vf)
+        if out_dir is not None:
+            _write_frame(out_dir, name, data)
+        out.append({"frame": name, "kind": "flight", "rec": rec, "segment": seg, "video_frame": vf,
                     "t_unix": round(float(t[i]), 3), "alt_m": round(float(alt[i]), 3), "flight_id": str(fid[i]),
-                    "bytes": len(data), "sha256": sha256_hex(data)})
-    counts["undecodable"] = undecodable
+                    "bytes": len(data), "sha256": sha256_hex(data), "session": str(sid[i])})
+    return out
+
+
+def extract_flight(out_dir: Path | None, events_text: str,
+                   rec_ranges: dict[str, tuple[float, float]] | None = None,
+                   ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Khung bay của **mọi** lần ghi giao một chuyến (AI v2 phase 03) sau các bước lọc của v1.
+
+    Bước lọc giữ nguyên v1 (cửa sổ chuyến, ``rel_alt_m > 3``, điểm vọt, giải mã được), nên với dữ liệu 25/11/2026 (chỉ
+    ``20261102-100941`` có chuyến bay có video) kết quả trùng khít 2 915 khung v1. Mỗi dòng mang thêm ``session``
+    (``<rec>#<i>``, xem ``flight_sessions``); ``write_manifest`` không ghi cột này nên ``manifest.csv`` v1 không đổi.
+    ``out_dir=None``: chỉ đọc, không chép JPEG. Trả (dòng manifest, số đếm từng bước cộng mọi lần ghi).
+    """
+    flights = parse_flight_events(events_text)
+    if not flights:
+        raise RuntimeError("không đọc được chuyến bay nào từ flights_events.txt")
+    ranges = all_recording_ranges() if rec_ranges is None else rec_ranges
+    sessions = flight_sessions(flights, ranges)
+    recs = sorted({r for _, r, _ in sessions})
+    counts: dict[str, Any] = {"flights": len(flights), "recordings_scanned": len(ranges),
+                              "recordings_with_flights": recs, "sessions": len(sessions)}
+    out: list[dict[str, Any]] = []
+    for rec in recs:
+        out += _extract_flight_rec(rec, sessions, out_dir, counts)
+    counts.setdefault("undecodable", 0)
     counts["final"] = len(out)
     return out, counts
 
@@ -257,7 +316,7 @@ def extract_neg(out_dir: Path) -> tuple[list[dict[str, Any]], dict[str, int]]:
 def write_manifest(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as f:
-        w = csv.DictWriter(f, fieldnames=MANIFEST_FIELDS, lineterminator="\n")
+        w = csv.DictWriter(f, fieldnames=MANIFEST_FIELDS, lineterminator="\n", extrasaction="ignore")
         w.writeheader()
         w.writerows(sorted(rows, key=lambda r: (r["kind"], r["t_unix"])))
 
@@ -284,7 +343,7 @@ def cmd_extract(args: argparse.Namespace) -> int:
     ok = lo <= fly_counts["final"] <= hi
     total_bytes = sum(int(r["bytes"]) for r in fly + neg)
     report = {
-        "recording": REC_FLIGHT,
+        "recording": fly_counts["recordings_with_flights"],
         "flight": fly_counts,
         "neg": neg_counts,
         "expected_flight_frames": FLIGHT_FRAMES_EXPECTED,
