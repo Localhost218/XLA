@@ -1,0 +1,89 @@
+{
+ "contract_version": "1.1",
+ "model": "enhancer-offline",
+ "version": "1.0.0",
+ "onnx_sha256": "e93b3eaa714a003df0c6a77c11dacefc7b22666143dc8c490957dc1a5b53afc8",
+ "frame_size": [
+  640,
+  480
+ ],
+ "crop_left": 16,
+ "camera_profile_version": "1.2.0",
+ "train_run": "v2-sr-l1_percep",
+ "created": "2026-11-25T17:52:06+00:00",
+ "scale": 2,
+ "output_size": [
+  1280,
+  960
+ ],
+ "temporal_window": 1,
+ "network": {
+  "candidate": "ft_l1_percep",
+  "base": "realesrgan_x2plus",
+  "arch": "rrdbnet",
+  "arch_kwargs": {
+   "num_in_ch": 3,
+   "num_out_ch": 3,
+   "scale": 2,
+   "num_feat": 64,
+   "num_block": 23,
+   "num_grow_ch": 32
+  },
+  "init_weights": "RealESRGAN_x2plus.pth",
+  "init_weights_sha256": "49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb",
+  "license": "BSD-3-Clause (Real-ESRGAN); kiến trúc RRDBNet Apache-2.0 (BasicSR)",
+  "step": 2481,
+  "precision": "fp16",
+  "opset": 17
+ },
+ "fp16": true,
+ "peak_vram_mb": 2064.0,
+ "s_per_frame": 0.4043,
+ "machine": {
+  "device": "RTX 4060 Laptop",
+  "time": "2026-11-25T17:50:48+00:00",
+  "host": "Nghaiz-PC",
+  "os": "Windows-11-10.0.26300-SP0",
+  "cpu_count": 32,
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "driver_version": "610.88",
+   "temperature.gpu": "82",
+   "clocks.sm": "1530 MHz",
+   "clocks.max.sm": "3105 MHz",
+   "power.draw": "52.22 W",
+   "pstate": "P0",
+   "memory.used": "1088 MiB",
+   "memory.total": "8188 MiB"
+  },
+  "cpu": {
+   "percent": 5.0,
+   "freq_mhz": 2501.0,
+   "ram_avail_gb": 22.4
+  }
+ },
+ "s_per_frame_detail": {
+  "mean": 0.40432211000024837,
+  "p50": 0.37808584999947925,
+  "p95": 0.5259280100022806,
+  "n": 20,
+  "providers": [
+   "CUDAExecutionProvider",
+   "CPUExecutionProvider"
+  ]
+ },
+ "metrics_note": "metrics (fp cal/holdout trên ảnh offline) phase 14 ghi",
+ "metrics_dev": {
+  "flicker_ratio": 1.348012612144038,
+  "pink_frac_drop": 0.9999251603144843,
+  "dark_channel_drop": 0.3308150830616526,
+  "blocking_excess_drop": 0.7582020082764531,
+  "fp_cal_raw": 0.1,
+  "fp_cal_offline": 0.06666666666666667
+ },
+ "golden_sources": {
+  "000.jpg": "20261102-100941_002_00400.jpg",
+  "001.jpg": "20261102-100941_004_01926.jpg",
+  "002.jpg": "20261102-100941_007_00744.jpg"
+ }
+}

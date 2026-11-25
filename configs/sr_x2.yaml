@@ -1,0 +1,91 @@
+# Phase 11 AI v2: ảnh rõ offline ×2 (`enhancer-offline-v1.0.0`, hợp đồng docs/hop-dong-model.md §11).
+# Đọc bằng xla/enhance/sr.py (bench | train | select | export) và xla/enhance/sr_pairs.py (cặp LR/HR).
+version: "1.0.0"
+weights_dir: D:/DevCache/weights/sr          # bản sao từ D:/IOT_Tools/downloads/weights (D8: không cài basicsr)
+runs_dir: D:/DevCache/runs/xla/v2/sr
+results_dir: results/v2/sr
+gpu_budget_hours: 1.5                        # trần cả phase (quyết định chủ dự án 25/11; plan ghi 4,5 h)
+
+# Ứng viên zero-shot: trọng số công bố, sha256 ghi lúc tải 25/11 (nguồn không công bố checksum: số này để kiểm lần sau).
+candidates:
+  realesrgan_x2plus:
+    arch: rrdbnet
+    kwargs: {num_in_ch: 3, num_out_ch: 3, scale: 2, num_feat: 64, num_block: 23, num_grow_ch: 32}
+    weights: RealESRGAN_x2plus.pth
+    weights_key: params_ema
+    sha256: 49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb
+    url: https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth
+    license: "BSD-3-Clause (Real-ESRGAN); kiến trúc RRDBNet Apache-2.0 (BasicSR)"
+  swinir_m_x2_real:
+    arch: swinir
+    kwargs: {upscale: 2, in_chans: 3, img_size: 64, window_size: 8, img_range: 1.0, depths: [6, 6, 6, 6, 6, 6],
+             embed_dim: 180, num_heads: [6, 6, 6, 6, 6, 6], mlp_ratio: 2.0, upsampler: nearest+conv,
+             resi_connection: 1conv}
+    weights: 003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x2_GAN.pth
+    weights_key: null                        # file lưu thẳng state_dict; khoá attn_mask (theo img_size 64) bị bỏ
+    sha256: f397408977a3e07eb06afb7238d453a12ef35ebab7328a54241f307860dbe342
+    url: https://github.com/JingyunLiang/SwinIR/releases/download/v0.0/003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x2_GAN.pth
+    license: Apache-2.0 (SwinIR)
+
+discriminator:                               # chỉ biến thể fine-tune có GAN
+  weights: RealESRGAN_x2plus_netD.pth
+  weights_key: params
+  sha256: 8a762d19b75574925f4ba77b9591480354135dcc81eb6ff287e177ecb42e5754
+  url: https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.3/RealESRGAN_x2plus_netD.pth
+
+bench:
+  n_frames: 20                               # khung dev 640×480 (xla.enhance.export_onnx.dev_frames)
+  warmup: 3
+  max_s_per_frame: 0.5                       # Kill (d): chậm hơn → không ship
+  recording: 20261102-100941                 # fps thật = số khung / thời lượng trong frames.csv của IOT-CV
+  flight_minutes: 20
+  target_hours: 1.0                          # đích vận hành: chuyến 20 phút xử lý xong ≤ 60 phút
+
+pairs:                                       # xla/enhance/sr_pairs.py
+  out: sr_pairs_x2                           # dưới XLA_DATA_ROOT: lr/{train,val}/images, hr/{train,val}/images
+  hr_window: [1248, 960]                     # [w, h] cửa sổ ảnh sạch; hạ ×½ (INTER_AREA) → 624×480 → D2 → 640×480 JPEG
+  n_train: 1600
+  n_val: 48
+  hr_jpeg_quality: 95
+  seed: 20261125
+  workers: 4                                 # trần 4 (máy từng sập dưới tải)
+  d2_config: configs/degrade_d2.yaml
+  d2_params_version: 3
+  profile: configs/camera_profile.yaml
+
+data:                                        # khoá như configs/restore.yaml để dùng lại xla.enhance.train_net
+  input_set: sr_pairs_x2/lr
+  target_set: sr_pairs_x2/hr
+  patch: 128                                 # patch LR; đích 256 (như gt_size 256 của Real-ESRGAN x2)
+  grid: 8                                    # gốc patch trên lưới khối JPEG 8 px tính từ crop_left
+  flip: true
+
+train:
+  base: realesrgan_x2plus
+  batch: 8
+  workers: 4
+  lr: 5.0e-5
+  lr_min: 5.0e-6
+  betas: [0.9, 0.99]
+  weight_decay: 0.0
+  warmup_steps: 100
+  max_steps: 20000                           # trần thật là time_budget_min; dừng sớm ghi checkpoint cuối
+  last_every: 200                            # last.pt để resume (plan: mỗi 200 bước)
+  pixel_weight: 1.0
+  perceptual_weight: 1.0
+  grad_clip: 0.0
+  seed: 20261125
+  variants:
+    l1_percep: {gan_weight: 0.0, time_budget_min: 22}
+    l1_percep_gan: {gan_weight: 0.1, time_budget_min: 22, d_lr: 5.0e-5}
+
+select:
+  split: dev
+  max_frames: 200                            # khung dev trong các chuỗi liền kề (≥ 3 khung), lấy cách đều theo chuỗi
+  min_run: 3
+  stats_every: 2
+  flicker_max: 1.15
+  detector_bundle: models/release/detector-v1.0.0     # meta.json (conf_threshold, onnx_sha256) trong repo
+  detector_onnx: D:/DevCache/weights/detector-v1.0.0/detector.onnx  # .onnx không vào git: bản sao, kiểm sha256 với meta
+  # Báo nhầm detector v1 trên khung cal (không người) sau SR, hạ ×½ (INTER_AREA) về 640×480. Ứng viên có
+  # fp/khung > gốc bị loại (Kill (d) nếu không còn ai).
