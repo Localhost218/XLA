@@ -30,18 +30,18 @@ camera này; số phiên bay đủ để chia mine/holdout) còn UNMEASURED.
 | Hàng rào: detector chạy trên ảnh offline không tăng báo nhầm (holdout) | 60 % | ESTIMATED: chưa đo; Real-ESRGAN nổi tiếng làm mịn nền, ít tạo vật thể mới, nhưng chưa thử trên khung này |
 | Một chuyến 20 phút xử lý offline xong ≤ 60 phút trên RTX 4060 Laptop 8 GB | 55 % | UNKNOWN cho s/khung của RRDBNet ×2 ở 640×480 trên ORT CUDA: insufficient evidence; 55 % là ước theo cỡ mạng (ESTIMATED). Phase 11 bước 1 đo |
 
-Success rate: phase 02 dữ liệu ngoài 70 % (HERIDAL không tải được, MEASURED: connection refused) · 03 chia theo phiên 60 % (UNKNOWN số phiên đủ) · 05–06 detector 55 % · 07 verifier 60 % · 08 IOT-CV track 80 % · 09 B2 đạt 45 % · 10 classic ONNX 65 % (parity percentile/deblock chưa thử) · 11 SR offline 55 % · 12 mạng video 25 % (tuỳ chọn, ONNX của deformable conv chưa chắc) · 13 IOT-CV offline 80 % · 18 web 85 % · 14 A/B 45 %. Overall (chuỗi B: 02 → 06 → 07 → 09 ≈ 0,7 × 0,55 × 0,6 × 0,45 ≈ 10 %; chuỗi A: 10 hoặc 11 → 14 ≈ 25 %), dưới mắt xích yếu nhất (09, 45 %). Đây là xác suất mọi tiêu chí đạt ngay lần đầu, không phải xác suất có kết quả báo cáo được (mọi phase đều cho số đo kèm CI dù đạt hay không).
+Success rate: phase 02 dữ liệu ngoài 80 % (HERIDAL + TinyPerson + WiSARD sample đã trên đĩa 25/11, MEASURED; SARD bỏ) · 03 chia theo phiên 60 % (UNKNOWN số phiên đủ) · 05–06 detector 55 % · 07 verifier 60 % · 08 IOT-CV track 80 % · 09 B2 đạt 45 % · 10 classic ONNX 65 % (parity percentile/deblock chưa thử) · 11 SR offline 55 % · 12 mạng video 25 % (tuỳ chọn, ONNX của deformable conv chưa chắc) · 13 IOT-CV offline 80 % · 18 web 85 % · 14 A/B 45 %. Overall (chuỗi B: 02 → 06 → 07 → 09 ≈ 0,7 × 0,55 × 0,6 × 0,45 ≈ 10 %; chuỗi A: 10 hoặc 11 → 14 ≈ 25 %), dưới mắt xích yếu nhất (09, 45 %). Đây là xác suất mọi tiêu chí đạt ngay lần đầu, không phải xác suất có kết quả báo cáo được (mọi phase đều cho số đo kèm CI dù đạt hay không).
 Effect (low/likely/high): giờ GPU 10 / 15 / 25 giờ (ESTIMATED, cộng theo phase: thầy 3 / 4,5 / 6 (trần phase 05) + trò k-fold 2,8 / 4,2 / 6 (1–6 lần × ~0,7 giờ, v1 E1 39,6–45,6 phút/lần MEASURED; trần phase 06) + verifier 0,5 / 0,7 / 1 + gán nhãn trước 03–04 0,5 / 0,8 / 1 + lai classic 0 / 1 / 2 + SR 2 / 3 / 4,5 + video 0 (dừng ở probe) / 0,5 / 4 + offline một chuyến 1 / 1 / 1 ≈ 9,8 / 15,7 / 25,5) · lịch theo đường găng 6 / 9 / 14 ngày làm việc (ESTIMATED, cộng Effort đường găng) · chất lượng: báo nhầm/khung bay 0,881 → ≤ 0,05 (đích). May be slower: tải SARD (4,43 GB, cần đăng nhập IEEE DataPort, DOCUMENTED), duyệt holdout và chấm A/B phụ thuộc lúc chủ dự án rảnh, cài BasicVSR++ (mmcv) trên Windows (UNKNOWN). Trực tiếp: verifier cộng ms, bù lại classic nhẹ hơn NAFNet (ESTIMATED).
 Uncertainties (by impact): 1. Số phiên bay + số khung không người ngoài bản ghi `20261102-100941` (mọi khung dev/test v1 đều từ bản ghi này, MEASURED từ `data/real/split.json`) → phase 03 bước 1 đếm theo `python -m backend.flights --events`, 30 phút CPU, trước phase 05/07/09. 2. Tỉ lệ ảnh gần nadir trong SARD/TinyPerson → phase 02 bước 3 đếm sau lọc góc, 1 giờ, trước phase 05. 3. VRAM YOLO11l @1280 → phase 05 bước 1 smoke 15 phút. 4. Parity ONNX của classic (percentile, deblock) → phase 10 bước 1 parity từng tầng, 2 giờ. 5. s/khung và VRAM của SR ×2 → phase 11 bước 1 đo trọng số có sẵn, 30 phút. 6. ORT có chạy DeformConv (BasicVSR++) không → phase 12 bước 1 thử xuất, 1 giờ.
 Kill / no-regression: (a) phase 03 thấy holdout < 150 khung không người → vẫn chấm nhưng báo "không đủ chứng minh", thêm human step ghi phiên bay trống; không bao giờ lấy khung holdout ra hiệu chỉnh. (b) Không ứng viên detector nào hơn `detector-v1.0.0` trên OOF k-fold → không xuất `detector-v2.0.0`, giữ v1, verifier + track vẫn ship. (c) Verifier không hạ báo nhầm trên `cal` ≥ 50 % ở recall OOF giảm ≤ 0,05 → không ship `verifier-v1.0.0`, IOT-CV chạy detector + track. (d) Offline: không ứng viên qua hàng rào báo nhầm hoặc > 0,5 s/khung → không xuất `enhancer-offline-v1.0.0`, web ẩn nút offline (API trả 503 đúng hợp đồng). (e) Classic vs gốc không đạt cận dưới > 0,5 → ghi "không đạt" ở chỉ số §5; "Ảnh rõ" classic vẫn bật mặc định theo quyết định Owner (brainstorm §3.A1), người dùng tắt được. Rollback: mỗi phase một nhánh lane; bundle có phiên bản, IOT-CV đổi về bundle v1 bằng `DETECTOR_ONNX`/`ENHANCER_ONNX` trong `.env`; `test_ngan_sach_ms` đỏ có chủ đích, không động vào.
 Re-score: none yet (re-score sau phase 03 bước 1, phase 02 bước 3, phase 11 bước 1).
-Not checked: giấy phép HERIDAL (máy chủ từ chối kết nối 25/11), giấy phép dataset của TinyPerson và VisDrone (README không ghi; repo TinyPerson ghi MIT cho mã), góc nhìn của SARD/TinyPerson, ORT DeformConv, VRAM thật của mọi model mới, bản ghi bay 19/11 có video hay không (`logs/tlog/20261119-*` có, `logs/recordings/` không có thư mục 19/11).
+Not checked: giấy phép dataset của TinyPerson và VisDrone (README không ghi; repo TinyPerson ghi MIT cho mã), góc nhìn của HERIDAL/TinyPerson/WiSARD, ORT DeformConv, VRAM thật của mọi model mới, bản ghi bay 19/11 có video hay không (`logs/tlog/20261119-*` có, `logs/recordings/` không có thư mục 19/11).
 
 ## Finish ETA
 
 `done by 2026-11-25 20:21 UTC+07:00 [parallel; p80-chain; 3 gates x 10m; delivery 52m42s] n=173 basis=global validated=unvalidated (0 of 10 plans measured; backtest of 10 past plans: took 1.78x longer than this figure, hit 2/10)`
 (sequential: 2026-11-26 02:36; đường găng của CLI: 1 > 3 > 4 > 5 > 6 > 7 > 9 > 14 > 15 > 17). Con số chỉ tính thời gian agent +
-cổng người theo dữ liệu chung của kit; **không** tính giờ GPU (10 / 15 / 25 giờ, Forecast), thời gian tải SARD/TinyPerson, hay
+cổng người theo dữ liệu chung của kit; **không** tính giờ GPU (10 / 15 / 25 giờ, Forecast), thời gian tải dữ liệu ngoài, hay
 lúc chủ dự án rảnh để duyệt holdout và chấm A/B. Lịch thực tế theo Forecast: 6 / 9 / 14 ngày làm việc.
 
 ## Phases
@@ -49,7 +49,7 @@ lúc chủ dự án rảnh để duyệt holdout và chấm A/B. Lịch thực t
 | # | Phase | Nhánh | Lane | Depends-on | Effort | File |
 |---|---|---|---|---|---|---|
 | 01 | Hợp đồng v1.1: verifier, enhancer-offline, `recommended_track`; validator, bundle giả | chung | serial | none | M | `phase-01-hop-dong-v2.md` |
-| 02 | Dữ liệu ngoài có giấy phép (SARD, TinyPerson, HERIDAL nếu tải được), lọc nadir, làm xấu D2 v3 | B | data-ext | 01 | L | `phase-02-du-lieu-ngoai.md` |
+| 02 | Dữ liệu ngoài có giấy phép (HERIDAL, TinyPerson, WiSARD sample; SARD bỏ), lọc nadir, làm xấu D2 v3 | B | data-ext | 01 | L | `phase-02-du-lieu-ngoai.md` |
 | 03 | Nhập mọi bản ghi, chỉ mục phiên bay, chia `neg_flight` theo phiên → mine / cal / holdout | B | realdata | 01 | M | `phase-03-phien-bay-chia-neg.md` |
 | 04 | Nhãn dev mở rộng + fold theo phiên cho chọn model k-fold | B | realdata | 03 | L | `phase-04-nhan-dev-kfold.md` |
 | 05 | Thầy YOLO11l/m @1280 trên D0+D2 (VisDrone + ngoài) + lớp âm mine, nhãn giả dev | B | detect | 01, 02, 03, 04 | L | `phase-05-thay-nhan-gia.md` |
@@ -67,7 +67,7 @@ lúc chủ dự án rảnh để duyệt holdout và chấm A/B. Lịch thực t
 | 17 | Báo cáo: `results/v2`, `reproduce.py --write`, `BAO_CAO_DO_AN.md`, slide `docs/slide/`, Release `models-v2.0.0`, PR cuối | chung | serial | 09, 14, 15, 16 | M | `phase-17-bao-cao-phat-hanh.md` |
 | 18 | IOT-CV web: nguồn ảnh offline, ô trạng thái model (KeyValue), mặc định "Ảnh rõ" theo `enhancer_default_on` | A | iotcv | 13 | M | `phase-18-iotcv-web.md` |
 
-Đường găng: 01 → 02 (chờ tải SARD) → 05 → 06 → 07 → 09 → 15 → 17, nhánh song song 01 → 03 → 04 → 05. Nhánh A (10, 11 → 12 → 14)
+Đường găng: 01 → 02 → 05 → 06 → 07 → 09 → 15 → 17, nhánh song song 01 → 03 → 04 → 05. Nhánh A (10, 11 → 12 → 14)
 và IOT-CV (08 → 13 → 18) chạy song song với nhánh B từ ngày đầu vì chỉ cần hợp đồng (01). Hai cổng người (duyệt holdout ở
 03, chấm A/B ở 14) không nằm trên đường găng của nhánh B; cổng A/B nằm trên đường tới 15.
 
@@ -75,8 +75,7 @@ và IOT-CV (08 → 13 → 18) chạy song song với nhánh B từ ngày đầu 
 
 | Step | Unblocks | Where / exact command | Why an agent cannot | Timing |
 |---|---|---|---|---|
-| Tải SARD (`SARD-fixed.zip`, 4,43 GB) về `D:\IOT_Tools\downloads\datasets\sard\` | phase 02 | Trang IEEE DataPort (agent mở sẵn): https://ieee-dataport.org/documents/search-and-rescue-image-dataset-person-detection-sard → đăng nhập → tải `SARD-fixed.zip`. Giấy phép trang ghi CC BY 4.0 | Trang ghi "LOGIN TO ACCESS DATASET FILES": cần tài khoản IEEE của chủ dự án (mật khẩu / 2FA) | now |
-| Tải TinyPerson (bản Google Drive trong README) về `D:\IOT_Tools\downloads\datasets\tinyperson\` | phase 02 | README (agent mở sẵn): https://raw.githubusercontent.com/ucas-vg/PointTinyBenchmark/TinyBenchmark/dataset/README.md → link "Google Driver" | Luật chủ máy: agent không đụng Google Drive; trang chính thức `vision.ucas.ac.cn` trả 404 (25/11) | now |
+| ~~Tải dữ liệu ngoài~~ **xong 25/11**: HERIDAL, TinyPerson, WiSARD sample ở `D:\IOT_Tools\downloads\datasets\{heridal,tinyperson,wisard}\`; SARD bỏ | phase 02 | — | — | done |
 | Duyệt tập `neg_flight` giữ kín: xác nhận các khung thật sự không có người (~10–15 phút) | phase 03 | Trang ảnh ghép `results/v2/neg-holdout/review/index.html` (agent mở sẵn, ô đánh dấu khung có người, nút **Xuất**) | Tập chấm B2 là phán quyết của chủ dự án, như tập test v1 (phase 08 v1) | later: cần phase 03 bước 1–5 |
 | Chấm thử mù A/B v2, hai lượt (cả khung, phóng to 2×), ~15 phút mỗi lượt | phase 14 | `results/ab-v2/ab-test.html` và `results/ab-v2-zoom/ab-test.html` (agent mở sẵn), chọn ảnh rõ hơn, bấm **Xuất kết quả** | Cảm nhận người xem là chính đại lượng cần đo | later: cần phase 10, 11 (và 12 nếu không dừng) |
 | (Tuỳ chọn, không chặn) Buổi bay tới: bật camera bay 1–2 chuyến ở bãi KHÔNG có người để có thêm phiên holdout | phase 03 (mở rộng holdout) | Bay như thường; agent chạy backend ghi video, sau đó chạy lại phase 03 bước 1–4 | Cần phần cứng + người lái | later: buổi bay tới, không chặn plan |
@@ -185,7 +184,7 @@ bên dưới là kết quả grep, không phải quét corpus.
 |---|---|---|---|
 | 1 | Bản sao số camera D2 (`params_version` 3) | REUSE | `degrade` @ xla/degrade/d2_camera.py:267, `encode_final` @ :287; `params_version: 3` @ configs/degrade_d2.yaml:7 |
 | 2 | Dựng tập D0/D2 + nhãn YOLO + `dataset.yaml` | EXTEND | `xla/degrade/build.py:112-114` (gọi D2), `:273-274` (`dataset.yaml`); delta: nguồn `external` trong `configs/sources.yaml`, tập trộn `d02x` (cặp SR ×2 dựng riêng ở `xla/enhance/sr_pairs.py`, phase 11, gọi `degrade` của dòng 1) |
-| 3 | Nạp VisDrone + lọc nadir | EXTEND | `load_visdrone` @ xla/degrade/sources.py:99, `is_nadir` @ :243, `cmd_fit_probe` @ :508, `configs/visdrone_view.yaml`; delta: `load_sard`, `load_tinyperson`, `load_heridal` + nhãn góc nhìn từng bộ |
+| 3 | Nạp VisDrone + lọc nadir | EXTEND | `load_visdrone` @ xla/degrade/sources.py:99, `is_nadir` @ :243, `cmd_fit_probe` @ :508, `configs/visdrone_view.yaml`; delta: `load_heridal`, `load_tinyperson`, `load_wisard` + nhãn góc nhìn từng bộ |
 | 4 | Nhập khung bay thật + cửa sổ chuyến | EXTEND | `extract_flight` @ xla/camera/frames.py:188, `parse_flight_events` @ :89, `FlightWindow` @ :69, `extract_neg` @ :229; delta: mọi bản ghi `logs/recordings/*`, trường `session` |
 | 5 | Chia dev/test theo khối 30 s | REUSE | `xla/camera/split.py`, `data/real/split.json` (1115/198/300, chỉ đọc) |
 | 6 | Gán nhãn trước (RT-DETR-x + YOLO11x + SAHI, WBF) | REUSE | `run` @ xla/detect/prelabel.py:169, `fuse` @ :80 |
@@ -225,8 +224,8 @@ bên dưới là kết quả grep, không phải quét corpus.
 | 40 | Siêu phân giải offline ×2 (RRDBNet / SwinIR) fine-tune D2 | NEW | repo chỉ có NAFNet/FBCNN/SCUNet cùng cỡ (`xla/enhance/arch/`); bản Real-ESRGAN-anime cũ ở `models/` của nhóm bị bỏ theo thiết kế v1<br>reuse-search: not-found-after-corpus-and-grep<br>scope: xla/enhance, models, src, repo:IOT-CV (backend) \| swept: 2026-11-25 |
 | 41 | Khôi phục video nhiều khung (BasicVSR++) | NEW | không có mạng nhiều khung nào; `temporal.py` chỉ đo nhấp nháy<br>reuse-search: not-found-after-corpus-and-grep<br>scope: xla, src, repo:IOT-CV (backend) \| swept: 2026-11-25 |
 
-Nguồn sự thật bên ngoài (fact-fetcher 25/11, URL kiểm 200): SARD CC BY 4.0 (IEEE DataPort, cần đăng nhập); TinyPerson
-không ghi giấy phép dataset (mã MIT); VisDrone không ghi giấy phép; HERIDAL không truy cập được; Ultralytics AGPL-3.0;
+Nguồn sự thật bên ngoài (fact-fetcher 25/11, URL kiểm 200): SARD cần thuê bao IEEE DataPort trả phí (kiểm 25/11 khi đã đăng nhập) → bỏ; HERIDAL CC BY 3.0 (Zenodo 5662351, 7,74 GB, md5 khớp); WiSARD MIT; TinyPerson
+không ghi giấy phép dataset (mã MIT); VisDrone không ghi giấy phép; máy chủ gốc HERIDAL từ chối kết nối (dùng bản Zenodo); Ultralytics AGPL-3.0;
 Real-ESRGAN BSD-3 (có `RealESRGAN_x2plus.pth` v0.2.1); SwinIR Apache-2.0 (có `SwinIR-M_x2` real GAN/PSNR); BasicVSR++
 Apache-2.0; RVRT CC-BY-NC (không dùng, D8 + Deferred 11); SAHI MIT; ByteTrack MIT; timm Apache-2.0 (trọng số ImageNet
 chỉ cho nghiên cứu, áp cho cả torchvision). Đồ án là nghiên cứu, báo cáo ghi rõ (phase 17).
@@ -276,8 +275,8 @@ chỉ cho nghiên cứu, áp cho cả torchvision). Đồ án là nghiên cứu,
 | 17 | Mặc định "Ảnh rõ" | luôn bật / theo A/B | Bật: phase 15 đặt `ENHANCER_DEFAULT_ON = true` cho classic; A/B classic vs gốc chỉ là chỉ số §5, không đổi mặc định; lựa chọn đã lưu của người dùng luôn thắng | Owner đã chốt (brainstorm §3.A1); gắn cổng A/B là mở lại quyết định (list-classifier R6 25/11) | `.env` `ENHANCER_DEFAULT_ON=false` |
 | 18 | Ô trạng thái model đặt đâu | trang Bay / trang Vision | `VisionPage.tsx` | Trang Bay phải vừa một màn hình không cuộn (AGENTS.md) | Chuyển component sang trang khác |
 | 19 | Release `models-v2.0.0` | có / không | Tạo như v1 D21 | Owner cho toàn quyền XLA (AGENTS.md luật 10) | Xoá Release trên GitHub |
-| 20 | HERIDAL | human step / bỏ | Agent thử trang chính + bản sao công khai; không tải được thì bỏ, không thêm human step | Máy chủ từ chối kết nối 25/11 | Thêm lại khi có nguồn |
-| 21 | Tải TinyPerson | agent / chủ dự án | Chủ dự án tải (human step) | Agent không đụng Google Drive | — |
+| 20 | HERIDAL | máy chủ gốc / bản sao | Bản Zenodo 5662351 (CC BY 3.0, keras-retinanet VOC), agent tải bằng aria2c 8 luồng, md5 khớp | Máy chủ gốc từ chối kết nối 25/11 | — |
+| 21 | Tải TinyPerson | agent / chủ dự án | Chủ dự án tự tải 4 file (train/test.tar.gz + tiny_set_train/test.json), xong 25/11 | Chủ dự án muốn tự bấm tải file lớn | — |
 | 22 | Ô trạng thái `enhancer-offline` | nạp khi khởi động / kiểm không nạp | Kiểm sha + meta + mở session **CPU** không chạy rồi đóng (state `ready`, màu vàng); session GPU chỉ mở khi job chạy | Không chiếm VRAM luồng trực tiếp; sha + meta không chứng minh graph mở được (red-team 25/11) | Mở session GPU sẵn nếu job khởi động chậm |
 | 23 | Box vẽ trên luồng trực tiếp | trước / sau verifier | Sau verifier; sự kiện sau track | Người lái thấy đúng thứ hệ thống tin; payload `detection` không đổi | Thêm cờ hiển thị hộp chưa xác minh |
 | 24 | Plane Work-Item Gate | chạy / bỏ | Bỏ hẳn (opt-out ghi nhận) | Chủ dự án cấm (luật chủ máy + AGENTS.md luật 4) | Không đảo ngược |
@@ -287,3 +286,4 @@ chỉ cho nghiên cứu, áp cho cả torchvision). Đồ án là nghiên cứu,
 | 28 | Hàng rào báo nhầm ảnh offline đo trên | holdout / cal | Quyết định trên `cal`, holdout chỉ ghi vào meta + báo cáo; không có ứng viên dự phòng sau khi bị loại | Holdout không được chọn gì (D5) | Sửa `guard_fp` |
 | 29 | Phần web IOT-CV | gộp phase 13 / phase riêng | Phase 18 riêng, Accept bằng vitest | Một Accept pytest không chứng minh được web (list-classifier R1) | Gộp lại |
 | 30 | Recall OOF khi C2 thắng | dùng model cuối / model từng fold | Xuất ONNX từng fold, phase 09 đo recall fold i bằng detector fold i | Model cuối đã thấy nhãn giả của mọi fold | Bỏ khi C1/C3 thắng |
+| 31 | Bỏ SARD, thêm WiSARD sample | SARD / WiSARD bản đủ / WiSARD sample | SARD bỏ (cần thuê bao IEEE trả phí, không bản sao công khai); WiSARD bản đủ 40,5 GB chủ dự án thấy quá nặng → dùng Multi-Modal Sample 971 MB (264 ảnh RGB, MIT); nguồn nền khó chính là HERIDAL | Kiểm 25/11 | Thêm SARD lại nếu có thuê bao IEEE |
