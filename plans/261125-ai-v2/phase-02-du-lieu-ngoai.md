@@ -3,7 +3,7 @@
 Lane: data-ext
 Depends-on: 01
 Gate: none (dữ liệu đã tải đủ 25/11)
-Status: READY
+Status: DONE 25/11/2026 (lane data-ext đã gộp vào `feat/ai-v2`; kết quả `results/v2/data/README.md`)
 Effort: L
 Repo: XLA, worktree `D:\XLA-wt\data-ext`, nhánh `lane/data-ext` từ `feat/ai-v2`
 Owns: `xla/degrade/sources.py`, `configs/sources.yaml`, `configs/view_external.yaml`, `xla/degrade/build.py` (chỉ thêm nguồn `external`), `tests/degrade/test_external_sources.py`
