@@ -1,0 +1,54 @@
+# Verifier tầng 2 (AI v2 phase 07): hard negative từ `mine`, phân loại vùng cắt, bundle verifier-v1.0.0.
+# Hợp đồng: docs/hop-dong-model.md §9. Mã: xla/verify/{mine,train,export_onnx}.py. Kết quả: results/v2/verifier/.
+seed: 20261125
+# Detector dùng để khai thác hộp = detector-v1.0.0 (phase 06 Kill (b), quyết định chủ dự án 25/11). Chỉ đọc.
+detector_bundle: D:/XLA/models/release/detector-v1.0.0
+runs_dir: D:/DevCache/runs/xla/v2/verifier
+d02x_dir: D:/DevCache/datasets/xla/d02x
+sources_config: configs/sources.yaml
+results_dir: results/v2/verifier
+
+# Hình học vùng cắt (graph §9): tâm giữ, cạnh = max(w, h) * context_scale, tối thiểu min_side_px, kẹp [crop_left, 640) x [0, 480)
+crop:
+  context_scale: 1.5
+  min_side_px: 32.0
+
+mine:
+  pos_iou: 0.5          # hộp detector khớp nhãn devpool (IoU >= 0,5) = dương
+  neg_max_iou: 0.1      # hộp detector trên khung có người: IoU lớn nhất với GT < 0,1 mới là âm (0,1–0,5 bỏ, mơ hồ)
+  neg_max_ioa: 0.3      # và phần hộp nằm trong một GT < 0,3 (hộp trên đầu/tay một người = một phần người; soát 25/11)
+  random_bg_per_frame: 8  # vùng nền ngẫu nhiên mỗi khung thật không người (âm dễ, cỡ như hộp người)
+  random_bg_side: [12, 60]
+  d02x_images: 2400     # ảnh train d02x chạy detector (lấy đều theo nguồn) để lấy âm báo nhầm + dương khớp
+  d02x_gt_pos_max: 3000 # dương GT d02x (lấy đều theo nguồn)
+  d02x_gt_min_side: 6
+  tinyperson_pos_max: 1200
+  tinyperson_min_side: 8
+  review_n: 200         # trang soát âm ngẫu nhiên (agent nhìn, bỏ người sót) -> results/v2/verifier/neg_review.csv
+
+train:
+  # Trần GPU của chủ dự án 25/11: 30 phút cả phase (plan ghi 1 giờ). Chạy ứng viên theo `candidates`, mỗi ứng viên 2 fold + bản cuối.
+  candidates:
+    mnv3s_64: {backbone: mobilenet_v3_small, crop_px: 64}
+    mnv3s_96: {backbone: mobilenet_v3_small, crop_px: 96}
+    effb0_64: {backbone: efficientnet_b0, crop_px: 64}
+    effb0_96: {backbone: efficientnet_b0, crop_px: 96}
+  variants: 3           # số bản cắt rung (jitter) mỗi mẫu, bản 0 = hộp gốc
+  jitter_shift: 0.12    # dịch tâm theo tỉ lệ cạnh
+  jitter_scale: 0.2     # đổi cỡ +-
+  jpeg_prob: 0.5        # D2: nén lại JPEG chất lượng ngẫu nhiên
+  jpeg_quality: [25, 85]
+  epochs: 12
+  patience: 3           # dừng sớm theo loss OOF-val (fold) / loss tập giữ lại (bản cuối)
+  batch: 256
+  lr: 0.001
+  weight_decay: 0.0001
+  weights: {real_pos: 3.0, real_neg_hard: 4.0, real_neg_bg: 1.0, ext_pos: 1.0, ext_neg: 1.0}
+  workers: 4
+
+select:
+  max_recall_drop: 0.05     # tiêu chí chọn + Kill (c)
+  kill_min_fp_reduction: 0.5
+  cal_fp_target: 0.03       # D7
+  # Điểm vận hành ghi vào meta.conf_threshold: d7 (cal fp/khung <= 0,03, recall OOF lớn nhất) — phase 09 chốt cùng k/n.
+  operating: d7

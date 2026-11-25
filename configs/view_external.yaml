@@ -1,0 +1,340 @@
+# Nhãn góc nhìn soát tay cho nguồn ngoài (AI v2 phase 02), đọc bằng xla/degrade/sources.py
+# (`load_external_view_labels`). Cùng định nghĩa lớp với configs/visdrone_view.yaml:
+#   nadir   — trục camera lệch ≲ 20–25° so với thẳng đứng: không thấy chân trời, thấy đỉnh đầu / vai người.
+#   near    — "gần nadir" ≲ 35°: nhìn dốc, phối cảnh nhẹ, không thấy chân trời.
+#   oblique — xiên hơn: thấy chân trời / trời, mặt đất chạy ra xa, người thấy rõ thân từ bên cạnh.
+#   mixed   — (chỉ cho nhóm) nhóm có nhiều góc: từng ảnh đi qua probe.
+# Thứ tự quyết: nhãn ảnh (`images`) → nhãn nhóm (`groups`, khoá "<bộ>/<nhóm>") → probe CLIP ≥ external.min_probe_nadir.
+# `images` là mẫu soát tay 100 ảnh/bộ (seed ghi ở `review`), dùng để đo precision của probe trên bộ đó.
+reviewed: 2026-11-25
+method: "agent lane data-ext soát mắt lưới `seq-sheet --source <bộ> --n 100 --seed 20261125` (ô 360×270, chưa hiện điểm probe khi soát)"
+# Kết quả: {'heridal': {'nadir': 93, 'near': 7, 'oblique': 0}, 'tinyperson': {'nadir': 11, 'near': 19, 'oblique': 70}, 'wisard': {'nadir': 38, 'near': 24, 'oblique': 38}}
+review:
+  seed: 20261125
+  n_per_set: 100
+  sheet_dir: D:/DevCache/cache/degrade/external_review
+# Nhãn nhóm (quyết sau khi soát, 25/11): HERIDAL 100/100 ảnh mẫu là nadir/near trên 16/17 nơi bay (số ảnh mẫu mỗi
+# nơi ở cột phải) trong khi probe CLIP (học trên VisDrone đô thị) chỉ nhận 77/100 → gán nadir theo nơi bay để không bỏ
+# 23 % ảnh tốt. CAB (8 ảnh, không có trong mẫu) vẫn qua probe. WiSARD: một chuyến, mẫu có 38/100 xiên → mixed (probe).
+groups:
+  heridal/BLA: nadir    # 1
+  heridal/BLI: nadir    # 1
+  heridal/BRA: nadir    # 6
+  heridal/BRK: nadir    # 9
+  heridal/BRS: nadir    # 4
+  heridal/CAP: nadir    # 5 (2 near)
+  heridal/GOR: nadir    # 17
+  heridal/GRO: nadir    # 2
+  heridal/JAS: nadir    # 11
+  heridal/MED: nadir    # 12
+  heridal/MOB: nadir    # 1
+  heridal/RAK: nadir    # 4
+  heridal/SB: nadir     # 1
+  heridal/TRS: nadir    # 3
+  heridal/VRD: nadir    # 20 (5 near)
+  heridal/ZRI: nadir    # 3
+  wisard/210417_MtErie_Enterprise_VIS_0003: mixed
+images:
+  # --- heridal: 100 ảnh, seed 20261125
+  heridal/test_BLI_0006: nadir
+  heridal/test_BRA_0006: nadir
+  heridal/test_BRA_0010: nadir
+  heridal/test_BRK_0003: nadir
+  heridal/test_BRS_0009: nadir
+  heridal/test_GRO_0002: nadir
+  heridal/test_GRO_0011: nadir
+  heridal/test_MOB_0002: nadir
+  heridal/test_TRS_0005: nadir
+  heridal/test_TRS_0006: nadir
+  heridal/train_BLA_0011: nadir
+  heridal/train_BRA_1015: nadir
+  heridal/train_BRA_1026: nadir
+  heridal/train_BRA_1043: nadir
+  heridal/train_BRA_1065: nadir
+  heridal/train_BRK_1020: nadir
+  heridal/train_BRK_2012: nadir
+  heridal/train_BRK_2022: nadir
+  heridal/train_BRK_2050: nadir
+  heridal/train_BRK_2065: nadir
+  heridal/train_BRK_2069: nadir
+  heridal/train_BRK_2112: nadir
+  heridal/train_BRK_2119: nadir
+  heridal/train_BRS_0005: nadir
+  heridal/train_BRS_0025: nadir
+  heridal/train_BRS_0045: nadir
+  heridal/train_CAP_0015: near
+  heridal/train_CAP_0031: nadir
+  heridal/train_CAP_0048: near
+  heridal/train_CAP_0055: nadir
+  heridal/train_CAP_0057: nadir
+  heridal/train_GOR_1007: nadir
+  heridal/train_GOR_1023: nadir
+  heridal/train_GOR_1036: nadir
+  heridal/train_GOR_1062: nadir
+  heridal/train_GOR_1065: nadir
+  heridal/train_GOR_1069: nadir
+  heridal/train_GOR_1074: nadir
+  heridal/train_GOR_2019: nadir
+  heridal/train_GOR_2040: nadir
+  heridal/train_GOR_2048: nadir
+  heridal/train_GOR_2060: nadir
+  heridal/train_GOR_2062: nadir
+  heridal/train_GOR_3004: nadir
+  heridal/train_GOR_3021: nadir
+  heridal/train_GOR_3029: nadir
+  heridal/train_GOR_3057: nadir
+  heridal/train_GOR_3065: nadir
+  heridal/train_JAS_0016: nadir
+  heridal/train_JAS_0017: nadir
+  heridal/train_JAS_0045: nadir
+  heridal/train_JAS_0051: nadir
+  heridal/train_JAS_0083: nadir
+  heridal/train_JAS_0088: nadir
+  heridal/train_JAS_0095: nadir
+  heridal/train_JAS_0109: nadir
+  heridal/train_JAS_0130: nadir
+  heridal/train_JAS_0136: nadir
+  heridal/train_JAS_0140: nadir
+  heridal/train_MED_1024: nadir
+  heridal/train_MED_1026: nadir
+  heridal/train_MED_1027: nadir
+  heridal/train_MED_3004: nadir
+  heridal/train_MED_3054: nadir
+  heridal/train_MED_3066: nadir
+  heridal/train_MED_3069: nadir
+  heridal/train_MED_4015: nadir
+  heridal/train_MED_4016: nadir
+  heridal/train_MED_4022: nadir
+  heridal/train_MED_4054: nadir
+  heridal/train_MED_4063: nadir
+  heridal/train_RAK_0039: nadir
+  heridal/train_RAK_0054: nadir
+  heridal/train_RAK_0057: nadir
+  heridal/train_RAK_0080: nadir
+  heridal/train_SB_0016: nadir
+  heridal/train_TRS_0048: nadir
+  heridal/train_VRD_0006: nadir
+  heridal/train_VRD_0027: nadir
+  heridal/train_VRD_0029: nadir
+  heridal/train_VRD_0035: nadir
+  heridal/train_VRD_0042: nadir
+  heridal/train_VRD_0052: nadir
+  heridal/train_VRD_0081: nadir
+  heridal/train_VRD_0099: nadir
+  heridal/train_VRD_0102: nadir
+  heridal/train_VRD_0112: nadir
+  heridal/train_VRD_0120: nadir
+  heridal/train_VRD_0154: nadir
+  heridal/train_VRD_0155: nadir
+  heridal/train_VRD_2002: near
+  heridal/train_VRD_2006: near
+  heridal/train_VRD_2050: near
+  heridal/train_VRD_3006: near
+  heridal/train_VRD_3047: near
+  heridal/train_VRD_3073: nadir
+  heridal/train_VRD_3077: nadir
+  heridal/train_ZRI_2030: nadir
+  heridal/train_ZRI_2044: nadir
+  heridal/train_ZRI_3011: nadir
+  # --- tinyperson: 100 ảnh, seed 20261125
+  tinyperson/bb_V0014_I0001080: nadir
+  tinyperson/bing_P000_367362_174157147172_2: oblique
+  tinyperson/bb_V0008_I0002840: oblique
+  tinyperson/bb_V0032_I0001840: oblique
+  tinyperson/bb_V0033_I0010280: oblique
+  tinyperson/bb_V0008_I0003760: near
+  tinyperson/bing_P000_35513899_1403330028758: oblique
+  tinyperson/bb_V0033_I0009040: oblique
+  tinyperson/bb_V0033_I0000120: nadir
+  tinyperson/bb_V0005_I0006600: near
+  tinyperson/bb_V0023_I0001880: oblique
+  tinyperson/youtube_V0004_I0002280: oblique
+  tinyperson/bb_V0005_I0005080: oblique
+  tinyperson/bb_V0016_I0002560: nadir
+  tinyperson/bb_V0022_I0002360: oblique
+  tinyperson/youtube_V0004_I0002720: oblique
+  tinyperson/chitube_V0006_I0002740: oblique
+  tinyperson/bb_V0023_I0001920: oblique
+  tinyperson/bb_V0033_I0005880: nadir
+  tinyperson/youtube_V0004_I0001600: near
+  tinyperson/bb_V0023_I0002240: oblique
+  tinyperson/youtube_V0002_I0003080: oblique
+  tinyperson/bb_V0030_I0000080: oblique
+  tinyperson/bb_V0016_I0003240: oblique
+  tinyperson/bb_V0033_I0002560: oblique
+  tinyperson/bb_V0023_I0001600: oblique
+  tinyperson/bb_V0033_I0000360: near
+  tinyperson/bing000_2009040913572766058: oblique
+  tinyperson/bb_V0033_I0000080: oblique
+  tinyperson/bb_V0032_I0003160: oblique
+  tinyperson/bb_V0005_I0004720: oblique
+  tinyperson/youtube_V0004_I0004560: oblique
+  tinyperson/bb_V0023_I0000720: oblique
+  tinyperson/bb_V0030_I0000000: oblique
+  tinyperson/bb_V0008_I0001000: oblique
+  tinyperson/bb_V0005_I0004080: near
+  tinyperson/baidu_P001_d18c336aebd34e4483ae1d028b9bbe64_th: oblique
+  tinyperson/bb_V0024_I0000400: nadir
+  tinyperson/chitube_V0007_I0001640: oblique
+  tinyperson/youtube_V0002_I0000400: oblique
+  tinyperson/bb_V0020_I0002000: oblique
+  tinyperson/bb_V0014_I0003560: oblique
+  tinyperson/bb_V0031_I0003560: oblique
+  tinyperson/google_P000_q1HoCQL5FXFV0M: nadir
+  tinyperson/bb_V0018_I0000800: oblique
+  tinyperson/bb_V0003_I0001440: near
+  tinyperson/bb_V0003_I0002160: near
+  tinyperson/bb_V0035_I0002400: near
+  tinyperson/bb_V0033_I0003040: oblique
+  tinyperson/chitube_V0006_I0000160: near
+  tinyperson/baidu_P001_709e3dc765154719830331a5ed2e9b05_th: oblique
+  tinyperson/bb_V0031_I0002480: oblique
+  tinyperson/youtube_V0002_I0003200: oblique
+  tinyperson/bb_V0036_I0000320: oblique
+  tinyperson/bb_V0020_I0000720: oblique
+  tinyperson/bb_V0033_I0003880: oblique
+  tinyperson/youtube_V0008_I0000080: oblique
+  tinyperson/youtube_V0008_I0003560: near
+  tinyperson/bb_V0007_I0002280: oblique
+  tinyperson/youtube_V0003_I0002040: near
+  tinyperson/youtube_V0000_I0002640: near
+  tinyperson/bb_V0012_I0000240: oblique
+  tinyperson/youtube_V0000_I0010600: oblique
+  tinyperson/bb_V0006_I0006640: oblique
+  tinyperson/bb_V0001_I0002160: oblique
+  tinyperson/bb_V0009_I0001840: near
+  tinyperson/youtube_V0008_I0002920: near
+  tinyperson/youtube_V0000_I0004000: oblique
+  tinyperson/bb_V0007_I0003240: oblique
+  tinyperson/bb_V0007_I0001320: oblique
+  tinyperson/bb_V0012_I0000480: oblique
+  tinyperson/bb_V0015_I0002640: oblique
+  tinyperson/youtube_V0001_I0003200: nadir
+  tinyperson/bing_P000_541946b178f30: oblique
+  tinyperson/youtube_V0005_I0002960: oblique
+  tinyperson/bing_P000_100k070000002rnjfBF15: oblique
+  tinyperson/youtube_V0001_I0003080: oblique
+  tinyperson/youtube_V0005_I0003040: near
+  tinyperson/youtube_V0003_I0002440: near
+  tinyperson/bb_V0027_I0001560: oblique
+  tinyperson/youtube_V0000_I0006240: oblique
+  tinyperson/baidu_P001_1000 (3): oblique
+  tinyperson/bing_P000_DSC_5411: oblique
+  tinyperson/bb_V0017_I0004240: oblique
+  tinyperson/google_P000_Porthleven-Surf-Sep2017-©EdBlomfield-100: oblique
+  tinyperson/bb_V0006_I0000200: oblique
+  tinyperson/youtube_V0001_I0000720: oblique
+  tinyperson/bb_V0001_I0000360: oblique
+  tinyperson/bb_V0006_I0000160: oblique
+  tinyperson/youtube_V0001_I0001840: nadir
+  tinyperson/bb_V0017_I0000800: oblique
+  tinyperson/youtube_V0001_I0002000: nadir
+  tinyperson/youtube_V0000_I0009360: oblique
+  tinyperson/youtube_V0008_I0003360: near
+  tinyperson/youtube_V0000_I0001400: near
+  tinyperson/bb_V0012_I0000000: oblique
+  tinyperson/bb_V0000_I0002200: nadir
+  tinyperson/youtube_V0005_I0001360: oblique
+  tinyperson/youtube_V0001_I0000120: nadir
+  tinyperson/bb_V0009_I0000160: near
+  # --- wisard: 100 ảnh, seed 20261125
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000000: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000001: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000002: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000004: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000006: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000009: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000010: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000011: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000013: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000015: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000019: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000021: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000029: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000031: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000034: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000035: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000036: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000040: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000045: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000048: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000051: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000052: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000054: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000056: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000057: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000058: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000060: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000061: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000062: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000067: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000068: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000069: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000070: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000075: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000080: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000081: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000083: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000086: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000088: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000089: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000090: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000092: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000095: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000102: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000103: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000107: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000108: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000109: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000110: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000113: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000114: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000117: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000125: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000128: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000129: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000132: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000137: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000138: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000141: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000142: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000146: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000148: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000149: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000150: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000154: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000156: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000163: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000165: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000168: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000171: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000175: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000176: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000178: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000180: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000184: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000185: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000187: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000188: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000196: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000197: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000199: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000202: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000203: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000204: oblique
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000209: near
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000212: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000217: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000218: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000220: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000221: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000222: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000227: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000229: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000232: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000234: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000237: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000240: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000241: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000255: nadir
+  wisard/210417_MtErie_Enterprise_VIS_0003_00000263: nadir

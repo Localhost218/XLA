@@ -75,15 +75,69 @@ def devval_frames(root: Path) -> list[str]:
     return sorted(json.loads((root / LABELS_REL / "manifest.json").read_text(encoding="utf-8"))["devval_frames"])
 
 
+NEG_SPLIT_REL = Path("data/real/neg_flight_split.json")
+MINE_MAX_FRAC = 0.10  # ảnh nền mine ≤ 10 % tập train (phase 05 AI v2 bước 2)
+
+
+def check_real_frames(names: list[str], root: Path, pseudo: dict[str, str] | None = None,
+                      excluded_sessions: set[str] | frozenset[str] = frozenset(), n_total: int | None = None,
+                      mine_max_frac: float = MINE_MAX_FRAC, session_of: dict[str, str] | None = None,
+                      ) -> dict[str, int]:
+    """Danh sách CHO PHÉP khung thật vào huấn luyện (hợp đồng §14.2, D5) — thay danh sách cấm cũ.
+
+    Khung thật (tên khớp khung bay, hay có trong ``split.json`` / ``neg_flight_split.json``) chỉ được vào nếu:
+
+    - là khung ``mine`` của ``neg_flight_split.json`` (ảnh nền, nhãn rỗng), tổng ≤ ``mine_max_frac`` × ``n_total``, hoặc
+    - có trong ``pseudo`` (``{frame: session}``: khung mang nhãn giả), là ``dev`` của ``split.json``, không phải ``cal`` /
+      ``holdout`` và phiên của nó không thuộc ``excluded_sessions`` (fold đang loại).
+
+    ``session_of`` (tuỳ chọn) ghi đè phiên của khung mine khi lọc fold (mặc định lấy từ ``neg_flight_split.json``).
+    Mọi khung thật khác (test, cal, holdout, dev chưa gán nhãn giả, khung ngoài split) → ValueError."""
+    split = {f["frame"]: f["split"] for f in json.loads((root / SPLIT_REL).read_text(encoding="utf-8"))["frames"]}
+    neg_doc = json.loads((root / NEG_SPLIT_REL).read_text(encoding="utf-8"))
+    neg = {f["frame"]: f for f in neg_doc["frames"]}
+    pseudo = pseudo or {}
+    sess = {f: r["session"] for f, r in neg.items()} | (session_of or {})
+    bad: dict[str, list[str]] = {}
+    n_mine = n_pseudo = 0
+    for n in names:
+        if not (n in split or n in neg or REAL_FRAME_RE.match(n)):
+            continue
+        kind = neg.get(n, {}).get("split")
+        if kind == "mine":
+            if sess.get(n) in excluded_sessions:
+                bad.setdefault("mine của fold đang loại", []).append(n)
+            n_mine += 1
+            continue
+        if kind in ("cal", "holdout"):
+            bad.setdefault(kind, []).append(n)
+        elif split.get(n) == "test":
+            bad.setdefault("test", []).append(n)
+        elif n not in pseudo:
+            bad.setdefault("chưa gán (không mine, không nhãn giả)", []).append(n)
+        elif split.get(n) != "dev":
+            bad.setdefault(f"nhãn giả trên khung {split.get(n) or 'ngoài split'}", []).append(n)
+        elif pseudo[n] in excluded_sessions:
+            bad.setdefault("nhãn giả của fold đang loại", []).append(n)
+        else:
+            n_pseudo += 1
+    if bad:
+        msg = "; ".join(f"{k}: {len(v)} (vd. {v[:2]})" for k, v in bad.items())
+        raise ValueError(f"khung thật ngoài danh sách cho phép (§14.2): {msg}")
+    total = n_total if n_total is not None else len(names)
+    if n_mine and n_mine > mine_max_frac * total:
+        raise ValueError(f"ảnh nền mine {n_mine}/{total} > {mine_max_frac:.0%} tập train")
+    return {"mine": n_mine, "pseudo": n_pseudo, "real_other": 0}
+
+
 def dataset_info(set_name: str, root: Path) -> dict[str, Any]:
-    """``dataset.yaml`` + sha256 manifest của tập sinh; tập train có khung bay thật nào → ValueError (D10)."""
+    """``dataset.yaml`` + sha256 manifest của tập sinh; khung thật ngoài danh sách cho phép → ValueError (§14.2)."""
     d = data_root() / set_name
     manifest = d / "manifest.jsonl"
     names = [json.loads(line)["name"] for line in manifest.read_text(encoding="utf-8").splitlines() if line.strip()]
-    real = {f["frame"] for f in json.loads((root / SPLIT_REL).read_text(encoding="utf-8"))["frames"]}
-    leak = sorted(n for n in names if n in real or REAL_FRAME_RE.match(n))
-    if leak:
-        raise ValueError(f"{set_name}: {len(leak)} khung thật trong tập huấn luyện (vd. {leak[:3]})")
+    real = check_real_frames(names, root, mine_max_frac=1.0)  # tập sinh: mọi khung thật đều là lỗi (dưới)
+    if real["mine"] or real["pseudo"]:
+        raise ValueError(f"{set_name}: tập sinh không được chứa khung thật (mine/nhãn giả chỉ thêm qua train.txt)")
     n_img = {sp: sum(1 for _ in (d / sp / "images").iterdir()) for sp in ("train", "val")}
     return {"set": set_name, "yaml": (d / "dataset.yaml").as_posix(), "manifest_sha256": _sha256(manifest),
             "build_key": _load(d / "build_key.json"), "n_images": n_img, "n_manifest": len(names),

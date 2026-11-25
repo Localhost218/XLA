@@ -1,0 +1,12 @@
+{"type": "instances",
+ "categories": [{"id": 1, "name": "sea_person", "supercategory": "person"},
+                {"id": 2, "name": "earth_person", "supercategory": "person"}],
+ "images": [{"file_name": "labeled_images/bb_V0001_I0000010.jpg", "width": 1280, "height": 720, "id": 0},
+            {"file_name": "labeled_images/bb_V0001_I0000020.jpg", "width": 1280, "height": 720, "id": 1},
+            {"file_name": "pure_bg_images/bing_P000_123_bg.jpg", "width": 1024, "height": 768, "id": 2}],
+ "annotations": [
+   {"bbox": [100, 200, 10, 20], "category_id": 2, "image_id": 0, "id": 0, "ignore": false, "uncertain": false, "logo": false},
+   {"bbox": [300, 210, 8, 8], "category_id": 1, "image_id": 0, "id": 1, "ignore": false, "uncertain": true, "logo": false},
+   {"bbox": [1000, 10, 200, 50], "category_id": 1, "image_id": 0, "id": 2, "ignore": true, "uncertain": false, "logo": true},
+   {"bbox": [500, 400, 12, 24], "category_id": 1, "image_id": 1, "id": 3, "ignore": false, "uncertain": false, "logo": false},
+   {"bbox": [600, 400, 0, 24], "category_id": 2, "image_id": 1, "id": 4, "ignore": false, "uncertain": false, "logo": false}]}

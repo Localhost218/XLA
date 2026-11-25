@@ -1,0 +1,127 @@
+{
+ "exported": false,
+ "created": "2026-11-25T12:22:00+00:00",
+ "bundle": "D:/XLA-wt/detect/models/release/detector-v2.0.0",
+ "winner": "C3",
+ "weights": "D:/DevCache/runs/xla/v2/detect/student/C3/weights/best.pt",
+ "conf_threshold": 0.05098,
+ "errors": [],
+ "warnings": [],
+ "ms_per_frame": {
+  "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
+  "p50": 21.597,
+  "p95": 22.128,
+  "n_frames": 300,
+  "warmup": 30,
+  "cpu_perf_pct": {
+   "counter": "\\Processor Information(_Total)\\% Processor Performance",
+   "min": 173.8,
+   "mean": 178.0,
+   "window_s": 60,
+   "throttled": false
+  }
+ },
+ "onnx_sha256": "e6fcbc6a238948a2afe6e2bdbdfda7f74f6658e4eba0c582dea927a2e9e9bf85",
+ "parity_pass": true,
+ "test_pt": {
+  "bundle_keys": {
+   "map50": 0.362856,
+   "map50_95": 0.149516,
+   "precision": 0.416149,
+   "recall": 0.449664,
+   "fp_per_neg_frame": 0.111111
+  },
+  "mAP50": {
+   "value": 0.362856,
+   "ci95": [
+    0.063126,
+    0.506878
+   ]
+  },
+  "AR_small": {
+   "value": 0.447059,
+   "ci95": [
+    0.348148,
+    0.7
+   ]
+  },
+  "AP_small": {
+   "value": 0.134952,
+   "ci95": [
+    0.03672,
+    0.240886
+   ]
+  },
+  "recall@0.05098": {
+   "value": 0.449664,
+   "ci95": [
+    0.249432,
+    0.563218
+   ]
+  },
+  "precision@0.05098": {
+   "value": 0.416149,
+   "ci95": [
+    0.078431,
+    0.549589
+   ]
+  },
+  "fp_per_neg_flight@0.05098": {
+   "value": 0.257862,
+   "ci95": [
+    0.123282,
+    0.419365
+   ]
+  },
+  "fp_per_neg_indoor@0.05098": {
+   "value": 0.033333,
+   "ci95": [
+    0.013605,
+    0.054422
+   ]
+  },
+  "n": {
+   "frames": 198,
+   "frames_with_person": 39,
+   "gt_boxes": 149,
+   "neg_split_frames": 300,
+   "negative_frames": 459,
+   "negative_frames_flight": 159,
+   "negative_frames_indoor": 300,
+   "labels_missing": 0,
+   "pred_frames_other_splits": 239
+  },
+  "threshold": 0.05098,
+  "threshold_source": "F1 tối đa trên OOF devpool"
+ },
+ "fold_onnx": [],
+ "ms_p95_ok": true,
+ "machine": {
+  "time": "2026-11-25T12:22:01+00:00",
+  "host": "Nghaiz-PC",
+  "os": "Windows-11-10.0.26300-SP0",
+  "cpu_count": 32,
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "driver_version": "610.88",
+   "temperature.gpu": "69",
+   "clocks.sm": "210 MHz",
+   "clocks.max.sm": "3105 MHz",
+   "power.draw": "9.55 W",
+   "pstate": "P4",
+   "memory.used": "1691 MiB",
+   "memory.total": "8188 MiB"
+  },
+  "cpu": {
+   "percent": 2.5,
+   "freq_mhz": 2501.0,
+   "ram_avail_gb": 23.3
+  }
+ },
+ "superseded": {
+  "by": "finalize.json",
+  "verdict": "Kill (b) trên đường ONNX (và đường .pt so với v1 .pt): bundle thử models/release/detector-v2.0.0 đã xoá, không phát hành",
+  "time": "2026-11-25T19:28"
+ }
+}

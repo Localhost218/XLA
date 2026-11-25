@@ -51,13 +51,16 @@ SMALL_AREA = 32.0**2
 MAX_DET = 100
 REC_THRS = np.linspace(0.0, 1.0, 101)
 N_IOU = 10  # 0.50:0.05:0.95, mặc định pycocotools
-EVAL_SPLITS = ("test", "devval")
+EVAL_SPLITS = ("test", "devval", "devpool")
+RESERVED_KINDS = ("cal", "holdout")  # khung neg_flight_split.json không bao giờ chọn/đếm âm (§14.2, D5)
 DEFAULT_THRESHOLDS = (0.25,)
 BOOT_N = 2000
 BOOT_SEED = 20261118
 CI_PCT = 95.0
 LABELS_REL = Path("data/real/labels")
 SPLIT_REL = Path("data/real/split.json")
+NEG_SPLIT_REL = Path("data/real/neg_flight_split.json")
+FOLDS_REL = Path("data/real/labels/folds.json")
 PRED_FIELDS = ("frame", "x1", "y1", "x2", "y2", "conf")
 _AREA_INDEX = {"all": 0, "small": 1}  # thứ tự areaRng mặc định của COCOeval: all, small, medium, large
 _EPS = np.spacing(1)
@@ -251,11 +254,14 @@ def prf_at(evals: list[FrameEval], thr: float) -> dict[str, float]:
     return {"precision": p, "recall": r, "f1": f1, "tp": tp, "fp": fp, "fn": npig - tp}
 
 
-def select_f1_threshold(evals: list[FrameEval], split_of: dict[str, str]) -> dict[str, float]:
-    """Ngưỡng tối đa F1 (IoU 0,5) — CHỈ trên khung dev; khung nào thuộc ``test`` (hoặc không rõ tập) → TestLeakError."""
-    leak = [fe.frame for fe in evals if split_of.get(fe.frame) != "dev"]
+def select_f1_threshold(evals: list[FrameEval], split_of: dict[str, str],
+                        reserved: set[str] | frozenset[str] = frozenset()) -> dict[str, float]:
+    """Ngưỡng tối đa F1 (IoU 0,5) — CHỈ trên khung dev; khung thuộc ``test`` (hoặc không rõ tập) hay thuộc ``reserved``
+    (``cal`` / ``holdout`` của ``neg_flight_split.json``, §14.2) → TestLeakError."""
+    leak = [fe.frame for fe in evals if split_of.get(fe.frame) != "dev" or fe.frame in reserved]
     if leak:
-        raise TestLeakError(f"chọn ngưỡng chỉ được trên dev-val (D10); {len(leak)} khung không thuộc dev, vd. {leak[:3]}")
+        raise TestLeakError(f"chọn ngưỡng chỉ được trên khung dev không phải cal/holdout (D5, D10); {len(leak)} khung "
+                            f"vi phạm, vd. {leak[:3]}")
     scores, tp_m, ig, npig = _concat(evals, "all")
     keep = ~ig[0]
     scores, tp = scores[keep], tp_m[0][keep]
@@ -275,7 +281,27 @@ def select_f1_threshold(evals: list[FrameEval], split_of: dict[str, str]) -> dic
 # ---------------------------------------------------------------- chỉ số + bootstrap
 
 NEG_KINDS = (("all", "fp_per_neg_frame"), ("flight", "fp_per_neg_flight"), ("indoor", "fp_per_neg_indoor"))
-"""Báo nhầm/khung âm: gộp; khung bay không người của tập chấm; khung ``neg`` (trong nhà)."""
+"""Báo nhầm/khung âm: gộp; khung bay không người của tập chấm; khung ``neg`` (trong nhà) — với ``devpool`` là khung
+``mine``. Khung ``cal`` / ``holdout`` (``RESERVED_KINDS``) không bao giờ là khung âm của bất kỳ tập chấm nào."""
+
+
+def reserved_frames(path: Path | None = None) -> set[str]:
+    """Khung ``cal`` + ``holdout`` của ``neg_flight_split.json`` (không có file → rỗng, như repo v1)."""
+    p = path or repo_root() / NEG_SPLIT_REL
+    if not p.is_file():
+        return set()
+    return {f["frame"] for f in json.loads(p.read_text(encoding="utf-8"))["frames"] if f["split"] in RESERVED_KINDS}
+
+
+def mine_frames(path: Path | None = None) -> list[str]:
+    p = path or repo_root() / NEG_SPLIT_REL
+    return sorted(f["frame"] for f in json.loads(p.read_text(encoding="utf-8"))["frames"] if f["split"] == "mine")
+
+
+def devpool_frames(path: Path | None = None) -> list[str]:
+    """Khung devpool = hợp các fold của ``folds.json`` (§14.2)."""
+    p = path or repo_root() / FOLDS_REL
+    return sorted(f for fold in json.loads(p.read_text(encoding="utf-8"))["folds"] for f in fold)
 
 
 def _metrics(evals: list[FrameEval], neg_fp: dict[float, dict[str, list[int]]], thresholds: list[float],
@@ -413,6 +439,7 @@ def prepare(pred_csv: Path, split: str = "test", labels_dir: Path | None = None,
     preds, ms = read_pred_csv(pred_csv, set(split_rows))
     thresholds = list(thresholds or [])
 
+    reserved = reserved_frames()
     devval = list((manifest or {}).get("devval_frames", []))
     bad_dv = [f for f in devval if split_of.get(f) != "dev"]
     if bad_dv:
@@ -420,15 +447,26 @@ def prepare(pred_csv: Path, split: str = "test", labels_dir: Path | None = None,
     test_frames = sorted(f for f, sp in split_of.items() if sp == "test")
     if manifest and manifest.get("test_frames") and set(manifest["test_frames"]) != set(test_frames):
         raise EvalInputError("manifest.test_frames khác tập test của split.json (D10: split.json là nguồn sự thật)")
-    frames = test_frames if split == "test" else sorted(devval)
+    frames = {"test": test_frames, "devval": sorted(devval), "devpool": devpool_frames()}[split]
     if not frames:
         raise EvalInputError(f"tập {split} rỗng (dev-val lấy từ manifest {manifest_path})")
+    # v2: devpool không bao giờ chứa cal/holdout. dev-val v1 (lịch sử) giữ nguyên 100 khung, kể cả 14 khung nay thuộc
+    # khối cal — chỉ để tái lập số v1 (scripts/reproduce.py); mọi lựa chọn v2 chạy trên devpool.
+    bad = [f for f in frames if split == "devpool" and (f in reserved or split_of.get(f) != "dev")]
+    if bad:
+        raise EvalInputError(f"tập {split}: {len(bad)} khung cal/holdout hoặc không thuộc dev (vd. {bad[:3]})")
     gt, missing, labels_sha = load_labels(labels_dir if split == "test" else devval_labels_dir, split, frames,
                                           allow_missing_labels)
     frames = [f for f in frames if f in gt]
 
     f1_info = None
-    if f1_from_devval and devval:
+    if f1_from_devval and split == "devpool":  # OOF: ngưỡng F1 tối đa trên chính devpool (dự đoán ngoài fold)
+        dp_evals, _ = _coco_eval(frames, gt, preds)
+        f1_info = select_f1_threshold(dp_evals, split_of, reserved) | {"source": "devpool OOF",
+                                                                       "devval_labels_sha256": labels_sha}
+        if round(f1_info["thr"], 6) not in thresholds:
+            thresholds.append(round(f1_info["thr"], 6))
+    elif f1_from_devval and devval:
         dv_gt, dv_missing, dv_sha = load_labels(devval_labels_dir, "devval", sorted(devval), allow_missing_labels)
         dv_evals, _ = _coco_eval(sorted(dv_gt), dv_gt, preds)
         f1_info = select_f1_threshold(dv_evals, split_of) | {"devval_labels_missing": len(dv_missing),
@@ -437,7 +475,8 @@ def prepare(pred_csv: Path, split: str = "test", labels_dir: Path | None = None,
             thresholds.append(round(f1_info["thr"], 6))
 
     evals_list, stats = _coco_eval(frames, gt, preds)
-    neg_split = sorted(f for f, sp in split_of.items() if sp == "neg")
+    neg_split = (mine_frames() if split == "devpool" else
+                 sorted(f for f, sp in split_of.items() if sp == "neg" and f not in reserved))
     s = EvalSet(evals={fe.frame: fe for fe in evals_list}, neg_frames=[f for f in frames if len(gt[f]) == 0] + neg_split,
                 neg_indoor=set(neg_split), block_of={f: int(split_rows[f]["block"]) for f in frames + neg_split},
                 raw={f: v[1] for f, v in preds.items()},

@@ -1,0 +1,160 @@
+{
+ "seed": 20261125,
+ "cal_mode": "block",
+ "locked_sessions": [
+  "20261102-100941#0",
+  "20261102-100941#1",
+  "20261102-100941#2",
+  "20261102-100941#3",
+  "20261102-100941#4",
+  "20261102-100941#5"
+ ],
+ "counts": {
+  "mine": 85,
+  "cal": 150
+ },
+ "planned": {
+  "mine": 171,
+  "cal": 150
+ },
+ "removed_person": {
+  "mine": 86
+ },
+ "per_session": {
+  "20261102-100941#0": {
+   "role": "mine"
+  },
+  "20261102-100941#1": {
+   "role": "mine",
+   "mine": 6
+  },
+  "20261102-100941#2": {
+   "role": "mine",
+   "mine": 12
+  },
+  "20261102-100941#3": {
+   "role": "mine",
+   "mine": 15,
+   "cal": 77
+  },
+  "20261102-100941#4": {
+   "role": "mine",
+   "mine": 13
+  },
+  "20261102-100941#5": {
+   "role": "mine",
+   "mine": 39,
+   "cal": 73
+  }
+ },
+ "cal_blocks": [
+  13,
+  21
+ ],
+ "cal_block_candidates": [
+  {
+   "block": 21,
+   "session": "20261102-100941#5",
+   "n_dev": 73,
+   "n_lost": 26,
+   "n_neg": 47,
+   "chosen": true
+  },
+  {
+   "block": 17,
+   "session": "20261102-100941#4",
+   "n_dev": 80,
+   "n_lost": 44,
+   "n_neg": 36,
+   "chosen": false
+  },
+  {
+   "block": 13,
+   "session": "20261102-100941#3",
+   "n_dev": 77,
+   "n_lost": 46,
+   "n_neg": 31,
+   "chosen": true
+  },
+  {
+   "block": 8,
+   "session": "20261102-100941#2",
+   "n_dev": 93,
+   "n_lost": 52,
+   "n_neg": 41,
+   "chosen": false
+  },
+  {
+   "block": 12,
+   "session": "20261102-100941#3",
+   "n_dev": 138,
+   "n_lost": 86,
+   "n_neg": 52,
+   "chosen": false
+  },
+  {
+   "block": 19,
+   "session": "20261102-100941#5",
+   "n_dev": 139,
+   "n_lost": 98,
+   "n_neg": 41,
+   "chosen": false
+  },
+  {
+   "block": 18,
+   "session": "20261102-100941#5",
+   "n_dev": 210,
+   "n_lost": 100,
+   "n_neg": 110,
+   "chosen": false
+  },
+  {
+   "block": 22,
+   "session": "20261102-100941#5",
+   "n_dev": 131,
+   "n_lost": 112,
+   "n_neg": 19,
+   "chosen": false
+  },
+  {
+   "block": 5,
+   "session": "20261102-100941#1",
+   "n_dev": 172,
+   "n_lost": 161,
+   "n_neg": 11,
+   "chosen": false
+  }
+ ],
+ "skipped": {
+  "devpool": 160,
+  "locked_not_dev": 1602,
+  "locked_test": 198,
+  "mine_spacing": 634
+ },
+ "devval_in_cal_blocks": [
+  "20261102-100941_004_01955.jpg",
+  "20261102-100941_004_01969.jpg",
+  "20261102-100941_004_01986.jpg",
+  "20261102-100941_004_02003.jpg",
+  "20261102-100941_004_02019.jpg",
+  "20261102-100941_007_01405.jpg",
+  "20261102-100941_007_01426.jpg",
+  "20261102-100941_007_01445.jpg",
+  "20261102-100941_007_01455.jpg",
+  "20261102-100941_007_01480.jpg",
+  "20261102-100941_007_01502.jpg",
+  "20261102-100941_007_01524.jpg",
+  "20261102-100941_007_01537.jpg",
+  "20261102-100941_007_01552.jpg"
+ ],
+ "unreviewed": 0,
+ "review_rows_not_planned": 0,
+ "devpool_frames": 160,
+ "errors": [],
+ "kill_a": {
+  "holdout_frames_pre_approval": 0,
+  "holdout_approved": 0,
+  "min": 150,
+  "verdict": "không đủ chứng minh"
+ }
+}

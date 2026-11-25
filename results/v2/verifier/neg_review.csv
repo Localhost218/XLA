@@ -1,0 +1,3 @@
+id,image,action,reason
+dev-4f88876fea,20261102-100941_007_01671.jpg,drop,hộp nằm trên đầu/tay người có nhãn (IoU < 0,1 vì hộp nhỏ): một phần người
+dev-9578fc8952,20261102-100941_002_00489.jpg,drop,hộp nằm trên thân người áo đen có nhãn: một phần người

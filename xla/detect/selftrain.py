@@ -30,6 +30,9 @@ AX::
     python -m xla.detect.selftrain --config configs/selftrain_e2.yaml --round K --json
     python -m xla.detect.selftrain --config configs/selftrain_e2.yaml --score --json             # → results/e2/e2.json
     python -m xla.detect.selftrain --config configs/selftrain_e2.yaml --onnx-score models/release/detector-v1.0.0 --json
+    python -m xla.detect.selftrain teacher --config configs/teacher_v2.yaml --smoke --json   # AI v2 phase 05 (cuối file)
+    python -m xla.detect.selftrain teacher --config configs/teacher_v2.yaml --json
+    python -m xla.detect.selftrain pseudo --config configs/teacher_v2.yaml --json
     # exit 0 xong; 1 lỗi dữ liệu / thiếu run / hết giờ chờ khoá / rò rỉ test; 2 sai tham số
 """
 
@@ -50,6 +53,7 @@ from xla.camera.frames import CROP_LEFT_PX, FRAMES_REL
 from xla.detect.baseline import drop_edge, select_frames, write_csv
 from xla.detect.train import (
     CSV_MAX_BYTES,
+    SYNTH_VAL_KEY,
     EpochTracker,
     _dump,
     _fit,
@@ -751,7 +755,588 @@ def onnx_score(cfg: dict[str, Any], bundle: Path, boot: int, seed: int) -> dict[
     return {k: entry[k] for k in ("bundle", "onnx_sha256", "model", "conf_threshold", "metrics", "predict_wall_s")}
 
 
+# ================================================================ AI v2 (phase 05): thầy @1280 trên d02x + nhãn giả
+#
+# ``python -m xla.detect.selftrain teacher|pseudo --config configs/teacher_v2.yaml [--smoke] --json``. Khác E2: tập
+# nguồn và trọng số thầy cấu hình được (``source_set``, ``teacher.candidates``), chọn checkpoint bằng mAP50 val của tập
+# nguồn (không khung thật có nhãn nào), khung thật vào train theo danh sách cho phép (``train.check_real_frames``), τ_cao
+# của nhãn giả chọn theo fold, mọi khung nhãn giả mang ``session`` + ``fold`` (``folds.json``).
+
+V2_RESULTS_REL = Path("results/v2/teacher")
+FOLDS_REL = Path("data/real/labels/folds.json")
+DEVPOOL_LABELS_REL = Path("data/real/labels/devpool")
+NEG_SPLIT_REL = Path("data/real/neg_flight_split.json")
+V1_BUNDLE = Path("D:/XLA/models/release/detector-v1.0.0")  # chỉ đọc: .onnx không có trong worktree (gitignore)
+
+
+def resolve_weights(w: str | Path) -> Path:
+    from xla.paths import downloads_dir
+
+    p = Path(w)
+    return p if p.is_absolute() else downloads_dir() / p
+
+
+def machine_info() -> dict[str, Any]:
+    """Khối ``machine`` kèm mọi số đo giờ/ms (GPU có hạ xung không, nhiệt, CPU)."""
+    import os
+    import platform
+    import subprocess
+
+    q = "name,driver_version,temperature.gpu,clocks.sm,clocks.max.sm,power.draw,pstate,memory.used,memory.total"
+    r = subprocess.run(["nvidia-smi", f"--query-gpu={q}", "--format=csv,noheader"], capture_output=True, text=True,
+                       check=False)
+    gpu = dict(zip(q.split(","), [v.strip() for v in r.stdout.strip().split(",")], strict=False)) if r.stdout else {}
+    try:
+        import psutil
+
+        cpu = {"percent": psutil.cpu_percent(interval=0.5), "freq_mhz": getattr(psutil.cpu_freq(), "current", None),
+               "ram_avail_gb": round(psutil.virtual_memory().available / 2**30, 1)}
+    except Exception:  # noqa: BLE001 — psutil hỏng không chặn phép đo
+        cpu = {}
+    return {"time": _now(), "host": platform.node(), "os": platform.platform(), "cpu_count": os.cpu_count(),
+            "gpu": gpu, "cpu": cpu}
+
+
+def source_rows(set_name: str) -> list[dict[str, Any]]:
+    from xla.paths import data_root
+
+    p = data_root() / set_name / "manifest.jsonl"
+    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+
+
+def sample_by_source(rows: list[dict[str, Any]], split: str, n: int, seed: int) -> list[str]:
+    """``n`` ảnh của ``split`` lấy đều theo tỉ lệ từng ``source`` (seed cố định); ``n`` ≥ cỡ tập → lấy hết."""
+    by: dict[str, list[str]] = {}
+    for r in rows:
+        if r["split"] == split:
+            by.setdefault(r.get("source", "?"), []).append(r["name"])
+    total = sum(map(len, by.values()))
+    if n >= total:
+        return sorted(x for v in by.values() for x in v)
+    rng = np.random.default_rng(seed)
+    out: list[str] = []
+    for src in sorted(by):
+        names = sorted(by[src])
+        k = min(len(names), max(1, round(n * len(names) / total)))
+        out += [names[i] for i in sorted(rng.choice(len(names), k, replace=False))]
+    return sorted(out)
+
+
+def split_rows_by_frame(root: Path) -> dict[str, dict[str, Any]]:
+    return {r["frame"]: r for r in _split_rows(root)}
+
+
+def neg_split_doc(root: Path) -> dict[str, Any]:
+    return json.loads((root / NEG_SPLIT_REL).read_text(encoding="utf-8"))
+
+
+def frame_sessions(root: Path) -> dict[str, str]:
+    """Phiên của mọi khung bay đã nhập (``manifest.csv`` + ``sessions.json``)."""
+    from xla.camera.sessions import flight_rows
+
+    return {r["frame"]: r["session"] for r in flight_rows(root) if r["session"]}
+
+
+def fold_sessions(root: Path, sess: dict[str, str]) -> list[set[str]]:
+    """Phiên của từng fold (``folds.json`` group = session): fold i loại mọi khung thật của các phiên này."""
+    doc = json.loads((root / FOLDS_REL).read_text(encoding="utf-8"))
+    if doc.get("groups") != "session":
+        raise ValueError(f"folds.json groups = {doc.get('groups')!r}, cần 'session'")
+    out = [{sess[f] for f in fold} for fold in doc["folds"]]
+    for i in range(len(out)):
+        for j in range(i + 1, len(out)):
+            if out[i] & out[j]:
+                raise ValueError(f"fold {i} và {j} chung phiên {sorted(out[i] & out[j])}")
+    return out
+
+
+def build_v2_dataset(out: Path, source_set: str, train_names: list[str], val_names: list[str],
+                     real: dict[str, list[list[float]]], pseudo_sessions: dict[str, str], root: Path,
+                     excluded_sessions: set[str] | frozenset[str] = frozenset(), repeat_real: int = 1,
+                     mine_max_frac: float = 0.10) -> dict[str, Any]:
+    """Tập huấn luyện ``out/`` = ảnh nguồn (liên kết cứng) + khung thật ``real`` (``{frame: hộp px}``; rỗng = ảnh nền).
+
+    Khung thật kiểm bằng danh sách cho phép (``train.check_real_frames``) TRƯỚC khi ghi gì. Cùng khoá (danh sách + nhãn)
+    thì dùng lại tập đã dựng (train tiếp sau khi máy sập không đổi dữ liệu)."""
+    import hashlib
+
+    from xla.detect.train import check_real_frames
+    from xla.paths import data_root
+
+    allowed = check_real_frames(sorted(real), root, pseudo=pseudo_sessions, excluded_sessions=excluded_sessions,
+                                n_total=len(train_names) + len(real) * repeat_real, mine_max_frac=mine_max_frac)
+    key = hashlib.sha256(json.dumps([source_set, train_names, val_names, sorted(real.items()), repeat_real],
+                                    sort_keys=True).encode()).hexdigest()
+    info_p = out / "dataset_info.json"
+    old = _load(info_p)
+    if old and old.get("key") == key and (out / "dataset.yaml").is_file():
+        return old
+    if out.exists():
+        shutil.rmtree(out)
+    src = data_root() / source_set
+    lists: dict[str, list[str]] = {"train": [], "val": []}
+    for sp, names in (("train", train_names), ("val", val_names)):
+        img_dir, lab_dir = out / sp / "images", out / sp / "labels"
+        img_dir.mkdir(parents=True)
+        lab_dir.mkdir(parents=True)
+        for n in names:
+            dst = img_dir / n
+            try:
+                dst.hardlink_to(src / sp / "images" / n)
+            except OSError:
+                shutil.copyfile(src / sp / "images" / n, dst)
+            lab = src / sp / "labels" / f"{Path(n).stem}.txt"
+            if lab.is_file():
+                shutil.copyfile(lab, lab_dir / lab.name)
+            lists[sp].append(dst.as_posix())
+    img_dir, lab_dir = out / "train" / "images", out / "train" / "labels"
+    n_box = 0
+    for f, boxes in sorted(real.items()):
+        if (img_dir / f).exists():
+            raise ValueError(f"trùng tên ảnh nguồn / khung thật: {f}")
+        shutil.copyfile(root / FRAMES_REL / f, img_dir / f)
+        (lab_dir / f"{Path(f).stem}.txt").write_text("".join(_yolo_line(b) + "\n" for b in boxes), encoding="utf-8",
+                                                     newline="\n")
+        n_box += len(boxes)
+        lists["train"] += [(img_dir / f).as_posix()] * repeat_real
+    for sp, paths in lists.items():
+        (out / f"{sp}.txt").write_text("\n".join(paths) + "\n", encoding="utf-8", newline="\n")
+    yml = {"path": out.as_posix(), "train": (out / "train.txt").as_posix(), "val": (out / "val.txt").as_posix(),
+           "names": {0: "person"}}
+    (out / "dataset.yaml").write_text(yaml.safe_dump(yml, sort_keys=False), encoding="utf-8", newline="\n")
+    info = {"key": key, "yaml": (out / "dataset.yaml").as_posix(), "source_set": source_set,
+            "n_images": {"train": len(lists["train"]), "val": len(lists["val"])}, "n_source_train": len(train_names),
+            "n_real_frames": len(real), "n_real_with_box": sum(1 for b in real.values() if b), "n_real_boxes": n_box,
+            "repeat_real": repeat_real, "real_allowlist": allowed, "excluded_sessions": sorted(excluded_sessions),
+            "train_txt_sha256": _sha256(out / "train.txt"), "created": _now()}
+    _dump(info_p, info)
+    return info
+
+
+class ValTracker:
+    """Callback ultralytics: giờ từng epoch, VRAM đỉnh, mAP50 val (tập nguồn) → ``best_val50.pt``; dừng sớm theo mAP50."""
+
+    def __init__(self, run_dir: Path, patience: int, cap_s: float | None = None) -> None:
+        self.run_dir, self.patience, self.cap_s = run_dir, patience, cap_s
+        self.hist_path = run_dir / "val_history.jsonl"
+        self.history = read_history(self.hist_path)
+        self.best = max((h["val_mAP50"] for h in self.history), default=-1.0)
+        self.t_call = time.perf_counter()
+        self.batch_t: list[float] = []
+        self.t0 = self.t_train = 0.0
+        self.vram_gb = 0.0
+        self.pending = False
+        self.stopped: str | None = None
+
+    def on_train_epoch_start(self, tr: Any) -> None:
+        self.t0 = time.perf_counter()
+        self.batch_t = []
+
+    def on_train_batch_end(self, tr: Any) -> None:
+        self.batch_t.append(time.perf_counter())
+
+    def on_train_epoch_end(self, tr: Any) -> None:
+        import torch
+
+        self.t_train = time.perf_counter()
+        self.pending = True
+        self.vram_gb = torch.cuda.max_memory_reserved(0) / 2**30
+
+    def on_fit_epoch_end(self, tr: Any) -> None:
+        if not self.pending:
+            return
+        self.pending = False
+        m50 = float((tr.metrics or {}).get(SYNTH_VAL_KEY, 0.0) or 0.0)
+        gaps = np.diff(self.batch_t) if len(self.batch_t) > 1 else np.asarray([np.nan])
+        rec = {"epoch": int(tr.epoch) + 1, "val_mAP50": m50,
+               "val_mAP50_95": float((tr.metrics or {}).get("metrics/mAP50-95(B)", 0.0) or 0.0),
+               "train_s": round(self.t_train - self.t0, 2), "val_save_s": round(time.perf_counter() - self.t_train, 2),
+               "batches": len(self.batch_t), "median_batch_s": round(float(np.nanmedian(gaps)), 4),
+               "batch": int(tr.batch_size), "vram_peak_gb": round(self.vram_gb, 2), "time": _now()}
+        self.history = [h for h in self.history if h["epoch"] != rec["epoch"]] + [rec]
+        with self.hist_path.open("a", encoding="utf-8", newline="\n") as fh:
+            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        if m50 > self.best:
+            self.best = m50
+            shutil.copyfile(Path(tr.last), self.run_dir / "weights" / "best_val50.pt")
+        best_ep = max(self.history, key=lambda h: (h["val_mAP50"], -h["epoch"]))["epoch"]
+        if rec["epoch"] - best_ep >= self.patience:
+            tr.stop, self.stopped = True, f"mAP50 val không tăng {self.patience} epoch (tốt nhất epoch {best_ep})"
+        elif self.cap_s is not None and time.perf_counter() - self.t_call > self.cap_s:
+            tr.stop, self.stopped = True, f"chạm trần giờ {self.cap_s / 3600:.2f} h"
+
+
+TRACK_EVENTS = ("on_train_epoch_start", "on_train_batch_end", "on_train_epoch_end", "on_fit_epoch_end")
+
+
+def train_v2(cfg: dict[str, Any], name: str, weights: Path, ds: dict[str, Any], targs: dict[str, Any],
+             patience: int, label: str, cap_s: float | None = None, select: str = "val") -> dict[str, Any]:
+    """Một lần train (thầy / trò v2), giữ ``gpu_lock`` suốt train rồi nhả; train tiếp từ ``last.pt`` nếu máy sập.
+
+    ``select="val"``: ``best.pt`` = ``best_val50.pt`` (mAP50 val tập nguồn); ``"last"``: epoch cuối."""
+    from ultralytics import YOLO
+    from ultralytics.utils.torch_utils import strip_optimizer
+
+    from xla.gpu_lock import gpu_lock
+
+    root = repo_root()
+    run_dir = Path(cfg["runs_dir"]) / name
+    (run_dir / "weights").mkdir(parents=True, exist_ok=True)
+    done_p = run_dir / "train_done.json"
+    info = _load(run_dir / "run_info.json", {}) or {"name": name, "sessions": []}
+    info |= {"argv": sys.argv, "git": _git_commit(root), "weights_init": weights.as_posix(), "dataset": ds,
+             "train_args": targs}
+    if done_p.is_file():
+        return {"run_dir": run_dir.as_posix(), "train_done": _load(done_p), "skipped": True,
+                "history": read_history(run_dir / "val_history.jsonl")}
+    t_wait = time.perf_counter()
+    with gpu_lock(label, timeout_s=float(cfg["lock_timeout_s"])):
+        t0 = time.perf_counter()
+        session: dict[str, Any] = {"start": _now(), "lock_wait_s": round(t0 - t_wait, 1),
+                                   "machine_start": machine_info()}
+        last = run_dir / "weights" / "last.pt"
+        tracker = ValTracker(run_dir, patience, cap_s)
+        resumed = last.is_file()
+        model = YOLO(str(last if resumed else weights))
+        for ev in TRACK_EVENTS:
+            model.add_callback(ev, getattr(tracker, ev))
+        if resumed:
+            model.train(resume=True, workers=int(targs["workers"]))
+        else:
+            model.train(data=ds["yaml"], project=str(run_dir.parent), name=run_dir.name, exist_ok=True, **targs)
+        best_src = run_dir / "weights" / ("best_val50.pt" if select == "val" else "last.pt")
+        if not best_src.is_file():
+            best_src = last
+        best = run_dir / "weights" / "best.pt"
+        if best_src != best:
+            shutil.copyfile(best_src, best)
+        strip_optimizer(best)
+        session |= {"resumed": resumed, "gpu_s": round(time.perf_counter() - t0, 1), "machine_end": machine_info(),
+                    "stopped": tracker.stopped}
+    import torch
+    import ultralytics
+
+    hist = read_history(run_dir / "val_history.jsonl")
+    done = {"finished": _now(), "select": select, "selected_from": best_src.name, "best_sha256": _sha256(best),
+            "epochs_run": len(hist), "stopped": tracker.stopped,
+            "best_epoch": (max(hist, key=lambda h: (h["val_mAP50"], -h["epoch"]))["epoch"] if hist else None)}
+    _dump(done_p, done)
+    info["sessions"].append(session | {"end": _now()})
+    info["versions"] = {"ultralytics": ultralytics.__version__, "torch": torch.__version__,
+                        "gpu": torch.cuda.get_device_name(0)}
+    _dump(run_dir / "run_info.json", info)
+    return {"run_dir": run_dir.as_posix(), "train_done": done, "session": session, "history": hist}
+
+
+def gpu_hours_of(run_dir: Path) -> float:
+    info = _load(run_dir / "run_info.json") or {}
+    return round(sum(s.get("gpu_s", 0.0) for s in info.get("sessions", [])) / 3600, 4)
+
+
+def _is_oom(e: BaseException) -> bool:
+    return "out of memory" in str(e).lower() or type(e).__name__ == "OutOfMemoryError"
+
+
+def teacher_smoke(cfg: dict[str, Any]) -> dict[str, Any]:
+    """Đo VRAM đỉnh + giây/ảnh mỗi cỡ thầy (vài chục bước, không phải một epoch), rồi chọn cỡ theo Deferred 8 + trần giờ."""
+    from xla.gpu_lock import gpu_lock
+
+    root, sm, tc = repo_root(), cfg["smoke"], cfg["teacher"]
+    rows = source_rows(cfg["source_set"])
+    tr_names = sample_by_source(rows, "train", int(sm["n_train"]), int(cfg["seed"]))
+    va_names = sample_by_source(rows, "val", int(sm["n_val"]), int(cfg["seed"]))
+    ds = build_v2_dataset(Path(cfg["datasets_dir"]) / "v2_teacher_smoke", cfg["source_set"], tr_names, va_names, {}, {},
+                          root)
+    out: dict[str, Any] = {"phase": "05", "created": _now(), "n_train": len(tr_names), "n_val": len(va_names),
+                           "batch": int(tc["batch"]), "imgsz": int(cfg["train"]["imgsz"]), "sizes": {}}
+    t_wait = time.perf_counter()
+    with gpu_lock("v2 phase05 smoke thầy", timeout_s=float(cfg["lock_timeout_s"])):
+        t_lock = time.perf_counter()
+        out["lock_wait_s"] = round(t_lock - t_wait, 1)
+        out["machine"] = machine_info()
+        for size in sm["sizes"]:
+            import torch
+
+            run_dir = Path(cfg["runs_dir"]) / f"teacher_smoke_{size}"
+            if run_dir.exists():
+                shutil.rmtree(run_dir)
+            (run_dir / "weights").mkdir(parents=True)
+            if torch.cuda.is_initialized():  # VRAM đỉnh đo riêng từng cỡ
+                torch.cuda.empty_cache()
+                torch.cuda.reset_peak_memory_stats(0)
+            t0 = time.perf_counter()
+            tracker = ValTracker(run_dir, 99)
+            from ultralytics import YOLO
+
+            model = YOLO(str(resolve_weights(tc["candidates"][size])))
+            for ev in TRACK_EVENTS:
+                model.add_callback(ev, getattr(tracker, ev))
+            targs = dict(cfg["train"]) | {"batch": int(tc["batch"]), "epochs": 1, "close_mosaic": 0}
+            try:
+                model.train(data=ds["yaml"], project=str(run_dir.parent), name=run_dir.name, exist_ok=True, **targs)
+                h = tracker.history[-1]
+                s_img = h["median_batch_s"] / h["batch"]
+                val_s_img = h["val_save_s"] / len(va_names)
+                n_tr = int(cfg["data"]["n_source_train"]) + 85  # + khung mine
+                epoch_s = s_img * n_tr + val_s_img * int(cfg["data"]["n_source_val"])
+                fits = h["vram_peak_gb"] <= float(tc["vram_max_gb"]) and h["batch"] >= 2
+                img_iters = float(tc["time_h"]) * 3600 / epoch_s * n_tr
+                rec = {"fits_8gb": fits, "vram_peak_gb": h["vram_peak_gb"], "batch_effective": h["batch"],
+                       "median_batch_s": h["median_batch_s"], "s_per_img_train": round(s_img, 4),
+                       "s_per_img_val": round(val_s_img, 4), "batches": h["batches"],
+                       "hours_per_epoch_est": round(epoch_s / 3600, 4), "epochs_in_time_est": round(
+                           float(tc["time_h"]) * 3600 / epoch_s, 2), "img_iters_in_time_est": int(img_iters)}
+            except Exception as e:  # OOM = không vừa; lỗi khác ném tiếp
+                if not _is_oom(e):
+                    raise
+                rec = {"fits_8gb": False, "error": f"{type(e).__name__}: {str(e)[:200]}"}
+            rec |= {"weights": str(resolve_weights(tc["candidates"][size])), "gpu_s": round(time.perf_counter() - t0, 1)}
+            out["sizes"][size] = rec
+            del model
+            torch.cuda.empty_cache()
+        out["gpu_s"] = round(time.perf_counter() - t_lock, 1)
+    out["machine_end"] = machine_info()
+    lrec = out["sizes"].get("l", {})
+    use_l = bool(lrec.get("fits_8gb")) and lrec.get("img_iters_in_time_est", 0) >= int(tc["min_img_iters"])
+    out["chosen"] = "l" if use_l else "m"
+    out["rule"] = (f"l nếu vừa batch ≥ 2 @1280 + AMP (VRAM ≤ {tc['vram_max_gb']} GB) VÀ trong time_h {tc['time_h']} h "
+                   f"học được ≥ {tc['min_img_iters']} ảnh (trần 1 giờ GPU của chủ dự án), không thì m")
+    _dump(repo_root() / V2_RESULTS_REL / "smoke.json", out)
+    return out
+
+
+def teacher_size(cfg: dict[str, Any]) -> str:
+    size = cfg["teacher"]["size"]
+    if size == "auto":
+        sm = _load(repo_root() / V2_RESULTS_REL / "smoke.json")
+        if not sm:
+            raise FileNotFoundError("teacher.size: auto cần results/v2/teacher/smoke.json (chạy teacher --smoke)")
+        size = sm["chosen"]
+    if size not in cfg["teacher"]["candidates"]:
+        raise ValueError(f"cỡ thầy {size!r} không có trong teacher.candidates")
+    return size
+
+
+def teacher_dataset(cfg: dict[str, Any], root: Path) -> dict[str, Any]:
+    rows = source_rows(cfg["source_set"])
+    d = cfg["data"]
+    tr = sample_by_source(rows, "train", int(d["n_source_train"]), int(cfg["seed"]))
+    va = sample_by_source(rows, "val", int(d["n_source_val"]), int(cfg["seed"]))
+    mine = {f["frame"]: [] for f in neg_split_doc(root)["frames"] if f["split"] == "mine"} if d["mine_background"] else {}
+    return build_v2_dataset(Path(cfg["datasets_dir"]) / "v2_teacher", cfg["source_set"], tr, va, mine, {}, root,
+                            mine_max_frac=float(d["mine_max_frac"]))
+
+
+def teacher_train(cfg: dict[str, Any]) -> dict[str, Any]:
+    root, tc = repo_root(), cfg["teacher"]
+    size = teacher_size(cfg)
+    ds = teacher_dataset(cfg, root)
+    targs = dict(cfg["train"]) | {"batch": int(tc["batch"]), "epochs": int(tc["epochs"]), "time": float(tc["time_h"])}
+    res = train_v2(cfg, "teacher", resolve_weights(tc["candidates"][size]), ds, targs, int(tc["early_stop_patience"]),
+                   f"v2 phase05 train thầy YOLO11{size}")
+    return {"size": size} | {k: res[k] for k in ("run_dir", "train_done", "history")}
+
+
+def _write_preds_csv(path: Path, preds: dict[str, tuple[list[Any], float]]) -> Path:
+    write_csv(path, preds)
+    return path
+
+
+def onnx_predict(onnx_path: Path, frames: list[str], root: Path, cuda: bool = False) -> dict[str, tuple[list, float]]:
+    """Dự đoán bằng chính ``detector.onnx`` (ORT, khung uint8 BGR nguyên, cắt mép trong graph) → ``{frame: (hộp, ms)}``."""
+    from xla import contract as C
+    from xla.detect import export_onnx as X
+
+    if cuda:
+        import torch  # noqa: F401 — nạp DLL CUDA/cuDNN của torch trước khi tạo session ORT CUDA (như export_onnx)
+    sess = X.ort_session(onnx_path, cuda=cuda)
+    out = {}
+    for f in frames:
+        im = C.decode_frame(root / FRAMES_REL / f)
+        t1 = time.perf_counter()
+        boxes, scores = X.run_detector(sess, im)
+        out[f] = ([(*map(float, b), float(s)) for b, s in zip(boxes, scores, strict=True)],
+                  (time.perf_counter() - t1) * 1000)
+    return out
+
+
+def map50_by_fold(csv_p: Path, root: Path) -> list[float | None]:
+    """mAP50 điểm của từng fold (khung devpool của fold; báo độ lệch giữa fold, không CI)."""
+    from xla.eval.detection import _coco_eval, accumulate, load_labels, read_pred_csv
+
+    folds = json.loads((root / FOLDS_REL).read_text(encoding="utf-8"))["folds"]
+    known = set(split_rows_by_frame(root))
+    preds, _ = read_pred_csv(csv_p, known)
+    out: list[float | None] = []
+    for fold in folds:
+        gt, _, _ = load_labels(root / LABELS_REL, "devpool", sorted(fold), allow_missing=False)
+        evals, _ = _coco_eval(sorted(gt), gt, preds)
+        p, _ = accumulate(evals, "all")
+        out.append(None if not np.isfinite(p[0]) else round(float(p[0]), 4))
+    return out
+
+
+def devpool_summary(ev: dict[str, Any]) -> dict[str, Any]:
+    op = round(ev["f1_threshold_from_devval"]["thr"], 6)
+    m = ev["metrics"]
+    keys = ("mAP50", "mAP50_95", "AP_small", "AR_small")
+    out = {k: m[k] for k in keys}
+    for k in ("precision", "recall", "f1", "fp_per_neg_flight", "fp_per_neg_indoor"):
+        nk = {"fp_per_neg_flight": "fp_per_devpool_empty_frame", "fp_per_neg_indoor": "fp_per_mine_frame"}.get(k, k)
+        out[f"{nk}@op"] = m[f"{k}@{op:g}"]
+    return {"op_threshold": op, "threshold_source": "F1 tối đa trên devpool OOF", "metrics": out, "n": ev["n"]}
+
+
+def pseudo_v2(cfg: dict[str, Any], smoke: bool = False) -> dict[str, Any]:
+    """Nhãn giả thầy v2 + TTA trên khung dev v1 cần cho C2 (không test/cal/holdout/mine), làm sạch ByteTrack, τ_cao theo
+    fold; chấm thầy và detector-v1 trên devpool (OOF với thầy). Ghi ``pseudo.out_dir`` + ``results/v2/teacher``."""
+    from ultralytics import YOLO
+
+    from xla.eval.detection import BOOT_N, BOOT_SEED, compare, evaluate, load_labels
+    from xla.gpu_lock import gpu_lock
+
+    root, pcfg = repo_root(), cfg["pseudo"]
+    res_dir = root / V2_RESULTS_REL
+    tw = Path(cfg["runs_dir"]) / "teacher" / "weights" / "best.pt"
+    if not tw.is_file():
+        raise FileNotFoundError(f"thiếu thầy {tw} (chạy teacher trước)")
+    split = split_rows_by_frame(root)
+    neg = neg_split_doc(root)["frames"]
+    reserved = {f["frame"] for f in neg if f["split"] in ("cal", "holdout")}
+    mine = sorted(f["frame"] for f in neg if f["split"] == "mine")
+    sess = frame_sessions(root)
+    fsess = fold_sessions(root, sess)
+    fold_of = {s: i for i, ss in enumerate(fsess) for s in ss}
+    targets = sorted(f for f, r in split.items() if r["split"] == "dev" and f not in reserved and f not in set(mine))
+    lost = [f for f in targets if sess.get(f) not in fold_of]
+    if lost:
+        raise ValueError(f"{len(lost)} khung dev không thuộc phiên nào của folds.json (vd. {lost[:3]})")
+    seqs = dev_sequences([split[f] for f in targets], float(pcfg["max_gap_s"]))
+    if smoke:
+        seqs = seqs[:5]
+    dp = json.loads((root / FOLDS_REL).read_text(encoding="utf-8"))["folds"]
+    dp_all = sorted(f for fold in dp for f in fold)
+    pdir = Path(cfg["runs_dir"]) / ("pseudo_smoke" if smoke else "pseudo")
+    pdir.mkdir(parents=True, exist_ok=True)
+    raw_p, t_csv = pdir / "raw_dets.json", res_dir / "preds" / "teacher_devpool.csv"
+    raw_doc = _load(raw_p)
+    gpu_s = 0.0
+    if not raw_doc or raw_doc["weights_sha256"] != _sha256(tw) or not t_csv.is_file():
+        t_wait = time.perf_counter()
+        with gpu_lock("v2 phase05 nhãn giả + chấm devpool thầy", timeout_s=float(cfg["lock_timeout_s"])):
+            t0 = time.perf_counter()
+            mach = machine_info()
+            dets = detect_sequences(tw, seqs, root / FRAMES_REL, pcfg, int(cfg["train"]["imgsz"]))
+            t1 = time.perf_counter()
+            preds = predict(YOLO(str(tw)), dp_all + mine, root / FRAMES_REL, cfg["predict"], int(cfg["train"]["imgsz"]),
+                            warmup=3)
+            t_csv.parent.mkdir(parents=True, exist_ok=True)
+            write_csv(t_csv, preds)
+            gpu_s = time.perf_counter() - t0
+            raw_doc = {"weights": tw.as_posix(), "weights_sha256": _sha256(tw), "tta": bool(pcfg["tta"]),
+                       "gpu_s": round(gpu_s, 1), "gpu_s_tta": round(t1 - t0, 1), "lock_wait_s": round(t0 - t_wait, 1),
+                       "machine": mach, "frames": dets}
+            _dump(raw_p, raw_doc)
+    raw = track_sequences(raw_doc["frames"], seqs, pcfg)
+    gt, _, _ = load_labels(root / LABELS_REL, "devpool", dp_all, allow_missing=False)
+    per_fold, labels_by_fold = [], []
+    for j, fold in enumerate(dp):
+        gt_j = {f: gt[f] for f in fold if f in raw}
+        tau, grid, why = select_tau_high(raw, gt_j, pcfg)
+        lab = apply_rules(raw, tau, pcfg)
+        labels_by_fold.append(lab)
+        per_fold.append({"fold": j, "sessions": sorted(fsess[j]), "tau_high": tau, "tau_high_rule": why,
+                         "quality_on_own_devpool": label_quality(lab, gt_j, float(pcfg["match_iou"])), "grid": grid})
+    out_dir = Path(pcfg["out_dir"] + ("_smoke" if smoke else ""))
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
+    (out_dir / "labels").mkdir(parents=True)
+    rows, n_box = [], 0
+    for f in sorted(raw):
+        j = fold_of[sess[f]]
+        lab = labels_by_fold[j][f]
+        if split[f]["split"] != "dev" or f in reserved:
+            raise LeakError(f"khung nhãn giả không phải dev hoặc là cal/holdout: {f}")
+        if lab["use"]:
+            (out_dir / "labels" / f"{Path(f).stem}.txt").write_text(
+                "".join(_yolo_line(b) + "\n" for b in lab["boxes"]), encoding="utf-8", newline="\n")
+            n_box += len(lab["boxes"])
+        rows.append({"frame": f, "session": sess[f], "fold": j, "use": lab["use"], "why": lab["why"],
+                     "boxes": [[round(v, 2) for v in b] for b in lab["boxes"]]})
+    man = {"version": "pseudo_v2", "created": _now(), "teacher": tw.as_posix(), "teacher_sha256": raw_doc["weights_sha256"],
+           "tta": raw_doc["tta"], "rule": "τ_cao của fold j = nhỏ nhất đạt precision ≥ 0,9 trên devpool fold j "
+           "(model fold i ≠ j mới huấn luyện trên nhãn này); khung test/cal/holdout/mine không bao giờ ở đây",
+           "n_sequences": len(seqs), "frames": rows, "per_fold": per_fold}
+    _dump(out_dir / "manifest.json", man)
+    if not smoke:
+        _dump(res_dir / "pseudo_manifest.json", man)  # bản trong repo (test Accept đọc bản này)
+    summary: dict[str, Any] = {"n_frames": len(rows), "n_used": sum(r["use"] for r in rows),
+                               "n_used_with_box": sum(1 for r in rows if r["use"] and r["boxes"]), "n_boxes": n_box,
+                               "by_fold": [{"fold": j, "frames": sum(1 for r in rows if r["fold"] == j),
+                                            "used": sum(1 for r in rows if r["fold"] == j and r["use"]),
+                                            "boxes": sum(len(r["boxes"]) for r in rows if r["fold"] == j and r["use"])}
+                                           for j in range(len(dp))],
+                               "dropped": {w: sum(1 for r in rows if r["why"] == w) for w in {r["why"] for r in rows}}}
+    doc: dict[str, Any] = {"phase": "05", "created": _now(), "teacher_weights": tw.as_posix(),
+                           "teacher_sha256": raw_doc["weights_sha256"], "pseudo_dir": out_dir.as_posix(),
+                           "pseudo": summary, "per_fold": [{k: v for k, v in p.items() if k != "grid"} for p in per_fold],
+                           "gpu_s_pseudo_and_devpool": raw_doc["gpu_s"], "machine": raw_doc.get("machine")}
+    if not smoke:
+        v1_onnx = V1_BUNDLE / "detector.onnx"
+        v1_csv = res_dir / "preds" / "v1_devpool.csv"
+        write_csv(v1_csv, onnx_predict(v1_onnx, dp_all + mine, root))
+        ev_t = evaluate(t_csv, "devpool", boot_n=BOOT_N, seed=BOOT_SEED)
+        ev_v = evaluate(v1_csv, "devpool", boot_n=BOOT_N, seed=BOOT_SEED)
+        cmp = compare(v1_csv, t_csv, "devpool", boot_n=BOOT_N, seed=BOOT_SEED)
+        doc["devpool"] = {"teacher": devpool_summary(ev_t) | {"map50_by_fold": map50_by_fold(t_csv, root)},
+                          "v1": devpool_summary(ev_v) | {"map50_by_fold": map50_by_fold(v1_csv, root),
+                                                         "onnx": v1_onnx.as_posix()},
+                          "teacher_minus_v1": {k: cmp["metrics"][k] for k in ("mAP50", "AR_small", "recall@op")},
+                          "note": "thầy không thấy khung devpool nào (OOF); v1 đã học nhãn giả khung dev (E2, trừ dev-val "
+                                  "+ đệm 0,3 s) nên với 74 khung devpool mới v1 KHÔNG phải OOF — lợi thế cho v1"}
+        sm = _load(res_dir / "smoke.json") or {}
+        aborted = [_load(p) for p in sorted(Path(cfg["runs_dir"]).glob("teacher_*_aborted/aborted.json"))]
+        gh = {"smoke": round(sm.get("gpu_s", 0.0) / 3600, 4), "teacher": gpu_hours_of(Path(cfg["runs_dir"]) / "teacher"),
+              "teacher_aborted": round(sum(a["gpu_s"] for a in aborted) / 3600, 4),
+              "pseudo_and_devpool": round(raw_doc["gpu_s"] / 3600, 4), "cap": float(cfg["gpu_cap_h"]),
+              "cap_note": "trần 1 giờ cả phase 05 do chủ dự án cắt 25/11 (plan gốc 6 giờ)"}
+        gh["total"] = round(gh["smoke"] + gh["teacher"] + gh["teacher_aborted"] + gh["pseudo_and_devpool"], 4)
+        doc["teacher_aborted"] = aborted
+        doc["gpu_hours"] = gh
+        doc["teacher_train"] = _load(Path(cfg["runs_dir"]) / "teacher" / "train_done.json")
+        doc["teacher_val_history"] = read_history(Path(cfg["runs_dir"]) / "teacher" / "val_history.jsonl")
+        _dump(res_dir / "teacher.json", doc)
+    return doc
+
+
+def _v2_main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="python -m xla.detect.selftrain", description="AI v2 phase 05: thầy + nhãn giả")
+    ap.add_argument("cmd", choices=("teacher", "pseudo"))
+    ap.add_argument("--config", type=Path, required=True)
+    ap.add_argument("--smoke", action="store_true", help="teacher: đo VRAM + giây/ảnh mỗi cỡ; pseudo: 5 chuỗi đầu")
+    ap.add_argument("--json", action="store_true")
+    a = ap.parse_args(argv)
+    from xla.eval.detection import EvalInputError
+
+    cfg = load_config(a.config)
+    try:
+        if a.cmd == "teacher":
+            out = teacher_smoke(cfg) if a.smoke else teacher_train(cfg)
+        else:
+            out = pseudo_v2(cfg, a.smoke)
+            out = {k: v for k, v in out.items() if k in ("pseudo", "per_fold", "devpool", "gpu_s_pseudo_and_devpool")}
+    except (FileNotFoundError, TimeoutError, ValueError, EvalInputError) as e:
+        print(f"LỖI: {e}", file=sys.stderr)
+        return 1
+    print(json.dumps(out, ensure_ascii=False, default=str) if a.json else json.dumps(out, ensure_ascii=False, indent=1,
+                                                                                    default=str))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    if argv and argv[0] in ("teacher", "pseudo"):  # AI v2 (phase 05)
+        return _v2_main(argv)
     ap = argparse.ArgumentParser(prog="python -m xla.detect.selftrain", description=__doc__.split("\n")[0])
     ap.add_argument("--config", type=Path, default=None, help=f"mặc định {CONFIG_REL}")
     g = ap.add_mutually_exclusive_group(required=True)

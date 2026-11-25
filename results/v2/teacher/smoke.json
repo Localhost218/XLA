@@ -1,0 +1,115 @@
+{
+ "phase": "05",
+ "created": "2026-11-25T10:05:00+00:00",
+ "n_train": 119,
+ "n_val": 60,
+ "batch": 2,
+ "imgsz": 1280,
+ "sizes": {
+  "l": {
+   "fits_8gb": true,
+   "vram_peak_gb": 5.47,
+   "batch_effective": 2,
+   "median_batch_s": 0.2715,
+   "s_per_img_train": 0.1358,
+   "s_per_img_val": 0.1572,
+   "batches": 60,
+   "hours_per_epoch_est": 0.1739,
+   "epochs_in_time_est": 3.57,
+   "img_iters_in_time_est": 13139,
+   "weights": "D:\\IOT_Tools\\downloads\\yolo-weights\\yolo11l.pt",
+   "gpu_s": 40.0
+  },
+  "m": {
+   "fits_8gb": true,
+   "vram_peak_gb": 4.28,
+   "batch_effective": 2,
+   "median_batch_s": 0.2112,
+   "s_per_img_train": 0.1056,
+   "s_per_img_val": 0.1237,
+   "batches": 60,
+   "hours_per_epoch_est": 0.1356,
+   "epochs_in_time_est": 4.57,
+   "img_iters_in_time_est": 16851,
+   "weights": "D:\\DevCache\\runs\\xla\\e2\\teacher\\weights\\last.pt",
+   "gpu_s": 27.7
+  }
+ },
+ "lock_wait_s": 0.0,
+ "machine": {
+  "time": "2026-11-25T10:05:01+00:00",
+  "host": "Nghaiz-PC",
+  "os": "Windows-11-10.0.26300-SP0",
+  "cpu_count": 32,
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "driver_version": "610.88",
+   "temperature.gpu": "64",
+   "clocks.sm": "210 MHz",
+   "clocks.max.sm": "3105 MHz",
+   "power.draw": "9.83 W",
+   "pstate": "P4",
+   "memory.used": "1516 MiB",
+   "memory.total": "8188 MiB"
+  },
+  "cpu": {
+   "percent": 4.6,
+   "freq_mhz": 2501.0,
+   "ram_avail_gb": 25.1
+  }
+ },
+ "gpu_s": 70.1,
+ "machine_end": {
+  "time": "2026-11-25T10:06:11+00:00",
+  "host": "Nghaiz-PC",
+  "os": "Windows-11-10.0.26300-SP0",
+  "cpu_count": 32,
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+   "driver_version": "610.88",
+   "temperature.gpu": "73",
+   "clocks.sm": "810 MHz",
+   "clocks.max.sm": "3105 MHz",
+   "power.draw": "13.12 W",
+   "pstate": "P0",
+   "memory.used": "1716 MiB",
+   "memory.total": "8188 MiB"
+  },
+  "cpu": {
+   "percent": 16.2,
+   "freq_mhz": 2501.0,
+   "ram_avail_gb": 21.8
+  }
+ },
+ "chosen": "m",
+ "rule": "l nếu vừa batch ≥ 2 @1280 + AMP (VRAM ≤ 7.6 GB) VÀ trong time_h 0.62 h học được ≥ 6000 ảnh (trần 1 giờ GPU của chủ dự án), không thì m",
+ "rule_choice": "l",
+ "override": {
+  "from": "l",
+  "to": "m",
+  "time": "2026-11-25T17:19:42",
+  "l_run": {
+   "size": "l",
+   "weights_init": "yolo-weights/yolo11l.pt (COCO)",
+   "lock_since": "2026-11-25T17:07:07",
+   "killed": "2026-11-25T17:19:42",
+   "gpu_s": 755.0,
+   "epochs_done": 1,
+   "val_history": [
+    {
+     "epoch": 1,
+     "val_mAP50": 0.00519,
+     "val_mAP50_95": 0.00114,
+     "train_s": 648.31,
+     "val_save_s": 57.03,
+     "batches": 1843,
+     "median_batch_s": 0.3505,
+     "batch": 2,
+     "vram_peak_gb": 5.63,
+     "time": "2026-11-25T10:19:01+00:00"
+    }
+   ],
+   "reason": "epoch 1 val mAP50 0,0052 (d02x val 800 ảnh): đầu 1 lớp học từ đầu + optimizer auto chọn SGD lr 0,01 vì 20 epoch × 1843 bước > 10 000; trong ~0,6 giờ còn lại không kịp hội tụ. Đổi sang m khởi từ thầy E2 (đã học D2 4 epoch, mAP50 val D2 0,19) với AdamW lr 0,002 như E1"
+  }
+ }
+}
