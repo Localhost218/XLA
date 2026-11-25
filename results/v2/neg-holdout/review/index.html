@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duyệt neg_flight giữ kín (holdout)</title>
+<style>
+:root { --bg: #f6f7f9; --card: #fff; --ink: #1d2330; --muted: #5b6475; --line: #d9dde5; --accent: #1f6feb;
+        --warn: #c2410c; --ok: #15803d; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.45 system-ui, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+header { position: sticky; top: 0; z-index: 2; background: var(--card); border-bottom: 1px solid var(--line);
+         padding: 10px 18px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+header h1 { font-size: 16px; margin: 0 12px 0 0; }
+header .stat { color: var(--muted); }
+header .stat b { color: var(--ink); }
+button { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--card);
+         cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+main { padding: 16px 18px 60px; max-width: 1500px; margin: 0 auto; }
+.help { color: var(--muted); margin: 0 0 16px; }
+.empty { padding: 40px; text-align: center; background: var(--card); border: 1px dashed var(--line); border-radius: 8px; }
+section.grid { background: var(--card); border: 1px solid var(--line); border-radius: 8px; margin: 0 0 18px; padding: 10px; }
+section.grid.seen { border-color: var(--ok); }
+section.grid h2 { font-size: 14px; margin: 0 0 8px; display: flex; gap: 12px; align-items: center; }
+.cells { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.cell { position: relative; border: 2px solid transparent; border-radius: 4px; }
+.cell.person { border-color: var(--warn); }
+.cell img { width: 100%; aspect-ratio: 4 / 3; display: block; background: #222; }
+.cell label { display: flex; gap: 6px; align-items: center; padding: 3px 4px; font-size: 12px; color: var(--muted); }
+.cell.person label { color: var(--warn); font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Duyệt neg_flight giữ kín</h1>
+  <span class="stat">Khung: <b id="n-frames">0</b></span>
+  <span class="stat">Có người: <b id="n-person">0</b></span>
+  <span class="stat">Lưới đã xem: <b id="n-seen">0</b> / <b id="n-grids">0</b></span>
+  <button class="primary" id="export">Xuất JSON</button>
+  <button id="reset">Xoá trạng thái</button>
+</header>
+<main>
+  <p class="help">Đánh dấu <b>có người</b> cho mọi khung thấy người (kể cả rất nhỏ, mờ, một phần). Khung không đánh dấu
+  được tính là <b>không người</b>. Xem hết một lưới thì tích <b>Đã xem lưới này</b>. Bấm ảnh để mở cỡ gốc. Trạng thái lưu
+  trong trình duyệt (localStorage); xong thì bấm <b>Xuất JSON</b> và đưa file cho agent chạy
+  <code>python -m xla.camera.sessions apply-review &lt;file&gt; --json</code>.</p>
+  <div id="grids"></div>
+</main>
+<script id="data" type="application/json">{"version": "neg-holdout-review-v1", "storage_key": "xla.neg-holdout-review.v1", "split_sha256": "3136e803c08ab11af12f61020b794644d11ede89c28f6e1f9858f138075406dd", "grid": 16, "img_prefix": "../../../../data/real/frames/", "frames": []}</script>
+<script>
+(function () {
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("data").textContent);
+  var KEY = DATA.storage_key + ":" + DATA.split_sha256.slice(0, 12);
+  var state = { person: {}, seen: {} };
+  try { var s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.person && s.seen) { state = s; } }
+  catch (e) { console.warn("localStorage hỏng, bắt đầu lại", e); }
+  function save() { localStorage.setItem(KEY, JSON.stringify(state)); render(); }
+  var grids = [];
+  for (var i = 0; i < DATA.frames.length; i += DATA.grid) { grids.push(DATA.frames.slice(i, i + DATA.grid)); }
+  var root = document.getElementById("grids");
+  if (!grids.length) {
+    root.innerHTML = '<div class="empty">Chưa có khung holdout nào (0 khung). Xem ' +
+      '<code>results/v2/neg-holdout/README.md</code>: không có phiên bay nào ngoài các phiên chứa khung dev/test v1.</div>';
+  }
+  grids.forEach(function (g, gi) {
+    var sec = document.createElement("section");
+    sec.className = "grid"; sec.dataset.grid = gi;
+    var h = document.createElement("h2");
+    h.innerHTML = "Lưới " + (gi + 1) + " / " + grids.length + ' <label><input type="checkbox" class="seen"> Đã xem lưới này</label>';
+    sec.appendChild(h);
+    var cells = document.createElement("div"); cells.className = "cells";
+    g.forEach(function (f) {
+      var c = document.createElement("div"); c.className = "cell"; c.dataset.frame = f.frame;
+      var a = document.createElement("a"); a.href = DATA.img_prefix + f.frame; a.target = "_blank"; a.rel = "noopener";
+      var img = document.createElement("img"); img.loading = "lazy"; img.src = DATA.img_prefix + f.frame; img.alt = f.frame;
+      a.appendChild(img); c.appendChild(a);
+      var lab = document.createElement("label");
+      lab.innerHTML = '<input type="checkbox" class="person"> có người <span>' + f.frame.slice(16, -4) + " · " + f.session + "</span>";
+      c.appendChild(lab); cells.appendChild(c);
+    });
+    sec.appendChild(cells); root.appendChild(sec);
+  });
+  root.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.classList.contains("person")) {
+      var f = t.closest(".cell").dataset.frame;
+      if (t.checked) { state.person[f] = true; } else { delete state.person[f]; }
+      save();
+    } else if (t.classList.contains("seen")) {
+      var gi = t.closest("section").dataset.grid;
+      if (t.checked) { state.seen[gi] = true; } else { delete state.seen[gi]; }
+      save();
+    }
+  });
+  function render() {
+    document.querySelectorAll(".cell").forEach(function (c) {
+      var on = !!state.person[c.dataset.frame];
+      c.classList.toggle("person", on); c.querySelector("input.person").checked = on;
+    });
+    document.querySelectorAll("section.grid").forEach(function (s) {
+      var on = !!state.seen[s.dataset.grid];
+      s.classList.toggle("seen", on); s.querySelector("input.seen").checked = on;
+    });
+    document.getElementById("n-frames").textContent = DATA.frames.length;
+    document.getElementById("n-person").textContent = Object.keys(state.person).length;
+    document.getElementById("n-seen").textContent = Object.keys(state.seen).length;
+    document.getElementById("n-grids").textContent = grids.length;
+  }
+  document.getElementById("export").addEventListener("click", function () {
+    var out = {
+      version: DATA.version, split_sha256: DATA.split_sha256, exported_at: new Date().toISOString(),
+      grids: grids.length, grids_seen: Object.keys(state.seen).map(Number).sort(function (a, b) { return a - b; }),
+      frames: DATA.frames.map(function (f) { return { frame: f.frame, person: !!state.person[f.frame] }; })
+    };
+    var blob = new Blob([JSON.stringify(out, null, 1)], { type: "application/json" });
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = "neg-holdout-review-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById("reset").addEventListener("click", function () {
+    if (confirm("Xoá mọi đánh dấu trên trang này?")) { state = { person: {}, seen: {} }; save(); }
+  });
+  render();
+})();
+</script>
+</body>
+</html>

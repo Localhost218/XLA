@@ -1,0 +1,201 @@
+frame,action,box_id,x1,y1,x2,y2,prelabel_source,reason
+20261102-100941_002_00391.jpg,ok,1,,,,,rtdetr,người áo hồng
+20261102-100941_002_00391.jpg,ok,2,,,,,rtdetr,người ngồi xổm
+20261102-100941_002_00391.jpg,tighten,5,385,62,418,84,rtdetr,người áo xanh cúi; bỏ cây gậy và bóng
+20261102-100941_002_00391.jpg,tighten,3,432,46,454,80,rtdetr,hai người đứng sát; tách hộp 3 thành hai
+20261102-100941_002_00391.jpg,add,,445,44,475,82,,người áo đen cạnh hộp 3
+20261102-100941_002_00391.jpg,drop,4,,,,,rtdetr,vùng bóng dưới hai người
+20261102-100941_002_00419.jpg,drop,1,,,,,rtdetr,dải mép trái + bóng
+20261102-100941_002_00419.jpg,drop,2,,,,,yolo,dải mép trái + bóng
+20261102-100941_002_00419.jpg,add,,9,80,42,112,,người áo xanh cúi (prelabel sót)
+20261102-100941_002_00419.jpg,add,,46,75,70,104,,người áo xanh đậm (prelabel sót)
+20261102-100941_002_00419.jpg,add,,62,74,98,112,,người áo đen (prelabel sót)
+20261102-100941_002_00431.jpg,drop,1,,,,,rtdetr,hộp to phủ đường + dải mép
+20261102-100941_002_00431.jpg,drop,3,,,,,yolo,dải mép trái
+20261102-100941_002_00431.jpg,drop,2,,,,,rtdetr,mảnh nhựa hồng
+20261102-100941_002_00431.jpg,add,,52,123,83,139,,người áo xanh cúi (prelabel sót)
+20261102-100941_002_00431.jpg,add,,79,108,110,132,,người áo xanh đậm (prelabel sót)
+20261102-100941_002_00431.jpg,add,,100,116,138,138,,người áo đen (prelabel sót)
+20261102-100941_002_00431.jpg,add,,4,196,48,218,,người đi bộ sát mép trái (prelabel sót)
+20261102-100941_002_00447.jpg,drop,1,,,,,rtdetr,dải mép trái
+20261102-100941_002_00447.jpg,drop,4,,,,,yolo,dải mép trái
+20261102-100941_002_00447.jpg,drop,2,,,,,rtdetr,mảnh nhựa hồng
+20261102-100941_002_00447.jpg,drop,3,,,,,rtdetr,mảnh nhựa hồng
+20261102-100941_002_00447.jpg,add,,54,70,83,88,,người áo xanh cúi (prelabel sót)
+20261102-100941_002_00447.jpg,add,,79,53,110,76,,người áo xanh đậm (prelabel sót)
+20261102-100941_002_00447.jpg,add,,100,61,140,90,,người áo đen (prelabel sót)
+20261102-100941_002_00452.jpg,drop,1,,,,,both,dải mép trái + bóng
+20261102-100941_002_00452.jpg,drop,2,,,,,rtdetr,hộp gộp ba người + bóng; tách ra ba hộp
+20261102-100941_002_00452.jpg,add,,47,62,79,76,,người áo xanh cúi
+20261102-100941_002_00452.jpg,add,,77,46,104,70,,người áo xanh đậm
+20261102-100941_002_00452.jpg,add,,94,54,134,81,,người áo đen
+20261102-100941_002_00480.jpg,drop,1,,,,,rtdetr,dải mép trái + bóng
+20261102-100941_002_00480.jpg,add,,64,66,98,80,,người áo xanh cúi (prelabel sót)
+20261102-100941_002_00480.jpg,add,,96,52,129,76,,người áo xanh đậm (prelabel sót)
+20261102-100941_002_00480.jpg,add,,126,46,160,80,,người áo đen (prelabel sót)
+20261102-100941_002_00489.jpg,drop,1,,,,,rtdetr,dải mép trái + bóng
+20261102-100941_002_00489.jpg,drop,2,,,,,rtdetr,mảnh nhựa hồng
+20261102-100941_002_00489.jpg,tighten,3,2,46,40,72,rtdetr,người đứng bên trái; bỏ bóng
+20261102-100941_002_00489.jpg,add,,86,36,119,55,,người áo xanh cúi (prelabel sót)
+20261102-100941_002_00489.jpg,add,,116,19,154,48,,người áo xanh đậm (prelabel sót)
+20261102-100941_002_00489.jpg,add,,142,11,188,54,,người áo đen (prelabel sót)
+20261102-100941_002_00504.jpg,drop,1,,,,,rtdetr,dải mép trái
+20261102-100941_002_00504.jpg,add,,0,46,30,80,,người áo xanh sát mép trái (prelabel sót)
+20261102-100941_002_00504.jpg,add,,18,29,68,68,,người áo xanh đậm (prelabel sót)
+20261102-100941_002_00504.jpg,add,,50,30,98,80,,người áo đen (prelabel sót)
+20261102-100941_002_00518.jpg,drop,1,,,,,rtdetr,dải mép trái; chỉ có bóng người
+20261102-100941_002_00537.jpg,drop,1,,,,,rtdetr,dải mép trái
+20261102-100941_002_00537.jpg,drop,2,,,,,yolo,mảnh nhựa hồng; góc trên chỉ có bóng người
+20261102-100941_002_00549.jpg,drop,1,,,,,both,mảnh nhựa hồng
+20261102-100941_002_00549.jpg,drop,2,,,,,rtdetr,dải mép trái
+20261102-100941_002_00565.jpg,drop,1,,,,,both,mảnh nhựa hồng
+20261102-100941_002_00579.jpg,drop,1,,,,,rtdetr,dải mép trái
+20261102-100941_002_00579.jpg,drop,2,,,,,yolo,mảnh nhựa hồng
+20261102-100941_003_02328.jpg,ok,,,,,,,không có người (túi nhựa hồng bên trái)
+20261102-100941_003_02383.jpg,drop,1,,,,,rtdetr,hộp to phủ cỏ; không có người
+20261102-100941_003_02393.jpg,ok,,,,,,,không có người
+20261102-100941_003_02415.jpg,ok,2,,,,,rtdetr,người áo hồng trên đường
+20261102-100941_003_02415.jpg,ok,3,,,,,rtdetr,một phần người sát mép phải
+20261102-100941_003_02415.jpg,ok,4,,,,,rtdetr,người áo hồng ngồi
+20261102-100941_003_02415.jpg,tighten,1,374,258,400,288,both,hai người sát nhau; tách hộp 1
+20261102-100941_003_02415.jpg,add,,348,283,392,318,,người áo tối nằm/ngồi dưới hộp 1
+20261102-100941_003_02435.jpg,ok,1,,,,,rtdetr,người áo hồng trên đường
+20261102-100941_003_02435.jpg,ok,3,,,,,rtdetr,người áo hồng ngồi
+20261102-100941_003_02435.jpg,ok,4,,,,,rtdetr,một phần người sát mép phải
+20261102-100941_003_02435.jpg,tighten,2,376,274,402,306,rtdetr,người áo hồng/trắng
+20261102-100941_003_02435.jpg,tighten,5,354,298,392,336,yolo,người áo tối; hộp 5 gộp hai người
+20261102-100941_003_02441.jpg,ok,2,,,,,rtdetr,người áo hồng trên đường
+20261102-100941_003_02441.jpg,tighten,3,419,236,448,270,rtdetr,người áo hồng ngồi; hộp cũ quá nhỏ
+20261102-100941_003_02441.jpg,tighten,1,403,274,431,306,both,người áo hồng/trắng; hộp 1 gộp hai người
+20261102-100941_003_02441.jpg,add,,381,294,423,335,,người áo tối dưới hộp 1
+20261102-100941_004_01525.jpg,drop,1,,,,,rtdetr,dải mép trái; cỏ không có người
+20261102-100941_004_01655.jpg,ok,,,,,,,không có người (tấm nhựa hồng)
+20261102-100941_004_01757.jpg,tighten,1,552,250,594,280,rtdetr,người đứng trên; hộp 1 gộp hai người + bóng
+20261102-100941_004_01757.jpg,add,,540,298,594,335,,người ngồi dưới
+20261102-100941_004_01757.jpg,hard,,,,,,,vật tối ở cuối bóng (549-574 / 354-381) không chắc là người
+20261102-100941_004_01760.jpg,tighten,1,510,229,549,260,rtdetr,người đứng trên; hộp 1 gộp hai người + bóng
+20261102-100941_004_01760.jpg,add,,500,279,549,313,,người ngồi dưới
+20261102-100941_004_01760.jpg,hard,,,,,,,vật tối ở cuối bóng (510-530 / 335-359) không chắc là người
+20261102-100941_004_01814.jpg,tighten,1,495,230,531,258,rtdetr,người đứng trên; hộp 1 gộp hai người + bóng
+20261102-100941_004_01814.jpg,add,,487,278,533,315,,người ngồi dưới
+20261102-100941_004_01814.jpg,drop,2,,,,,rtdetr,dải mép trái
+20261102-100941_004_01814.jpg,hard,,,,,,,vật tối ở cuối bóng (490-528 / 334-352) không chắc là người
+20261102-100941_004_01846.jpg,add,,588,248,630,292,,người sát mép phải (prelabel sót)
+20261102-100941_004_01846.jpg,add,,576,285,617,309,,người áo xanh nhạt (prelabel sót)
+20261102-100941_004_01846.jpg,add,,582,318,618,348,,người áo tối (prelabel sót)
+20261102-100941_004_01846.jpg,hard,,,,,,,nhóm người chồng bóng; vật tối 563-599 / 354-377 không chắc
+20261102-100941_004_01860.jpg,drop,1,,,,,both,bóng người sát mép phải; người ở ngoài khung
+20261102-100941_004_01860.jpg,hard,,,,,,,chỉ có bóng người sát mép phải
+20261102-100941_004_01888.jpg,drop,1,,,,,rtdetr,dải mép trái; không có người
+20261102-100941_004_01908.jpg,drop,1,,,,,both,mảnh nhựa hồng ở mép trên
+20261102-100941_004_01936.jpg,ok,,,,,,,không có người
+20261102-100941_005_01084.jpg,drop,1,,,,,both,túi nhựa hồng
+20261102-100941_005_01091.jpg,drop,1,,,,,both,túi nhựa hồng
+20261102-100941_005_01109.jpg,drop,1,,,,,yolo,túi nhựa hồng sát mép phải
+20261102-100941_005_01126.jpg,drop,1,,,,,rtdetr,đốm trên cỏ
+20261102-100941_005_01201.jpg,ok,,,,,,,bãi đá không có người
+20261102-100941_005_01224.jpg,ok,,,,,,,bãi đá không có người
+20261102-100941_007_00497.jpg,drop,1,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00497.jpg,drop,2,,,,,rtdetr,hộp to phủ cỏ; chỉ có tấm nhựa hồng
+20261102-100941_007_00520.jpg,ok,,,,,,,không có người (tấm nhựa hồng)
+20261102-100941_007_00527.jpg,ok,,,,,,,không có người
+20261102-100941_007_00540.jpg,ok,,,,,,,không có người
+20261102-100941_007_00567.jpg,drop,1,,,,,both,dải mép trái; không có người
+20261102-100941_007_00601.jpg,ok,,,,,,,không có người (túi tối trên cỏ)
+20261102-100941_007_00610.jpg,drop,1,,,,,rtdetr,hộp to phủ cỏ; không có người
+20261102-100941_007_00617.jpg,ok,,,,,,,không có người
+20261102-100941_007_00632.jpg,drop,1,,,,,both,dải mép trái; không có người
+20261102-100941_007_00640.jpg,ok,,,,,,,không có người
+20261102-100941_007_00670.jpg,drop,1,,,,,rtdetr,mảnh nhựa hồng
+20261102-100941_007_00683.jpg,ok,,,,,,,không có người
+20261102-100941_007_00690.jpg,add,,118,126,147,157,,người áo trắng trên đường (prelabel sót)
+20261102-100941_007_00690.jpg,add,,132,160,164,189,,người thứ hai (prelabel sót)
+20261102-100941_007_00690.jpg,add,,133,190,159,214,,người thứ ba (prelabel sót)
+20261102-100941_007_00690.jpg,add,,124,217,152,248,,người thứ tư (prelabel sót)
+20261102-100941_007_00710.jpg,drop,2,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00710.jpg,tighten,1,62,12,100,42,rtdetr,người trên; hộp 1 gộp hai người
+20261102-100941_007_00710.jpg,add,,74,36,106,64,,người dưới
+20261102-100941_007_00710.jpg,add,,78,0,96,12,,một phần người ở mép trên
+20261102-100941_007_00727.jpg,add,,80,0,100,14,,một phần người ở mép trên (prelabel sót)
+20261102-100941_007_00727.jpg,add,,68,16,99,38,,người áo trắng (prelabel sót)
+20261102-100941_007_00727.jpg,add,,45,38,74,64,,người (prelabel sót)
+20261102-100941_007_00727.jpg,add,,62,50,99,84,,người áo xanh (prelabel sót)
+20261102-100941_007_00735.jpg,drop,1,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00735.jpg,add,,56,6,88,26,,người áo trắng (prelabel sót)
+20261102-100941_007_00735.jpg,add,,29,31,57,56,,người (prelabel sót)
+20261102-100941_007_00735.jpg,add,,47,42,86,73,,người áo xanh (prelabel sót)
+20261102-100941_007_00750.jpg,drop,1,,,,,both,dải mép trái
+20261102-100941_007_00750.jpg,add,,7,11,38,32,,người (prelabel sót)
+20261102-100941_007_00750.jpg,add,,30,26,66,56,,người áo xanh (prelabel sót)
+20261102-100941_007_00750.jpg,hard,,,,,,,không chắc là một hay hai người nằm chéo
+20261102-100941_007_00769.jpg,drop,2,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00769.jpg,drop,1,,,,,rtdetr,mảnh nhựa hồng mép dưới
+20261102-100941_007_00769.jpg,add,,57,19,84,43,,người tóc đen (prelabel sót)
+20261102-100941_007_00769.jpg,add,,74,24,113,59,,người áo xanh (prelabel sót)
+20261102-100941_007_00769.jpg,add,,84,0,112,12,,một phần người ở mép trên (prelabel sót)
+20261102-100941_007_00786.jpg,tighten,1,58,0,101,28,rtdetr,người áo trắng; hộp 1 gộp hai người
+20261102-100941_007_00786.jpg,add,,92,6,124,39,,người áo xanh
+20261102-100941_007_00786.jpg,drop,2,,,,,rtdetr,mảnh nhựa
+20261102-100941_007_00805.jpg,drop,1,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00805.jpg,add,,29,29,72,66,,người áo đen quần trắng (prelabel sót)
+20261102-100941_007_00805.jpg,add,,63,24,102,59,,người áo xanh (prelabel sót)
+20261102-100941_007_00805.jpg,add,,56,0,88,15,,một phần người ở mép trên (prelabel sót)
+20261102-100941_007_00823.jpg,drop,2,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00823.jpg,tighten,1,47,26,94,62,rtdetr,người áo đen quần trắng; hộp 1 gộp hai người
+20261102-100941_007_00823.jpg,add,,81,15,121,52,,người áo xanh
+20261102-100941_007_00823.jpg,add,,79,0,104,12,,một phần người ở mép trên
+20261102-100941_007_00829.jpg,drop,3,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00829.jpg,drop,2,,,,,rtdetr,vật trắng trên cỏ
+20261102-100941_007_00829.jpg,tighten,1,39,34,88,64,rtdetr,người áo đen quần trắng; hộp 1 gộp hai người
+20261102-100941_007_00829.jpg,add,,71,19,113,56,,người áo xanh
+20261102-100941_007_00829.jpg,add,,64,0,94,15,,một phần người ở mép trên
+20261102-100941_007_00847.jpg,drop,2,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00847.jpg,drop,1,,,,,rtdetr,mảnh nhựa mép dưới
+20261102-100941_007_00847.jpg,add,,59,24,104,66,,người áo đen quần trắng (prelabel sót)
+20261102-100941_007_00847.jpg,add,,81,15,123,49,,người áo xanh (prelabel sót)
+20261102-100941_007_00847.jpg,add,,79,0,104,9,,một phần người ở mép trên (prelabel sót)
+20261102-100941_007_00895.jpg,drop,1,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00895.jpg,add,,61,21,101,58,,người áo đen quần trắng (prelabel sót)
+20261102-100941_007_00895.jpg,add,,79,16,121,49,,người áo xanh (prelabel sót)
+20261102-100941_007_00895.jpg,add,,77,0,101,8,,một phần người ở mép trên (prelabel sót)
+20261102-100941_007_00908.jpg,drop,1,,,,,rtdetr,vật trắng trên cỏ
+20261102-100941_007_00908.jpg,add,,62,0,98,17,,một phần người ở mép trên (prelabel sót)
+20261102-100941_007_00962.jpg,drop,1,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00962.jpg,drop,2,,,,,yolo,dải mép trái
+20261102-100941_007_00962.jpg,add,,61,0,107,32,,người áo xanh sát mép trên (prelabel sót)
+20261102-100941_007_00974.jpg,drop,1,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_00974.jpg,drop,2,,,,,rtdetr,mảnh nhựa
+20261102-100941_007_00974.jpg,add,,66,0,93,17,,một phần người ở mép trên (prelabel sót)
+20261102-100941_007_00982.jpg,drop,1,,,,,rtdetr,vật trắng trên cỏ; không có người
+20261102-100941_007_01605.jpg,drop,1,,,,,both,dải mép trái; không có người
+20261102-100941_007_01619.jpg,drop,1,,,,,both,dải mép trái
+20261102-100941_007_01619.jpg,drop,2,,,,,rtdetr,vật trắng ở bờ cỏ; không có người
+20261102-100941_007_01622.jpg,drop,1,,,,,rtdetr,dải mép trái
+20261102-100941_007_01622.jpg,drop,2,,,,,rtdetr,hộp to phủ cỏ
+20261102-100941_007_01622.jpg,drop,3,,,,,yolo,dải mép trái; không có người
+20261102-100941_007_01640.jpg,drop,1,,,,,rtdetr,dải mép trái; không có người
+20261102-100941_007_01667.jpg,drop,1,,,,,both,dải mép trái; không có người
+20261102-100941_007_01688.jpg,drop,2,,,,,both,dải mép trái
+20261102-100941_007_01688.jpg,tighten,1,497,310,527,340,rtdetr,người đội mũ trắng; hộp 1 gộp ba người + bóng
+20261102-100941_007_01688.jpg,add,,482,357,519,390,,người áo tối (giữa)
+20261102-100941_007_01688.jpg,add,,492,397,532,432,,người áo tối (dưới)
+20261102-100941_007_01688.jpg,ok,3,,,,,rtdetr,người nằm/ngồi
+20261102-100941_007_01688.jpg,add,,612,219,640,241,,một phần người sát mép phải (prelabel sót)
+20261102-100941_007_01712.jpg,drop,1,,,,,both,dải mép trái
+20261102-100941_007_01712.jpg,ok,2,,,,,rtdetr,người nằm/ngồi
+20261102-100941_007_01712.jpg,add,,517,278,554,305,,người đội mũ trắng (prelabel sót)
+20261102-100941_007_01712.jpg,add,,494,338,532,365,,người áo tối (prelabel sót)
+20261102-100941_007_01712.jpg,add,,487,365,534,398,,người áo tối dưới (prelabel sót)
+20261102-100941_007_01712.jpg,add,,619,183,640,208,,một phần người sát mép phải (prelabel sót)
+20261102-100941_007_01743.jpg,drop,1,,,,,rtdetr,túi nhựa hồng
+20261102-100941_007_01743.jpg,drop,2,,,,,rtdetr,dải mép trái
+20261102-100941_007_01743.jpg,drop,3,,,,,yolo,bóng người sát mép phải
+20261102-100941_007_01743.jpg,add,,560,412,640,466,,người sát mép phải dưới (giày trắng) (prelabel sót)
+20261102-100941_007_01743.jpg,add,,604,452,640,480,,một phần người ở góc dưới phải (prelabel sót)
+20261102-100941_007_01743.jpg,hard,,,,,,,người bị cắt ở góc dưới phải; ranh giới hai người không rõ
+20261102-100941_007_01756.jpg,drop,1,,,,,rtdetr,dải mép trái
+20261102-100941_007_01756.jpg,add,,606,436,640,462,,chân người sát mép phải (prelabel sót)
+20261102-100941_007_01756.jpg,hard,,,,,,,chỉ thấy chân + bóng người sát mép phải
+20261102-100941_007_01771.jpg,drop,1,,,,,rtdetr,túi nhựa hồng
+20261102-100941_007_01771.jpg,hard,,,,,,,bóng người sát mép phải; người ở ngoài khung
+20261102-100941_007_01796.jpg,drop,1,,,,,rtdetr,túi rác tối; không có người
