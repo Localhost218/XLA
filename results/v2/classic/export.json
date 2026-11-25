@@ -1,0 +1,289 @@
+{
+  "bundle": "D:\\XLA-wt\\classic\\models\\release\\enhancer-v2.0.0",
+  "params": "enhance_classic.yaml",
+  "frames": {
+    "parity": [
+      "20261102-100941_002_00382.jpg",
+      "20261102-100941_002_00418.jpg",
+      "20261102-100941_002_00440.jpg",
+      "20261102-100941_002_00462.jpg",
+      "20261102-100941_002_00497.jpg",
+      "20261102-100941_002_00519.jpg",
+      "20261102-100941_002_00541.jpg",
+      "20261102-100941_002_00563.jpg",
+      "20261102-100941_003_02260.jpg",
+      "20261102-100941_003_02376.jpg",
+      "20261102-100941_003_02398.jpg",
+      "20261102-100941_003_02420.jpg",
+      "20261102-100941_003_02442.jpg",
+      "20261102-100941_004_01755.jpg",
+      "20261102-100941_004_01843.jpg",
+      "20261102-100941_004_01865.jpg",
+      "20261102-100941_004_01887.jpg",
+      "20261102-100941_004_01918.jpg",
+      "20261102-100941_004_01940.jpg",
+      "20261102-100941_004_01962.jpg",
+      "20261102-100941_004_01984.jpg",
+      "20261102-100941_004_02006.jpg",
+      "20261102-100941_005_01073.jpg",
+      "20261102-100941_005_01101.jpg",
+      "20261102-100941_005_01123.jpg",
+      "20261102-100941_005_01215.jpg",
+      "20261102-100941_007_00529.jpg",
+      "20261102-100941_007_00551.jpg",
+      "20261102-100941_007_00573.jpg",
+      "20261102-100941_007_00605.jpg",
+      "20261102-100941_007_00627.jpg",
+      "20261102-100941_007_00673.jpg",
+      "20261102-100941_007_00695.jpg",
+      "20261102-100941_007_00717.jpg",
+      "20261102-100941_007_00739.jpg",
+      "20261102-100941_007_00761.jpg",
+      "20261102-100941_007_00783.jpg",
+      "20261102-100941_007_00805.jpg",
+      "20261102-100941_007_00827.jpg",
+      "20261102-100941_007_00895.jpg",
+      "20261102-100941_007_00965.jpg",
+      "20261102-100941_007_00987.jpg",
+      "20261102-100941_007_01417.jpg",
+      "20261102-100941_007_01439.jpg",
+      "20261102-100941_007_01477.jpg",
+      "20261102-100941_007_01607.jpg",
+      "20261102-100941_007_01629.jpg",
+      "20261102-100941_007_01674.jpg",
+      "20261102-100941_007_01734.jpg",
+      "20261102-100941_007_01756.jpg"
+    ],
+    "golden": [
+      "20261102-100941_002_00428.jpg",
+      "20261102-100941_004_01947.jpg",
+      "20261102-100941_007_00765.jpg"
+    ],
+    "trace": "20261102-100941_002_00390.jpg"
+  },
+  "precision": "fp32",
+  "opset": 17,
+  "tolerance": {
+    "mae_max": 1.0,
+    "abs_max": 8
+  },
+  "reference": "numpy xla.enhance.classic (SSOT) cùng khung; từng tầng: vào = ra numpy của tầng trước",
+  "branches": {
+    "n": 50,
+    "dehaze_black_stretch": 0,
+    "dehaze_no_stretch": 50,
+    "magenta_gate_active": 46,
+    "magenta_gate_empty": 4
+  },
+  "parity": {
+    "stages": {
+      "ort_cpu": {
+        "deblock": {
+          "mae_mean": 0.0,
+          "mae_worst": 0.0,
+          "abs_max": 0,
+          "frac_px_diff_worst": 0.0,
+          "pass": true
+        },
+        "magenta": {
+          "mae_mean": 0.000282,
+          "mae_worst": 0.002441,
+          "abs_max": 1,
+          "frac_px_diff_worst": 0.002441,
+          "pass": true
+        },
+        "vignette": {
+          "mae_mean": 0.0,
+          "mae_worst": 0.0,
+          "abs_max": 0,
+          "frac_px_diff_worst": 0.0,
+          "pass": true
+        },
+        "dehaze": {
+          "mae_mean": 0.001217,
+          "mae_worst": 0.014428,
+          "abs_max": 1,
+          "frac_px_diff_worst": 0.014428,
+          "pass": true
+        },
+        "sharpen": {
+          "mae_mean": 2e-06,
+          "mae_worst": 1.6e-05,
+          "abs_max": 1,
+          "frac_px_diff_worst": 1.6e-05,
+          "pass": true
+        }
+      },
+      "ort_cuda": {
+        "deblock": {
+          "mae_mean": 0.0,
+          "mae_worst": 0.0,
+          "abs_max": 0,
+          "frac_px_diff_worst": 0.0,
+          "pass": true
+        },
+        "magenta": {
+          "mae_mean": 0.000282,
+          "mae_worst": 0.002441,
+          "abs_max": 1,
+          "frac_px_diff_worst": 0.002441,
+          "pass": true
+        },
+        "vignette": {
+          "mae_mean": 0.0,
+          "mae_worst": 0.0,
+          "abs_max": 0,
+          "frac_px_diff_worst": 0.0,
+          "pass": true
+        },
+        "dehaze": {
+          "mae_mean": 0.000593,
+          "mae_worst": 0.006905,
+          "abs_max": 1,
+          "frac_px_diff_worst": 0.006905,
+          "pass": true
+        },
+        "sharpen": {
+          "mae_mean": 2e-06,
+          "mae_worst": 1.6e-05,
+          "abs_max": 1,
+          "frac_px_diff_worst": 1.6e-05,
+          "pass": true
+        }
+      }
+    },
+    "full": {
+      "ort_cpu_vs_numpy": {
+        "mae_mean": 0.001971,
+        "mae_worst": 0.017892,
+        "abs_max": 8,
+        "frac_px_diff_worst": 0.016895,
+        "pass": true
+      },
+      "ort_cuda_vs_numpy": {
+        "mae_mean": 0.001221,
+        "mae_worst": 0.010012,
+        "abs_max": 8,
+        "frac_px_diff_worst": 0.009775,
+        "pass": true
+      },
+      "ort_cuda_vs_ort_cpu": {
+        "mae_mean": 0.001309,
+        "mae_worst": 0.015454,
+        "abs_max": 2,
+        "frac_px_diff_worst": 0.014701,
+        "pass": true
+      }
+    },
+    "golden_ort_cpu_vs_numpy": {
+      "mae_mean": 0.001076,
+      "mae_worst": 0.001705,
+      "abs_max": 6,
+      "frac_px_diff_worst": 0.001359,
+      "pass": true
+    }
+  },
+  "machine": {
+    "cpu": "AMD Ryzen 9 7945HX with Radeon Graphics",
+    "logical_cpus": 32,
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "onnxruntime": "1.24.4",
+    "torch": "2.6.0+cu124",
+    "opencv": "5.1.0",
+    "numpy": "2.5.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "ort_cpu_threads": 4,
+    "cv2_threads": 4
+  },
+  "quality_dev": {
+    "numpy": {
+      "dark_channel_median_raw": 141.5,
+      "dark_channel_median": 56.0,
+      "dark_channel_drop": 0.6042402826855123,
+      "pink_frac_raw": 0.007024906517094016,
+      "pink_frac": 0.000602764423076923,
+      "pink_frac_drop": 0.9141960933415713
+    },
+    "onnx_cpu": {
+      "dark_channel_median_raw": 141.5,
+      "dark_channel_median": 56.0,
+      "dark_channel_drop": 0.6042402826855123,
+      "pink_frac_raw": 0.007024906517094016,
+      "pink_frac": 0.000602497329059829,
+      "pink_frac_drop": 0.9142341143481774
+    }
+  },
+  "flicker_dev": {
+    "n_runs": 60,
+    "n_frames": 1086,
+    "numpy": 2.193118086644362,
+    "onnx_cpu": 2.1930728553441123
+  },
+  "cpu_perf_before": {
+    "ok": true,
+    "min": 164.2,
+    "mean": 169.2,
+    "window_s": 10,
+    "at": "2026-11-25T16:49:20+00:00"
+  },
+  "ms_cpu": {
+    "onnx_ort_cpu": {
+      "p50": 29.287,
+      "p95": 30.627,
+      "mean": 29.436,
+      "min": 28.405,
+      "n": 300
+    },
+    "numpy_classic": {
+      "p50": 9.62,
+      "p95": 10.182,
+      "mean": 9.7,
+      "n": 300
+    }
+  },
+  "cpu_perf_after": {
+    "ok": true,
+    "min": 169.1,
+    "mean": 170.5,
+    "window_s": 10,
+    "at": "2026-11-25T16:49:44+00:00"
+  },
+  "cpu_seconds": 113.5,
+  "gpu_state_before": {
+    "temp_c": 86.0,
+    "power_w": 30.0,
+    "sm_mhz": 2145.0,
+    "sm_max_mhz": 3105.0,
+    "throttle_reasons": "0x0000000000000001",
+    "pstate": "P0",
+    "at": "2026-11-25T17:27:05+00:00"
+  },
+  "gpu_state_after": {
+    "temp_c": 87.0,
+    "power_w": 45.77,
+    "sm_mhz": 2265.0,
+    "sm_max_mhz": 3105.0,
+    "throttle_reasons": "0x0000000000000020",
+    "pstate": "P0",
+    "at": "2026-11-25T17:27:10+00:00"
+  },
+  "cuda_providers": [
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+  ],
+  "gpu_seconds": 9.7,
+  "wait_lock_seconds": 2236.4,
+  "ms_per_frame": {
+    "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
+    "p50": 15.438,
+    "p95": 18.411,
+    "mean": 15.41,
+    "min": 11.932,
+    "n": 300
+  },
+  "errors": [],
+  "parity_ok": true,
+  "onnx_sha256": "83d96e8b0f628d0e6cc271ed9550220962de897cac2d57ed306a1db51cb5477b",
+  "classic_params_sha256": "2b1addee584aa5b2e580273235813506acbc8e51af9dd15537fcddfbcfd13730"
+}

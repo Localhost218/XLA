@@ -1,0 +1,93 @@
+{
+  "contract_version": "1.1",
+  "model": "enhancer",
+  "version": "2.0.0",
+  "onnx_sha256": "83d96e8b0f628d0e6cc271ed9550220962de897cac2d57ed306a1db51cb5477b",
+  "frame_size": [
+    640,
+    480
+  ],
+  "crop_left": 16,
+  "camera_profile_version": "1.2.0",
+  "train_run": "classic enhance_classic.yaml@1.0.0 (không huấn luyện)",
+  "metrics": {
+    "pink_frac_drop": null,
+    "dark_channel_drop": null,
+    "flicker_ratio": null
+  },
+  "ms_per_frame": {
+    "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
+    "p50": 19.268,
+    "p95": 25.345
+  },
+  "created": "2026-11-25T17:27:10+00:00",
+  "network": "classic",
+  "classic_params_sha256": "2b1addee584aa5b2e580273235813506acbc8e51af9dd15537fcddfbcfd13730",
+  "camera_profile_sha256": "0a4587101241450130f6d9cdc8354dd2cd54e44c2473594530ae57d962a7c574",
+  "classic_params_version": "1.0.0",
+  "precision": "fp32",
+  "metrics_note": "metrics (tập test thật) = null: lane classic không đụng khung test; phase 14 đo",
+  "metrics_dev": {
+    "dark_channel_median_raw": 141.5,
+    "dark_channel_median": 56.0,
+    "dark_channel_drop": 0.6042402826855123,
+    "pink_frac_raw": 0.007024906517094016,
+    "pink_frac": 0.000602497329059829,
+    "pink_frac_drop": 0.9142341143481774,
+    "flicker_ratio": 2.1930728553441123,
+    "split": "dev"
+  },
+  "ms_per_frame_cpu": {
+    "runtime": "onnxruntime CPU EP, 4 luồng",
+    "p50": 29.287,
+    "p95": 30.627,
+    "mean": 29.436,
+    "min": 28.405,
+    "n": 300
+  },
+  "bench_machine": {
+    "cpu": "AMD Ryzen 9 7945HX with Radeon Graphics",
+    "logical_cpus": 32,
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "onnxruntime": "1.24.4",
+    "torch": "2.6.0+cu124",
+    "opencv": "5.1.0",
+    "numpy": "2.5.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "ort_cpu_threads": 4,
+    "cv2_threads": 4
+  },
+  "parity": {
+    "vs": "numpy xla.enhance.classic",
+    "n_frames": 50,
+    "ort_cpu_vs_numpy": {
+      "mae_mean": 0.001971,
+      "mae_worst": 0.017892,
+      "abs_max": 8,
+      "frac_px_diff_worst": 0.016895,
+      "pass": true
+    },
+    "ort_cuda_vs_numpy": {
+      "mae_mean": 0.001221,
+      "mae_worst": 0.010012,
+      "abs_max": 8,
+      "frac_px_diff_worst": 0.009775,
+      "pass": true
+    },
+    "ort_cuda_vs_ort_cpu": {
+      "mae_mean": 0.001309,
+      "mae_worst": 0.015454,
+      "abs_max": 2,
+      "frac_px_diff_worst": 0.014701,
+      "pass": true
+    }
+  },
+  "trace_frame": "20261102-100941_002_00390.jpg",
+  "golden_sources": {
+    "000.jpg": "20261102-100941_002_00428.jpg",
+    "001.jpg": "20261102-100941_004_01947.jpg",
+    "002.jpg": "20261102-100941_007_00765.jpg"
+  },
+  "ms_per_frame_source": "results/v2/classic/ms_ab.json: A/B xen kẽ với enhancer-v1.0.0 trong một tiến trình, giữ gpu_lock, 10 vòng × 100 lần, gộp 1000 lần; số cũ của lần xuất (GPU đang xung cao) p50 15.438, p95 18.411"
+}

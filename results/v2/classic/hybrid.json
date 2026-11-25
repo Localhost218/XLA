@@ -1,0 +1,147 @@
+{
+  "config": "configs/restore_hybrid.yaml",
+  "rule": "hơn classic = không kém ở cả ba chỉ số dev (dark channel trung vị, % điểm hồng, flicker_ratio; thấp hơn là tốt hơn) và tốt hơn ít nhất một; thêm tổng ms ORT CUDA ≤ ms_max mới được A/B",
+  "gpu_cap_s": 1800.0,
+  "input_set": {
+    "dir": "D:\\DevCache\\datasets\\xla\\v2_classic_d2",
+    "built": 0,
+    "counts": {
+      "train": 3006,
+      "val": 487
+    },
+    "seconds": 0.0,
+    "classic_params_sha256": "2b1addee584aa5b2e580273235813506acbc8e51af9dd15537fcddfbcfd13730",
+    "source": "d2",
+    "jpeg_quality": 100,
+    "sampling": "4:4:4"
+  },
+  "smoke": {
+    "steps": 200,
+    "s_per_step": 0.1882028365135193,
+    "gpu_seconds": 45.745985984802246,
+    "vram_peak_gb": 1.7454094886779785,
+    "val_synthetic": [
+      {
+        "step": 0,
+        "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+        "n": 50,
+        "psnr": 14.654692068636336,
+        "ssim": 0.4475050550699234,
+        "psnr_input": 19.155073800576815,
+        "ssim_input": 0.7203050643205643
+      },
+      {
+        "step": 200,
+        "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+        "n": 50,
+        "psnr": 18.908863721865938,
+        "ssim": 0.7247275918722152,
+        "psnr_input": 19.155073800576815,
+        "ssim_input": 0.7203050643205643
+      }
+    ]
+  },
+  "plan": {
+    "gpu_used_after_smoke_s": 45.7,
+    "room_s": 1394.3,
+    "more_steps": 7400
+  },
+  "train": {
+    "steps": 7600,
+    "s_per_step": 0.15126091934539176,
+    "gpu_seconds": 1194.727920293808,
+    "vram_peak_gb": 1.7581939697265625,
+    "wait_lock_seconds": 1342.2274844646454,
+    "params": 1137203,
+    "run_dir": "D:\\DevCache\\runs\\xla\\restore\\v2-classic-hybrid-w16",
+    "val_synthetic_final": {
+      "step": 7600,
+      "kind": "số tổng hợp (cặp D2→D0 val, ảnh tự sinh)",
+      "n": 487,
+      "psnr": 24.603748741262866,
+      "ssim": 0.8120858342495787,
+      "psnr_input": 19.5065127462999,
+      "ssim_input": 0.7360886087530203
+    }
+  },
+  "eval": {
+    "rows": [
+      {
+        "checkpoint": "step_002400.pt",
+        "step": 2400,
+        "quality": {
+          "dark_channel_median_raw": 141.5,
+          "dark_channel_median": 84.0,
+          "dark_channel_drop": 0.40636042402826855,
+          "pink_frac_raw": 0.007024906517094016,
+          "pink_frac": 0.0,
+          "pink_frac_drop": 1.0
+        },
+        "flicker_ratio": 2.176407809888657,
+        "flicker_classic": 2.193118086644362,
+        "n_flicker_frames": 1086
+      },
+      {
+        "checkpoint": "step_004800.pt",
+        "step": 4800,
+        "quality": {
+          "dark_channel_median_raw": 141.5,
+          "dark_channel_median": 103.0,
+          "dark_channel_drop": 0.27208480565371024,
+          "pink_frac_raw": 0.007024906517094016,
+          "pink_frac": 0.0,
+          "pink_frac_drop": 1.0
+        },
+        "flicker_ratio": 2.0668837855992455,
+        "flicker_classic": 2.193118086644362,
+        "n_flicker_frames": 1086
+      },
+      {
+        "checkpoint": "step_007200.pt",
+        "step": 7200,
+        "quality": {
+          "dark_channel_median_raw": 141.5,
+          "dark_channel_median": 111.0,
+          "dark_channel_drop": 0.21554770318021202,
+          "pink_frac_raw": 0.007024906517094016,
+          "pink_frac": 0.0,
+          "pink_frac_drop": 1.0
+        },
+        "flicker_ratio": 1.859116995401882,
+        "flicker_classic": 2.193118086644362,
+        "n_flicker_frames": 1086
+      },
+      {
+        "checkpoint": "step_007600.pt",
+        "step": 7600,
+        "quality": {
+          "dark_channel_median_raw": 141.5,
+          "dark_channel_median": 111.5,
+          "dark_channel_drop": 0.21201413427561838,
+          "pink_frac_raw": 0.007024906517094016,
+          "pink_frac": 0.0,
+          "pink_frac_drop": 1.0
+        },
+        "flicker_ratio": 1.848450840666517,
+        "flicker_classic": 2.193118086644362,
+        "n_flicker_frames": 1086
+      }
+    ],
+    "classic": {
+      "dark_channel_median_raw": 141.5,
+      "dark_channel_median": 56.0,
+      "dark_channel_drop": 0.6042402826855123,
+      "pink_frac_raw": 0.007024906517094016,
+      "pink_frac": 0.000602764423076923,
+      "pink_frac_drop": 0.9141960933415713
+    },
+    "gpu_seconds": 306.7,
+    "wait_lock_seconds": 2168.4
+  },
+  "gpu_seconds": 1501.4,
+  "gpu_minutes": 25.02,
+  "within_cap": true,
+  "verdict": "không đạt trong trần",
+  "reason": "không checkpoint nào hơn classic trên dev theo luật",
+  "winners": []
+}

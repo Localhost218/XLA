@@ -1,0 +1,590 @@
+{
+  "frame": "20261102-100941_002_00382.jpg",
+  "models": {
+    "enhancer-v2.0.0": "D:\\XLA-wt\\classic\\models\\release\\enhancer-v2.0.0\\enhancer.onnx",
+    "enhancer-v1.0.0": "D:\\XLA\\models\\release\\enhancer-v1.0.0\\enhancer.onnx"
+  },
+  "rounds": 10,
+  "iters": 100,
+  "warmup": 30,
+  "block_warmup": 5,
+  "providers": {
+    "enhancer-v2.0.0": [
+      "CUDAExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "enhancer-v1.0.0": [
+      "CUDAExecutionProvider",
+      "CPUExecutionProvider"
+    ]
+  },
+  "total": {
+    "enhancer-v2.0.0": {
+      "p50": 19.268,
+      "p95": 25.345,
+      "mean": 19.561,
+      "min": 12.741,
+      "n": 1000
+    },
+    "enhancer-v1.0.0": {
+      "p50": 20.612,
+      "p95": 27.891,
+      "mean": 21.444,
+      "min": 14.925,
+      "n": 1000
+    }
+  },
+  "diff_ms": {
+    "enhancer-v2.0.0-enhancer-v1.0.0_p50": -1.344,
+    "enhancer-v2.0.0-enhancer-v1.0.0_p95": -2.546,
+    "per_round_p50_diff_min": -7.809,
+    "per_round_p50_diff_max": 3.286
+  },
+  "runtime": "onnxruntime-gpu 1.24.4 CUDA EP",
+  "machine": {
+    "cpu": "AMD Ryzen 9 7945HX with Radeon Graphics",
+    "logical_cpus": 32,
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "onnxruntime": "1.24.4",
+    "torch": "2.6.0+cu124",
+    "opencv": "5.1.0",
+    "numpy": "2.5.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "ort_cpu_threads": 4,
+    "cv2_threads": 4
+  },
+  "rows": [
+    {
+      "round": 0,
+      "order": [
+        "enhancer-v2.0.0",
+        "enhancer-v1.0.0"
+      ],
+      "gpu_start": {
+        "temp_c": 68.0,
+        "power_w": 31.59,
+        "sm_mhz": 945.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:10:03+00:00"
+      },
+      "cpu_perf_start": {
+        "ok": true,
+        "min": 187.6,
+        "mean": 188.2,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:05+00:00"
+      },
+      "enhancer-v2.0.0": {
+        "p50": 23.719,
+        "p95": 25.807,
+        "mean": 23.227,
+        "min": 19.02,
+        "n": 100
+      },
+      "enhancer-v1.0.0": {
+        "p50": 20.785,
+        "p95": 25.352,
+        "mean": 20.851,
+        "min": 15.644,
+        "n": 100
+      },
+      "gpu_end": {
+        "temp_c": 70.0,
+        "power_w": 43.61,
+        "sm_mhz": 1530.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:10:10+00:00"
+      },
+      "cpu_perf_end": {
+        "ok": true,
+        "min": 178.1,
+        "mean": 180.8,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:13+00:00"
+      }
+    },
+    {
+      "round": 1,
+      "order": [
+        "enhancer-v1.0.0",
+        "enhancer-v2.0.0"
+      ],
+      "gpu_start": {
+        "temp_c": 66.0,
+        "power_w": 11.81,
+        "sm_mhz": 345.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P4",
+        "at": "2026-11-25T18:10:13+00:00"
+      },
+      "cpu_perf_start": {
+        "ok": true,
+        "min": 176.3,
+        "mean": 178.0,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:15+00:00"
+      },
+      "enhancer-v1.0.0": {
+        "p50": 21.846,
+        "p95": 33.437,
+        "mean": 22.963,
+        "min": 16.684,
+        "n": 100
+      },
+      "enhancer-v2.0.0": {
+        "p50": 18.833,
+        "p95": 23.166,
+        "mean": 18.757,
+        "min": 13.728,
+        "n": 100
+      },
+      "gpu_end": {
+        "temp_c": 68.0,
+        "power_w": 20.99,
+        "sm_mhz": 1140.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:10:20+00:00"
+      },
+      "cpu_perf_end": {
+        "ok": true,
+        "min": 177.5,
+        "mean": 179.5,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:22+00:00"
+      }
+    },
+    {
+      "round": 2,
+      "order": [
+        "enhancer-v2.0.0",
+        "enhancer-v1.0.0"
+      ],
+      "gpu_start": {
+        "temp_c": 66.0,
+        "power_w": 11.42,
+        "sm_mhz": 270.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P4",
+        "at": "2026-11-25T18:10:22+00:00"
+      },
+      "cpu_perf_start": {
+        "ok": true,
+        "min": 176.6,
+        "mean": 177.0,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:24+00:00"
+      },
+      "enhancer-v2.0.0": {
+        "p50": 22.207,
+        "p95": 25.036,
+        "mean": 21.999,
+        "min": 18.028,
+        "n": 100
+      },
+      "enhancer-v1.0.0": {
+        "p50": 18.921,
+        "p95": 23.774,
+        "mean": 19.397,
+        "min": 15.215,
+        "n": 100
+      },
+      "gpu_end": {
+        "temp_c": 71.0,
+        "power_w": 40.3,
+        "sm_mhz": 1440.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:10:29+00:00"
+      },
+      "cpu_perf_end": {
+        "ok": true,
+        "min": 177.9,
+        "mean": 178.1,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:31+00:00"
+      }
+    },
+    {
+      "round": 3,
+      "order": [
+        "enhancer-v1.0.0",
+        "enhancer-v2.0.0"
+      ],
+      "gpu_start": {
+        "temp_c": 67.0,
+        "power_w": 12.67,
+        "sm_mhz": 285.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P4",
+        "at": "2026-11-25T18:10:31+00:00"
+      },
+      "cpu_perf_start": {
+        "ok": true,
+        "min": 176.5,
+        "mean": 179.2,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:34+00:00"
+      },
+      "enhancer-v1.0.0": {
+        "p50": 21.118,
+        "p95": 27.588,
+        "mean": 22.107,
+        "min": 17.021,
+        "n": 100
+      },
+      "enhancer-v2.0.0": {
+        "p50": 15.429,
+        "p95": 19.319,
+        "mean": 15.96,
+        "min": 12.741,
+        "n": 100
+      },
+      "gpu_end": {
+        "temp_c": 69.0,
+        "power_w": 23.48,
+        "sm_mhz": 1245.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:10:38+00:00"
+      },
+      "cpu_perf_end": {
+        "ok": true,
+        "min": 176.6,
+        "mean": 177.1,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:40+00:00"
+      }
+    },
+    {
+      "round": 4,
+      "order": [
+        "enhancer-v2.0.0",
+        "enhancer-v1.0.0"
+      ],
+      "gpu_start": {
+        "temp_c": 67.0,
+        "power_w": 12.71,
+        "sm_mhz": 300.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P4",
+        "at": "2026-11-25T18:10:40+00:00"
+      },
+      "cpu_perf_start": {
+        "ok": true,
+        "min": 175.0,
+        "mean": 178.6,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:43+00:00"
+      },
+      "enhancer-v2.0.0": {
+        "p50": 21.503,
+        "p95": 24.727,
+        "mean": 21.275,
+        "min": 17.549,
+        "n": 100
+      },
+      "enhancer-v1.0.0": {
+        "p50": 19.493,
+        "p95": 23.292,
+        "mean": 19.558,
+        "min": 15.291,
+        "n": 100
+      },
+      "gpu_end": {
+        "temp_c": 72.0,
+        "power_w": 44.67,
+        "sm_mhz": 1545.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:10:47+00:00"
+      },
+      "cpu_perf_end": {
+        "ok": true,
+        "min": 183.4,
+        "mean": 184.6,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:50+00:00"
+      }
+    },
+    {
+      "round": 5,
+      "order": [
+        "enhancer-v1.0.0",
+        "enhancer-v2.0.0"
+      ],
+      "gpu_start": {
+        "temp_c": 67.0,
+        "power_w": 10.47,
+        "sm_mhz": 465.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P4",
+        "at": "2026-11-25T18:10:50+00:00"
+      },
+      "cpu_perf_start": {
+        "ok": true,
+        "min": 180.9,
+        "mean": 183.4,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:52+00:00"
+      },
+      "enhancer-v1.0.0": {
+        "p50": 20.694,
+        "p95": 35.619,
+        "mean": 23.434,
+        "min": 16.689,
+        "n": 100
+      },
+      "enhancer-v2.0.0": {
+        "p50": 16.147,
+        "p95": 19.754,
+        "mean": 16.539,
+        "min": 12.76,
+        "n": 100
+      },
+      "gpu_end": {
+        "temp_c": 69.0,
+        "power_w": 22.52,
+        "sm_mhz": 1155.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:10:56+00:00"
+      },
+      "cpu_perf_end": {
+        "ok": true,
+        "min": 183.3,
+        "mean": 184.0,
+        "window_s": 2,
+        "at": "2026-11-25T18:10:59+00:00"
+      }
+    },
+    {
+      "round": 6,
+      "order": [
+        "enhancer-v2.0.0",
+        "enhancer-v1.0.0"
+      ],
+      "gpu_start": {
+        "temp_c": 68.0,
+        "power_w": 12.43,
+        "sm_mhz": 375.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P4",
+        "at": "2026-11-25T18:10:59+00:00"
+      },
+      "cpu_perf_start": {
+        "ok": true,
+        "min": 181.7,
+        "mean": 181.9,
+        "window_s": 2,
+        "at": "2026-11-25T18:11:01+00:00"
+      },
+      "enhancer-v2.0.0": {
+        "p50": 22.912,
+        "p95": 27.892,
+        "mean": 22.822,
+        "min": 18.291,
+        "n": 100
+      },
+      "enhancer-v1.0.0": {
+        "p50": 19.939,
+        "p95": 23.667,
+        "mean": 20.013,
+        "min": 15.208,
+        "n": 100
+      },
+      "gpu_end": {
+        "temp_c": 73.0,
+        "power_w": 46.23,
+        "sm_mhz": 1665.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:11:06+00:00"
+      },
+      "cpu_perf_end": {
+        "ok": true,
+        "min": 173.3,
+        "mean": 176.0,
+        "window_s": 2,
+        "at": "2026-11-25T18:11:08+00:00"
+      }
+    },
+    {
+      "round": 7,
+      "order": [
+        "enhancer-v1.0.0",
+        "enhancer-v2.0.0"
+      ],
+      "gpu_start": {
+        "temp_c": 68.0,
+        "power_w": 13.31,
+        "sm_mhz": 465.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P4",
+        "at": "2026-11-25T18:11:08+00:00"
+      },
+      "cpu_perf_start": {
+        "ok": true,
+        "min": 176.2,
+        "mean": 176.4,
+        "window_s": 2,
+        "at": "2026-11-25T18:11:11+00:00"
+      },
+      "enhancer-v1.0.0": {
+        "p50": 22.07,
+        "p95": 27.81,
+        "mean": 22.407,
+        "min": 16.83,
+        "n": 100
+      },
+      "enhancer-v2.0.0": {
+        "p50": 15.492,
+        "p95": 18.453,
+        "mean": 15.866,
+        "min": 13.127,
+        "n": 100
+      },
+      "gpu_end": {
+        "temp_c": 70.0,
+        "power_w": 21.55,
+        "sm_mhz": 1200.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:11:15+00:00"
+      },
+      "cpu_perf_end": {
+        "ok": true,
+        "min": 176.6,
+        "mean": 178.7,
+        "window_s": 2,
+        "at": "2026-11-25T18:11:17+00:00"
+      }
+    },
+    {
+      "round": 8,
+      "order": [
+        "enhancer-v2.0.0",
+        "enhancer-v1.0.0"
+      ],
+      "gpu_start": {
+        "temp_c": 68.0,
+        "power_w": 13.36,
+        "sm_mhz": 285.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P4",
+        "at": "2026-11-25T18:11:17+00:00"
+      },
+      "cpu_perf_start": {
+        "ok": true,
+        "min": 175.8,
+        "mean": 177.2,
+        "window_s": 2,
+        "at": "2026-11-25T18:11:20+00:00"
+      },
+      "enhancer-v2.0.0": {
+        "p50": 21.695,
+        "p95": 32.76,
+        "mean": 22.502,
+        "min": 17.572,
+        "n": 100
+      },
+      "enhancer-v1.0.0": {
+        "p50": 20.445,
+        "p95": 26.684,
+        "mean": 20.222,
+        "min": 14.925,
+        "n": 100
+      },
+      "gpu_end": {
+        "temp_c": 73.0,
+        "power_w": 48.23,
+        "sm_mhz": 1605.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:11:25+00:00"
+      },
+      "cpu_perf_end": {
+        "ok": true,
+        "min": 173.6,
+        "mean": 173.9,
+        "window_s": 2,
+        "at": "2026-11-25T18:11:27+00:00"
+      }
+    },
+    {
+      "round": 9,
+      "order": [
+        "enhancer-v1.0.0",
+        "enhancer-v2.0.0"
+      ],
+      "gpu_start": {
+        "temp_c": 68.0,
+        "power_w": 11.7,
+        "sm_mhz": 375.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P4",
+        "at": "2026-11-25T18:11:27+00:00"
+      },
+      "cpu_perf_start": {
+        "ok": true,
+        "min": 172.1,
+        "mean": 175.7,
+        "window_s": 2,
+        "at": "2026-11-25T18:11:29+00:00"
+      },
+      "enhancer-v1.0.0": {
+        "p50": 24.05,
+        "p95": 32.157,
+        "mean": 23.492,
+        "min": 17.163,
+        "n": 100
+      },
+      "enhancer-v2.0.0": {
+        "p50": 16.241,
+        "p95": 20.625,
+        "mean": 16.662,
+        "min": 12.826,
+        "n": 100
+      },
+      "gpu_end": {
+        "temp_c": 70.0,
+        "power_w": 23.31,
+        "sm_mhz": 1230.0,
+        "sm_max_mhz": 3105.0,
+        "throttle_reasons": "0x0000000000000001",
+        "pstate": "P0",
+        "at": "2026-11-25T18:11:34+00:00"
+      },
+      "cpu_perf_end": {
+        "ok": true,
+        "min": 183.7,
+        "mean": 184.0,
+        "window_s": 2,
+        "at": "2026-11-25T18:11:36+00:00"
+      }
+    }
+  ],
+  "gpu_seconds": 95.5,
+  "wait_lock_seconds": 0.0
+}
