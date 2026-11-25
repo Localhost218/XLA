@@ -55,5 +55,23 @@ cặp lặp đúng.
 
 Mỗi so sánh đạt khi cận dưới Wilson 95 % > 0,5. Với 25 cặp, 18/25 là đạt, còn 17/25 cho cận dưới 0,484. Luật quyết định
 nằm trong `ab_score.DECISION_RULE`: offline được ship khi guard pass và cả offline_vs_raw lẫn offline_vs_classic cùng đạt
-trong ít nhất một lượt. classic_vs_raw chỉ là chỉ số §5. Lai không thay được classic. Một giới hạn cần biết: ảnh SR ×2
+ở lượt **cả khung** (sửa 26/11 trước khi chấm, commit b545b64: lượt phóng to chỉ báo cáo; luật "ít nhất một lượt" làm lỏng tiêu chí). classic_vs_raw chỉ là chỉ số §5. Lai không thay được classic. Một giới hạn cần biết: ảnh SR ×2
 không có lưới khối JPEG nên người chấm có thể nhận ra được.
+
+## 4. Kết quả (chủ dự án chấm lượt cả khung, 26/11/2026 01:49) — `ab_result.json`, `ab_score.json`, `decision.json`
+
+| So sánh | Thắng (bên thứ nhất) | Tỉ lệ | Wilson 95 % | Đạt? |
+|---|---|---|---|---|
+| classic vs gốc | 25/25 | 1,00 | [0,867; 1,000] | đạt (chỉ số §5) |
+| offline vs gốc | 25/25 | 1,00 | [0,867; 1,000] | đạt |
+| offline vs classic | 16/25 | 0,64 | [0,445; 0,798] | **không đạt** |
+
+Cặp lặp đổi bên: 5/5 chọn như lần đầu (nhất quán 1,00).
+
+**Quyết định (`decision.json`): `offline_ship = false`** — lượt cả khung không thắng cả gốc lẫn classic. Offline rõ hơn gốc
+rõ rệt nhưng không chứng minh được hơn classic (64 %, cận dưới 0,445), trong khi đắt hơn (0,40 s/khung, ~0,76 h/chuyến 20
+phút), nhấp nháy 1,35 (> 1,15) và màu ngả lạnh. IOT-CV không cài `enhancer-offline-*`; API offline trả 503, web ẩn nút.
+Classic thắng gốc 25/25: củng cố quyết định Owner bật "Ảnh rõ" classic mặc định (Deferred 17), không đổi quyết định đó.
+
+Lượt phóng to (`results/ab-v2-zoom/`) **không chấm**: theo luật chốt trước nó không quyết định; trang vẫn để nguyên nếu
+muốn chấm sau (`ab_score` lượt `zoom` chỉ thêm vào báo cáo).

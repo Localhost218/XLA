@@ -1,0 +1,61 @@
+{
+ "export": "results\\ab-v2\\ab_result.json",
+ "key": "results\\ab-v2\\ab_key.json",
+ "key_id": "97bf4f3ec5b67c15",
+ "n_choices": 80,
+ "comparisons": {
+  "offline_vs_raw": {
+   "n": 25,
+   "win_rate": 1.0,
+   "ci95_wilson": [
+    0.866808,
+    1.0
+   ],
+   "verdict_vs_50": "mang_thang",
+   "candidate": "offline",
+   "baseline": "raw",
+   "wins": 25,
+   "criterion": "cận dưới Wilson 95 % > 0,5",
+   "passes": true
+  },
+  "offline_vs_classic": {
+   "n": 25,
+   "win_rate": 0.64,
+   "ci95_wilson": [
+    0.445185,
+    0.797521
+   ],
+   "verdict_vs_50": "chua_phan_dinh",
+   "candidate": "offline",
+   "baseline": "classic",
+   "wins": 16,
+   "criterion": "cận dưới Wilson 95 % > 0,5",
+   "passes": false
+  },
+  "classic_vs_raw": {
+   "n": 25,
+   "win_rate": 1.0,
+   "ci95_wilson": [
+    0.866808,
+    1.0
+   ],
+   "verdict_vs_50": "mang_thang",
+   "candidate": "classic",
+   "baseline": "raw",
+   "wins": 25,
+   "criterion": "cận dưới Wilson 95 % > 0,5",
+   "passes": true
+  }
+ },
+ "consistency": {
+  "n_repeats": 5,
+  "agree": 5,
+  "rate": 1.0,
+  "note": "cặp lặp đổi bên; đồng ý = chọn cùng biến thể như lần đầu"
+ },
+ "side_bias": {
+  "left_rate": 0.6,
+  "n": 75
+ },
+ "exported_at": "2026-11-25T18:49:29.145Z"
+}
