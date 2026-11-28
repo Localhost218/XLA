@@ -1,0 +1,42 @@
+\section{Dữ liệu}\label{sec:du-lieu}
+
+\subsection{Khung bay thật, chia theo khối 30 giây}
+
+Mọi khung thật đến từ sáu chuyến bay sáng 02/11/2026 trên cùng một bãi. Từ 17\,775 đoạn video, nhóm giữ khung nằm trong cửa sổ bay và cao trên 3 m, bỏ 29 khung có độ cao vọt bất thường, còn 2\,915 khung. Khung liền nhau của luồng 2 đến 9 khung/s gần như trùng nhau, nên chia ngẫu nhiên theo khung sẽ để ``anh em sinh đôi'' của khung test lọt vào tập huấn luyện. Nhóm cắt chuyến bay thành 24 khối 30 s, chọn 13 khối làm test theo tầng (độ cao, có người hay không), trong khối test chỉ lấy khung cách nhau ít nhất 1 s, và để vùng đệm 5 s quanh mỗi khối test.
+
+Nhãn người của tập test được gán trước bằng nhiều model kèm SAHI, soát từng khung bằng mắt, rồi duyệt lần cuối trên Label Studio chạy tại máy; lượt duyệt cuối sửa 25,8\,\% số hộp. Phần dev được chia tiếp theo phiên bay (mỗi phiên là một chuyến): \texttt{devpool} để chọn model bằng k-fold theo phiên (fold 0 là phiên \#5, fold 1 là phiên \#1 đến \#4), \texttt{cal} gồm trọn hai khối dev để hiệu chỉnh ngưỡng, \texttt{mine} gồm khung không người để khai thác âm khó. Bảng~\ref{tab:split} tổng hợp các tập.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption[Các tập dữ liệu]{Các tập dữ liệu. Ảnh ngoài đã qua lọc góc nhìn (nadir hoặc gần nadir); số trong ngoặc là ảnh có người.}
+\label{tab:split}
+\begin{tabularx}{\textwidth}{@{}l r X@{}}
+\toprule
+Tập & Khung / ảnh & Dùng để \\
+\midrule
+test (13 khối 30 s) & 198 & chấm một lần: 39 khung có người, 149 người, 159 khung bay không người \\
+khung âm trong nhà (\texttt{neg}) & 300 & báo nhầm trong nhà, ba bản ghi khác \\
+\texttt{devpool} & 160 & chọn model k-fold theo phiên: 70 khung có người, 218 người \\
+\texttt{cal} (2 phiên, 16 khối) & 150 & hiệu chỉnh ngưỡng verifier và track; không người \\
+\texttt{mine} & 85 & âm khó cho verifier; không người \\
+\addlinespace
+HERIDAL (CC BY 3.0) & 1\,684 (1\,086) & tập trộn \texttt{d02x}, mẫu dương và âm cho verifier \\
+WiSARD (MIT) & 110 & \texttt{d02x}, mẫu dương và âm cho verifier \\
+TinyPerson & 173 & chỉ làm mẫu dương cho verifier \\
+VisDrone & 3\,493 cửa sổ & ảnh nguồn cho D0, D1, D2 (từ 1\,841 ảnh) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Ảnh huấn luyện: dữ liệu ngoài và hai bộ làm xấu}
+
+Khung bay thật có người quá ít để huấn luyện, nên ảnh huấn luyện lấy từ bộ ảnh drone có nhãn người. VisDrone~\cite{visdrone} là nguồn chính, cắt thành cửa sổ 624$\times$480 sao cho người có cỡ như trên khung thật. Nhóm thêm HERIDAL~\cite{heridal}, WiSARD~\cite{wisard} và TinyPerson~\cite{tinyperson}. Camera của nhóm nhìn thẳng xuống, nên ảnh ngoài phải qua lọc góc nhìn: một probe logistic trên đặc trưng CLIP, học từ nhãn VisDrone, giữ ảnh có điểm $\geq$ 0,8. Trên 100 ảnh soát tay mỗi bộ, probe chọn đúng 77/77 ảnh HERIDAL, 11/11 ảnh TinyPerson và 25/25 ảnh WiSARD (precision 1,00). HERIDAL chia train/val theo nơi bay (17 nơi) để không rò cảnh.
+
+Ảnh nguồn sạch được làm xấu trước khi huấn luyện. D1 làm xấu ngẫu nhiên theo chuỗi bậc hai của Real-ESRGAN~\cite{realesrgan} và không đọc hồ sơ camera. D2 là bản sao camera: sáu khâu tất định theo thứ tự vật lý, từ không khí tới file JPEG (công thức ở mục~\ref{sec:suy-giam}). Khâu JPEG nén bằng đúng hai bảng lượng tử đọc từ file của camera, lấy mẫu màu 4:2:2; Pillow tái tạo được bảng và header của 20/20 khung dev thử.
+
+Tham số D2 không đặt bằng tay. CMA-ES~\cite{cmaes} tìm 12 tham số sao cho thống kê của ảnh D2 sinh từ 500 ảnh nguồn cố định khớp 1\,115 khung dev. Hàm mục tiêu là trung bình 18 số hạng, mỗi số hạng là khoảng cách Wasserstein-1 giữa phân bố của một thống kê mức thấp (màu, dark channel, nhiễu, độ nét, khối JPEG, tối góc, phổ nhiễu) trên ảnh D2 và trên khung thật, chia cho IQR của khung thật:
+\begin{equation}
+\mathcal{L}(\theta)=\frac{1}{18}\sum_{j=1}^{18}\frac{W_1\!\big(F_j^{\mathrm{D2}(\theta)},\,F_j^{\mathrm{thật}}\big)}{\mathrm{IQR}_j}.
+\label{eq:cmaes}
+\end{equation}
+Vòng 1 chạy 155 lượt, $\mathcal{L}$ giảm từ 0,967 xuống 0,736; vòng 2 nới các biên vòng 1 chạm, thêm tham số mức đen dư, chạy 80 lượt và xuống 0,712. Trên 198 khung test, khoảng cách thống kê của D2 là 0,80 so với 5,93 của D1 (mức sàn giữa hai nhóm khung thật là 0,33), và detector E1 học trên D2 báo nhầm 0,30 hộp/khung bay không người so với 0,99 của D1, hiệu $-0{,}692$ \ci{$-1{,}238$}{$-0{,}246$}. Tập \texttt{d02x} trộn VisDrone (D0 và D2) với HERIDAL và WiSARD, dùng cho thầy, trò và mẫu của verifier.

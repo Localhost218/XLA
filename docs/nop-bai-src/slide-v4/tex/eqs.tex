@@ -1,0 +1,85 @@
+\documentclass[border=1.5pt,multi=eqn]{standalone}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont{BeVietnamPro}[Path=D:/IOT_Tools/downloads/fonts/,Extension=.ttf,UprightFont=*-Regular,BoldFont=*-SemiBold]
+\setmathfont{Cambria Math}
+\setmathfont{Cambria Math}[range={"2013}]
+\newenvironment{eqn}[1]{\fontsize{18}{22}\selectfont\color[HTML]{#1}$\displaystyle}{$}
+\begin{document}
+\begin{eqn}{0E2238}I(x)=J(x)\,t(x)+A\,\bigl(1-t(x)\bigr)\end{eqn}
+\begin{eqn}{0E2238}t(x)=e^{-\beta\,d(x)}\end{eqn}
+\begin{eqn}{0E2238}t=\operatorname{clip}\Bigl(\dfrac{A-d^{*}}{A-d_J};\;0{,}2;\;1\Bigr)\end{eqn}
+\begin{eqn}{0E2238}D=\dfrac{1}{N}\sum_{x}\,\min_{y\in\Omega_{15}(x)}\,\min_{c}\,I^{c}(y)\end{eqn}
+\begin{eqn}{0E2238}G(r)=\cos^{4}\Bigl(\arctan\dfrac{r}{f}\Bigr)=\Bigl(1+\dfrac{r^{2}}{f^{2}}\Bigr)^{-2}\end{eqn}
+\begin{eqn}{0E2238}I(x)=J(x)\cdot G\bigl(r(x)\bigr)\end{eqn}
+\begin{eqn}{0E2238}f=\dfrac{r_c}{\tan\bigl(\arccos V^{1/4}\bigr)}=1016\ \text{px}\end{eqn}
+\begin{eqn}{0E2238}\begin{aligned}F(u,v)&=\tfrac14\,C(u)\,C(v)\sum_{x=0}^{7}\sum_{y=0}^{7}f(x,y)\,\phi_u(x)\,\phi_v(y)\\ \phi_u(x)&=\cos\dfrac{(2x+1)u\pi}{16},\quad C(0)=\tfrac{1}{\sqrt{2}},\ \ C(k)=1\end{aligned}\end{eqn}
+\begin{eqn}{0E2238}C(0)=1/\sqrt{2},\quad C(k)=1\ \ (k>0)\end{eqn}
+\begin{eqn}{0E2238}F_q=\operatorname{round}\dfrac{F(u,v)}{Q(u,v)},\qquad Q=\Bigl\lfloor\dfrac{75\,Q_K+50}{100}\Bigr\rfloor\end{eqn}
+\begin{eqn}{0E2238}B=\tfrac12\Bigl(\dfrac{\overline{|\Delta_x Y|}_{\text{biên}}}{\overline{|\Delta_x Y|}_{\text{trong}}}+\dfrac{\overline{|\Delta_y Y|}_{\text{biên}}}{\overline{|\Delta_y Y|}_{\text{trong}}}\Bigr)\end{eqn}
+\begin{eqn}{0E2238}P(x)=\bigl[R-G>25\bigr]\wedge\bigl[B-G>25\bigr]\end{eqn}
+\begin{eqn}{0E2238}O_c=\operatorname{clip}\bigl(k\,g_c\,c_c\,\min(e\,I_c/g_c,\;1)\bigr)\end{eqn}
+\begin{eqn}{0E2238}g_R=2{,}13,\quad g_B=1{,}812,\quad g_G=1\end{eqn}
+\begin{eqn}{0E2238}I=J\,t+A(1-t)\end{eqn}
+\begin{eqn}{0E2238}(G_\sigma\ast I)\,\cos^{4}\theta\end{eqn}
+\begin{eqn}{0E2238}\min(e\,I_c/g_c,\,1)\end{eqn}
+\begin{eqn}{0E2238}I+\sigma(Y)\,n\end{eqn}
+\begin{eqn}{0E2238}\operatorname{round}(F/Q_{12})\end{eqn}
+\begin{eqn}{FFFFFF}\mathcal{L}=\dfrac{1}{|K|}\sum_{k\in K}\dfrac{W_1(\text{thật}_k,\ \text{D2}_k)}{\operatorname{IQR}(\text{thật}_k)}\end{eqn}
+\begin{eqn}{0E2238}\mathcal{L}=\dfrac{1}{|K|}\sum_{k\in K}\dfrac{W_1(\text{thật}_k,\ \text{giả}_k)}{\operatorname{IQR}(\text{thật}_k)},\quad W_1=\int\bigl|F_a-F_b\bigr|\end{eqn}
+\begin{eqn}{0E2238}r=I-G_{\sigma=2}\ast I\end{eqn}
+\begin{eqn}{0E2238}\mathrm{acc}=\dfrac{1}{n}\sum_{i}\bigl[\hat y_i=y_i\bigr]\ \to\ 0{,}5\end{eqn}
+\begin{eqn}{0E2238}\begin{aligned}\widehat{\mathrm{MMD}}^{2}&=\tfrac{1}{m(m-1)}\sum_{i\neq j}k(x_i,x_j)+\tfrac{1}{n(n-1)}\sum_{i\neq j}k(y_i,y_j)\\&\quad-\tfrac{2}{mn}\sum_{i,j}k(x_i,y_j)\end{aligned}\end{eqn}
+\begin{eqn}{0E2238}\begin{aligned}\widehat{\mathrm{MMD}}^{2}&=\bar{k}_{xx}+\bar{k}_{yy}-2\,\bar{k}_{xy}\\ \bar{k}_{xx}&=\tfrac{1}{m(m-1)}\textstyle\sum_{i\neq j}k(x_i,x_j)\end{aligned}\end{eqn}
+\begin{eqn}{0E2238}k(x,y)=\Bigl(\dfrac{x^{\top}y}{d}+1\Bigr)^{3},\quad d=1024\end{eqn}
+\begin{eqn}{0E2238}\mathcal{L}=7{,}5\,\mathcal{L}_{\text{box}}+0{,}5\,\mathcal{L}_{\text{cls}}+1{,}5\,\mathcal{L}_{\text{DFL}}\end{eqn}
+\begin{eqn}{0E2238}\begin{aligned}\mathcal{L}_{\text{box}}&=1-\mathrm{IoU}+\dfrac{\rho^{2}(b,b^{gt})}{c^{2}}+\alpha v\\ v&=\dfrac{4}{\pi^{2}}\Bigl(\arctan\dfrac{w^{gt}}{h^{gt}}-\arctan\dfrac{w}{h}\Bigr)^{2}\end{aligned}\end{eqn}
+\begin{eqn}{0E2238}\begin{aligned}\mathcal{L}_{\text{DFL}}&=-\bigl[(y_{r}-y)\log S_{l}+(y-y_{l})\log S_{r}\bigr]\\ \hat d&=\textstyle\sum_{i=0}^{15}i\,S_i\end{aligned}\end{eqn}
+\begin{eqn}{0E2238}t=s^{0{,}5}\,u^{6}\end{eqn}
+\begin{eqn}{0E2238}\mathcal{L}_{\text{cls}}=\mathrm{BCE}\bigl(\sigma(z),\,\hat t\bigr)\end{eqn}
+\begin{eqn}{0E2238}\mathrm{IoU}=\dfrac{|B\cap B^{gt}|}{|B\cup B^{gt}|}\ \ge 0{,}5\end{eqn}
+\begin{eqn}{0E2238}P=\dfrac{TP}{TP+FP},\qquad R=\dfrac{TP}{TP+FN}\end{eqn}
+\begin{eqn}{0E2238}\mathrm{AP}=\dfrac{1}{101}\sum_{r\in\{0;\,0{,}01;\,\dots;\,1\}}\ \max_{r'\ge r}p(r')\end{eqn}
+\begin{eqn}{0E2238}\mathrm{mAP}_{50\text{–}95}=\dfrac{1}{10}\sum_{\tau=0{,}50}^{0{,}95}\mathrm{AP}_{\tau}\end{eqn}
+\begin{eqn}{0E2238}\mathrm{FP}=\dfrac{1}{159}\sum_{f}\#\bigl\{b:\ s_b\ge\tau_{F1}\bigr\}\end{eqn}
+\begin{eqn}{0E2238}\mathrm{CI}_{95}=\bigl[q_{2{,}5};\ q_{97{,}5}\bigr]\ \text{của}\ \bigl\{\mathrm{mAP}(\mathcal{B}^{*}_{b})\bigr\}_{b=1}^{2000}\end{eqn}
+\begin{eqn}{0E2238}c=s\,w_e\,w_t\,\Delta,\quad \Delta=q_0-p_0\end{eqn}
+\begin{eqn}{0E2238}g=\rho\bigl(\max(R,B);230;10\bigr)\,\rho\bigl(\min(R,B)-G;6;14\bigr)\end{eqn}
+\begin{eqn}{0E2238}\rho(v;a,r)=\operatorname{clip}\bigl((v-a)/r;\,0;\,1\bigr)\end{eqn}
+\begin{eqn}{0E2238}e=\max\Bigl(0,\dfrac{R+B}{2}-G\Bigr),\quad \delta=0{,}56\,\alpha\,e\end{eqn}
+\begin{eqn}{0E2238}R'=R-\delta,\quad B'=B-\delta,\quad G'=G+0{,}704\,\delta\end{eqn}
+\begin{eqn}{0E2238}J^{c}=I^{c}\cdot\min\Bigl(\bigl(1+r^{2}/f^{2}\bigr)^{2},\ 1{,}35\Bigr)\end{eqn}
+\begin{eqn}{0E2238}I^{\mathrm{dark}}(x)=\min_{y\in\Omega_{15}(x)}\ \min_{c}\,I^{c}(y)\end{eqn}
+\begin{eqn}{0E2238}A^{c}=\operatorname{mean}\bigl\{I^{c}(x):\ I^{\mathrm{dark}}(x)\ge P_{99{,}9}\bigr\}\end{eqn}
+\begin{eqn}{0E2238}\tilde t(x)=1-\omega\,\dfrac{I^{\mathrm{dark}}(x)}{\bar A},\quad \omega=0{,}85\end{eqn}
+\begin{eqn}{0E2238}\begin{aligned}q_i&=\bar a_k\,Y_i+\bar b_k\\ a_k&=\dfrac{\operatorname{cov}_k(Y,\tilde t)}{\operatorname{var}_k(Y)+\varepsilon},\quad b_k=\bar{\tilde t}_k-a_k\bar Y_k\end{aligned}\end{eqn}
+\begin{eqn}{0E2238}r=6,\ \ \varepsilon=10^{-3},\ \ t=\operatorname{clip}(q;\,0{,}4;\,1)\end{eqn}
+\begin{eqn}{0E2238}J^{c}(x)=\dfrac{I^{c}(x)-A^{c}}{t(x)}+A^{c}\end{eqn}
+\begin{eqn}{0E2238}\tilde t=1-\omega\min_{c}\min_{y\in\Omega}\dfrac{I^{c}(y)}{A^{c}},\qquad J=\dfrac{I-A}{\max(t,t_0)}+A\end{eqn}
+\begin{eqn}{0E2238}\mathrm{SG}(X)=X_{1}\odot X_{2}\end{eqn}
+\begin{eqn}{0E2238}\mathrm{SCA}(X)=X\odot\bigl(W\,\mathrm{pool}(X)+b\bigr)\end{eqn}
+\begin{eqn}{0E2238}y=u+\beta\odot x,\qquad \mathrm{out}=y+\gamma\odot x'\end{eqn}
+\begin{eqn}{0E2238}\mathcal{L}=\bigl\|\hat y-y\bigr\|_{1}+\bigl(1-\mathrm{SSIM}(\hat y,y)\bigr)\end{eqn}
+\begin{eqn}{0E2238}\hat y=x+\mathcal{N}_{\theta}(x)\end{eqn}
+\begin{eqn}{0E2238}\Delta_{\text{hồng}}=1-\dfrac{\bar p_{\text{sau}}}{\bar p_{\text{gốc}}}\ \ge 0{,}9\end{eqn}
+\begin{eqn}{0E2238}F=\dfrac{\sum_i\overline{|P_{i+1}-P_i|}}{\sum_i\overline{|R_{i+1}-R_i|}}\ \le 1\end{eqn}
+\begin{eqn}{0E2238}\dfrac{\hat p+\frac{z^{2}}{2n}\ \pm\ z\sqrt{\frac{\hat p(1-\hat p)}{n}+\frac{z^{2}}{4n^{2}}}}{1+\frac{z^{2}}{n}},\quad z=1{,}96\end{eqn}
+\begin{eqn}{0E2238}\alpha=\mathrm{box}_{7\times7}\bigl(\mathrm{dilate}_{21\times21}(g)\bigr)\end{eqn}
+\begin{eqn}{0E2238}\mathcal{L}=\dfrac{1}{|K|}\sum_{k\in K}\dfrac{W_1(\text{thật}_k,\ \text{giả}_k)}{\operatorname{IQR}(\text{thật}_k)}\end{eqn}
+\begin{eqn}{0E2238}W_1(a,b)=\int\bigl|F_a(x)-F_b(x)\bigr|\,dx\end{eqn}
+\begin{eqn}{0E2238}\begin{aligned}P&=\dfrac{TP}{TP+FP}\\ R&=\dfrac{TP}{TP+FN}\end{aligned}\end{eqn}
+\begin{eqn}{0E2238}\begin{aligned}\mathrm{AP}&=\dfrac{1}{101}\sum_{r}p_{\text{bao}}(r)\\ p_{\text{bao}}(r)&=\max_{r'\ge r}p(r')\end{aligned}\end{eqn}
+\begin{eqn}{0E2238}\begin{aligned}\mathrm{CI}_{95}&=\bigl[q_{2{,}5};\ q_{97{,}5}\bigr]\\ &\text{của }\bigl\{\mathrm{mAP}(\mathcal{B}^{*}_{b})\bigr\}_{b=1}^{2000}\end{aligned}\end{eqn}
+\begin{eqn}{0E2238}s=\max\bigl(1{,}5\max(w,h);\ 32\bigr),\quad b'=\bigl[c_x\pm\tfrac{s}{2}\bigr]\times\bigl[c_y\pm\tfrac{s}{2}\bigr]\end{eqn}
+\begin{eqn}{0E2238}v(b)=\sigma\Bigl(f_\theta\bigl(\mathrm{RoIAlign}_{96\times96}(I,\,b')\bigr)\Bigr)\end{eqn}
+\begin{eqn}{0E2238}\text{giữ } b\iff s(b)\ge 0{,}0767\ \wedge\ v(b)\ge 0{,}35\end{eqn}
+\begin{eqn}{0E2238}\mathcal{L}=-\dfrac{\sum_i w_i\bigl[y_i\log v_i+(1-y_i)\log(1-v_i)\bigr]}{\sum_i w_i}\end{eqn}
+\begin{eqn}{0E2238}\theta^{*}=\arg\max_{\theta}\ R_{\text{devpool}}(\theta)\quad\text{với}\quad \mathrm{FP}_{\text{cal}}(\theta)\le 0{,}03\end{eqn}
+\begin{eqn}{0E2238}\Delta_b=m\bigl(B;\mathcal{B}^{*}_{b}\bigr)-m\bigl(A;\mathcal{B}^{*}_{b}\bigr),\quad \mathrm{CI}_{95}=\bigl[q_{2{,}5}(\Delta);\ q_{97{,}5}(\Delta)\bigr]\end{eqn}
+\begin{eqn}{0E2238}\hat y_i=f^{(-k(i))}(x_i)\end{eqn}
+\begin{eqn}{0E2238}\mathcal{L}=\bigl\|\hat y-y\bigr\|_{1}+\sum_{l}\bigl\|\phi_l(\hat y)-\phi_l(y)\bigr\|_{1}\end{eqn}
+\begin{eqn}{0E2238}\mathrm{MAE}=\dfrac{1}{|\Omega|}\sum_{x\in\Omega}\bigl|\mathrm{ONNX}(x)-\mathrm{numpy}(x)\bigr|\end{eqn}
+\begin{eqn}{0E2238}\text{track xác nhận}\iff\#\{\text{hộp qua tầng 2 trong }n\text{ khung}\}\ge k\end{eqn}
+\end{document}

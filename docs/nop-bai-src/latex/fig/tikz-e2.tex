@@ -1,0 +1,20 @@
+\begin{tikzpicture}[
+  font=\scriptsize, node distance=5mm and 7mm,
+  hop/.style={draw=#1, fill=#1!12, line width=0.8pt, rounded corners=2pt, align=center, text width=29mm, minimum height=15mm},
+  mui/.style={-{Stealth[length=2mm]}, line width=0.9pt, cXam},
+]
+\node[hop=cXanh] (e1) {\textbf{E1 D2} (YOLO11s)\\dev-val 0,329\\làm thầy vòng 1};
+\node[hop=cTim, below=of e1] (thay) {\textbf{Thầy YOLO11m}\\fine-tune trên D2, 4 epoch\\1,2 giờ GPU, dev-val 0,267};
+\node[hop=cVang, right=of e1] (nhan1) {\textbf{Nhãn giả vòng 1}\\TTA + ByteTrack\\trên 1\,115 khung dev\\$\tau_{cao}$ 0,55: P 1,0, R 0,084};
+\node[hop=cTim, right=of nhan1] (r1) {\textbf{Trò r1} (YOLO11s)\\D2 + khung nhãn giả $\times$2\\+ 300 khung âm, 4 epoch\\dev-val \textbf{0,379}};
+\node[hop=cVang, below=of r1] (nhan2) {\textbf{Nhãn giả vòng 2}\\thầy = r1\\$\tau_{cao}$ 0,75: P 0,857, R 0,112};
+\node[hop=cTim, left=of nhan2] (r2) {\textbf{Trò r2} (YOLO11s)\\dev-val 0,296 $<$ 0,379\\$\Rightarrow$ dừng, không vòng 3};
+\node[hop=cCam, right=of r1, text width=24mm] (ship) {\textbf{Ship r1}\\xuất ONNX\\\texttt{detector-v1.0.0}\\ngưỡng 0,0767};
+\draw[mui] (e1) -- (nhan1);
+\draw[mui, dashed] (thay.east) -- (nhan1.south west);
+\draw[mui] (nhan1) -- (r1);
+\draw[mui] (r1) -- (nhan2);
+\draw[mui] (nhan2) -- (r2);
+\draw[mui] (r1) -- (ship);
+\draw[mui] (e1.north) -- ++(0,4mm) -| node[pos=0.25, above, font=\tiny] {trò khởi tạo từ E1 D2} (r1.north);
+\end{tikzpicture}

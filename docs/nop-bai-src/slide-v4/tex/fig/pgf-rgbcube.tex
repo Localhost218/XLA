@@ -1,0 +1,22 @@
+\begin{tikzpicture}
+\begin{axis}[baocao, ymajorgrids=false,
+  width=7.2cm, height=6.6cm, view={125}{22},
+  xmin=0.5,xmax=1,ymin=0.5,ymax=1,zmin=0.5,zmax=1,
+  restrict x to domain=0.5:1, restrict y to domain=0.5:1, restrict z to domain=0.5:1, unbounded coords=jump,
+  xlabel={R}, ylabel={G}, zlabel={B}, xlabel style={anchor=north east}, ylabel style={anchor=north west},
+  xtick={0.5,0.75,1}, ytick={0.5,0.75,1}, ztick={0.5,0.75,1},
+  /pgf/number format/precision=2,
+  axis lines=box, grid=major, grid style={cXam!18},
+  legend style={at={(0.5,-0.2)},anchor=north,legend columns=2,font=\scriptsize},
+  clip=false,
+]
+\addplot3[only marks, mark=*, mark size=0.9pt, color=cXam!55, opacity=0.8] table[x=r,y=g,z=b] {fig/pts_other.dat};
+\addlegendentry{điểm sáng thật, không hồng}
+\addplot3[only marks, mark=*, mark size=1.0pt, color=cHong, opacity=0.85] table[x=r,y=g,z=b] {fig/pts_pink.dat};
+\addlegendentry{điểm hồng thật}
+\addplot3[cXanh, dashed, line width=1pt, domain=0.5:1, samples=2] ({x},{x},{x});
+\addlegendentry{trục xám $R=G=B$}
+\addplot3[cCam, line width=1.8pt] table[x=r,y=g,z=b] {fig/tone_path.dat};
+\addlegendentry{xám qua khâu (c) của D2}
+\end{axis}
+\end{tikzpicture}

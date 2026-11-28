@@ -1,0 +1,26 @@
+\begin{tikzpicture}
+\begin{axis}[baocao, xbar stacked, bar width=14pt, width=14.5cm, height=4.6cm,
+  ymajorgrids=false, xmajorgrids,
+  xmin=0, xmax=72, xlabel={ms mỗi khung (IOT-CV, bản ghi 02/11, khung 284–914)},
+  ymin=0.4, ymax=2.75, ytick={1,2},
+  yticklabels={{hết tốc lực\\23,6 khung/s},{nhịp camera thật\\7,2 khung/s}},
+  y tick label style={align=right,font=\scriptsize},
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=4},
+  /pgf/number format/precision=1]
+\addplot[fill=cXam!60, draw=none] coordinates {(0.71,2) (0.61,1)}; \addlegendentry{giải mã JPEG}
+\addplot[fill=cCam, draw=none] coordinates {(23.63,2) (26.72,1)}; \addlegendentry{detector}
+\addplot[fill=cTim!80, draw=none] coordinates {(12.46,2) (14.62,1)}; \addlegendentry{enhancer}
+\addplot[fill=cXanh!70, draw=none] coordinates {(0.69,2) (0.59,1)}; \addlegendentry{nén lại + khác}
+\draw[cHong, line width=1.2pt, dashed] (axis cs:50,0.55) -- (axis cs:50,2.45) node[below right, font=\scriptsize, cHong] {ngân sách p95 50 ms};
+\node[draw=cHong, fill=white, diamond, inner sep=1.6pt] at (axis cs:54.09,2) {};
+\node[anchor=west, font=\scriptsize] at (axis cs:55,2) {p95 tổng 54,1 (vượt)};
+\node[draw=cLuc, fill=white, diamond, inner sep=1.6pt] at (axis cs:44.92,1) {};
+\node[anchor=west, font=\scriptsize] at (axis cs:55,1) {p95 tổng 44,9 (đạt)};
+\node[anchor=west, font=\scriptsize, white] at (axis cs:1.5,2) {23,6};
+\node[anchor=west, font=\scriptsize, white] at (axis cs:25,2) {12,5};
+\node[anchor=west, font=\scriptsize] at (axis cs:37.8,2) {= 37,5 p50};
+\node[anchor=west, font=\scriptsize, white] at (axis cs:1.5,1) {26,7};
+\node[anchor=west, font=\scriptsize, white] at (axis cs:28,1) {14,6};
+\node[anchor=west, font=\scriptsize] at (axis cs:42.9,1) {= 42,5};
+\end{axis}
+\end{tikzpicture}

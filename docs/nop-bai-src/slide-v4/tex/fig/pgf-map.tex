@@ -1,0 +1,50 @@
+% mAP50 test [CI 95 %] và báo nhầm/khung bay không người, cùng thứ tự model
+\begin{subfigure}[b]{0.5\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[baocao, width=7.4cm, height=5.2cm, ybar, bar width=9pt,
+  ymin=0, ymax=0.5, ylabel={mAP50 test},
+  symbolic x coords={moc,D0,D1,D2,D2SR,thay,r1,r2,bundle}, xtick={moc,D0,D1,D2,D2SR,thay,r1,r2,bundle},
+  xticklabels={mốc COCO,E1 D0,E1 D1,E1 D2,E1 D2+SR,thầy 11m,E2 r1,E2 r2,bundle},
+  x tick label style={rotate=40,anchor=east,font=\scriptsize},
+  /pgf/number format/precision=1, enlarge x limits=0.07,
+  error bars/y dir=both, error bars/y explicit, error bars/error bar style={line width=0.7pt,black!70}, error bars/error mark options={rotate=90,mark size=2pt,black!70}]
+\addplot[fill=cXam!70, draw=none, bar shift=0pt] coordinates {(moc,0.126) += (0,0.098) -= (0,0.096)};
+\addplot[fill=cXanh!80, draw=none, bar shift=0pt] coordinates {
+  (D0,0.297) += (0,0.111) -= (0,0.261)
+  (D1,0.143) += (0,0.042) -= (0,0.060)
+  (D2,0.236) += (0,0.134) -= (0,0.167)
+  (D2SR,0.149) += (0,0.133) -= (0,0.138)};
+\addplot[fill=cTim!80, draw=none, bar shift=0pt] coordinates {
+  (thay,0.218) += (0,0.131) -= (0,0.111)
+  (r1,0.156) += (0,0.079) -= (0,0.120)
+  (r2,0.313) += (0,0.159) -= (0,0.278)};
+\addplot[fill=cCam, draw=none, bar shift=0pt] coordinates {(bundle,0.120) += (0,0.077) -= (0,0.088)};
+\draw[cLuc, dashed, line width=0.8pt] (axis cs:moc,0.227) -- (axis cs:bundle,0.227) node[pos=0.02, above, font=\tiny, anchor=south west] {tiêu chí 0,227};
+\end{axis}
+\end{tikzpicture}
+\caption{mAP50 trên 198 khung test, thanh lỗi là CI 95\,\% bootstrap khối}
+\label{fig:map}
+\end{subfigure}\hfill
+\begin{subfigure}[b]{0.48\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[baocao, width=7.7cm, height=5.2cm, ybar, bar width=9pt,
+  ymin=0, ymax=3.7, ylabel={hộp sai / khung},
+  symbolic x coords={moc,D0,D1,D2,D2SR,thay,r1,r2,bundle}, xtick={moc,D0,D1,D2,D2SR,thay,r1,r2,bundle},
+  xticklabels={mốc COCO,E1 D0,E1 D1,E1 D2,E1 D2+SR,thầy 11m,E2 r1,E2 r2,bundle},
+  x tick label style={rotate=40,anchor=east,font=\scriptsize},
+  /pgf/number format/precision=1, enlarge x limits=0.07,
+  error bars/y dir=both, error bars/y explicit, error bars/error bar style={line width=0.7pt,black!70}, error bars/error mark options={rotate=90,mark size=2pt,black!70}]
+\addplot[fill=cXam!70, draw=none, bar shift=0pt] coordinates {(moc,0.597) += (0,0.287) -= (0,0.200)};
+\addplot[fill=cXanh!80, draw=none, bar shift=0pt] coordinates {
+  (D0,1.195) += (0,0.556) -= (0,0.428)
+  (D1,0.994) += (0,0.602) -= (0,0.491)
+  (D2,0.302) += (0,0.074) -= (0,0.084)
+  (D2SR,1.956) += (0,1.658) -= (0,1.276)};
+\addplot[fill=cTim!80, draw=none, bar shift=0pt] coordinates {
+  (thay,0.390) (r1,0.868) += (0,0.543) -= (0,0.482) (r2,0.522)};
+\addplot[fill=cCam, draw=none, bar shift=0pt] coordinates {(bundle,0.881) += (0,0.614) -= (0,0.548)};
+\end{axis}
+\end{tikzpicture}
+\caption{Báo nhầm trên 159 khung bay không người, ở ngưỡng F1 dev-val}
+\label{fig:fp}
+\end{subfigure}

@@ -1,0 +1,32 @@
+% (a) hệ số tối góc cos^4 theo tiêu cự hồ sơ; (b) dark channel của một khung thật
+\begin{subfigure}[b]{0.49\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[baocao, ymajorgrids=false, width=7.0cm, height=5.6cm, view={-35}{32},
+  xlabel={$x$ (px)}, ylabel={$y$ (px)}, zlabel={hệ số sáng},
+  xmin=0,xmax=640,ymin=0,ymax=480,zmin=0.5,zmax=1.0,
+  xtick={0,320,640}, ytick={0,240,480}, ztick={0.5,0.75,1},
+  /pgf/number format/precision=2,
+  colormap name=baocao, grid=major, grid style={cXam!15}]
+\addplot3[surf, shader=interp, samples=26, samples y=20, domain=0:640, y domain=0:480, opacity=0.95]
+  {1/(1+((x-320)^2+(y-240)^2)/1016.1^2)^2};
+\addplot3[cHong, line width=1.2pt, samples=40, domain=0:640, samples y=1]
+  (x,480,{1/(1+((x-320)^2+240^2)/690^2)^2});
+\end{axis}
+\end{tikzpicture}
+\caption{Tối góc $\cos^4\theta$, $\tan\theta=r/f$, $f=1\,016$ px (hồ sơ). Đường hồng: mép dưới với $f=690$ px mà D2 dùng sau hiệu chỉnh.}
+\label{fig:vignette3d}
+\end{subfigure}\hfill
+\begin{subfigure}[b]{0.49\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[baocao, ymajorgrids=false, width=7.0cm, height=5.6cm, view={-35}{40},
+  xlabel={$x$ (px)}, ylabel={$y$ (px)}, zlabel={dark channel},
+  xmin=0,xmax=624,ymin=0,ymax=480,zmin=40,zmax=220, y dir=reverse,
+  xtick={0,312,624}, ytick={0,240,480}, ztick={50,100,150,200},
+  colormap name=baocao, grid=major, grid style={cXam!15}]
+\addplot3[surf, shader=faceted interp, faceted color=black!25, line width=0.1pt]
+  table[x=x,y=y,z=z] {fig/dark_channel.dat};
+\end{axis}
+\end{tikzpicture}
+\caption{Dark channel (ô 15 px) của khung test \texttt{005\_00934}: trung vị 138, nền đường sáng lên tới 216.}
+\label{fig:dc3d}
+\end{subfigure}

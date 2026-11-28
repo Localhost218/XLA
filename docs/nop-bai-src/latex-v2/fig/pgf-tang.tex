@@ -1,0 +1,39 @@
+% Ba tầng trên 198 khung test (bảng t7, system/score.json). Thanh lỗi: CI 95 % bootstrap theo khối 30 s.
+\begin{subfigure}[b]{0.49\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[baocao, width=7.2cm, height=5.0cm, ybar, bar width=16pt,
+  ymin=0, ymax=0.40, ylabel={mAP50 test}, xmin=0.4, xmax=3.6, xtick={1,2,3},
+  xticklabels={{tầng 1\\detector},{tầng 2\\+ verifier},{tầng 3\\+ track}},
+  x tick label style={align=center,font=\scriptsize}, /pgf/number format/precision=2,
+  error bars/y dir=both, error bars/y explicit, error bars/error bar style={line width=0.7pt,black!70},
+  error bars/error mark options={rotate=90,mark size=3pt,black!70}]
+\addplot[fill=cCam, draw=none, bar shift=0pt] coordinates {(1,0.119) += (0,0.078) -= (0,0.087)};
+\addplot[fill=cTim!85, draw=none, bar shift=0pt] coordinates {(2,0.210) += (0,0.102) -= (0,0.088)};
+\addplot[fill=cLuc!85, draw=none, bar shift=0pt] coordinates {(3,0.210) += (0,0.102) -= (0,0.088)};
+\node[font=\scriptsize, anchor=south] at (axis cs:1,0.205) {0,119};
+\node[font=\scriptsize, anchor=south] at (axis cs:2,0.320) {0,210};
+\node[font=\scriptsize, anchor=south] at (axis cs:3,0.320) {0,210};
+\end{axis}
+\end{tikzpicture}
+\caption{mAP50 trên 198 khung test}
+\label{fig:tang-map}
+\end{subfigure}\hfill
+\begin{subfigure}[b]{0.49\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[baocao, width=7.2cm, height=5.0cm, ybar, bar width=16pt,
+  ymin=0, ymax=1.75, ylabel={hộp sai / khung bay trống}, xmin=0.4, xmax=3.6, xtick={1,2,3},
+  xticklabels={{tầng 1\\detector},{tầng 2\\+ verifier},{tầng 3\\+ track}},
+  x tick label style={align=center,font=\scriptsize}, /pgf/number format/precision=2,
+  error bars/y dir=both, error bars/y explicit, error bars/error bar style={line width=0.7pt,black!70},
+  error bars/error mark options={rotate=90,mark size=3pt,black!70}]
+\addplot[fill=cCam, draw=none, bar shift=0pt] coordinates {(1,0.874) += (0,0.612) -= (0,0.541)};
+\addplot[fill=cTim!85, draw=none, bar shift=0pt] coordinates {(2,0.289) += (0,0.342) -= (0,0.253)};
+\addplot[fill=cLuc!85, draw=none, bar shift=0pt] coordinates {(3,0.289) += (0,0.342) -= (0,0.253)};
+\node[font=\scriptsize, anchor=south] at (axis cs:1,1.50) {0,874};
+\node[font=\scriptsize, anchor=south] at (axis cs:2,0.64) {0,289};
+\node[font=\scriptsize, anchor=south] at (axis cs:3,0.64) {0,289};
+\end{axis}
+\end{tikzpicture}
+\caption{Báo nhầm trên 159 khung bay không người}
+\label{fig:tang-fp}
+\end{subfigure}

@@ -1,0 +1,18 @@
+\section{Khai báo sử dụng AI}\label{sec:ai}
+
+Nhóm dùng trợ lý AI qua Claude Code trong quá trình làm đồ án (Bảng~\ref{tab:ai}). Nhóm đặt mục tiêu, chọn phương pháp, đối chiếu từng con số trong báo cáo với file kết quả đã lưu trong \texttt{results/}, và chịu trách nhiệm về nội dung. Các model mã nguồn mở chạy bên trong hệ thống là YOLO11s/YOLO11m (Ultralytics, tinh chỉnh lại), NAFNet (huấn luyện lại từ đầu) và DINOv2 (chỉ để đo KID). Chỉ khung bay của nhóm được công bố; ảnh VisDrone dùng để nghiên cứu, không đăng lại.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption{Khai báo công cụ AI.}
+\label{tab:ai}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.3cm} X X X@{}}
+\toprule
+Công cụ & Mục đích & Phạm vi & Cách kiểm chứng \\
+\midrule
+Claude Opus 5.5 (effort xhigh) qua Claude Code & Viết và tái cấu trúc mã, kịch bản thí nghiệm; soạn và sửa báo cáo, slide, README & Mã trong \texttt{xla/}, \texttt{scripts/}, \texttt{backend/vision}; bản nháp các mục báo cáo & Chạy test tự động; so số với \texttt{results/*.json}; nhóm đọc lại từng mục \\
+\addlinespace
+Claude Sonnet 5.5 (effort xhigh) qua Claude Code & Như trên; tra cứu tài liệu tham khảo & Một phần mã và văn bản; danh mục tài liệu & Đối chiếu tài liệu với bản gốc; kiểm số như trên \\
+\bottomrule
+\end{tabularx}
+\end{table}

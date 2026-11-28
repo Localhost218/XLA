@@ -1,0 +1,172 @@
+\section{Kết quả}\label{sec:ket-qua}
+
+\subsection{D1 so với D2: độ giống thật và nhận diện}
+
+D2 kéo khoảng cách thống kê từ 5,93 (D1) xuống 0,80, gần mức sàn thật–thật 0,33 (Hình~\ref{fig:realism}, hàng trên). Ở mức điểm ảnh, camera đã được sao chép sát. C2ST và KID thì gần như không đổi: C2ST của D2 là 0,950 \ci{0,930}{0,966}, ngang D1 (0,936), và KID của D2 (4,41) nằm trong CI của D1 (4,44). Bộ phân loại vẫn tách gần như hoàn toàn ảnh làm xấu khỏi ảnh thật. Chỉ D2+Real-SR đưa KID xuống dưới D1 với CI không chồng (3,99 \ci{3,82}{4,17}), vẫn rất xa mức sàn 0,37. Nhóm cho rằng phần còn lệch nằm ở nội dung ảnh (phố đô thị của VisDrone so với bãi cỏ của nhóm); giả thuyết này chưa được kiểm riêng.
+
+Hàng dưới của Hình~\ref{fig:realism} đặt độ giống thật cạnh kết quả nhận diện sau tinh chỉnh trên cùng tập. Thứ tự không trùng nhau. D2+Real-SR giống thật nhất theo cả ba thước nhưng báo nhầm nhiều nhất (1,96 hộp/khung). D2 đứng giữa về độ giống thật và là tập duy nhất cho báo nhầm thấp hơn mốc. Thước đo độ giống thật vì vậy không thay được phép thử trên nhận diện.
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-realism}
+\caption[D1 so với D2]{D1 so với D2. Trên: độ giống thật so với 198 khung test, 1\,000 mảnh mỗi bên. Dưới: E1 tinh chỉnh trên từng tập, chấm trên cùng 198 khung test. Thanh lỗi: CI 95\,\%.}
+\label{fig:realism}
+\end{figure}
+
+\subsection{Nhận diện người}
+
+Bảng~\ref{tab:nhandien} và Hình~\ref{fig:map-fp} là kết quả của chín model trên 198 khung test. E1 D2 đạt mAP50 0,236, gần gấp đôi mốc YOLO11s COCO @1280 (0,126). Hiệu ghép cặp với mốc là $+0{,}109$ \ci{$-0{,}017$}{$+0{,}236$}: điểm vượt mức 0,227 nhưng cận dưới CI chạm 0, nên tiêu chí mAP chưa đạt. Chỗ D2 thắng rõ là báo nhầm: 0,30 hộp sai trên mỗi khung bay không người, so với 0,99 của D1 và 0,60 của mốc. Hiệu D2 $-$ D1 về báo nhầm là $-0{,}692$ \ci{$-1{,}238$}{$-0{,}246$}, CI nằm trọn dưới 0; hiệu về mAP50 là $+0{,}093$ \ci{$-0{,}073$}{$+0{,}252$}, chưa kết luận được. Với một hệ thống cảnh báo, báo nhầm quyết định người vận hành có còn tin cảnh báo hay không.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption[Chín bộ nhận diện trên 198 khung test thật (39 khung có người, 149 hộp)]{Chín bộ nhận diện trên 198 khung test thật (39 khung có người, 149 hộp). Ngưỡng = F1 tối đa trên dev-val. CI 95\,\% bootstrap theo khối 30 s. Báo nhầm tính trên 159 khung bay không người. Bundle là gói \texttt{detector-v1.0.0}.}
+\label{tab:nhandien}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}l c c c c c c@{}}
+\toprule
+Model & dev-val & Ngưỡng & mAP50 test [CI 95\,\%] & mAP50-95 & AR nhỏ & Báo nhầm \\
+\midrule
+Mốc YOLO11s COCO @1280 & – & 0,068 & 0,126 \ci{0,030}{0,224} & 0,063 & 0,531 & 0,597 \\
+\addlinespace
+E1 D0 (ảnh sạch) & 0,295 & 0,053 & 0,297 \ci{0,036}{0,408} & 0,100 & 0,519 & 1,195 \\
+E1 D1 (ngẫu nhiên) & 0,176 & 0,023 & 0,143 \ci{0,083}{0,185} & 0,047 & 0,444 & 0,994 \\
+E1 D2 (bản sao camera) & 0,329 & 0,089 & 0,236 \ci{0,069}{0,370} & 0,079 & 0,426 & 0,302 \\
+E1 D2+Real-SR & 0,299 & 0,059 & 0,149 \ci{0,011}{0,282} & 0,048 & 0,440 & 1,956 \\
+\addlinespace
+E2 thầy YOLO11m & 0,267 & 0,054 & 0,218 \ci{0,107}{0,349} & 0,060 & 0,425 & 0,390 \\
+E2 trò vòng 1 (r1) & 0,379 & 0,075 & 0,156 \ci{0,036}{0,235} & 0,052 & 0,419 & 0,868 \\
+E2 trò vòng 2 (r2) & 0,296 & 0,018 & 0,313 \ci{0,035}{0,472} & 0,157 & 0,446 & 0,522 \\
+\addlinespace
+Bundle ONNX (E2 r1) & 0,263 & 0,077 & 0,120 \ci{0,032}{0,197} & 0,042 & 0,240 & 0,881 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-map}
+\caption[Nhận diện theo từng thí nghiệm]{Nhận diện theo từng thí nghiệm. Xám: mốc; xanh: E1; tím: E2; cam: bản ship. Vạch lục ở (a): tiêu chí mAP50 0,227.}
+\label{fig:map-fp}
+\end{figure}
+
+Hình~\ref{fig:scatter} gộp hai trục vào một mặt phẳng. Góc trên bên trái (mAP cao, báo nhầm thấp) là chỗ một bộ cảnh báo cần đứng. Không model nào chạm dải lục sát trục tung (vùng đạt cả hai tiêu chí); E1 D2 gần nhất, r2 có mAP cao hơn nhưng báo nhầm gần gấp đôi, còn bundle ship nằm ở góc dưới, ngang mốc về mAP và báo nhầm nhiều hơn.
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-scatter}
+\caption[mAP50 theo báo nhầm của chín model]{mAP50 theo báo nhầm của chín model. Dải lục sát trục tung: vùng đạt cả hai tiêu chí đặt trước (mAP50 $\geq$ 0,227, báo nhầm $\leq$ 0,05 hộp/khung).}
+\label{fig:scatter}
+\end{figure}
+
+Theo luật chọn trên dev-val, E1 D2 thắng ở E1 (0,329) và trò r1 thắng ở E2 (0,379), nên r1 được ship. Trên test, r1 lại kém E1 D2: hiệu $-0{,}080$ \ci{$-0{,}187$}{$0{,}000$}, báo nhầm gần gấp ba. Bản ONNX của r1 còn 0,120. Ngược lại, r2 có dev-val thấp hơn r1 nhưng đạt mAP50 test cao nhất (0,313). Nhóm không đổi lựa chọn sau khi đã thấy test; mục~\ref{sec:thao-luan} bàn vì sao dev-val chọn sai. Hình~\ref{fig:det} đặt hộp của ba model cạnh nhãn thật trên cùng hai khung test, ở đúng ngưỡng vận hành của từng model. Ở khung trên, mốc COCO gộp hai người thành một hộp lớn; ở khung dưới có 5 người, mốc chỉ trả 2 hộp, E1 D2 trả 7, bundle trả 4.
+
+\begin{figure}[!htbp]
+\centering
+\foreach \i/\c in {0/{\texttt{005\_00934}},1/{\texttt{003\_02520}}}{%
+\begin{subfigure}[b]{0.24\textwidth}\centering\includegraphics[width=\linewidth]{fig/grid\i_gt.jpg}\caption*{Nhãn thật, \c}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.24\textwidth}\centering\includegraphics[width=\linewidth]{fig/grid\i_moc.jpg}\caption*{Mốc COCO}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.24\textwidth}\centering\includegraphics[width=\linewidth]{fig/grid\i_e1d2.jpg}\caption*{E1 D2}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.24\textwidth}\centering\includegraphics[width=\linewidth]{fig/grid\i_bundle.jpg}\caption*{Bundle ship}\end{subfigure}\par\smallskip}
+\caption[Cùng khung, bốn bộ hộp]{Cùng khung, bốn bộ hộp: nhãn thật (lục), mốc COCO (xám, ngưỡng 0,068), E1 D2 (xanh, 0,089), bundle (cam, 0,077). Ảnh cắt quanh người, phóng 3$\times$, lấy từ file dự đoán đã lưu trong \texttt{results/}.}
+\label{fig:det}
+\end{figure}
+
+\subsection{Làm rõ ảnh: gốc, cổ điển, NAFNet}
+
+Bộ lọc cổ điển thắng mạng 24/25 lượt chấm mù (Hình~\ref{fig:ab-e4}a), nên mạng NAFNet không được bật làm ảnh rõ mặc định. So với ảnh gốc, mạng chỉ thắng 11/25 lượt (0,44, CI chạm 0,5) ở lần 1 và 13/25 ở lần 2 khi phóng to 2$\times$, cả hai dưới ngưỡng 0,70. Bảng~\ref{tab:lamro} và Hình~\ref{fig:criteria} cho biết lý do: mạng xoá 99,9\,\% điểm hồng nhưng chỉ giảm dark channel 36,8\,\% (cần 50\,\%), và Hình~\ref{fig:enh} cho thấy màu ra nguội và nhạt. Trên ảnh của trang chấm, thành phần b* (ấm/lạnh) của mạng là 1,4 so với 3,0 của ảnh gốc và 6,5 của bản cổ điển; độ bão hoà 23,5 so với 49,0. Cả hai cách đều làm ảnh nhấp nháy hơn giữa hai khung liền nhau (1,81 và 2,18 lần), vì khử mù kéo giãn tương phản theo từng khung.
+
+\begin{figure}[!htbp]
+\centering
+\foreach \i/\c in {0/{\texttt{005\_00934}},1/{\texttt{004\_01252}}}{%
+\begin{subfigure}[b]{0.162\textwidth}\centering\includegraphics[width=\linewidth]{fig/enh\i_raw.jpg}\caption*{gốc}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.162\textwidth}\centering\includegraphics[width=\linewidth]{fig/enh\i_classic.jpg}\caption*{cổ điển}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.162\textwidth}\centering\includegraphics[width=\linewidth]{fig/enh\i_net.jpg}\caption*{mạng}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.162\textwidth}\centering\includegraphics[width=\linewidth]{fig/zoom\i_raw.jpg}\caption*{gốc, 2$\times$}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.162\textwidth}\centering\includegraphics[width=\linewidth]{fig/zoom\i_classic.jpg}\caption*{cổ điển, 2$\times$}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.162\textwidth}\centering\includegraphics[width=\linewidth]{fig/zoom\i_net.jpg}\caption*{mạng, 2$\times$}\end{subfigure}\par\smallskip}
+\caption[Cùng khung bay thật qua ba nhánh]{Cùng khung bay thật qua ba nhánh: ba cột trái là cả khung, ba cột phải là mảnh phóng 2$\times$. Hàng trên: \texttt{005\_00934}, mảnh quanh bốn người; hàng dưới: \texttt{004\_01252}, mảnh quanh vệt hồng. Bản cổ điển khử mù sâu và giữ màu cỏ; mạng xoá hồng sạch hơn nhưng ra xám lạnh.}
+\label{fig:enh}
+\end{figure}
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption[Hai cách làm rõ trên khung test, so với tiêu chí đặt trước]{Hai cách làm rõ trên khung test, so với tiêu chí đặt trước. Thời gian: ORT CUDA EP trên RTX 4060 Laptop cho mạng, CPU 4 luồng cho cổ điển.}
+\label{tab:lamro}
+\begin{tabular}{@{}l c c c@{}}
+\toprule
+Tiêu chí & Ngưỡng & Cổ điển & Mạng NAFNet-w16 \\
+\midrule
+Điểm hồng giảm & $\geq 90\,\%$ & 89,2\,\% & 99,9\,\% \\
+Dark channel trung vị giảm & $\geq 50\,\%$ & 51,6\,\% (140,8 $\to$ 68,1) & 36,8\,\% (140,8 $\to$ 89,1) \\
+Nhấp nháy so với ảnh vào & $\leq 1$ & 2,18 \ci{2,10}{2,31} & 1,81 \ci{1,74}{1,92} \\
+A/B mạng thắng ảnh gốc (lần 1) & $\geq 70\,\%$ & – & 11/25 = 0,44 \\
+A/B mạng thắng cổ điển (lần 1) & $\geq 55\,\%$ & \multicolumn{2}{c}{1/25 = 0,04 \ci{0,007}{0,195}} \\
+Thời gian p50 / p95 & $\leq 30$ ms & 9,2 / 10,2 ms & 20,7 / 25,3 ms \\
+Không làm giảm mAP (E4, bundle) & – & $-0{,}112$ & $-0{,}085$ \\
+MUSIQ (gốc 32,9, cao là tốt) & mô tả & 33,0 & 38,0 \\
+NIQE (gốc 6,42, thấp là tốt) & mô tả & 5,53 & 5,47 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-criteria}
+\caption[Bốn tiêu chí đo được của hai cách làm rõ; vạch lục là ngưỡng đặt trước]{Bốn tiêu chí đo được của hai cách làm rõ; vạch lục là ngưỡng đặt trước. Cổ điển đạt dark channel và tốc độ, sát ngưỡng điểm hồng; mạng đạt điểm hồng và tốc độ. Không cách nào đạt nhấp nháy.}
+\label{fig:criteria}
+\end{figure}
+
+MUSIQ chấm mạng cao hơn bản cổ điển (38,0 so với 33,0) trong khi người chấm chọn bản cổ điển 24/25 lượt. Vì vậy nhóm không dùng chỉ số không tham chiếu để chọn phương pháp. Một quan sát hậu kiểm: gộp hai lần chấm, ở các lượt có người trong khung mạng thắng ảnh gốc 17/21, ở nền không người chỉ 7/29. Quan sát này không thuộc tiêu chí đặt trước nên không đổi kết luận.
+
+\subsection{Làm rõ trước khi nhận diện (E4)}
+
+\sloppy Với bundle đã tinh chỉnh, ảnh qua mạng làm mAP50 giảm từ 0,119 xuống 0,035 (hiệu $-0{,}085$ \ci{$-0{,}139$}{$-0{,}011$}) và ảnh qua bộ cổ điển xuống 0,007 (hiệu $-0{,}112$ \ci{$-0{,}182$}{$-0{,}028$}); cả hai CI nằm trọn dưới 0 (Hình~\ref{fig:ab-e4}b). Với mốc COCO, ảnh qua mạng tăng 0,069 nhưng CI \ci{$-0{,}033$}{$+0{,}231$} chạm 0, còn bản cổ điển làm giảm 0,046. Không trường hợp nào thoả luật chuyển, nên nhận diện tiếp tục chạy trên khung gốc.\par\fussy
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-ab-e4}
+\caption{Hai phép thử của phần làm rõ: (a) A/B mù giữa mạng và hai đối thủ, (b) E4 với hai bộ nhận diện.}
+\label{fig:ab-e4}
+\end{figure}
+
+\subsection{Chạy trong phần mềm drone}
+
+Hai model chạy trong backend IOT-CV qua ONNX Runtime CUDA, trên chính JPEG ghi được ngày 02/11, phát lại đúng nhịp thời gian thật (Hình~\ref{fig:latency}). Pipeline theo kịp camera: bỏ 2/600 khung (0,3\,\%). Ngân sách đặt trước là p95 tổng $\leq$ 50 ms và detector $\leq$ 30 ms. Ở nhịp thật cả hai vượt (54,1 và 33,4 ms); chạy hết tốc lực thì đạt (44,9 và 28,1 ms). Lý do nằm ở GPU: giữa hai khung camera nó rảnh khoảng 100 ms và tự hạ xung (1\,890 so với tối đa 3\,105 MHz), nên khung kế tiếp chạy chậm hơn. Đo riêng trên ORT, detector chạy 20,0/20,2 ms p50/p95.
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-latency}
+\caption[Thời gian xử lý một khung trong IOT-CV (p50 từng phần; hình thoi là p95 tổng) so với ngân sách 50 ms]{Thời gian xử lý một khung trong IOT-CV (p50 từng phần; hình thoi là p95 tổng) so với ngân sách 50 ms. GPU 72\,\textdegree C, xung lúc nghỉ 1\,890/3\,105 MHz.}
+\label{fig:latency}
+\end{figure}
+
+
+
+\subsection{So sánh tổng hợp}\label{sec:so-sanh}
+
+Bảng~\ref{tab:luachon} gom mọi lựa chọn đã thử vào một chỗ, mỗi hàng một phương án, kèm quyết định và lý do. Hai quyết định có hệ quả lớn nhất đi ngược điểm số đơn lẻ: bundle được ship dù mAP test thấp hơn E1 D2, vì luật chọn trên dev-val đã chốt trước; và mạng NAFNet không được bật dù chạy nhanh và xoá hồng tốt nhất, vì người xem không chọn nó.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption[Lựa chọn và lý do]{Lựa chọn và lý do. Độ chính xác: mAP50 test (nhận diện) hoặc kết quả A/B (làm rõ); báo nhầm trên khung bay không người.}
+\label{tab:luachon}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{2.3cm} c >{\raggedright\arraybackslash}p{1.7cm} >{\raggedright\arraybackslash}p{1.8cm} X@{}}
+\toprule
+Phương án & Độ chính xác & Báo nhầm & Tốc độ & Quyết định & Lý do \\
+\midrule
+Mốc YOLO11s COCO @1280 & mAP50 0,126 & 0,597 & 20,9 ms p50 (PyTorch) & giữ làm mốc & không tinh chỉnh; mọi model khác so với nó \\
+\addlinespace
+E1 D1 (ngẫu nhiên) & mAP50 0,143 & 0,994 & cùng kiến trúc YOLO11s & loại & báo nhầm cao hơn cả mốc; độ giống thật kém nhất \\
+\addlinespace
+E1 D2 (bản sao camera) & mAP50 0,236 & 0,302 & cùng kiến trúc YOLO11s & tập làm xấu dùng tiếp cho E2 & thắng dev-val ở E1; báo nhầm thấp nhất trong chín model \\
+\addlinespace
+E2 trò vòng 2 (r2) & mAP50 0,313 & 0,522 & cùng kiến trúc YOLO11s & không ship & dev-val 0,296 thấp hơn r1; luật cấm chọn theo test \\
+\addlinespace
+Bundle ONNX (E2 r1) & mAP50 0,120 & 0,881 & 23,6 ms p50 trong IOT-CV & ship & dev-val cao nhất (0,379); đúng hợp đồng; sẽ chọn lại khi có dev-val mới \\
+\addlinespace
+Lọc cổ điển & thắng mạng 24/25 lượt A/B & – & 9,2 ms CPU & đề xuất làm ảnh rõ & người xem chọn; đạt dark channel; chưa nằm trong hợp đồng ONNX \\
+\addlinespace
+NAFNet-w16 & thắng gốc 11/25, 13/25 & – & 12,5 ms trong IOT-CV & không bật mặc định & thua cổ điển và chưa hơn ảnh gốc; màu nguội, khử mù yếu \\
+\bottomrule
+\end{tabularx}
+\end{table}

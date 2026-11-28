@@ -1,0 +1,106 @@
+\section{Phương pháp}\label{sec:phuong-phap}
+
+\subsection{Làm xấu ảnh huấn luyện: D1 và D2}
+
+Bộ nhận diện học trên ảnh VisDrone sạch sẽ gặp một phân bố khác hẳn khi bay, nên ảnh nguồn được làm xấu trước khi huấn luyện. \textbf{D1, làm xấu ngẫu nhiên} theo chuỗi bậc hai của Real-ESRGAN~\cite{realesrgan}: nhoè Gauss ($\sigma$ 0,2–3,0), đổi cỡ 0,5–1,5 lần, nhiễu ($\sigma$ 1–30), JPEG chất lượng 30–95 (4:2:0), lặp hai vòng, thêm 8–16 cột tối ở mép trái. D1 không đọc hồ sơ camera; nó là đối chứng ``không đo''.
+
+\textbf{D2, bản sao camera} là chuỗi sáu khâu tất định theo thứ tự vật lý của ảnh, từ không khí tới file JPEG (Hình~\ref{fig:d2-chuoi}). Màn mờ dùng mô hình khí quyển $I = J\,t + A(1-t)$ của He và cộng sự~\cite{he-dcp}, chọn $t$ cho từng ảnh sao cho dark channel ra đúng một giá trị rút từ phân bố đo được. Khâu tông màu tái tạo cơ chế gây hồng: ISP của OV3660 nhân hệ số cân bằng trắng cho R và B lớn hơn G, nên ở vùng sáng kênh G bão hoà trước rồi dừng, trong khi R và B còn tăng (Hình~\ref{fig:rgbcube}). Khâu JPEG nén một lần bằng đúng hai bảng lượng tử đọc từ file của camera (bảng mẫu Annex K~\cite{jpeg} nhân 0,75), lấy mẫu màu 4:2:2; Pillow tái tạo được bảng và header của 20/20 khung dev thử.
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/tikz-d2}
+\caption[Chuỗi làm xấu D2 (\texttt{configs/degrade\_d2.yaml}, \texttt{params\_version} 3)]{Chuỗi làm xấu D2 (\texttt{configs/degrade\_d2.yaml}, \texttt{params\_version} 3). Khoảng $[a;b]$ là dải rút đều cho mỗi ảnh; số nhân là hệ số trên giá trị đo của hồ sơ camera.}
+\label{fig:d2-chuoi}
+\end{figure}
+
+Tham số của D2 không đặt bằng tay. Nhóm dùng CMA-ES~\cite{cmaes} tìm 12 tham số sao cho thống kê ảnh D2 sinh từ 500 ảnh nguồn cố định khớp 1\,115 khung dev, đo bằng khoảng cách thống kê ở mục~\ref{sec:do-giong}. Vòng 1 chạy 155 lượt và giảm khoảng cách từ 0,967 xuống 0,736; vòng 2 nới các biên mà vòng 1 chạm, thêm tham số mức đen dư, chạy 80 lượt và xuống 0,712. Bảng~\ref{tab:d2} ghi giá trị cuối. Hình~\ref{fig:d2-anh} cho thấy từng khâu trên một ảnh thử tự vẽ: mái tôn trắng và bồn nước chuyển hồng ở khâu (c), giống hệt vệt hồng trên đường bê tông ở Hình~\ref{fig:loi-camera}.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption[Tham số D2 sau hiệu chỉnh vòng 2]{Tham số D2 sau hiệu chỉnh vòng 2. Hệ số tối góc nhỏ hơn 1 vì tối góc thật gồm cả bóng ống kính, mạnh hơn $\cos^4$ của tiêu cự thật.}
+\label{tab:d2}
+\begin{tabularx}{\textwidth}{@{}l X X@{}}
+\toprule
+Khâu & Tham số & Giá trị \\
+\midrule
+(a) Màn mờ & airlight $A$; hệ số dark channel đích; $t$ & $[0{,}794;0{,}944]$; 0,962; $[0{,}2;1{,}0]$ \\
+(b) Ống kính & hệ số $\sigma$ PSF; hệ số tiêu cự tối góc & $[0{,}505;0{,}805]\times0{,}759$ px; $[0{,}629;0{,}729]\times1\,016$ px \\
+(c) Tông màu & độ sáng; WB ISP R/B; ám màu R/B; mức đen & $[1{,}188;1{,}438]$; 2,130/1,812; 0,998/0,964; 0,0017 \\
+(d) ISP & làm mềm $\sigma$; hệ số nhiễu NLF; phần nhiễu màu & $[0{,}334;0{,}734]$; $[0{,}425;0{,}825]$; 0,3 \\
+(e) Dải mép & bề rộng; hàng bắt đầu; Y khối tối; vạch đỏ & $14\pm1$ px; 146–200; 64; chu kỳ 60 px, cao 8 px \\
+(f) JPEG & bảng q12 đo được; bảng giả thuyết Annex K $\times q/16$ & 80\,\% ảnh; 20\,\% ảnh, $q\in[19;40]$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[!htbp]
+\centering
+\foreach \f/\t in {d2_0_src/{nguồn},d2_1_haze/{(a) mờ, $t=0{,}60$},d2_2_lens/{(b) ống kính},d2_3_tone/{(c) tông: hồng},d2_4_isp/{(d) ISP},d2_5_final/{(e)+(f) JPEG}}{%
+\begin{subfigure}[b]{0.162\textwidth}\centering\includegraphics[width=\linewidth]{fig/\f.jpg}\caption*{\t}\end{subfigure}\hfill}
+\caption{Sáu khâu D2 trên một ảnh thử tự vẽ (không dùng ảnh VisDrone): cỏ, đường, mái tôn trắng, bồn nước, mái đỏ và bốn người nhìn từ trên.}
+\label{fig:d2-anh}
+\end{figure}
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-rgbcube}
+\caption[Ám hồng trong khối màu RGB]{Ám hồng trong khối màu RGB. Đường cam: một dải xám đi qua khâu (c) của D2 với tham số ở Bảng~\ref{tab:d2}; tới vùng sáng, G dừng ở 0,78 (Y vùng bão hoà đo được 222/255) trong khi R, B lên 1, nên điểm rẽ khỏi trục xám về phía hồng. Chấm: 440 điểm sáng (Y $>$ 170) rút từ khung thật \texttt{004\_01252}.}
+\label{fig:rgbcube}
+\end{figure}
+
+\textbf{D2+Real-SR} giữ D2 nhưng thay nhiễu tổng hợp ở khâu (d) bằng phần dư thật: 8\,920 mảnh 32$\times$32 cắt từ vùng phẳng của khung dev, trừ trung bình từng khối 8$\times$8, nhân hệ số 0,4 (chọn trên dev).
+
+\subsection{Đo độ giống thật}\label{sec:do-giong}
+
+Ảnh làm xấu ``giống thật'' đến đâu được đo bằng ba thước, trên mảnh ảnh cắt từ cột 16 trở đi, không đổi cỡ:
+\begin{itemize}
+\item \textbf{khoảng cách thống kê}: khoảng cách Wasserstein-1 giữa phân bố của từng thống kê mức thấp (màu, dark channel, nhiễu, độ nét, khối JPEG, tối góc, phổ nhiễu) ở hai tập, chia cho IQR của tập thật, rồi lấy trung bình;
+\item \textbf{C2ST}~\cite{c2st}: độ chính xác của một CNN nhỏ (60\,929 tham số) học phân biệt mảnh thật với mảnh làm xấu, trên phần dư $I - \mathrm{Gauss}_{\sigma=2}(I)$ của mảnh 64$\times$64; 0,5 nghĩa là không phân biệt được;
+\item \textbf{KID}~\cite{kid} trên đặc trưng CLS của DINOv2 ViT-L/14~\cite{dinov2}, mảnh 224$\times$224, 10 tập con rời nhau.
+\end{itemize}
+Một hàng ``thật với thật'' (600 khung dev so với 198 khung test) cho biết mức sàn của từng thước, vì hai nhóm khung thật khác cảnh cũng không bao giờ cho C2ST đúng 0,5.
+
+\subsection{Nhận diện người}
+
+\textbf{Mốc.} YOLO11s~\cite{yolo11} huấn luyện sẵn trên COCO, ảnh vào 1\,280 px, chỉ giữ lớp người. Bỏ mọi hộp có $x_1 < 16$ (nằm trên dải mép) đã nâng mAP50 test từ 0,067 lên 0,126, nên mốc chính thức là bản đã bỏ dải mép. Thử thêm SAHI cắt lát 320 px cho 0,113, chậm hơn 26 lần, nên không dùng.
+
+\textbf{E1, tinh chỉnh.} YOLO11s COCO đổi đầu ra còn một lớp, 6 epoch ở 1\,280 px, batch 4, AdamW lr 0,002, tắt tăng cường HSV vì màu và ám là thứ D1/D2 cần dạy. Bốn lần chạy chỉ khác tập (D0, D1, D2, D2+Real-SR), mỗi lần 0,66–0,76 giờ GPU; sau mỗi epoch giữ checkpoint có mAP50 dev-val cao nhất.
+
+\textbf{E2, tự huấn luyện} trên khung bay chưa gán nhãn~\cite{selftrain}. Một thầy YOLO11m được tinh chỉnh trên D2; nhãn giả của vòng 1 lấy từ model có precision nhãn giả cao hơn trên dev-val, và E1 D2 thắng YOLO11m ở bước này (recall 0,084 so với 0,075 cùng precision 1,0). Nhãn giả qua TTA và ByteTrack~\cite{bytetrack}: hộp điểm thấp được cứu nếu thuộc một vệt dài ít nhất 3 khung có hộp điểm cao. Trò YOLO11s khởi tạo từ E1 D2 học trên D2 cộng khung dev có nhãn giả (lặp 2 lần) và 300 khung âm. Vòng sau chỉ chạy khi dev-val tăng (Hình~\ref{fig:e2}).
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/tikz-e2}
+\caption[Vòng tự huấn luyện E2]{Vòng tự huấn luyện E2. Khung test và khung dev cách khung dev-val dưới 0,3 s không vào tập huấn luyện. P, R: precision, recall của nhãn giả trên dev-val. Nét đứt: YOLO11m cho nhãn giả kém E1 D2 nên không làm thầy vòng 1.}
+\label{fig:e2}
+\end{figure}
+
+\textbf{Xuất ONNX và hợp đồng model.} Model ship được xuất ONNX opset 17 cho ONNX Runtime~\cite{onnxrt} với toàn bộ tiền và hậu xử lý nằm trong graph: nhận khung BGR \texttt{uint8} cỡ $480\times640\times3$ tên \texttt{frame}, cắt 16 cột, letterbox vuông 1\,280, chạy mạng, NMS, trả \texttt{boxes} theo toạ độ khung gốc và \texttt{scores}. Gói \texttt{detector-v1.0.0} kèm \texttt{meta.json} (sha256, ngưỡng 0,0767) và ba khung golden lấy từ dev. IOT-CV kiểm sha256, tensor và kết quả golden; lệch một điều kiện là model không được nạp và web báo lý do. ORT CPU khớp bản PyTorch cùng letterbox tới 0,0000 mAP50 trên dev-val.
+
+\subsection{Làm rõ ảnh}
+
+\textbf{Chuỗi lọc cổ điển} (Hình~\ref{fig:classic}) đi ngược chuỗi hỏng của camera. Khử khối chạy trước tiên vì nó cần lưới 8$\times$8 còn nguyên. Khử hồng phải đứng trước khử mù: khử mù nhân sắc độ với $1/t$ nên làm loang vệt hồng, và thử nghiệm cho thấy đặt khử hồng sau khử mù chỉ xoá được 46–68\,\% điểm hồng, đặt trước xoá 93\,\%. Khử mù dùng dark channel ô 15 px~\cite{he-dcp} với độ truyền làm mịn bằng guided filter~\cite{guided}, giữ lại 15\,\% màn mờ ($\omega=0{,}85$) và chặn $t\geq0{,}4$ để không khuếch đại nhiễu ở vùng mù đặc. Hình~\ref{fig:surf3d} cho thấy hai đại lượng mà chuỗi lọc phải bù: hệ số tối góc theo tiêu cự đo được và dark channel của một khung thật.
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/tikz-classic}
+\caption{Chuỗi lọc cổ điển (\texttt{xla.enhance.classic}, cấu hình 1.0.0) và thời gian từng bước.}
+\label{fig:classic}
+\end{figure}
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-3d-surfaces}
+\caption[Hai bề mặt 3D đọc từ số đo thật]{Hai bề mặt 3D đọc từ số đo thật: hệ số tối góc trên khung 640$\times$480 và dark channel của một khung bay. Dark channel cao khắp khung (gần 140/255): màn mờ phủ đều, gần cũng như xa.}
+\label{fig:surf3d}
+\end{figure}
+
+\textbf{Mạng NAFNet}~\cite{nafnet} học ánh xạ D2 $\to$ D0 trên cặp mảnh 256$\times$256 đặt theo lưới 8 px (giữ pha khối JPEG), loss $L_1 + (1-\mathrm{SSIM})$. Bản NAFNet-SIDD bề rộng 32 (29,2 triệu tham số) sau huấn luyện chạy 82,1 ms p95, vượt trần 30 ms. Nhóm chuyển sang bề rộng 16, một khối mỗi tầng (1,14 triệu tham số), khởi tạo ngẫu nhiên, batch 16, lr $10^{-3}$ cosine, 4\,500 bước. Checkpoint được chọn trên 60 chuỗi khung dev liền kề; không checkpoint nào giữ độ nhấp nháy dưới 1,15 lần ảnh vào, nên luật dự phòng chọn bản nhấp nháy ít nhất (bước 4\,500). Bundle \texttt{enhancer-v1.0.0} chạy 15,4/21,0 ms p50/p95 trên ORT CUDA.
+
+\subsection{Cách đánh giá}
+
+\textbf{mAP50 và báo nhầm.} Mọi model chấm trên 198 khung test với ngưỡng vận hành là ngưỡng F1 tối đa trên dev-val. Báo nhầm tính bằng số hộp sai trên mỗi khung bay không người. CI 95\,\% lấy bằng bootstrap 2\,000 lần theo khối 30 s, vì khung trong một khối tương quan và rút từng khung lẻ sẽ cho CI hẹp giả. Hai model được so bằng hiệu ghép cặp trên cùng các mẫu bootstrap. Tiêu chí đặt trước khi chạy: mAP50 $\geq 0{,}227$ kèm cận dưới CI của hiệu so với mốc $>0$, báo nhầm $\leq 0{,}05$ hộp/khung, và $\leq 30$ ms p95 trên ORT CUDA.
+
+\textbf{Thử mù A/B.} Ảnh rõ không có nhãn ``đúng'' trên khung thật, nên người xem là thước đo. Một trang HTML chạy offline hiện hai ảnh cạnh nhau, trái phải xáo trộn, tên file là mã ngẫu nhiên; người chấm chọn ảnh dễ nhìn hơn. Lần 1 gồm 55 lượt (25 mạng với gốc, 25 mạng với cổ điển, 5 cặp lặp để đo độ nhất quán), cả khung. Lần 2 phóng to 2$\times$ quanh người. Một người chấm theo đúng giao thức này. Ngưỡng đạt: mạng thắng ảnh gốc $\geq 70\,\%$ và thắng cổ điển $\geq 55\,\%$; CI Wilson 95\,\%. Các chỉ số không tham chiếu MUSIQ, NIQE chỉ để mô tả, không dùng chọn gì.
+
+\textbf{E4.} Hai bộ nhận diện (mốc COCO, bundle đã tinh chỉnh) chạy trên ba biến thể của khung test (gốc, cổ điển, mạng). Luật chốt trước: chỉ chuyển nhận diện sang ảnh đã làm rõ khi CI của hiệu mAP50 so với khung gốc nằm trọn trên 0.

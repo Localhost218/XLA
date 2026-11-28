@@ -1,0 +1,32 @@
+{
+ "haze": {
+  "dark_target_0_255": 141.35,
+  "airlight_0_1": 0.8061,
+  "t": 0.6042,
+  "dark_src_lin": 0.0409
+ },
+ "lens": {
+  "psf_sigma_px": 0.596,
+  "vignette_focal_px": 689.88
+ },
+ "tone": {
+  "isp_wb_gain_r": 2.13,
+  "isp_wb_gain_b": 1.812,
+  "cast_r": 0.9733,
+  "cast_b": 0.929,
+  "k_out": 0.5722,
+  "exposure": 2.4388,
+  "brightness": 1.3956,
+  "sat_frac": 0.12426,
+  "black_level": 0.0017
+ },
+ "isp": {
+  "soften_sigma": 0.3383,
+  "noise_scale": 0.4379
+ },
+ "strip": {
+  "strip_width": 14,
+  "strip_start_row": 154,
+  "red_phase": 18.83
+ }
+}

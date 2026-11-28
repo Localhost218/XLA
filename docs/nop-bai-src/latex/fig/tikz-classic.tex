@@ -1,0 +1,21 @@
+\begin{tikzpicture}[
+  font=\scriptsize, x=1cm, y=1cm,
+  buoc/.style={draw=#1, fill=#1!12, line width=0.8pt, rounded corners=2pt, align=center, text width=17mm, minimum height=17mm},
+  mui/.style={-{Stealth[length=1.8mm]}, line width=0.8pt, cXam},
+]
+% tên, màu, ms p50 (classic_bench.json, 200 khung dev, 4 luồng CPU)
+\foreach \i/\ten/\mau/\ms/\ghi in {
+  0/{Cắt 16 cột}/cXam/0.201/{bỏ dải mép},
+  1/{Khử khối}/cCam/2.198/{chỉ trên lưới 8$\times$8,\\$\alpha$ 10, $\beta$ 4},
+  2/{Khử hồng}/cHong/2.567/{cổng $\max(R,B)$\\230–240, 2 lượt},
+  3/{Bù tối góc}/cVang/0.152/{chia $\cos^4$,\\trần 1,35},
+  4/{Khử mù}/cXanh/2.214/{dark channel 15 px,\\$\omega$ 0,85, $t\geq 0{,}4$},
+  5/{Làm nét}/cLuc/1.591/{unsharp trên Y,\\bỏ $|d|\leq 2\sigma_n$},
+  6/{Đệm mép}/cXam/0.252/{lặp cột 16}} {
+  \node[buoc=\mau] (n\i) at (\i*2.28,0) {\textbf{\ten}\\[1pt]\ghi};
+  \fill[\mau!80] ($(n\i.west |- 0,-0.98)+(0.05,0)$) rectangle ++(\ms*0.45,-0.2);
+  \node[anchor=west, font=\tiny] at ($(n\i.west |- 0,-1.08)+(0.05+\ms*0.45,0)$) {\pgfmathprintnumber[use comma,precision=2,fixed]{\ms} ms};
+}
+\foreach \i [evaluate=\i as \j using int(\i+1)] in {0,...,5} \draw[mui] (n\i) -- (n\j);
+\node[anchor=north west, font=\scriptsize, cXam] at ($(n0.west |- 0,-1.3)$) {Tổng p50 9,18 ms, p95 10,21 ms trên CPU Ryzen 9 7945HX (4 luồng OpenCV). Thanh dưới mỗi bước: thời gian p50.};
+\end{tikzpicture}

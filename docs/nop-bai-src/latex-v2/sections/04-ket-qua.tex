@@ -1,0 +1,83 @@
+\section{Kết quả}\label{sec:ket-qua}
+
+\subsection{Nhận diện: tầng xác minh cắt hai phần ba báo nhầm}
+
+Bảng~\ref{tab:tang} và Hình~\ref{fig:tang} là kết quả chấm một lần trên 198 khung test, qua đúng đường IOT-CV chạy: phát lại bản ghi, ghi CSV từng tầng, chấm bằng \texttt{xla.eval.detection}. So YOLO11s một tầng với YOLO11s + verifier EfficientNet-B0 + lọc track (ba tầng) trên cùng 198 khung: mAP50 tăng từ 0,120 lên 0,210, hiệu $+0{,}090$ \ci{$+0{,}026$}{$+0{,}189$}, và báo nhầm trên khung bay không người giảm từ 0,881 xuống 0,289 hộp/khung, hiệu $-0{,}591$ \ci{$-1{,}033$}{$-0{,}273$}. Cả hai CI không chạm 0. Recall ở ngưỡng vận hành giữ nguyên 0,396 (59/149 người): verifier không bỏ người nào mà detector đã bắt được. Trên 300 khung trong nhà, báo nhầm ở mức 0,003 hộp/khung.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption[Ba tầng nhận diện trên 198 khung test thật]{Ba tầng nhận diện trên 198 khung test thật (39 khung có người, 149 người). CI 95\,\% bootstrap theo khối 30 s. Báo nhầm tính trên 159 khung bay không người và 300 khung trong nhà.}
+\label{tab:tang}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}l c c c c c@{}}
+\toprule
+Tầng & mAP50 [CI 95\,\%] & Recall & Báo nhầm, bay [CI 95\,\%] & Trong nhà & Ngưỡng \\
+\midrule
+1 detector & 0,119 \ci{0,032}{0,197} & 0,396 & 0,874 \ci{0,333}{1,486} & 0,003 & 0,077 \\
+2 + verifier & 0,210 \ci{0,122}{0,312} & 0,396 & 0,289 \ci{0,036}{0,631} & 0,003 & 0,350 \\
+3 + track $k1/n1$ & 0,210 \ci{0,122}{0,312} & 0,396 & 0,289 \ci{0,036}{0,631} & 0,003 & 0,350 \\
+\midrule
+ba tầng $-$ một tầng & $+0{,}090$ \ci{$+0{,}026$}{$+0{,}189$} & $+0{,}000$ & $-0{,}591$ \ci{$-1{,}033$}{$-0{,}273$} & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-tang}
+\caption[Ba tầng nhận diện trên 198 khung test]{Ba tầng nhận diện trên 198 khung test, thanh lỗi là CI 95\,\% bootstrap theo khối. Phần tăng mAP50 và phần giảm báo nhầm đều đến từ tầng 2.}
+\label{fig:tang}
+\end{figure}
+
+Tầng 1 chạy qua IOT-CV cho đúng kết quả của detector chấm bằng XLA (hiệu mAP50 bằng 0, lệch một hộp báo nhầm trên 159 khung), nên phần chênh ở tầng 2 là của verifier. Trên \texttt{cal}, verifier ở $\tau=0{,}35$ bỏ 13/15 hộp sai; trên \texttt{devpool} (dự đoán ngoài fold) nó bỏ 25/79 hộp sai mà vẫn giữ đủ 58/218 người. Tầng 3 ở $k=1$ trùng tầng 2 từng hộp, đúng như luật D7 chọn: lọc track $k\geq2$ bỏ nốt 2 hộp sai trên \texttt{cal} nhưng mất ít nhất 10 người trên \texttt{devpool}. Ba gói ONNX (nhận diện, xác minh, làm rõ) đều qua kiểm golden của IOT-CV trên cả CUDA và CPU (detector IoU $\geq$ 0,9998, verifier lệch điểm $\leq$ 0,0003, bộ lọc cổ điển lệch $\leq$ 2 mức).
+
+\subsection{Làm rõ ảnh: bộ lọc cổ điển thắng ảnh gốc 25/25}
+
+Trên 198 khung test, bộ lọc cổ điển ONNX hạ tỉ lệ điểm hồng từ 0,943\,\% xuống 0,102\,\% (giảm 89,2\,\%) và hạ dark channel trung vị từ 139,0 xuống 56,5 (giảm 59,4\,\%); trên 50 khung dev các số tương ứng là 91,4\,\% và 60,4\,\%, nên dev và test không lệch nhau. Hình~\ref{fig:enh} là hai khung bay thật trước và sau: lớp sương xám được gỡ, cỏ về màu xanh, vệt hồng trên đường đất nhạt đi, người và bóng người nổi rõ khỏi nền.
+
+\begin{figure}[!htbp]
+\centering
+\foreach \i/\c in {0/{\texttt{002\_00428}},2/{\texttt{007\_00765}}}{%
+\begin{subfigure}[b]{0.285\textwidth}\centering\includegraphics[width=\linewidth]{fig/anh\i_raw.jpg}\caption*{gốc, \c}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.285\textwidth}\centering\includegraphics[width=\linewidth]{fig/anh\i_classic.jpg}\caption*{cổ điển ONNX}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.205\textwidth}\centering\includegraphics[width=\linewidth]{fig/anh\i_raw_zoom.jpg}\caption*{gốc, 2$\times$}\end{subfigure}\hfill
+\begin{subfigure}[b]{0.205\textwidth}\centering\includegraphics[width=\linewidth]{fig/anh\i_classic_zoom.jpg}\caption*{cổ điển, 2$\times$}\end{subfigure}\par\smallskip}
+\caption[Khung bay thật qua bộ lọc cổ điển ONNX]{Khung bay thật ngày 02/11 qua bộ lọc cổ điển ONNX: ảnh ra là đầu ra ORT đã lưu làm golden của gói ONNX làm rõ. Hai cột phải phóng 2$\times$ vùng có người (góc trên trái).}
+\label{fig:enh}
+\end{figure}
+
+Bảng~\ref{tab:sosanh} đặt bộ lọc cổ điển cạnh các phương án đã đo. Ở thử mù A/B lượt cả khung (Hình~\ref{fig:ab}), bộ lọc cổ điển thắng ảnh gốc 25/25, Wilson \ci{0,867}{1,000}; năm cặp lặp đổi bên đều được chọn như lần đầu. Real-ESRGAN x2 tinh chỉnh cũng thắng ảnh gốc 25/25, còn khi đặt cạnh bộ lọc cổ điển nó được chọn 16/25, Wilson \ci{0,445}{0,798}: người chấm không phân biệt được hai cách ở cỡ cả khung. Hàng rào báo nhầm của ảnh offline qua (detector trên 150 khung \texttt{cal}: 15 hộp ở ảnh gốc, 10 hộp ở ảnh offline, hiệu $-0{,}033$ \ci{$-0{,}123$}{$+0{,}039$}).
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption[So sánh các phương pháp làm rõ ảnh]{So sánh các phương pháp làm rõ ảnh. Thời gian đo trên RTX 4060 Laptop, ONNX Runtime 1.24.4 trừ khi ghi khác; ``chuyến'' là một chuyến bay 20 phút (6\,750 khung ở 5,62 khung/s).}
+\label{tab:sosanh}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.7cm} >{\raggedright\arraybackslash}p{3.3cm} >{\raggedright\arraybackslash}p{3.0cm} X@{}}
+\toprule
+Phương pháp & Kết quả đo & Tốc độ & Lý do chọn hay không chọn \\
+\midrule
+Bộ lọc cổ điển ONNX & A/B thắng gốc 25/25; hồng $-$89,2\,\%, dark channel $-$59,4\,\% (test) & 19,3 / 25,3 ms p50/p95 CUDA; 29,3 / 30,6 ms CPU & chọn, bật sẵn: không học nên không mang thiên lệch của ảnh huấn luyện, khử mù theo chính khung đang xem \\
+\addlinespace
+NAFNet-w16 & dark channel $-$36,8\,\%, màu ra nguội & 20,61 / 27,89 ms (cùng lượt đo) & không chọn: khử mù yếu hơn, chậm hơn 2,55 ms p95 \\
+\addlinespace
+Lai cổ điển $\to$ NAFNet & hết hồng; dark channel trung vị 84,0 đến 111,5 (cổ điển 56,0), dev & 7\,600 bước, 25 phút GPU & không xuất: mạng học theo đích VisDrone sạch nên trả lại màn mờ bộ lọc đã gỡ \\
+\addlinespace
+Real-ESRGAN x2 tinh chỉnh (offline) & A/B thắng gốc 25/25; với cổ điển 16/25 & 0,404 s/khung, 0,758 giờ GPU/chuyến & không chọn: A/B cả khung không phân biệt được với cổ điển, trong khi chậm hơn khoảng 20 lần \\
+\addlinespace
+SwinIR-M x2 & & 2,70 s/khung PyTorch; 17,4 s ORT & dừng ở bench: một chuyến cần 32,6 giờ GPU \\
+\addlinespace
+BasicVSR++ (5 khung) & & 3,34 s/khung PyTorch & dừng ở probe: ORT 1.24.4 không có kernel \texttt{DeformConv} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Chạy trong phần mềm drone}
+
+IOT-CV nạp ba gói ONNX và phát lại 600 khung của chuyến 02/11 (khung 284 đến 884) đúng nhịp thật, so hai cấu hình trong một tiến trình, bốn lượt xen kẽ ABBA: nhận diện một tầng + NAFNet (A) và ba tầng + bộ lọc cổ điển (B). Ở luồng mặc định có người xem ``Ảnh rõ'', p95 tổng của B là 89,5 ms so với 99,1 ms của A (p50 76,3 so với 84,5 ms), và tỉ lệ khung bị bỏ là 4,2 và 4,7\,\% so với 7,8 và 8,2\,\% (Hình~\ref{fig:ms}). Bộ lọc cổ điển nhẹ hơn NAFNet khoảng 15 ms p95 (19,3 so với 34,4 ms), đủ bù phần verifier thêm vào (p95 khoảng 9 ms, p50 0,03 ms vì phần lớn khung không có hộp qua tầng 1). Lệch giữa hai lượt cùng cấu hình $\leq$ 3,4 ms, nhỏ hơn chênh giữa hai cấu hình. GPU lúc đo chạy ở xung trung vị 780 đến 802 MHz (tối đa 3\,105), 70 đến 72\,\textdegree C; số tuyệt đối ghi kèm điều kiện này, hai cấu hình đo cùng điều kiện.
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-ab-ms}
+\caption[Thử mù A/B và thời gian xử lý trong IOT-CV]{(a) Thử mù A/B, lượt cả khung; vạch đứt là 0,5. (b) p95 từng bước trong IOT-CV ở hai cấu hình: nhận diện một tầng + NAFNet và ba tầng + bộ lọc cổ điển.}
+\label{fig:ab-ms}
+\end{figure}

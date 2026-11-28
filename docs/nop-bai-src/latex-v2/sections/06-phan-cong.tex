@@ -1,0 +1,22 @@
+\section{Phân công}\label{sec:phan-cong}
+
+Bảng~\ref{tab:phancong} ghi phần việc của từng thành viên trong phần AI xử lý ảnh. Việc chung (thống nhất mục tiêu, luật chọn ghi trước, đọc lại số liệu) cả nhóm cùng làm.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption{Phân công nhóm 10.}
+\label{tab:phancong}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.3cm} l X@{}}
+\toprule
+Thành viên & MSSV & Công việc \\
+\midrule
+Nguyễn Duy Nghĩa & B23DCCN600 & Làm rõ ảnh (bộ lọc cổ điển, NAFNet, so với Real-ESRGAN, SwinIR, BasicVSR++), xuất bộ lọc cổ điển thành ONNX, thử mù A/B, tích hợp vào IOT-CV và bench \\
+\addlinespace
+Nguyễn Tự Kiên & B23DCCN465 & Bộ làm xấu D1/D2, khớp tham số D2 bằng CMA-ES, đo độ giống thật (W1, C2ST), lọc dữ liệu ngoài theo góc nhìn (HERIDAL, WiSARD, TinyPerson) \\
+\addlinespace
+Nguyễn Minh Toàn & B23DCCN832 & Nhận diện YOLO11s (COCO $\to$ E1 $\to$ E2 $\to$ ONNX), thử thầy YOLO11m và trò C3, verifier EfficientNet-B0 \\
+\addlinespace
+Nguyễn Thành Trung & B23DCCN861 & Khung bay thật, hồ sơ camera, chia tập theo khối 30 s, gán nhãn, tập âm \texttt{cal}, lọc track $k1/n1$, soát tay 200 khung âm \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,0 +1,44 @@
+\section{Thảo luận}\label{sec:thao-luan}
+
+\subsection{Tầng xác minh bớt báo nhầm mà recall không giảm}
+
+Verifier chỉ được bỏ hộp, không thêm hộp, nên recall của cả hệ không thể vượt recall của detector; việc còn lại là chọn ngưỡng sao cho nó không bỏ người thật. Trên \texttt{devpool}, mọi ngưỡng từ 0,05 đến 0,35 giữ cùng 58/218 người và cùng 2 hộp sai trên \texttt{cal}. Luật D7 lấy ngưỡng cao nhất trong vùng đó, nên trên test recall đứng yên ở 0,396 trong khi báo nhầm giảm 0,591 hộp/khung.
+
+Vì sao một mạng phân loại nhỏ lọc được thứ detector để lọt? Detector phải tìm người trên cả khung letterbox 1\,280, mỗi ô lưới chỉ thấy một mảnh nhỏ. Verifier nhìn riêng một vùng cắt 96$\times$96 quanh hộp, nới 1,5 lần để thấy trọn vật và phần nền quanh nó, nên phân biệt được người với vật có cỡ và màu gần giống: túi, tấm nhựa hồng, bụi cây, đá, bóng người. Các kiểu nhầm này lặp lại trên bãi bay, và 91 âm khó thật (trọng số $\times$4 trong loss) dạy đúng chúng. Khi những hộp sai điểm cao bị bỏ, đường precision theo recall nâng lên, nên mAP50 tăng 0,090 dù không có thêm người nào được tìm thấy. Bảng~\ref{tab:luachon} ghi các phương án khác đã so trên cùng \texttt{devpool} và \texttt{cal}.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption[Các phương án nhận diện đã so]{Các phương án nhận diện đã so, đều chọn bằng \texttt{devpool} hoặc \texttt{cal}, không dùng test. ``Detector YOLO11s'' là tầng 1 đang chạy.}
+\label{tab:luachon}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.4cm} >{\raggedright\arraybackslash}p{4.6cm} X@{}}
+\toprule
+Phương án & Số đo & Quyết định và lý do \\
+\midrule
+Thầy YOLO11m cho nhãn giả & hiệu với detector YOLO11s trên \texttt{devpool} $-0{,}031$ \ci{$-0{,}092$}{$+0{,}052$} & không làm thầy: nhãn giả không rõ hơn \\
+\addlinespace
+Trò YOLO11s C3 (VisDrone sạch + nền \texttt{mine}) & OOF 0,321 \ci{0,210}{0,446}; cùng đường ONNX, hiệu với detector đang chạy $-0{,}041$ \ci{$-0{,}078$}{$+0{,}018$} & giữ detector đang chạy, đặt verifier phía sau \\
+\addlinespace
+Verifier EfficientNet-B0, cắt 96 & giảm 82\,\% báo nhầm OOF ở mức giảm recall $\leq$ 0,05 & chọn: lọc mạnh nhất trong bốn ứng viên \\
+\addlinespace
+Verifier MobileNetV3-S, cắt 64 & giảm 64\,\%; 2,93 ms ở 5 hộp & không chọn: lọc kém hơn \\
+\addlinespace
+Lọc track $k\geq2$ & \texttt{cal} 0 hộp sai, \texttt{devpool} mất $\geq$ 10 người & giữ $k=n=1$: D7 ưu tiên recall khi \texttt{cal} đã $\leq$ 0,03 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Bộ lọc cổ điển thắng ảnh gốc 25/25}
+
+Mỗi khâu của bộ lọc đảo đúng một lỗi đã đo ở Bảng~\ref{tab:camera}: khử khối cho lưới 8$\times$8 của bảng q12, khử hồng cho kênh G bị cắt khi ISP nhân hệ số trắng, bù tối góc theo tiêu cự 1\,016 px của hồ sơ, khử mù cho dark channel trung vị 143,7. Tham số lấy từ số đo của chính camera này, và thứ tự khâu đi ngược thứ tự hỏng: khối JPEG sinh sau cùng nên được gỡ trước tiên, khử hồng đứng trước khử mù vì $1/t$ khuếch đại sắc độ. Khử mù tính $A$ và $t$ trên chính khung đang xem, nên bám được khung mù đặc lẫn khung trong. Kết quả là ảnh ra hết lớp xám đồng đều mà Hình~\ref{fig:surf3d}b cho thấy, và người chấm chọn nó ở cả 25 cặp.
+
+NAFNet-w16 và bản lai cổ điển $\to$ NAFNet học ánh xạ về ảnh VisDrone sạch, nên học luôn cân bằng màu và mức mù của bộ ảnh đó: NAFNet chỉ giảm dark channel 36,8\,\%, bản lai đẩy dark channel trung vị từ 56,0 lên 84,0 đến 111,5. Bộ lọc cổ điển không có đích học nên không có thiên lệch này.
+
+Các mạng lớn không đáng chi phí cho luồng trực tiếp. Camera đưa khoảng 7,2 khung/s ở nhịp bản ghi, tức một khung mỗi 140 ms, và trong ngân sách đó còn detector, verifier, giải mã. Real-ESRGAN x2 mất 0,404 s mỗi khung, khoảng 20 lần bộ lọc cổ điển, trong khi ở cỡ cả khung người chấm chọn nó 16/25 lần (Wilson \ci{0,445}{0,798}), tức không phân biệt được. SwinIR-M x2 mất 17,4 s mỗi khung trên ORT, một chuyến 20 phút cần 32,6 giờ GPU. BasicVSR++ cần phép \texttt{DeformConv} mà ONNX Runtime 1.24.4 chưa có kernel, và 3,34 s mỗi khung ngay trên PyTorch. Với cùng phần cứng, bộ lọc cổ điển 19,3 ms là điểm cân bằng giữa chất lượng người xem chấm được và tốc độ theo kịp camera.
+
+\subsection{D2 và CMA-ES cho dữ liệu huấn luyện}
+
+Khung bay thật có người quá ít để huấn luyện, nên chất lượng của ảnh làm xấu quyết định detector học được gì. Khớp 12 tham số D2 bằng CMA-ES theo (\ref{eq:cmaes}) đưa khoảng cách thống kê với khung thật xuống 0,80, so với 5,93 của làm xấu ngẫu nhiên D1 và mức sàn 0,33 giữa hai nhóm khung thật. Detector học trên D2 báo nhầm 0,30 hộp/khung bay không người so với 0,99 của D1 (hiệu $-0{,}692$, CI nằm trọn dưới 0). Cùng chuỗi D2 còn dùng lại ở hai chỗ: làm xấu HERIDAL và WiSARD trong tập \texttt{d02x}, và nén lại vùng cắt của verifier bằng JPEG q25 đến q85, nên mọi mạng trong hệ học trên ảnh có đúng kiểu hỏng của camera.
+
+\subsection{Giới hạn của dữ liệu}
+
+Mọi khung có người dùng để chấm đến từ một buổi bay, bản ghi \texttt{20261102-100941}, trên một bãi cỏ. Tập test có 39 khung có người và 149 người, nên CI của mAP50 rộng cỡ $\pm$0,1 (0,210 \ci{0,122}{0,312}). Các vật dễ nhầm như túi rác và mảnh nhựa hồng xuất hiện ở nhiều phiên của cùng buổi, nên \texttt{cal}, \texttt{devpool} và test gần nhau hơn khung từ hai buổi khác nhau. Thử A/B có một người chấm, 25 cặp mỗi so sánh. Số ms đo khi GPU ở khoảng 780 MHz. Bước tiếp theo là bay thêm các buổi ở bãi khác, có và không có người, rồi chạy lại đúng các lệnh chấm đã có. Dữ liệu ngoài (HERIDAL, WiSARD, TinyPerson) chỉ dùng cho nghiên cứu theo giấy phép của từng bộ.

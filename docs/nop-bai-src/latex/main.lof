@@ -1,0 +1,18 @@
+\contentsline {figure}{\numberline {1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Đường đi của một khung ảnh}}{1}{figure.caption.4}%
+\contentsline {figure}{\numberline {2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Lỗi của camera trên khung bay thật ngày 02/11/2026}}{2}{figure.caption.6}%
+\contentsline {figure}{\numberline {3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Chia khung bay theo khối thời gian (seed 20261118)}}{3}{figure.caption.7}%
+\contentsline {figure}{\numberline {4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Chuỗi làm xấu D2 (\texttt {configs/degrade\_d2.yaml}, \texttt {params\_version} 3)}}{4}{figure.caption.9}%
+\contentsline {figure}{\numberline {5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sáu khâu D2 trên một ảnh thử tự vẽ (không dùng ảnh VisDrone): cỏ, đường, mái tôn trắng, bồn nước, mái đỏ và bốn người nhìn từ trên.}}{5}{figure.caption.11}%
+\contentsline {figure}{\numberline {6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Ám hồng trong khối màu RGB}}{5}{figure.caption.12}%
+\contentsline {figure}{\numberline {7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Vòng tự huấn luyện E2}}{7}{figure.caption.13}%
+\contentsline {figure}{\numberline {8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Chuỗi lọc cổ điển (\texttt {xla.enhance.classic}, cấu hình 1.0.0) và thời gian từng bước.}}{7}{figure.caption.14}%
+\contentsline {figure}{\numberline {9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Hai bề mặt 3D đọc từ số đo thật}}{8}{figure.caption.15}%
+\contentsline {figure}{\numberline {10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces D1 so với D2}}{9}{figure.caption.16}%
+\contentsline {figure}{\numberline {11}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Nhận diện theo từng thí nghiệm}}{10}{figure.caption.18}%
+\contentsline {figure}{\numberline {12}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces mAP50 theo báo nhầm của chín model}}{10}{figure.caption.19}%
+\contentsline {figure}{\numberline {13}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Cùng khung, bốn bộ hộp}}{11}{figure.caption.20}%
+\contentsline {figure}{\numberline {14}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Cùng khung bay thật qua ba nhánh}}{12}{figure.caption.21}%
+\contentsline {figure}{\numberline {15}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Bốn tiêu chí đo được của hai cách làm rõ; vạch lục là ngưỡng đặt trước}}{12}{figure.caption.23}%
+\contentsline {figure}{\numberline {16}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Hai phép thử của phần làm rõ: (a) A/B mù giữa mạng và hai đối thủ, (b) E4 với hai bộ nhận diện.}}{13}{figure.caption.24}%
+\contentsline {figure}{\numberline {17}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thời gian xử lý một khung trong IOT-CV (p50 từng phần; hình thoi là p95 tổng) so với ngân sách 50 ms}}{13}{figure.caption.25}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

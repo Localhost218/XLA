@@ -1,0 +1,78 @@
+\section{Phương pháp}\label{sec:phuong-phap}
+
+\subsection{Mô hình suy giảm D2}\label{sec:suy-giam}
+
+D2 dựng lại chuỗi hỏng của camera theo đúng thứ tự vật lý. Gọi $J$ là ảnh nguồn sạch (thang 0 đến 1). Màn mờ theo mô hình khí quyển của He và cộng sự~\cite{he-dcp}, ống kính gồm nhoè Gauss và tối góc:
+\begin{equation}
+H = J\,t + A\,(1-t),\qquad L(\mathbf{x}) = V(\mathbf{x})\,\big(H * k_{\sigma}\big)(\mathbf{x}),\qquad V(\mathbf{x})=\Big(1+\tfrac{r(\mathbf{x})^2}{f^2}\Big)^{-2}=\cos^4\theta,
+\label{eq:haze}
+\end{equation}
+với $A$ là airlight, $t$ chọn cho từng ảnh sao cho dark channel ra đúng một giá trị rút từ phân bố đo được, $r$ là khoảng cách tới tâm, $f$ là tiêu cự (hồ sơ đo 1\,016 px). Khâu tông màu nhân hệ số cân bằng trắng của ISP cho R và B (2,130 và 1,812 sau hiệu chỉnh) rồi cắt về miền hợp lệ; vì G bão hoà trước, điểm sáng rẽ khỏi trục xám về phía hồng. Sau đó là khâu ISP (làm mềm, nhiễu theo hàm mức nhiễu), dải tối mép trái 14 $\pm$ 1 px và JPEG bằng bảng lượng tử thật:
+\begin{equation}
+I_{\mathrm{D2}} = \mathcal{Q}_{\mathrm{q12}}\Big(\mathcal{E}\big(\mathcal{N}(\mathcal{T}(L))\big)\Big),
+\label{eq:d2}
+\end{equation}
+trong đó $\mathcal{T}$ là tông màu, $\mathcal{N}$ là ISP và nhiễu, $\mathcal{E}$ là dải mép, $\mathcal{Q}_{\mathrm{q12}}$ là nén JPEG 4:2:2. Mười hai tham số của (\ref{eq:haze}) và (\ref{eq:d2}) được khớp bằng (\ref{eq:cmaes}).
+
+\subsection{Nhận diện ba tầng}
+
+\textit{Tầng 1, detector.} YOLO11s~\cite{yolo11} khởi từ COCO, tinh chỉnh trên D2 rồi tự huấn luyện trên khung dev chưa gán nhãn (E1 $\to$ E2), xuất ONNX opset 17 cho ONNX Runtime~\cite{onnxrt}. Graph nhận khung BGR \texttt{uint8} 480$\times$640$\times$3, cắt 16 cột, letterbox 1\,280, chạy mạng, NMS và trả hộp theo toạ độ khung gốc; ngưỡng vận hành 0,0767. Gói ONNX nhận diện kèm \texttt{meta.json} ghi sha256, ngưỡng và cấu hình track.
+
+\textit{Tầng 2, verifier.} Một EfficientNet-B0~\cite{effnet} phân loại vùng cắt quanh từng hộp. Hộp $b$ được nới 1,5 lần, cạnh tối thiểu 32 px, cắt bằng RoiAlign ra 96$\times$96 ngay trong graph ONNX, nên phần mềm drone không phải tự cắt. Điểm và luật giữ hộp:
+\begin{equation}
+s(b)=\sigma\Big(g_{\phi}\big(\mathrm{RoiAlign}_{96}(I,\;1{,}5\,b)\big)\Big),\qquad \text{giữ } b \iff s(b)\geq\tau,\ \ \tau=0{,}35.
+\label{eq:verifier}
+\end{equation}
+Mẫu huấn luyện có 18\,766 vùng cắt: 91 âm khó thật (hộp sai của detector trên \texttt{mine} và \texttt{devpool}), 1\,888 âm nền, 9\,444 hộp sai của detector trên ảnh \texttt{d02x}, cùng mẫu dương từ \texttt{devpool}, \texttt{d02x} và TinyPerson. Loss BCE có trọng số (âm khó thật $\times$4, dương thật $\times$3); mỗi vùng cắt được rung tâm $\pm$12\,\%, đổi cỡ $\pm$20\,\% và nén lại JPEG q25 đến q85 theo D2.
+
+\textit{Tầng 3, lọc track.} Hộp ghép giữa các khung bằng IoU $\geq$ 0,3; một track chỉ báo khi có $k$ hộp trong $n$ khung. Tầng này cài một lần trong IOT-CV (mô-đun \texttt{track\_filter}); XLA hiệu chỉnh và chấm nó bằng cách gọi đúng mã đó.
+
+\textit{Chọn điểm vận hành.} Luật D7, ghi trước, chỉ dùng \texttt{cal} và \texttt{devpool}: báo nhầm trên \texttt{cal} $\leq$ 0,03 hộp/khung, trong đó lấy recall \texttt{devpool} lớn nhất, hoà thì lấy cấu hình đơn giản nhất. Lưới 720 điểm (ngưỡng verifier 0 đến 0,95 $\times$ $k$ $\times$ $n$ $\times$ khoảng trống) chọn $\tau=0{,}35$ và $k=n=1$.
+
+\subsection{Làm rõ ảnh: bộ lọc cổ điển chạy bằng ONNX}
+
+Chuỗi lọc cổ điển (Hình~\ref{fig:classic}) đi ngược chuỗi hỏng của camera. Khử khối chạy trước tiên vì nó cần lưới 8$\times$8 còn nguyên: chỉ san bậc thang ở biên khối khi $|q_0-p_0|<\alpha=10$ và hai bên đều phẳng ($<\beta=4$). Khử hồng phải đứng trước khử mù, vì khử mù nhân sắc độ với $1/t$ làm loang vệt hồng: đặt sau chỉ xoá 46 đến 68\,\% điểm hồng, đặt trước xoá 93\,\%. Cổng hồng mở khi $\min(R,B)-G\geq6$ và $\max(R,B)\geq230$; mỗi lượt dịch sắc độ mà giữ độ sáng Y (BT.601):
+\begin{equation}
+\Delta=\lambda\,\alpha_m\Big(\tfrac{R+B}{2}-G\Big),\qquad R\leftarrow R-\Delta,\quad B\leftarrow B-\Delta,\quad G\leftarrow G+0{,}704\,\Delta,
+\label{eq:magenta}
+\end{equation}
+với $\alpha_m$ là mặt nạ cổng đã nở 21 px và làm mềm, $\lambda=0{,}56$, hai lượt. Hệ số 0,704 = $(0{,}299+0{,}114)/0{,}587$ giữ Y không đổi. Bù tối góc chia cho $V(\mathbf{x})$ của (\ref{eq:haze}), trần 1,35. Khử mù đảo (\ref{eq:haze}) với dark channel ô 15 px~\cite{he-dcp}:
+\begin{equation}
+\tilde t(\mathbf{x}) = 1-\omega\,\frac{\mathrm{dark}(\mathbf{x})}{\overline{A}},\qquad t=\max\big(0{,}4,\ \mathrm{GF}(\tilde t)\big),\qquad J_c=\frac{I_c-A_c}{t}+A_c,
+\label{eq:dehaze}
+\end{equation}
+với $\omega=0{,}85$ (giữ lại 15\,\% màn mờ), $A_c$ lấy theo từng kênh ở phân vị 99,9 của dark channel, GF là guided filter~\cite{guided} tính ở 1/4 độ phân giải. Cuối cùng làm nét unsharp trên Y, bỏ chi tiết $|d|\leq2\sigma_n$ để không làm nét nhiễu. Hình~\ref{fig:surf3d} cho thấy hai đại lượng mà chuỗi phải bù, đọc từ số đo thật.
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/tikz-classic}
+\caption[Chuỗi lọc cổ điển trong gói ONNX làm rõ]{Chuỗi lọc cổ điển trong gói ONNX làm rõ (tham số \texttt{configs/enhance\_classic.yaml}).}
+\label{fig:classic}
+\end{figure}
+
+\begin{figure}[!htbp]
+\centering
+\input{fig/pgf-3d-surfaces}
+\caption[Hai bề mặt 3D đọc từ số đo thật]{Hai bề mặt 3D đọc từ số đo thật: hệ số tối góc trên khung 640$\times$480 và dark channel của một khung bay. Dark channel cao khắp khung (gần 140/255): màn mờ phủ đều, gần cũng như xa, nên một $\overline{A}$ cho cả khung là đủ.}
+\label{fig:surf3d}
+\end{figure}
+
+Viết bằng numpy/OpenCV, bộ lọc cổ điển nằm ngoài hợp đồng model của IOT-CV, nên nhóm dựng lại đúng năm tầng thành một graph ONNX: phép số nguyên của OpenCV thành phép float kèm \texttt{Round} và \texttt{Clip} đúng chỗ, \texttt{np.percentile} thành \texttt{TopK} cộng nội suy, nhánh \texttt{if} thành \texttt{Where}, erode/dilate thành \texttt{MaxPool}, lọc Gauss thành tổng lát dịch có trọng số. Graph không có \texttt{If}, \texttt{Loop}, \texttt{Conv} hay \texttt{MatMul}, nên không bị TF32 của ORT CUDA làm lệch phép làm tròn \texttt{uint8}.
+
+Năm phương án học sâu được đo cùng thước để so: NAFNet-w16~\cite{nafnet} học ánh xạ D2 $\to$ D0, lai cổ điển $\to$ NAFNet, Real-ESRGAN x2plus~\cite{realesrgan} tinh chỉnh trên cặp D2 cho ảnh rõ offline sau chuyến bay, SwinIR-M x2~\cite{swinir} và BasicVSR++~\cite{basicvsrpp} cho video. Kết quả so ở Bảng~\ref{tab:sosanh}.
+
+\subsection{Thước đo}
+
+\textit{mAP50 và báo nhầm.} AP của lớp người là diện tích dưới đường precision theo recall khi hộp dự đoán khớp nhãn với IoU $\geq$ 0,5:
+\begin{equation}
+\mathrm{AP}_{50}=\int_0^1 p_{50}(r)\,dr,\qquad \mathrm{IoU}(b,g)=\frac{|b\cap g|}{|b\cup g|}.
+\label{eq:map}
+\end{equation}
+Báo nhầm là số hộp sai trên mỗi khung bay không người. Mọi khoảng tin cậy 95\,\% lấy bằng bootstrap 2\,000 lần theo khối 30 s: rút lại khối chứ không rút khung lẻ, vì khung trong một khối tương quan và rút khung lẻ cho CI hẹp giả. Hai hệ được so bằng hiệu ghép cặp trên cùng mẫu bootstrap; một cải thiện được tính khi CI của hiệu không chạm 0.
+
+\textit{Thử mù A/B.} Ảnh rõ không có đáp án trên khung thật, nên người xem là thước đo. Trang HTML chạy offline hiện hai ảnh cạnh nhau, trái phải xáo trộn, tên file là mã hex; người chấm chọn ảnh dễ nhìn hơn. Mỗi so sánh có $n=25$ cặp trên khung dev có người (không dùng khung test), thêm 5 cặp lặp đổi bên. Với $x$ lượt thắng, $\hat p=x/n$, $z=1{,}96$, khoảng Wilson~\cite{wilson} là
+\begin{equation}
+\frac{\hat p+\frac{z^2}{2n}\pm z\sqrt{\frac{\hat p(1-\hat p)}{n}+\frac{z^2}{4n^2}}}{1+\frac{z^2}{n}},
+\label{eq:wilson}
+\end{equation}
+và một so sánh được tính là thắng khi cận dưới $>0{,}5$, tức từ 18/25. Luật chốt trước khi chấm: ảnh rõ offline chỉ được đưa vào phần mềm khi thắng cả ảnh gốc lẫn bộ lọc cổ điển ở lượt cả khung.

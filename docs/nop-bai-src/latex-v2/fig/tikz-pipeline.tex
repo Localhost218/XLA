@@ -1,0 +1,24 @@
+% Đường đi của một khung trong IOT-CV với ba gói ONNX (results/.../iotcv/README.md §1, bảng t9)
+\begin{tikzpicture}[
+  font=\scriptsize, node distance=3.5mm and 4.5mm,
+  khoi/.style={draw=#1, fill=#1!12, rounded corners=2pt, line width=0.8pt, align=center, minimum height=11mm, text width=19mm},
+  mui/.style={-{Stealth[length=2.2mm]}, line width=0.9pt, cXam},
+]
+\node[khoi=cHong] (cam) {\textbf{Camera}\\ESP32-S3 N16R8\\+ OV3660\\JPEG 640$\times$480};
+\node[khoi=cVang, right=of cam, text width=17mm] (wifi) {\textbf{Wi-Fi}\\MJPEG qua HTTP\\2 đến 9 khung/s};
+\node[khoi=cXanh, right=of wifi, text width=19mm] (gcs) {\textbf{Laptop}\\ONNX Runtime\\CUDA, RTX 4060\\Laptop 8 GB};
+\node[khoi=cCam, above right=2mm and 7mm of gcs.east, anchor=south west, text width=23mm] (det) {\textbf{Tầng 1}\\detector YOLO11s\\gói ONNX nhận diện};
+\node[khoi=cTim, right=of det, text width=19mm] (ver) {\textbf{Tầng 2}\\verifier EffNet-B0\\cắt 96 px, $s\geq0{,}35$};
+\node[khoi=cLuc, right=of ver, text width=15mm] (trk) {\textbf{Tầng 3}\\track IoU 0,3\\$k=n=1$};
+\node[khoi=cXanh, below right=2mm and 7mm of gcs.east, anchor=north west, text width=46mm] (enh) {\textbf{Ảnh rõ trực tiếp}: gói ONNX làm rõ\\bộ lọc cổ điển, bật sẵn};
+\node[draw=cXam, rounded corners=2pt, fill=cXam!8, align=center, text width=15mm, minimum height=11mm, right=5mm of enh] (web) {\textbf{Web}\\luồng ``Ảnh rõ''};
+\node[draw=cXam, rounded corners=2pt, fill=cXam!8, align=center, text width=15mm, minimum height=11mm, above=2mm of trk] (canh) {\textbf{Web}\\cảnh báo người};
+\draw[mui] (cam) -- (wifi);
+\draw[mui] (wifi) -- (gcs);
+\draw[mui] (gcs.east) -- ++(3mm,0) |- (det.west);
+\draw[mui] (gcs.east) -- ++(3mm,0) |- (enh.west);
+\draw[mui] (det) -- (ver);
+\draw[mui] (ver) -- (trk);
+\draw[mui] (trk) -- (canh);
+\draw[mui] (enh) -- (web);
+\end{tikzpicture}

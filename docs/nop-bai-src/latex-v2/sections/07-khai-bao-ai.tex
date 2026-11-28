@@ -1,0 +1,18 @@
+\section{Khai báo sử dụng AI}\label{sec:ai}
+
+Nhóm dùng trợ lý AI qua Claude Code trong quá trình làm đồ án (Bảng~\ref{tab:ai}). Nhóm đặt mục tiêu, chọn phương pháp, đối chiếu từng con số trong báo cáo với file kết quả đã lưu trong \texttt{results/}, và chịu trách nhiệm về nội dung. Các model mã nguồn mở chạy bên trong hệ thống là YOLO11s (Ultralytics, tinh chỉnh lại) và EfficientNet-B0 (torchvision, khởi tạo ImageNet, huấn luyện lại làm verifier); bộ lọc cổ điển do nhóm viết.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption{Khai báo công cụ AI.}
+\label{tab:ai}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.3cm} X X@{}}
+\toprule
+Công cụ & Dùng cho & Cách nhóm kiểm lại \\
+\midrule
+Claude Opus 5.5 (effort xhigh) qua Claude Code & Viết code, chạy thí nghiệm, soạn văn bản báo cáo và slide & Chạy test tự động; so số với \texttt{results/*.json}; đọc lại từng mục \\
+\addlinespace
+Claude Sonnet 5.5 (effort xhigh) qua Claude Code & Viết code, chạy thí nghiệm, soạn văn bản & Như trên \\
+\bottomrule
+\end{tabularx}
+\end{table}

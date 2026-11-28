@@ -1,0 +1,5 @@
+stat1	\mathcal{L}=\dfrac{1}{|K|}\sum_{k\in K}\dfrac{W_1(\text{thật}_k,\ \text{giả}_k)}{\operatorname{IQR}(\text{thật}_k)}
+w1	W_1(a,b)=\int\bigl|F_a(x)-F_b(x)\bigr|\,dx
+pr2	\begin{aligned}P&=\dfrac{TP}{TP+FP}\\ R&=\dfrac{TP}{TP+FN}\end{aligned}
+ap2	\begin{aligned}\mathrm{AP}&=\dfrac{1}{101}\sum_{r}p_{\text{bao}}(r)\\ p_{\text{bao}}(r)&=\max_{r'\ge r}p(r')\end{aligned}
+boot2	\begin{aligned}\mathrm{CI}_{95}&=\bigl[q_{2{,}5};\ q_{97{,}5}\bigr]\\ &\text{của }\bigl\{\mathrm{mAP}(\mathcal{B}^{*}_{b})\bigr\}_{b=1}^{2000}\end{aligned}
