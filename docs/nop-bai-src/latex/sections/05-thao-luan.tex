@@ -1,0 +1,25 @@
+\section{Thảo luận}\label{sec:thao-luan}
+
+\subsection{Vì sao dev-val không dự đoán được test}
+
+Luật chọn trên dev-val ngăn nhóm chọn theo test, nhưng lần này nó chọn sai. Có ba nguyên nhân khả dĩ, chưa tách riêng được. Một: 100 khung dev-val nằm cùng chuyến bay với khung dev đã gắn nhãn giả; vùng đệm 0,3 s chỉ loại khung sát nhất, các khung cùng cảnh vẫn vào tập huấn luyện của E2, nên dev-val ưu ái các vòng E2. Hai: recall của nhãn giả chỉ 8,4\,\% (vòng 1) và 11,2\,\% (vòng 2), tức gần như mọi người thật trên khung dev bị gắn là nền và trò học cách bỏ qua người nhỏ. Ba: 100 khung (36 khung có người) quá ít để xếp hạng các model cách nhau vài phần trăm. Chênh lệch letterbox vuông và chữ nhật trên dev-val đổi dấu giữa các model ($-0{,}034$ với r1, $+0{,}021$ với E1 D2), và mAP50 dev-val của E1 D2 nhảy từ 0,327 xuống 0,137 giữa hai epoch liền nhau.
+
+\subsection{Vì sao mạng làm rõ thua bộ lọc cổ điển}
+
+Mạng học ánh xạ D2 $\to$ D0, tức ``ảnh camera giả'' về ``ảnh VisDrone sạch''. Phần D2 mô phỏng sát thì nó học tốt: điểm hồng giảm 99,9\,\%. Phần mù thì không: dark channel chỉ giảm 36,8\,\%, bộ cổ điển giảm 51,6\,\%. Giải thích nhóm cho là hợp lý nhất, chưa kiểm riêng, là mức mù trên cặp huấn luyện nhẹ hơn khung thật. Màu nguội có thể đến từ chính đích D0, vốn mang cân bằng màu của VisDrone chứ không phải màu bãi cỏ. Mạng còn tẩy cả vật vốn màu hồng (một chiếc áo, một mẩu giấy trên khung golden) vì cặp huấn luyện không có vật hồng thật. Bộ lọc cổ điển không học gì nên không thừa hưởng các thiên lệch này; nó khử mù theo dark channel của chính khung đang xem.
+
+\subsection{Vì sao nhận diện chạy trên khung gốc}
+
+Bộ nhận diện đã tinh chỉnh học trên ảnh D2, tức ảnh xấu đúng kiểu camera, nên ảnh đã làm rõ là ảnh lạ với nó. E4 xác nhận điều này với CI nằm trọn dưới 0 cho cả hai cách làm rõ. Mốc COCO có xu hướng được lợi từ ảnh mạng (+0,069), có thể vì nó học trên ảnh sạch, nhưng 39 khung có người chưa đủ để kết luận. Hợp đồng model có cờ \texttt{input\_variant}; nếu sau này một cặp (bộ làm rõ, bộ nhận diện) thắng E4 thì IOT-CV đổi luồng mà không phải sửa code.
+
+\subsection{Giới hạn và hướng tiếp theo}
+
+Mọi số đo đến từ một bãi bay trong một buổi sáng. Tập test có 39 khung có người nên CI của mAP50 rộng khoảng $\pm0{,}1$, và không model nào đạt báo nhầm $\leq0{,}05$ (tốt nhất là E1 D2, 0,302). Bảng lượng tử chỉ đo ở q12, trong khi web IOT-CV tự hạ chất lượng tới q40 khi Wi-Fi yếu. Thử A/B có một người chấm, 25 lượt mỗi so sánh, độ nhất quán 3/5. Ở nhịp camera thật, ngân sách p95 50 ms không đạt trên laptop này.
+
+Các bước tiếp theo, theo thứ tự ưu tiên:
+\begin{enumerate}
+\item hạ phơi sáng và chỉnh cân bằng trắng của chính OV3660 để vùng sáng không cắt kênh G; đo thêm bảng lượng tử ở q40;
+\item thu thêm khung bay có người ở nhiều độ cao và nhiều buổi, tách dev-val thành một đoạn bay riêng, rồi chọn lại giữa E1 D2, r1 và r2;
+\item thêm loss màu (trên a*b*) và loss nhất quán giữa khung liền nhau cho mạng làm rõ, chấm lại bằng trang A/B phóng to;
+\item thử detector 960 px hoặc FP16 để vào ngân sách 50 ms, chấm lại mAP trên 198 khung test.
+\end{enumerate}

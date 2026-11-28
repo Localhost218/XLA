@@ -1,0 +1,23 @@
+\documentclass[12pt,border=4pt]{standalone}
+\usepackage{fontspec}
+\setmainfont{BeVietnamPro}[Path=D:/IOT_Tools/downloads/fonts/,Extension=.ttf,UprightFont=*-Regular,BoldFont=*-SemiBold]
+\usepackage{amsmath}
+\usepackage{unicode-math}\setmathfont{Cambria Math}
+\usepackage[table]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,calc,fit,backgrounds,decorations.pathreplacing,shadows}
+\usepackage{tikz-3dplot}
+\usepackage{pgfplots}\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots,fillbetween}
+\definecolor{cXanh}{HTML}{1F5A96}\definecolor{cCam}{HTML}{E07B24}\definecolor{cLuc}{HTML}{2E8B57}
+\definecolor{cHong}{HTML}{C2397F}\definecolor{cTim}{HTML}{6B4FA0}\definecolor{cXam}{HTML}{5B6770}\definecolor{cVang}{HTML}{D8A51D}
+\pgfplotsset{baocao/.style={tick label style={font=\scriptsize}, scaled ticks=false, /pgf/number format/fixed,
+  label style={font=\small}, legend style={font=\scriptsize,draw=none,fill=none},
+  /pgf/number format/use comma, /pgf/number format/1000 sep={\,}, axis line style={cXam}, major tick style={cXam},
+  ymajorgrids, grid style={cXam!20}}}
+\pgfplotsset{colormap={baocao}{rgb255=(31,90,150) rgb255=(107,79,160) rgb255=(194,57,127) rgb255=(224,123,36) rgb255=(216,165,29)}}
+\pgfkeys{/pgf/number format/assume math mode=true}
+\newcommand{\ci}[2]{[#1;\,#2]}\newcommand{\so}[1]{#1}
+\begin{document}
+\input{fig/pgf-rgbcube}
+\end{document}

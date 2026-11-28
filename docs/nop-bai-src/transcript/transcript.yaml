@@ -1,0 +1,332 @@
+# Kịch bản thuyết trình nội bộ, Nhóm 10, bản đầy đủ (không giới hạn thời gian).
+# Viết theo dàn ý chung D:\XLA\docs\nop-bai-src\dan-y-slide-v3.md (20 mục). Mỗi khối "sections" khoá theo số mục.
+# Công thức lấy từ code D:\XLA\xla\ và configs (code là chuẩn); số liệu từ results/reproduce/tables/t1..t6,
+# results/**, BAO_CAO_DO_AN.md, docs/nop-bai-src/latex/sections/. Kiến trúc YOLO11 đọc từ ultralytics 8.4.215
+# (cfg/models/11/yolo11.yaml, cfg/default.yaml, utils/loss.py).
+# text: chuỗi = lời nói; {f: ...} = dòng công thức đặt ngay trước đoạn đọc nó.
+# Khi có deck cuối: thêm khối "slides" (number, title đúng chữ trên slide, sections: [số mục]).
+project: Làm rõ ảnh UAV và tìm người từ camera ESP32-S3 + OV3660 · Nhóm 10
+subtitle: Kịch bản đầy đủ, không giới hạn thời gian
+sections:
+- section: 1
+  name: Bìa
+  text:
+  - Nhóm em là nhóm 10. Đề tài là làm rõ ảnh UAV và tìm người, trên khung bay thật của camera ESP32-S3 với cảm biến OV3660. Giảng viên hướng dẫn là thầy Phạm Văn Cường.
+  - 'Bài trình bày đi theo đúng đường làm việc của nhóm em: camera làm hỏng ảnh ở đâu, lý thuyết của từng kiểu hỏng, dữ liệu, cách làm xấu ảnh huấn luyện, bộ nhận diện, bộ làm rõ, kết quả, và cuối cùng là chọn gì, vì sao.'
+  nhan: nhóm 10
+- section: 2
+  name: Bài toán
+  text:
+  - 'Drone S500 của nhóm em bay bằng ArduPilot và mang một bo camera riêng: ESP32-S3 N16R8 với cảm biến OV3660, gắn nhìn thẳng xuống đất. Bo nối vào Mobile Hotspot của laptop và phát luồng MJPEG qua HTTP. Mỗi khung là một ảnh JPEG 640×480, nén ở mức chất lượng 12 của ESP32. Ngoài bãi bay, luồng đạt 2 đến 9 khung mỗi giây, tuỳ khoảng cách và Wi-Fi.'
+  - 'Mọi xử lý AI chạy trên laptop, GPU RTX 4060 Laptop 8 GB, không chạy trên drone. Lý do đơn giản: bo ESP32-S3 chỉ đủ sức nén và gửi ảnh.'
+  - 'Từ cùng một khung đầu vào, hệ thống cần hai đầu ra. Đầu ra thứ nhất là nhận diện: các hộp x1, y1, x2, y2 kèm độ tin cậy cho lớp người, theo toạ độ của chính khung đó, để web cảnh báo người vận hành. Đầu ra thứ hai là ảnh rõ: một khung cùng cỡ, dễ nhìn hơn cho người ngồi trước laptop.'
+  - Nhóm em đo hồ sơ camera trên 1115 khung dev của chuyến bay ngày 02/11/2026 và tìm ra năm lỗi chính.
+  - Lỗi nặng nhất là ám hồng. Trung vị chỉ 0,17 % điểm ảnh bị hồng, nhưng 31 % số khung có hơn 0,5 % điểm hồng, và chúng luôn nằm ở vùng sáng gần bão hoà như đường bê tông, mái tôn.
+  - Lỗi thứ hai là mù như sương. Dark channel trung vị là 143,7 trên thang 255, khoảng p5 đến p95 là 134,6 đến 152,1.
+  - Lỗi thứ ba là vỡ khối JPEG. Tỉ số biên khối 8×8 trung vị là 2,68.
+  - Lỗi thứ tư là tối góc. Góc ảnh chỉ sáng bằng 0,81 lần tâm.
+  - 'Lỗi thứ năm là dải tối ở mép trái, rộng khoảng 14 px, độ sáng Y trong dải là 100,9 so với nền 152,3. Mọi model của nhóm em đều bỏ 16 cột đầu. Ảnh còn hơi nhoè: PSF Gauss khớp được có sigma 0,76 px.'
+  - Có thêm một ràng buộc thời gian thực. Ngân sách đặt trước là p95 tổng không quá 50 ms mỗi khung, riêng detector không quá 30 ms.
+  - 'Luật nhóm em đặt ra từ đầu: điểm số chỉ chấm trên khung bay thật. Ảnh tự sinh dùng để huấn luyện được, nhưng không dùng để kết luận model nào tốt hơn.'
+  - 'Từ đó có hai câu hỏi nghiên cứu. Câu một: làm xấu ảnh huấn luyện theo số đo của chính camera này, gọi là D2, có cho bộ nhận diện tốt hơn làm xấu ngẫu nhiên, gọi là D1, trên khung thật không. Câu hai: làm rõ ảnh trước khi nhận diện có giúp bộ nhận diện không.'
+  nhan: 31 % khung ám hồng · dark channel 143,7 · ngân sách 50 ms
+- section: 3
+  name: Lý thuyết ảnh suy giảm
+  text:
+  - 'Mỗi lỗi ở trên có một mô hình vật lý. Nhóm em dùng chính các mô hình này hai lần: một lần để làm xấu ảnh cho giống camera, một lần để sửa ảnh theo chiều ngược lại.'
+  - f: I(x) = J(x)·t(x) + A·(1 − t(x)),   t(x) = e^(−β·d(x))
+  - 'Mô hình thứ nhất là mô hình mù khí quyển. Đọc là: I của x bằng J của x nhân t của x, cộng A nhân một trừ t của x. Và t của x bằng e mũ trừ bê-ta nhân d của x.'
+  - Ở đây x là vị trí điểm ảnh. I là ảnh camera thu được. J là ảnh cảnh thật, thứ ta muốn khôi phục. A là ánh sáng môi trường, tức màu của màn mờ. t là độ truyền, phần ánh sáng từ cảnh đi tới được camera, nằm trong khoảng 0 đến 1. Bê-ta là hệ số tán xạ của không khí, d là khoảng cách từ cảnh tới camera.
+  - 'Ý nghĩa của công thức: mỗi điểm ảnh là trộn giữa cảnh thật và màn mờ. t càng nhỏ thì màn mờ càng lấn cảnh.'
+  - Với camera này có một điểm đặc biệt. Camera nhìn thẳng xuống, nên d gần bằng độ cao bay và gần như đều trên cả khung. Kéo theo t gần như đều. Dark channel đo được cao khắp khung, gần 140 trên 255, gần cũng như xa. Vì vậy bộ làm xấu D2 chọn một t cho cả ảnh, và bộ khử mù không cần bản đồ t sắc nét từng điểm.
+  - f: E(θ) = E₀·cos⁴θ,   tan θ = r / f
+  - 'Mô hình thứ hai là tối góc. Đọc là: độ rọi E tại góc thê-ta bằng độ rọi ở tâm E không nhân cos mũ bốn của thê-ta, với tan thê-ta bằng r chia f.'
+  - r là khoảng cách từ điểm ảnh tới tâm ảnh, tính bằng điểm ảnh. f là tiêu cự, cũng tính bằng điểm ảnh. Ảnh thu được bằng ảnh thật nhân với hệ số cos mũ bốn đó.
+  - 'Nhóm em khớp mô hình này với tỉ số sáng góc trên tâm đo được là 0,81 và tìm ra tiêu cự 1016 px. Con số này dùng hai chiều: D2 nhân ảnh với bản đồ cos mũ bốn, bộ lọc cổ điển chia ảnh cho bản đồ đó.'
+  - f: F(u,v) = ¼·C(u)·C(v)·Σₓ Σᵧ f(x,y)·cos((2x+1)uπ/16)·cos((2y+1)vπ/16),   C(0) = 1/√2, C(k) = 1
+  - 'Mô hình thứ ba là nén JPEG. JPEG chia ảnh thành khối 8×8 và biến đổi cosin rời rạc từng khối. Công thức đọc là: F của u, v bằng một phần tư nhân C của u nhân C của v, nhân tổng theo x từ 0 tới 7 và theo y từ 0 tới 7 của f của x, y nhân cos của hai x cộng một nhân u pi chia 16, nhân cos của hai y cộng một nhân v pi chia 16.'
+  - 'f của x, y là giá trị điểm ảnh trong khối, đã trừ 128. u, v là chỉ số tần số từ 0 tới 7: u, v nhỏ là thành phần phẳng, u, v lớn là chi tiết mịn. C của 0 bằng một chia căn hai, C của các chỉ số khác bằng 1.'
+  - f: F_q(u,v) = round(F(u,v) / Q(u,v))
+  - 'Bước làm mất thông tin là lượng tử. Đọc là: F q của u, v bằng làm tròn của F của u, v chia Q của u, v. Q là bảng lượng tử. Ô tần số cao có Q lớn, nên chi tiết mịn bị làm tròn về 0.'
+  - 'Vì sao vỡ khối: mỗi khối 8×8 được lượng tử riêng. Sai số làm tròn của hai khối cạnh nhau khác nhau, nên ở ranh giới khối xuất hiện bậc thang. Nhóm em đo bằng tỉ số biên khối: chênh lệch độ sáng trung bình ngay trên ranh khối chia cho chênh lệch bên trong khối. Bằng 1 là không lộ khối. Camera cho 2,68.'
+  - 'Bảng lượng tử của camera đọc thẳng từ file JPEG: ở q12, nó bằng bảng mẫu Annex K của chuẩn JPEG nhân 0,75, lấy mẫu màu 4:2:2, tức kênh màu bị chia đôi theo chiều ngang.'
+  - 'Mô hình thứ tư là ám hồng. Đây là lỗi của ISP trong camera. ISP nhân hệ số cân bằng trắng cho R và B lớn hơn cho G. Ở vùng sáng, kênh G chạm trần trước rồi dừng, còn R và B vẫn tăng tới trần. Kết quả là R và B cao, G thấp hơn: điểm ảnh ngả hồng tím.'
+  - f: 'điểm hồng: R − G > 25 và B − G > 25 (thang 0–255);   Y = 0,299·R + 0,587·G + 0,114·B'
+  - 'Luật đo điểm hồng trong code là: R trừ G lớn hơn 25 và B trừ G lớn hơn 25, trên thang 0 đến 255. Độ sáng Y dùng công thức Rec.601: Y bằng 0,299 R cộng 0,587 G cộng 0,114 B. Công thức Y này quan trọng ở phần khử hồng: nhóm em sẽ sửa màu mà giữ nguyên Y.'
+  - Độ sáng Y đo được ở vùng bão hoà hồng là 222 trên 255. Từ con số này, D2 suy ra G dừng ở khoảng 0,78 trên thang 0 đến 1 khi R và B đã lên 1.
+  nhan: t gần đều vì nhìn thẳng xuống · f = 1016 px · Annex K × 0,75, 4:2:2 · R − G > 25 và B − G > 25
+- section: 4
+  name: Dữ liệu
+  text:
+  - 'Toàn bộ khung thật đến từ một buổi sáng, ngày 02/11/2026: sáu chuyến bay trên cùng một bãi, trong bản ghi 20261102-100941. Nhóm em giữ khung nằm trong cửa sổ bay và có độ cao trên 3 m, được 2944 khung, rồi bỏ 29 khung có độ cao vọt bất thường. Còn lại 2915 khung.'
+  - Điểm khó là chia tập. Luồng 2 đến 9 khung mỗi giây nên khung liền nhau gần như giống hệt nhau. Chia ngẫu nhiên theo khung thì tập test sẽ có anh em sinh đôi nằm trong tập huấn luyện, và điểm số bị thổi phồng. Đây là rò rỉ theo thời gian.
+  - 'Cách nhóm em chặn rò rỉ: cắt chuyến bay thành 24 khối 30 giây. Chọn 13 khối làm test, phân tầng theo độ cao và theo có người hay không. Trong khối test chỉ lấy khung cách nhau ít nhất 1 giây. Quanh mỗi khối test có vùng đệm 5 giây không thuộc tập nào.'
+  - Kết quả là các tập sau. Tập dev có 1115 khung, chưa gán nhãn, dùng đo hồ sơ camera, hiệu chỉnh D2 và làm nhãn giả. Trong dev có dev-val 100 khung, 115 hộp người, 36 khung có người, chỉ dùng chọn checkpoint và ngưỡng. Tập test có 198 khung, 149 hộp, 39 khung có người. Trong test có 159 khung bay không người, dùng đếm báo nhầm. Thêm 300 khung âm chụp trong nhà. 159 cộng 300 là 459 khung âm.
+  - Không quyết định nào được chọn trên tập test.
+  - Nhãn người của tập test được gán trước bằng nhiều model kèm SAHI, soát lại từng khung bằng mắt, rồi duyệt lần cuối trên Label Studio chạy tại máy. Ở lượt duyệt cuối, 25,8 % số hộp bị sửa, phần lớn là chỉnh ranh giới hộp.
+  - 'Người trên khung bay rất nhỏ: ước lượng sơ bộ trên khung dev, cạnh ngắn của hộp trung vị khoảng 54 px. 198 khung test vượt mức tối thiểu 50 ảnh của đề, nhưng chỉ 39 khung có người. Vì vậy mọi khoảng tin cậy về mAP phía sau đều rộng.'
+  - 'Ảnh để huấn luyện lấy từ VisDrone: ảnh drone có nhãn người, nhìn từ trên cao. Nhóm em có tải 420 ảnh NOMAD, nhưng toàn bộ nhìn xiên khoảng 45 đến 60 độ, trong khi camera của nhóm nhìn thẳng xuống, nên bỏ NOMAD.'
+  - 'Mỗi ảnh nguồn được cắt thành cửa sổ 624×480, chọn sao cho người có cỡ như trên khung thật. Các tập D0, D1, D2 và D2 cộng Real-SR dùng chung 3493 cửa sổ từ 1841 ảnh nguồn: 3006 cửa sổ để huấn luyện, gồm 2394 ảnh có người với 19792 người, và 487 cửa sổ để kiểm tra.'
+  nhan: khối 30 giây · 198 test, 39 có người · 459 khung âm
+- section: 5
+  name: Làm xấu D1 và D2
+  text:
+  - Bộ nhận diện học trên ảnh VisDrone sạch sẽ gặp một phân bố khác hẳn khi bay. Nên ảnh nguồn được làm xấu trước khi huấn luyện, theo hai cách.
+  - 'D1 là làm xấu ngẫu nhiên, theo chuỗi bậc hai của Real-ESRGAN: nhoè Gauss sigma 0,2 đến 3,0, đổi cỡ 0,5 đến 1,5 lần, nhiễu sigma 1 đến 30, JPEG chất lượng 30 đến 95 lấy mẫu 4:2:0, lặp hai vòng, rồi thêm 8 đến 16 cột tối ở mép trái. D1 không đọc hồ sơ camera. Nó là đối chứng không đo.'
+  - 'D2 là bản sao camera: chuỗi sáu khâu theo thứ tự vật lý của ảnh, từ không khí tới file JPEG. Ba khâu đầu tính trong không gian tuyến tính, ba khâu sau trên sRGB. Mỗi tham số khớp một số đo của hồ sơ.'
+  - f: d* = d_J·t + A·(1 − t)   ⇒   t = (A − d*) / (A − d_J),   t ∈ [0,2; 1,0]
+  - 'Khâu a là màn mờ. Nhóm em muốn dark channel của ảnh ra đúng một giá trị đích d sao, rút từ phân bố đo được. Đọc công thức: d sao bằng d J nhân t cộng A nhân một trừ t. Suy ra t bằng A trừ d sao, chia cho A trừ d J.'
+  - d J là dark channel trung vị của ảnh nguồn sạch, A là ánh sáng môi trường. t được kẹp trong 0,2 đến 1,0. A rút đều trong 0,794 đến 0,944, giá trị đích nhân thêm hệ số 0,962. Vì t tính ngược từ số đo, mỗi ảnh D2 có độ mù rơi đúng vào phân bố của camera thật.
+  - 'Khâu b là ống kính: nhoè bằng PSF Gauss rồi tối góc cos mũ bốn. Sigma của PSF là 0,759 px nhân một hệ số rút trong 0,505 đến 0,805. Tiêu cự tối góc là 1016 px nhân hệ số trong 0,629 đến 0,729, tức khoảng 690 px sau hiệu chỉnh. Hệ số nhỏ hơn 1 vì tối góc thật gồm cả bóng ống kính, mạnh hơn cos mũ bốn của tiêu cự thật.'
+  - f: P_c = min(1, e·L_c / g_c),   O_c = min(1, k·g_c·c_c·P_c),   g_G = c_G = 1
+  - 'Khâu c là tông màu, khâu tạo ra màu hồng. Đọc công thức: P c bằng min của một và e nhân L c chia g c. Rồi O c bằng min của một và k nhân g c nhân c c nhân P c.'
+  - 'L c là giá trị tuyến tính của kênh c. g c là hệ số cân bằng trắng của ISP: D2 tìm được 2,130 cho R và 1,812 cho B, còn G bằng 1. e là phơi sáng. Chia cho g c là quay về miền cảm biến, min với 1 là cảm biến cắt kênh, nhân lại g c là ISP cân bằng trắng. c c là ám màu còn lại, 0,998 cho R và 0,964 cho B. k là mức ra của điểm bão hoà.'
+  - f: G_trần = (Y_hồng − 0,299 − 0,114) / 0,587
+  - 'Ở vùng sáng, P của cả ba kênh đều bằng 1. G ra bằng k, còn R và B ra bằng k nhân hệ số lớn hơn 1, bị kẹp về 1. Thế là R bằng B bằng 1, G bằng k: hồng. k suy từ độ sáng Y đo được ở vùng hồng. Đọc là: G trần bằng Y hồng trừ 0,299 trừ 0,114, chia 0,587. Với Y bằng 222 trên 255, G dừng ở khoảng 0,78. Độ sáng rút trong 1,188 đến 1,438, mức đen dư 0,0017.'
+  - 'Khâu d là ISP: làm mềm sigma 0,334 đến 0,734, rồi thêm nhiễu. Độ lệch chuẩn nhiễu phụ thuộc độ sáng, nội suy từ hàm mức nhiễu NLF đo được, nhân hệ số 0,425 đến 0,825, và nhiễu được lọc cho đúng phổ PSD đo được. Phần nhiễu màu là 0,3.'
+  - 'Khâu e là dải mép trái: rộng 14 cộng trừ 1 px, khối tối có Y bằng 64, bắt đầu ở hàng 146 đến 200, kèm vạch đỏ chu kỳ 60 px, cao 8 px.'
+  - Khâu f là JPEG, nén đúng một lần ở cuối. 80 % ảnh dùng đúng hai bảng lượng tử đo được ở q12. 20 % ảnh dùng bảng giả thuyết Annex K nhân q chia 16, với q từ 19 đến 40, để phủ trường hợp web hạ chất lượng khi Wi-Fi yếu. Pillow tái tạo được bảng và header của 20 trên 20 khung dev thử.
+  - Tham số của D2 không đặt bằng tay. Nhóm em dùng CMA-ES tìm 12 tham số sao cho thống kê ảnh D2 khớp 1115 khung dev.
+  - f: D(θ) = (1/18)·Σₖ W₁(Pₖ thật, Pₖ D2(θ)) / IQRₖ thật,   W₁(P,Q) = ∫|F_P(x) − F_Q(x)| dx
+  - 'Hàm mục tiêu đọc là: D của thê-ta bằng một phần 18 nhân tổng theo k của W1 giữa phân bố thật và phân bố D2 của đại lượng k, chia cho IQR của tập thật. Trong đó W1 của P và Q bằng tích phân của trị tuyệt đối F P của x trừ F Q của x.'
+  - 'Thê-ta là vectơ 12 tham số. 18 đại lượng gồm màu, dark channel, nhiễu, độ nét, tỉ số khối, tối góc, dải mép, phổ nhiễu. W1 là khoảng cách Wasserstein bậc một: diện tích giữa hai hàm phân phối tích luỹ. Chia cho IQR, tức khoảng giữa phân vị 25 và 75 của tập thật, để các đại lượng khác đơn vị so được với nhau.'
+  - Mọi ứng viên dùng cùng 500 ảnh nguồn và cùng dòng số ngẫu nhiên, nên hàm mục tiêu là hàm tất định của tham số. CMA-ES rút một loạt ứng viên từ phân bố Gauss nhiều chiều, giữ các ứng viên tốt, dời tâm và chỉnh ma trận hiệp phương sai về phía đó. Nó không cần đạo hàm, hợp với một hàm mục tiêu phải dựng ảnh rồi đo.
+  - Vòng 1 chạy 155 lượt, khoảng cách giảm từ 0,967 xuống 0,736. Vòng 2 nới các biên mà vòng 1 chạm, thêm tham số mức đen dư, chạy 80 lượt, xuống 0,712.
+  - 'Biến thể D2 cộng Real-SR giữ D2 nhưng thay nhiễu tổng hợp ở khâu d bằng phần dư thật: 8920 mảnh 32×32 cắt từ vùng phẳng của khung dev, trừ trung bình từng khối 8×8, nhân hệ số 0,4 chọn trên dev.'
+  nhan: 6 khâu theo thứ tự vật lý · WB 2,130 và 1,812 · CMA-ES 0,967 → 0,712
+- section: 6
+  name: Đo độ giống thật
+  text:
+  - Ảnh làm xấu giống thật đến đâu? Nhóm em đo bằng ba thước, xếp theo mức trừu tượng tăng dần, trên mảnh ảnh cắt từ cột 16 trở đi, không đổi cỡ.
+  - 'Thước thứ nhất là khoảng cách thống kê vừa nói ở mục trước: trung bình của 18 khoảng cách W1 chia IQR. Nhỏ là giống.'
+  - f: 'C2ST: acc = (1/n)·Σᵢ 1[ŷᵢ = yᵢ],   không phân biệt được ⇔ acc ≈ 0,5'
+  - 'Thước thứ hai là C2ST, kiểm định hai mẫu bằng bộ phân loại. Ý tưởng: nếu hai tập ảnh cùng phân bố thì không bộ phân loại nào tách được chúng, độ chính xác chỉ quanh 0,5. Công thức đọc là: acc bằng một phần n nhân tổng theo i của chỉ thị y mũ i bằng y i, tức tỉ lệ đoán đúng.'
+  - 'Bộ phân loại là một CNN nhỏ, 60929 tham số: bốn tầng conv 3×3, ba tầng bước 2, pooling trung bình toàn cục, một đầu ra. Nó không nhìn ảnh gốc mà nhìn phần dư cao tần: ảnh trừ đi bản làm nhoè Gauss sigma bằng 2, trên mảnh 64×64. Lý do: để nội dung cảnh không lấn khác biệt suy giảm. Tập chia 50, 20, 30 phần trăm theo ảnh nguồn, nên các mảnh của cùng một ảnh không rơi vào hai phía.'
+  - f: MMD²ᵤ = 1/(m(m−1))·Σ_{i≠j} k(xᵢ,xⱼ) + 1/(n(n−1))·Σ_{i≠j} k(yᵢ,yⱼ) − 2/(mn)·Σᵢ Σⱼ k(xᵢ,yⱼ)
+  - 'Thước thứ ba là KID, viết tắt của Kernel Inception Distance. Tên giữ chữ Inception, nhưng ở đây đặc trưng lấy từ DINOv2. KID là bình phương MMD không chệch. Đọc là: MMD bình phương bằng một chia m nhân m trừ một, nhân tổng các cặp i khác j của k của x i, x j; cộng một chia n nhân n trừ một, nhân tổng các cặp của k của y i, y j; trừ hai chia m n nhân tổng mọi cặp k của x i, y j.'
+  - f: k(x,y) = (xᵀy / d + 1)³,   d = 1024
+  - x là đặc trưng của ảnh thật, y là đặc trưng của ảnh làm xấu, m và n là số mẫu hai bên. Hàm nhân k của x, y bằng x chuyển vị y chia d cộng 1, tất cả mũ 3. d là số chiều đặc trưng.
+  - Đặc trưng trong code là token CLS của DINOv2 ViT-L/14, 1024 chiều, trên mảnh 224×224, tính trên 10 tập con rời nhau. Hai tập giống nhau thì ba tổng triệt nhau và MMD về 0. Nhóm em báo KID nhân 100.
+  - 'Có thêm một hàng thật với thật: 600 khung dev so với 198 khung test. Hàng này cho mức sàn, vì hai nhóm khung thật khác cảnh cũng không bao giờ cho C2ST đúng 0,5.'
+  - 'Kết quả, so với khung test. Khoảng cách thống kê: D1 5,928, D2 0,796, D2 cộng Real-SR 0,663, sàn thật với thật 0,330. D2 giảm khoảng cách hơn 7 lần và tiến sát sàn. Ở mức điểm ảnh, camera đã được sao chép sát.'
+  - 'C2ST thì gần như không đổi: D1 0,936, D2 0,950 với khoảng tin cậy 0,930 đến 0,966, D2 cộng Real-SR 0,923, sàn 0,542. Bộ phân loại vẫn tách gần như hoàn toàn ảnh làm xấu khỏi ảnh thật.'
+  - 'KID nhân 100: D1 4,443, D2 4,409, nằm trong khoảng tin cậy của nhau. Chỉ D2 cộng Real-SR xuống 3,994, khoảng 3,824 đến 4,169, không chồng với D1, nhưng vẫn rất xa sàn 0,371.'
+  - 'Nhóm em cho rằng phần còn lệch nằm ở nội dung ảnh: phố đô thị của VisDrone so với bãi cỏ của nhóm. Giả thuyết này chưa kiểm riêng.'
+  - 'Bài học quan trọng: D2 cộng Real-SR giống thật nhất theo cả ba thước, nhưng ở mục sau nó lại báo nhầm nhiều nhất. Thước đo độ giống thật không thay được phép thử trên nhận diện.'
+  nhan: lệch 5,928 → 0,796 (sàn 0,330) · C2ST 0,950 (sàn 0,542) · KID 4,443 và 4,409
+- section: 7
+  name: Lý thuyết bộ nhận diện YOLO11s
+  text:
+  - Bộ nhận diện là YOLO11s của Ultralytics, gói ultralytics 8.4.215. Nhóm em đọc kiến trúc ngay trong mã nguồn của gói, file cấu hình yolo11.yaml và file hàm mất mát, không lấy từ bài viết bên ngoài.
+  - 'YOLO11 có ba phần: backbone, neck và head.'
+  - Backbone trích đặc trưng. Nó là chuỗi lớp Conv 3×3 bước 2, mỗi lớp giảm cỡ một nửa, từ mức P1 xuống P5. Ở P5, bản đồ đặc trưng nhỏ hơn ảnh vào 32 lần. Xen giữa các lớp đó là khối C3k2. C3k2 tách đặc trưng thành hai nhánh, cho một nhánh đi qua vài bottleneck nhỏ, rồi ghép lại, nên giữ được cả đặc trưng gốc lẫn đặc trưng đã biến đổi.
+  - Cuối backbone là SPPF. SPPF cho cùng một đặc trưng qua max pooling 5×5 ba lần nối tiếp, rồi ghép cả bốn bản lại. Mỗi lần pooling nhìn rộng thêm, nên một tầng thấy được ngữ cảnh ở nhiều cỡ với rất ít phép tính.
+  - Sau SPPF là C2PSA, khối chú ý theo vị trí. Nó cho mỗi vị trí trong bản đồ đặc trưng nhìn sang mọi vị trí khác, nên đặc trưng ở mức sâu nhất mang được ngữ cảnh của cả ảnh.
+  - Neck ghép đặc trưng nhiều mức theo kiểu FPN cộng PAN. Đặc trưng sâu được phóng lên rồi ghép với đặc trưng nông, sau đó lại đi xuống bằng Conv bước 2. Đầu ra là ba mức P3, P4 và P5, bước 8, 16 và 32 điểm ảnh. Mức P3 bước 8 là mức bắt người nhỏ.
+  - 'Head là khối Detect: không dùng anchor và tách hai nhánh. Nhánh phân lớp cho điểm của từng lớp. Nhánh hộp dự đoán bốn khoảng cách từ tâm ô tới bốn cạnh hộp. Mỗi khoảng cách không phải một số mà là một phân bố trên 16 ô, reg_max bằng 16. Khoảng cách cuối cùng là kỳ vọng của phân bố đó.'
+  - Bản s có hệ số độ sâu 0,50 và độ rộng 0,50, ghi trong yolo11.yaml là 9458752 tham số ở bản 80 lớp.
+  - 'Nhóm em dùng học chuyển giao: lấy trọng số YOLO11s đã học trên COCO, đổi đầu ra từ 80 lớp còn đúng một lớp người, giữ backbone và neck đã học. Cỡ vào là 1280 vì người trên khung bay rất nhỏ. Khung 640×480 phóng lên 1280 thì mỗi người phủ nhiều ô hơn trên lưới bước 8.'
+  - f: L = 7,5·L_box + 0,5·L_cls + 1,5·L_dfl
+  - 'Hàm mất mát có ba phần. Đọc là: L bằng 7,5 nhân L box, cộng 0,5 nhân L cls, cộng 1,5 nhân L dfl. Ba hệ số này là mặc định trong file default.yaml của gói.'
+  - f: CIoU = IoU − ρ²(b, b_gt)/c² − α·v,   v = (4/π²)·(arctan(w_gt/h_gt) − arctan(w/h))²,   α = v / ((1 − IoU) + v),   L_box = 1 − CIoU
+  - 'Phần hộp dùng CIoU. Đọc là: CIoU bằng IoU, trừ rô bình phương của b và b gt chia c bình phương, trừ an-pha nhân v.'
+  - 'IoU là tỉ lệ giao trên hợp của hộp dự đoán b và hộp thật b gt. Rô là khoảng cách giữa hai tâm hộp, c là đường chéo của hộp nhỏ nhất bao cả hai. v đo độ lệch tỉ lệ khung: v bằng 4 chia pi bình phương, nhân bình phương hiệu của arctan w gt chia h gt và arctan w chia h. An-pha bằng v chia cho một trừ IoU cộng v. Mất mát hộp là một trừ CIoU.'
+  - 'Vì sao không dùng IoU trơn: khi hai hộp không giao nhau, IoU bằng 0 và không cho hướng sửa. Số hạng khoảng cách tâm vẫn kéo hộp về đúng chỗ, số hạng v sửa tỉ lệ khung.'
+  - f: L_cls = −[y·log p + (1 − y)·log(1 − p)]
+  - 'Phần phân lớp là entropy chéo nhị phân. Đọc là: L cls bằng trừ của y nhân log p, cộng một trừ y nhân log của một trừ p. p là điểm sau sigmoid, y là nhãn mục tiêu.'
+  - f: L_dfl = −[(yᵢ₊₁ − y)·log Sᵢ + (y − yᵢ)·log Sᵢ₊₁]
+  - 'Phần DFL, mất mát tiêu điểm phân bố. Nếu khoảng cách thật y nằm giữa hai ô y i và y i cộng một, đọc là: L dfl bằng trừ của y i cộng một trừ y nhân log S i, cộng y trừ y i nhân log S i cộng một. S là xác suất softmax của ô. DFL dồn xác suất vào hai ô kẹp giá trị thật, nên cạnh hộp đặt được giữa hai ô.'
+  - f: 'gán mẫu: t = s^0,5 · u^6, giữ 10 ô tốt nhất cho mỗi người'
+  - 'Ô nào chịu trách nhiệm cho người nào do bộ gán TaskAlignedAssigner quyết định. Nó tính t bằng s mũ 0,5 nhân u mũ 6: s là điểm lớp, u là IoU của hộp dự đoán. Mỗi người giữ 10 ô có t cao nhất. Vậy ô được chọn phải vừa tin là người vừa vẽ hộp khít.'
+  - Sau mạng là NMS, loại bỏ hộp trùng. Sắp các hộp theo điểm, giữ hộp cao nhất, xoá các hộp có IoU với nó lớn hơn ngưỡng, rồi lặp. Bundle của nhóm em đặt ngưỡng IoU 0,5, sàn điểm 0,05, tối đa 100 hộp mỗi khung.
+  nhan: P3, P4, P5 bước 8, 16, 32 · reg_max 16 · L = 7,5 box + 0,5 cls + 1,5 dfl · cỡ vào 1280
+- section: 8
+  name: Chỉ số đánh giá
+  text:
+  - f: IoU = |B ∩ B_gt| / |B ∪ B_gt|
+  - 'IoU đọc là: giao của B và B gt chia hợp của B và B gt. Một hộp dự đoán được tính là đúng khi IoU với một hộp thật từ 0,5 trở lên, và mỗi hộp thật chỉ ghép được một lần.'
+  - f: P = TP / (TP + FP),   R = TP / (TP + FN),   F1 = 2·P·R / (P + R)
+  - 'Precision P bằng TP chia TP cộng FP: trong các hộp đã vẽ, bao nhiêu là người thật. Recall R bằng TP chia TP cộng FN: trong các người thật, bao nhiêu được tìm ra. F1 bằng hai P R chia P cộng R.'
+  - f: AP = ∫₀¹ p(r) dr ≈ (1/101)·Σ_{r ∈ {0; 0,01; …; 1}} p_interp(r),   p_interp(r) = max_{r̃ ≥ r} p(r̃)
+  - 'AP là diện tích dưới đường precision theo recall. Đọc là: AP bằng tích phân từ 0 tới 1 của p của r theo r. Trong code, tích phân được xấp xỉ bằng 101 điểm recall từ 0 tới 1, bước 0,01, và tại mỗi điểm lấy precision nội suy: precision lớn nhất ở mọi recall từ đó trở lên. Đây đúng cách của pycocotools; code của nhóm em tự đối chiếu với pycocotools mỗi lần chạy.'
+  - f: mAP50-95 = trung bình AP ở 10 ngưỡng IoU 0,50; 0,55; …; 0,95
+  - mAP50 là AP ở ngưỡng IoU 0,5. mAP50-95 là trung bình AP ở 10 ngưỡng từ 0,50 tới 0,95, khắt khe hơn về độ khít của hộp. Bài toán chỉ có một lớp người nên mAP bằng AP của lớp đó.
+  - f: báo nhầm = (số hộp trên 159 khung bay không người) / 159
+  - 'Với hệ thống cảnh báo, nhóm em thêm chỉ số báo nhầm: số hộp trung bình mà model vẽ trên mỗi khung bay không có người, tính trên 159 khung. Đây là số lần web báo động sai.'
+  - Mỗi model có một ngưỡng vận hành, là ngưỡng cho F1 lớn nhất trên dev-val. Code từ chối nếu có khung test lọt vào bước chọn ngưỡng.
+  - Khoảng tin cậy 95 % lấy bằng bootstrap theo khối. Rút lại các khối 30 giây có hoàn lại, khối bay và khối âm rút riêng, 2000 lần, tính lại chỉ số mỗi lần, lấy phân vị 2,5 và 97,5. Phải rút theo khối vì khung trong một khối tương quan với nhau. Rút từng khung lẻ sẽ cho khoảng tin cậy hẹp giả.
+  - 'Khi so hai model, nhóm em tính hiệu ghép cặp: cùng một bộ mẫu bootstrap cho cả hai, rồi lấy khoảng tin cậy của hiệu. Hiệu chỉ được coi là có thật khi khoảng tin cậy nằm trọn một phía của 0.'
+  - 'Tiêu chí đặt trước khi chạy: mAP50 từ 0,227 trở lên kèm cận dưới khoảng tin cậy của hiệu so với mốc lớn hơn 0, báo nhầm không quá 0,05 hộp mỗi khung, và không quá 30 ms p95 trên ORT CUDA.'
+  nhan: 101 điểm recall · bootstrap 2000 lần theo khối 30 giây · tiêu chí 0,227 và 0,05
+- section: 9
+  name: 'E1: tinh chỉnh trên D0, D1, D2, D2+SR'
+  text:
+  - 'Trước E1 là mốc. Mốc là YOLO11s huấn luyện sẵn trên COCO, ảnh vào 1280 px, chỉ giữ lớp người. Bỏ mọi hộp có x1 nhỏ hơn 16, tức hộp nằm trên dải mép, đã nâng mAP50 test của mốc từ 0,067 lên 0,126. Nên mốc chính thức là bản đã bỏ dải mép. Nhóm em có thử SAHI cắt lát 320 px: được 0,113 và chậm hơn 26 lần, nên không dùng.'
+  - 'E1 tinh chỉnh YOLO11s COCO với đầu ra một lớp: 6 epoch ở 1280 px, batch 4, AdamW lr 0,002. Tăng cường màu HSV bị tắt, vì màu và ám màu chính là thứ D1 và D2 cần dạy cho model. Mosaic bật, tắt ở 2 epoch cuối.'
+  - 'Bốn lần chạy chỉ khác tập ảnh: D0 ảnh sạch, D1, D2, và D2 cộng Real-SR. Mỗi lần mất 0,66 đến 0,76 giờ GPU. Sau mỗi epoch, nhóm em giữ checkpoint có mAP50 dev-val cao nhất.'
+  - 'Kết quả trên dev-val và test, theo thứ tự. D0: dev-val 0,295, test 0,297, báo nhầm 1,195. D1: dev-val 0,176, test 0,143, báo nhầm 0,994. D2: dev-val 0,329, test 0,236, báo nhầm 0,302. D2 cộng Real-SR: dev-val 0,299, test 0,149, báo nhầm 1,956. Mốc: test 0,126, báo nhầm 0,597.'
+  - 'D2 thắng dev-val nên là tập được dùng tiếp cho E2. Trên test, E1 D2 gần gấp đôi mốc: hiệu ghép cặp cộng 0,109, khoảng tin cậy từ âm 0,017 đến cộng 0,236. Điểm vượt mức 0,227, nhưng cận dưới khoảng tin cậy chạm 0, nên tiêu chí mAP chưa đạt.'
+  - 'So D2 với D1 là câu hỏi một. Về mAP50, hiệu là cộng 0,093, khoảng tin cậy từ âm 0,073 đến cộng 0,252: chưa kết luận được. Về báo nhầm, hiệu là âm 0,692, khoảng tin cậy từ âm 1,238 đến âm 0,246, nằm trọn dưới 0. D2 là tập duy nhất cho báo nhầm thấp hơn mốc.'
+  - D0 ảnh sạch có mAP test cao, 0,297, nhưng khoảng tin cậy rất rộng, 0,036 đến 0,408, và báo nhầm 1,195. Học trên ảnh sạch thì model gặp ảnh mù, hồng, vỡ khối và vẽ hộp lung tung.
+  nhan: mốc 0,067 → 0,126 khi bỏ dải mép · D2 báo nhầm 0,302 so với 0,994 · hiệu −0,692
+- section: 10
+  name: 'E2: tự huấn luyện'
+  text:
+  - 'E1 chỉ học trên ảnh tổng hợp. E2 tận dụng 1115 khung dev thật chưa có nhãn, bằng tự huấn luyện: một model thầy gán nhãn giả, một model trò học lại trên nhãn giả đó.'
+  - 'Thầy dự kiến là YOLO11m, bản lớn hơn, tinh chỉnh trên D2 trong 4 epoch. Nhưng thầy của vòng 1 được chọn bằng chất lượng nhãn giả trên dev-val, và ở bước này E1 D2 thắng YOLO11m: recall 0,084 so với 0,075, cùng precision 1,0. Nên nhãn giả vòng 1 thật ra lấy từ E1 D2, không phải từ YOLO11m.'
+  - Nhãn giả được làm kỹ. Thầy chạy kèm TTA, tức dự đoán trên nhiều biến thể của ảnh. Dự đoán thô từ ngưỡng 0,01 đi vào ByteTrack để nối thành vệt theo thời gian. Một hộp điểm thấp, từ 0,05 trở lên, được giữ lại nếu nó thuộc một vệt dài ít nhất 3 khung có hộp điểm cao. Ngưỡng cao là ngưỡng nhỏ nhất trên lưới 0,10 tới 0,80 cho precision nhãn giả từ 0,9 trở lên trên dev-val.
+  - 'Lý do dùng vệt: người thật xuất hiện liên tục qua nhiều khung, còn báo nhầm thường lóe lên một khung rồi mất.'
+  - Trò là YOLO11s, khởi tạo từ E1 D2, học trên D2 cộng khung dev có nhãn giả lặp 2 lần, cộng 300 khung âm, 4 epoch, batch 4. Khung dev cách một khung dev-val dưới 0,3 giây không vào tập huấn luyện. Trò của vòng k là thầy của vòng sau, và vòng sau chỉ chạy khi dev-val tăng.
+  - 'Kết quả. Thầy YOLO11m: dev-val 0,267, test 0,218, báo nhầm 0,390. Trò vòng 1: dev-val 0,379, test 0,156, báo nhầm 0,868. Trò vòng 2: dev-val 0,296, test 0,313, báo nhầm 0,522.'
+  - 'Luật đã chốt là chọn theo dev-val, nên trò vòng 1 được ship. Trên test, vòng 1 lại kém E1 D2: hiệu âm 0,080, khoảng tin cậy từ âm 0,187 đến 0,000, báo nhầm gần gấp ba. Ngược lại, vòng 2 có dev-val thấp hơn nhưng mAP50 test cao nhất, 0,313. Nhóm em không đổi lựa chọn sau khi đã thấy test.'
+  - Recall của nhãn giả chỉ 8,4 % ở vòng 1 và 11,2 % ở vòng 2. Nghĩa là gần như mọi người thật trên khung dev bị gán là nền. Đây là một lý do dev-val chọn sai, sẽ nói kỹ ở phần thảo luận.
+  nhan: nhãn giả vòng 1 từ E1 D2 (recall 0,084) · dev-val 0,379 và 0,296 · test 0,156 và 0,313
+- section: 11
+  name: So sánh 9 bộ nhận diện
+  text:
+  - 'Đây là chín bộ nhận diện trên cùng 198 khung test, với ngưỡng F1 dev-val của từng bộ. Nhóm em đọc theo ba cột: mAP50 kèm khoảng tin cậy, mAP50-95, và báo nhầm.'
+  - 'Mốc YOLO11s COCO: mAP50 0,126, khoảng 0,030 đến 0,224, mAP50-95 0,063, báo nhầm 0,597.'
+  - 'E1 D0: 0,297, khoảng 0,036 đến 0,408, mAP50-95 0,100, báo nhầm 1,195. E1 D1: 0,143, khoảng 0,083 đến 0,185, báo nhầm 0,994. E1 D2: 0,236, khoảng 0,069 đến 0,370, mAP50-95 0,079, báo nhầm 0,302. E1 D2 cộng Real-SR: 0,149, khoảng 0,011 đến 0,282, báo nhầm 1,956.'
+  - 'E2 thầy YOLO11m: 0,218, khoảng 0,107 đến 0,349, báo nhầm 0,390. Trò vòng 1: 0,156, khoảng 0,036 đến 0,235, báo nhầm 0,868. Trò vòng 2: 0,313, khoảng 0,035 đến 0,472, mAP50-95 0,157 cao nhất, báo nhầm 0,522.'
+  - 'Bundle ONNX, tức trò vòng 1 đã xuất: 0,120, khoảng 0,032 đến 0,197, mAP50-95 0,042, báo nhầm 0,881.'
+  - 'Điều đầu tiên cần thấy: khoảng tin cậy của chín bộ chồng lên nhau. Vòng 2 cao nhất nhưng khoảng của nó từ 0,035 đến 0,472, trùm lên gần hết các bộ khác. Với 39 khung có người, mAP chưa đủ để xếp hạng chín bộ này.'
+  - 'Recall người nhỏ cũng đáng chú ý: mốc COCO có AR nhỏ cao nhất, 0,531, còn bundle thấp nhất, 0,240. Mốc tìm được nhiều người nhỏ nhưng kèm nhiều hộp sai.'
+  - 'Biểu đồ tán xạ đặt mAP50 lên trục dọc, báo nhầm lên trục ngang. Góc trên bên trái là chỗ một bộ cảnh báo cần đứng. Dải lục sát trục tung là vùng đạt cả hai tiêu chí đặt trước: mAP50 từ 0,227 và báo nhầm không quá 0,05. Không model nào chạm dải đó. E1 D2 gần nhất. Vòng 2 có mAP cao hơn nhưng báo nhầm gần gấp đôi. Bundle ship nằm ở góc dưới, ngang mốc về mAP và báo nhầm nhiều hơn.'
+  - 'Hình cùng khung đặt hộp của mốc, E1 D2 và bundle cạnh nhãn thật, mỗi bộ ở đúng ngưỡng vận hành của nó: mốc 0,068, E1 D2 0,089, bundle 0,077. Hình chỉ để minh hoạ cách các bộ sai khác nhau. Kết luận dựa vào số trên 198 khung.'
+  nhan: CI chồng nhau · không model nào chạm vùng đạt · E1 D2 gần nhất (0,236 và 0,302)
+- section: 12
+  name: Làm rõ cổ điển
+  text:
+  - 'Bộ lọc cổ điển đi ngược chuỗi hỏng của camera. Camera làm hỏng theo thứ tự: màn mờ ngoài trời, rồi ống kính tối góc, rồi cảm biến cắt kênh và ISP cân bằng trắng, cuối cùng là JPEG. Code chạy ngược lại: cắt 16 cột, khử khối, khử hồng, bù tối góc, khử mù, làm nét, rồi đệm lại 16 cột.'
+  - 'Thứ tự này có số đo đứng sau. Khử khối phải chạy đầu tiên vì nó cần lưới 8×8 còn nguyên: đặt ngay sau giải mã thì tỉ số khối giảm từ 2,68 về 2,15, đặt sau khử mù và làm nét thì tỉ số khối lại tăng. Khử hồng phải đứng trước khử mù, vì khử mù nhân sắc độ với một chia t, làm loang vệt hồng. Đặt khử hồng sau khử mù chỉ xoá được 46 đến 68 % điểm hồng, đặt trước xoá 93 %.'
+  - f: 'khử khối: Δ = q₀ − p₀,   w_cạnh = clip(1 − |Δ|/10, 0, 1),   w_vân = clip(1 − max(|p₁ − p₀|, |q₁ − q₀|)/4, 0, 1)'
+  - f: corr = 0,5·w_cạnh·w_vân·Δ;   p₀ += corr, q₀ −= corr;   p₁ += 0,5·corr, q₁ −= 0,5·corr
+  - 'Tầng một, khử khối. Code xét từng cặp điểm hai bên ranh khối: p không, p một ở khối trái, q không, q một ở khối phải. Đọc công thức: đen-ta bằng q không trừ p không, là bậc thang ở ranh. Trọng số cạnh bằng một trừ trị tuyệt đối đen-ta chia 10, kẹp từ 0 tới 1. Trọng số vân bằng một trừ chênh lệch lớn nhất bên trong khối chia 4, kẹp từ 0 tới 1. Lượng sửa bằng 0,5 nhân hai trọng số nhân đen-ta.'
+  - 'Ý nghĩa: bậc thang nhỏ hơn 10 mức trên vùng phẳng là vết khối, bị san cho hai bên gặp nhau ở giữa. Bậc thang từ 10 trở lên, hoặc hai bên có vân, là cạnh thật, giữ nguyên. Điểm thứ hai tính từ ranh được sửa một nửa lượng đó. Lượng sửa cộng như nhau vào ba kênh nên sắc độ không đổi.'
+  - f: 'khử hồng: cổng = ramp(max(R,B); 230; 10) · ramp(min(R,B) − G; 6; 14),   ramp(v; a; r) = clip((v − a)/r, 0, 1)'
+  - 'Tầng hai, khử hồng. Cổng có hai điều kiện nhân nhau. Đọc là: cổng bằng ramp của max R, B từ 230 trong 10 mức, nhân ramp của min R, B trừ G từ 6 trong 14 mức. ramp của v với a và r bằng v trừ a chia r, kẹp từ 0 tới 1.'
+  - 'Điều kiện thứ nhất bắt vùng gần bão hoà: max của R và B từ 230, đủ ở 240. Điều kiện thứ hai đòi cả R lẫn B vượt G, dùng min của R và B. Vật đỏ bão hoà có B thấp nên min của R và B nhỏ, không qua cổng. Đây là chỗ bộ lọc khác luật đo điểm hồng R trừ G lớn hơn 25 và B trừ G lớn hơn 25: luật đo dùng để đếm, cổng mềm dùng để sửa.'
+  - f: α = làm mềm 7×7 của (nở 21 px của cổng),   δ = 0,56·α·((R + B)/2 − G)
+  - 'Cổng được nở 21 px để phủ viền hồng loang do lấy mẫu màu 4:2:2, rồi làm mềm bằng box 7×7, thành mặt nạ an-pha từ 0 tới 1. Lượng sửa đọc là: đen-ta nhỏ bằng 0,56 nhân an-pha nhân trung bình của R và B trừ G.'
+  - f: R ← R − δ,   B ← B − δ,   G ← G + 0,704·δ,   0,704 = (0,299 + 0,114)/0,587
+  - 'Rồi R trừ đen-ta, B trừ đen-ta, G cộng 0,704 đen-ta. Hệ số 0,704 bằng 0,299 cộng 0,114, chia 0,587. Thay vào công thức Y: Y giảm 0,299 đen-ta và 0,114 đen-ta ở R và B, tăng 0,587 nhân 0,704 đen-ta ở G, tức gần đúng 0,413 đen-ta. Hai bên triệt nhau. Bộ lọc chỉ dịch màu, giữ nguyên độ sáng.'
+  - Ví dụ một điểm R, G, B bằng 245, 200, 240, an-pha bằng 1. Sau một lượt, điểm thành 221, 217, 216. Màu hết hồng, còn Y chỉ đổi từ 218,0 thành 218,1. Bộ lọc chạy hai lượt. Ở chỗ bão hoà nặng, max của R và B từ 240, code bơm thêm chi tiết cao tần của kênh G vào, hệ số 0,5, vì G là kênh còn giữ thông tin.
+  - f: 'bù tối góc: hệ số(r) = 1/cos⁴(arctan(r/f)) = (1 + (r/f)²)²,   f = 1016 px,   trần 1,35'
+  - 'Tầng ba, bù tối góc. Đọc là: hệ số của r bằng một chia cos mũ bốn của arctan r chia f, bằng một cộng r chia f bình phương, tất cả bình phương. f bằng 1016 px lấy từ hồ sơ camera. Hệ số bị chặn ở 1,35 để không khuếch đại nhiễu ở góc.'
+  - 'Tầng bốn, khử mù bằng dark channel prior của He, Sun và Tang. Quan sát nền: trong ảnh ngoài trời không mù, ở hầu hết các ô nhỏ luôn có ít nhất một kênh màu gần 0, do bóng, vật tối, hay màu đậm. Màn mờ cộng A nhân một trừ t vào mọi kênh nên nâng dark channel lên. Đo dark channel là đo được độ dày màn mờ.'
+  - f: 'dark channel: I_dark(x) = min_{y ∈ Ω(x)} min_c I_c(y),   Ω = ô 15×15'
+  - 'Dark channel đọc là: I dark của x bằng min theo y trong ô ô-mê-ga của x, của min theo kênh c của I c của y. Ô là 15×15 điểm ảnh, đúng cỡ ô mà phép đo hồ sơ dùng.'
+  - 'Ánh sáng môi trường A tính theo từng kênh: trung bình của các điểm có dark channel từ phân vị 99,9 trở lên, kẹp trong 180 đến 250. Tính từng kênh để giữ màu của màn mờ.'
+  - f: t̃(x) = 1 − ω·I_dark(x) / mean(A),   ω = 0,85;   t = clip(guided(t̃), 0,4; 1)
+  - 'Độ truyền đọc là: t ngã của x bằng một trừ ô-mê-ga nhân I dark của x chia trung bình A. Ô-mê-ga bằng 0,85, tức cố ý giữ lại 15 % màn mờ để ảnh còn chiều sâu. Rồi t được làm mịn bằng guided filter và chặn dưới ở 0,4, để không khuếch đại nhiễu ở vùng mù đặc. Code còn thêm một cận dưới từng điểm để ảnh ra không âm ở vùng tối sát vùng sáng.'
+  - f: 'guided filter: q = ā·I + b̄,   a = cov(I, p)/(var(I) + ε),   b = p̄ − a·Ī'
+  - 'Guided filter là bộ lọc giữ cạnh. Đọc là: q bằng a gạch nhân I cộng b gạch. Trong mỗi cửa sổ, a bằng hiệp phương sai của ảnh dẫn I và ảnh vào p chia cho phương sai của I cộng ép-xi-lon, b bằng trung bình p trừ a nhân trung bình I. Ảnh dẫn là Y. Ở đâu Y có cạnh thì t theo cạnh đó, ở vùng phẳng thì t được làm mịn. Code tính ở một phần tư độ phân giải, bán kính 24 px quy về 6 px, ép-xi-lon 0,001, rồi phóng lên.'
+  - f: J_c(x) = (I_c(x) − A_c) / t(x) + A_c
+  - 'Cuối cùng khôi phục ảnh. Đọc là: J c của x bằng I c của x trừ A c, chia t của x, cộng A c. Đây chính là mô hình mù khí quyển giải ngược cho J. Sau đó code chặn mức đen: nếu chỗ tối nhất bị đẩy xuống dưới mức đen của ảnh vào hoặc dưới 8, ảnh được kéo giãn tuyến tính, giữ điểm trắng 255.'
+  - f: 'làm nét: d = Y − Gauss_1,2(Y);   bỏ phần |d| ≤ 2·σ_nhiễu;   Y'' = Y + 0,6·d, kẹp trong [min, max] lân cận 3×3'
+  - 'Tầng năm, làm nét. Đọc là: d bằng Y trừ Y làm nhoè Gauss sigma 1,2. Phần chi tiết nhỏ hơn hai lần sigma nhiễu bị bỏ, để không làm nét nhiễu. Sigma nhiễu ước lượng theo Immerkær trên chính ảnh. Y mới bằng Y cộng 0,6 nhân d, nhưng bị kẹp trong khoảng min và max của lân cận 3×3, để không sinh viền đen trắng ở cạnh mạnh.'
+  - 'Thời gian p50 từng tầng trên CPU Ryzen 9 7945HX, 4 luồng OpenCV: cắt mép 0,201 ms, khử khối 2,198, khử hồng 2,567, bù tối góc 0,152, khử mù 2,214, làm nét 1,591, đệm mép 0,252. Tổng p50 9,18 ms, p95 10,21 ms. Ngân sách của bộ lọc là 30 ms.'
+  - Siêu phân giải và giải chập có được thử nhưng bị bỏ, vì trên khung thật chúng làm nổi khối JPEG.
+  - Trên tập test, bộ cổ điển giảm 89,2 % điểm hồng và giảm dark channel trung vị 51,6 %, từ 140,8 xuống 68,1.
+  nhan: 'khử hồng trước khử mù: 93 % so với 46 đến 68 % · 0,704 giữ Y · ω 0,85, t ≥ 0,4 · 9,18 ms p50'
+- section: 13
+  name: Mạng NAFNet
+  text:
+  - 'Phương án học máy cho ảnh rõ là NAFNet của Chen và cộng sự, 2022. Tên có nghĩa là mạng không có hàm kích hoạt phi tuyến: không ReLU, không GELU.'
+  - f: y = x + β·conv(SCA(SG(dwconv(conv(LN(x))))));   ra = y + γ·conv(SG(conv(LN(y))))
+  - 'Khối cơ bản là NAFBlock. Đi theo code: chuẩn hoá LayerNorm theo kênh, conv 1×1 nhân đôi số kênh, conv 3×3 theo từng kênh, rồi SimpleGate, rồi chú ý kênh đơn giản SCA, rồi conv 1×1 về lại số kênh. Kết quả nhân với hệ số bê-ta rồi cộng vào đầu vào. Nửa sau là một khối truyền thẳng: LayerNorm, conv 1×1, SimpleGate, conv 1×1, nhân gam-ma, cộng tắt.'
+  - f: SimpleGate(X) = X₁ ⊙ X₂   (X chia đôi theo kênh)
+  - 'SimpleGate đọc là: X một nhân từng phần tử với X hai, với X được chia đôi theo kênh. Phép nhân hai nửa đã là phi tuyến, nên mạng không cần hàm kích hoạt.'
+  - f: 'SCA(X) = X ⊙ W·pool(X)   (pool: trung bình toàn cục, W: conv 1×1)'
+  - 'SCA đọc là: X nhân từng kênh với W nhân pool của X. Pool là trung bình toàn cục của mỗi kênh, W là conv 1×1. Mỗi kênh được tăng hay giảm theo nội dung chung của cả ảnh.'
+  - 'Bê-ta và gam-ma khởi tạo bằng 0. Lúc đầu mỗi khối là phép đồng nhất, mạng học dần phần sửa. Toàn mạng còn một đường tắt lớn: ảnh ra bằng ảnh vào cộng phần dư mạng học được.'
+  - 'Bản nhóm em ship là bề rộng 16, kiểu U-Net bốn tầng: encoder bốn tầng, mỗi tầng một khối, sau mỗi tầng một conv 2×2 bước 2 gấp đôi số kênh; tầng giữa một khối; decoder bốn tầng, phóng lên bằng conv 1×1 với PixelShuffle, cộng với nhánh tắt từ encoder, mỗi tầng một khối. Tổng 1,14 triệu tham số.'
+  - 'Vì sao bề rộng 16: bản NAFNet-SIDD bề rộng 32 có 29,2 triệu tham số, sau huấn luyện chạy 82,1 ms p95, vượt trần 30 ms. Bản 16 khởi tạo ngẫu nhiên, học 4500 bước, batch 16, lr 10 mũ trừ 3 theo lịch cosine.'
+  - 'Dữ liệu cặp: đầu vào là ảnh D2, đích là chính ảnh đó ở bản D0 sạch. Mạng học ánh xạ D2 về D0. Mảnh 256×256 đặt trên lưới 8 px tính từ cột 16, để giữ đúng pha khối JPEG như lúc chạy thật, có lật ngang dọc cho cả cặp.'
+  - f: L = L₁ + (1 − SSIM),   SSIM = ((2μₓμᵧ + C₁)(2σₓᵧ + C₂)) / ((μₓ² + μᵧ² + C₁)(σₓ² + σᵧ² + C₂))
+  - 'Hàm mất mát đọc là: L bằng L một cộng một trừ SSIM. L một là trung bình trị tuyệt đối sai khác từng điểm. SSIM so cấu trúc: tử số là hai muy x muy y cộng C một, nhân hai xích-ma x y cộng C hai; mẫu số là muy x bình phương cộng muy y bình phương cộng C một, nhân xích-ma x bình phương cộng xích-ma y bình phương cộng C hai. Muy là trung bình, xích-ma là độ lệch chuẩn và hiệp phương sai cục bộ. L một giữ màu và độ sáng, SSIM giữ cạnh và vân. Không dùng GAN, để mạng không bịa chi tiết.'
+  - Checkpoint chọn trên 60 chuỗi khung dev liền kề, không dùng test. Luật muốn độ nhấp nháy không tăng quá 1,15 lần ảnh vào, nhưng không checkpoint nào đạt, nên luật dự phòng chọn bản nhấp nháy ít nhất, bước 4500. Bundle enhancer-v1.0.0 chạy 15,4 ms p50, 21,0 ms p95 trên ORT CUDA.
+  nhan: 'không hàm kích hoạt: X₁ ⊙ X₂ · w16, 1,14 triệu tham số · L₁ + (1 − SSIM)'
+- section: 14
+  name: Đánh giá ảnh rõ
+  text:
+  - 'Ảnh rõ không có nhãn đúng trên khung thật, nên nhóm em chấm theo hai lớp: các tiêu chí đo được, đặt trước khi chạy, và người xem chấm mù.'
+  - f: giảm điểm hồng = 1 − p_hồng(ra) / p_hồng(vào),   giảm dark channel = 1 − dc(ra) / dc(vào)
+  - 'Giảm điểm hồng đọc là: một trừ tỉ lệ điểm hồng của ảnh ra chia tỉ lệ của ảnh vào, với điểm hồng theo luật R trừ G lớn hơn 25 và B trừ G lớn hơn 25. Ngưỡng là 90 %. Cổ điển đạt 89,2 %, sát ngưỡng. Mạng đạt 99,9 %.'
+  - 'Giảm dark channel trung vị: ngưỡng 50 %. Cổ điển 51,6 %, từ 140,8 xuống 68,1. Mạng chỉ 36,8 %, từ 140,8 xuống 89,1.'
+  - f: nhấp nháy = mean|P_{t+1} − P_t| / mean|R_{t+1} − R_t|   (khung liền kề cách nhau < 0,25 s, bỏ 16 cột)
+  - 'Nhấp nháy đọc là: trung bình trị tuyệt đối hiệu giữa hai khung liền kề của ảnh đã xử lý, chia cho cùng đại lượng của ảnh gốc. Bằng 1 là không đổi. Ngưỡng là không tăng. Cả hai đều trượt: mạng 1,81 lần, khoảng 1,74 đến 1,92; cổ điển 2,18 lần, khoảng 2,10 đến 2,31. Lý do: khử mù kéo giãn tương phản theo từng khung, nên chênh lệch giữa hai khung cũng bị kéo giãn.'
+  - 'Thời gian p50 và p95: cổ điển 9,2 và 10,2 ms trên CPU, mạng 20,7 và 25,3 ms trên GPU, cả hai dưới 30 ms.'
+  - 'Lớp thứ hai là thử mù A/B. Một trang HTML chạy offline hiện hai ảnh cạnh nhau, trái phải xáo trộn, tên file là mã ngẫu nhiên. Người chấm chọn ảnh dễ nhìn hơn. Lần 1 gồm 55 lượt: 25 lượt mạng với gốc, 25 lượt mạng với cổ điển, và 5 cặp lặp để đo độ nhất quán, xem cả khung. Lần 2 phóng to 2 lần quanh người. Ngưỡng đạt: mạng thắng ảnh gốc từ 70 % và thắng cổ điển từ 55 %.'
+  - f: 'Wilson: p̂ = k/n,   tâm = (p̂ + z²/(2n)) / (1 + z²/n),   nửa rộng = z/(1 + z²/n)·√(p̂(1 − p̂)/n + z²/(4n²)),   z = 1,96'
+  - 'Khoảng tin cậy của tỉ lệ thắng dùng khoảng Wilson. Đọc là: p mũ bằng k chia n. Tâm bằng p mũ cộng z bình phương chia hai n, tất cả chia một cộng z bình phương chia n. Nửa độ rộng bằng z chia một cộng z bình phương chia n, nhân căn của p mũ nhân một trừ p mũ chia n, cộng z bình phương chia bốn n bình phương. z bằng 1,96 cho mức 95 %.'
+  - 'Vì sao Wilson: với 25 lượt và tỉ lệ gần 0, khoảng chuẩn thông thường cho cận dưới âm, vô nghĩa. Khoảng Wilson luôn nằm trong 0 đến 1.'
+  - 'Kết quả lần 1: mạng thắng ảnh gốc 11 trên 25 lượt, tức 0,44, khoảng Wilson 0,267 đến 0,629. Mạng thắng cổ điển 1 trên 25, tức 0,04, khoảng 0,007 đến 0,195. Nói cách khác, cổ điển thắng mạng 24 trên 25 lượt. Lần 2 phóng to: mạng thắng gốc 13 trên 25, khoảng 0,335 đến 0,700, thắng cổ điển 5 trên 25, khoảng 0,089 đến 0,391. Mạng không qua ngưỡng nào.'
+  - Hình so cùng khung giải thích vì sao. Bản cổ điển khử mù sâu và giữ màu cỏ. Mạng xoá hồng sạch hơn nhưng ra xám lạnh. Trên ảnh của trang chấm, thành phần b sao trong không gian Lab, chỉ độ ấm lạnh, của mạng là 1,4, so với 3,0 của ảnh gốc và 6,5 của bản cổ điển.
+  - 'Mạng đạt 3 trên 7 tiêu chí đăng ký trước: xoá hồng, tốc độ, và không làm giảm mAP vì nhánh nhận diện chạy trên khung gốc. Nó trượt bốn: dark channel, nhấp nháy, và hai tiêu chí A/B.'
+  - 'Chỉ số không tham chiếu cho thấy vì sao không dùng chúng để chọn. MUSIQ chấm mạng 38,0, cổ điển 33,0, gốc 32,9. NIQE thấp là tốt: mạng 5,47, cổ điển 5,53, gốc 6,42. Theo MUSIQ mạng tốt hơn, nhưng người xem chọn cổ điển 24 trên 25 lượt.'
+  - 'Một quan sát sau khi chấm: gộp hai lần, ở các lượt có người trong khung, mạng thắng ảnh gốc 17 trên 21; ở nền không người chỉ 7 trên 29. Quan sát này không thuộc tiêu chí đặt trước nên không đổi kết luận.'
+  nhan: cổ điển thắng 24/25 · mạng thắng gốc 11/25 và 13/25 · dark channel 51,6 % và 36,8 %
+- section: 15
+  name: 'E4: làm rõ trước khi nhận diện'
+  text:
+  - 'Câu hỏi hai: làm rõ ảnh trước khi nhận diện có giúp không. Thí nghiệm E4 giữ nguyên bộ nhận diện, chỉ đổi ảnh đầu vào giữa ba bản của khung test: gốc, sau cổ điển, sau mạng. Rồi so mAP50 ghép cặp với khung gốc.'
+  - 'Luật chốt trước: chỉ chuyển nhận diện sang ảnh đã làm rõ khi khoảng tin cậy của hiệu mAP50 so với khung gốc nằm trọn trên 0.'
+  - 'Với mốc YOLO11s COCO có sẵn: khung gốc 0,126. Sau mạng 0,195, tăng 0,069, nhưng khoảng tin cậy từ âm 0,033 đến cộng 0,231, còn chứa 0. Sau cổ điển 0,081, giảm 0,046, khoảng từ âm 0,088 đến âm 0,006.'
+  - 'Với bundle đã tinh chỉnh: khung gốc 0,119. Sau mạng còn 0,035, giảm 0,085, khoảng từ âm 0,139 đến âm 0,011, nằm trọn dưới 0. Sau cổ điển chỉ còn 0,007, giảm 0,112, khoảng từ âm 0,182 đến âm 0,028.'
+  - 'Vì sao giảm: bộ đã tinh chỉnh học trên ảnh D2, tức ảnh xấu đúng kiểu camera. Ảnh đã làm rõ là phân bố khác, ảnh lạ với nó. Mốc COCO học trên ảnh sạch nên có xu hướng được lợi từ ảnh mạng, nhưng 39 khung có người chưa đủ để kết luận.'
+  - 'Không trường hợp nào thoả luật chuyển. Nên nhận diện chạy trên khung gốc, đúng quy tắc D5 nhóm em đặt từ đầu: ảnh rõ chỉ để người xem.'
+  nhan: bundle −0,085 (CI −0,139 đến −0,011) · mốc +0,069 còn chứa 0
+- section: 16
+  name: ONNX, hợp đồng model, tích hợp IOT-CV, thời gian chạy
+  text:
+  - 'Model ship được xuất ONNX opset 17 cho ONNX Runtime, với toàn bộ tiền xử lý và hậu xử lý nằm trong graph. Graph nhận một tensor tên frame: khung BGR uint8 cỡ 480×640×3, đúng như camera gửi. Bên trong, nó cắt 16 cột, letterbox vuông 1280, chạy mạng, chạy NMS, rồi trả boxes theo toạ độ khung gốc và scores.'
+  - Đặt mọi bước vào graph để phía IOT-CV không phải viết lại tiền xử lý. Viết lại hai nơi là cách nhanh nhất để lệch nhau.
+  - 'Hợp đồng model ghi trong meta.json: phiên bản hợp đồng 1.0, sha256 của file ONNX, cỡ khung, số cột cắt 16, phiên bản hồ sơ camera 1.2.0, ngưỡng vận hành 0,0767, ngưỡng IoU của NMS 0,5, cờ input_variant bằng raw. Kèm ba khung golden lấy từ dev để kiểm sai số.'
+  - IOT-CV kiểm sha256, kiểm tensor vào ra, và chạy lại ba khung golden. Lệch một điều kiện là model không được nạp, và web báo lý do. Bản ONNX chạy trên ORT CPU khớp bản PyTorch cùng letterbox tới 0,0000 mAP50 trên dev-val.
+  - 'Cờ input_variant có ý nghĩa cho sau này: nếu một cặp bộ làm rõ và bộ nhận diện thắng E4, IOT-CV đổi luồng mà không phải sửa code.'
+  - 'Thời gian chạy. Nhóm em phát lại chính JPEG ghi được ngày 02/11 trong backend IOT-CV, đúng nhịp thời gian thật, qua ONNX Runtime CUDA trên RTX 4060 Laptop. Pipeline theo kịp camera: bỏ 2 trên 600 khung, tức 0,3 %.'
+  - 'Khi có người xem ảnh rõ: detector 23,6 ms p50 và 33,4 ms p95, enhancer 12,5 và 19,0 ms, tổng 37,5 và 54,1 ms, xử lý 7,2 khung mỗi giây. Ngân sách là p95 tổng 50 ms và detector 30 ms. Ở nhịp thật cả hai vượt.'
+  - 'Chỉ chạy detector, p95 tổng còn lên 67,9 ms. Chạy hết tốc lực hai model: detector 26,7 và 28,1 ms, enhancer 14,6 và 15,7 ms, tổng 42,5 và 44,9 ms, 23,6 khung mỗi giây, đều trong ngân sách.'
+  - Lý do nằm ở GPU. Giữa hai khung camera, GPU rảnh khoảng 100 ms và tự hạ xung, 1890 so với tối đa 3105 MHz, nên khung kế tiếp chạy chậm hơn. Chạy càng thưa càng chậm. Đo riêng trên ORT, detector chạy 20,0 ms p50 và 20,2 ms p95.
+  nhan: mọi bước trong graph · 3 khung golden · p95 54,1 ms ở nhịp thật, 44,9 ms hết tốc lực
+- section: 17
+  name: Chọn gì và vì sao
+  text:
+  - Bảng này gom mọi phương án đã thử, mỗi hàng một quyết định.
+  - 'Mốc YOLO11s COCO: mAP50 0,126, báo nhầm 0,597, 20,9 ms p50 trên PyTorch. Giữ làm mốc, vì mọi model khác so với nó.'
+  - 'E1 D1: mAP50 0,143, báo nhầm 0,994. Loại, vì báo nhầm cao hơn cả mốc và độ giống thật kém nhất.'
+  - 'E1 D2: mAP50 0,236, báo nhầm 0,302. Không ship trực tiếp, nhưng D2 là tập làm xấu dùng tiếp cho E2 và E1 D2 là trọng số khởi đầu của trò. Lý do: thắng dev-val ở E1 và có báo nhầm thấp nhất trong chín model.'
+  - 'E2 trò vòng 2: mAP50 0,313, báo nhầm 0,522. Không ship, vì dev-val 0,296 thấp hơn vòng 1, và luật cấm chọn theo test.'
+  - 'Bundle detector-v1.0.0, tức trò vòng 1: mAP50 0,120, báo nhầm 0,881, 23,6 ms p50 trong IOT-CV. Ship, vì dev-val cao nhất, 0,379, và đúng hợp đồng. Nhóm em sẽ chọn lại khi có dev-val mới.'
+  - 'Bộ lọc cổ điển: thắng mạng 24 trên 25 lượt A/B, 9,2 ms trên CPU. Người xem chọn nó và nó đạt tiêu chí dark channel. Nhóm em đề xuất đưa nó vào IOT-CV làm luồng ảnh rõ, nhưng hiện chưa ship, vì nó là hàm Python, chưa nằm trong hợp đồng ONNX.'
+  - 'NAFNet bề rộng 16: thắng ảnh gốc 11 trên 25 và 13 trên 25, 12,5 ms trong IOT-CV. Có trong IOT-CV dưới dạng enhancer-v1.0.0 nhưng không bật mặc định, vì thua cổ điển, chưa hơn ảnh gốc, màu nguội và khử mù yếu.'
+  - Hai quyết định có hệ quả lớn nhất đều đi ngược điểm số đơn lẻ. Bundle được ship dù mAP test thấp hơn E1 D2, vì luật chọn trên dev-val đã chốt trước. Mạng NAFNet không được bật dù xoá hồng tốt nhất, vì người xem không chọn nó.
+  nhan: ship detector-v1.0.0 (dev-val 0,379) · cổ điển 24/25 nhưng chưa vào hợp đồng · NAFNet tắt mặc định
+- section: 18
+  name: Thảo luận và giới hạn
+  text:
+  - 'Câu hỏi đầu tiên cần trả lời thật: vì sao dev-val chọn sai. Có ba nguyên nhân khả dĩ, chưa tách riêng được.'
+  - 'Một: 100 khung dev-val nằm cùng chuyến bay với khung dev đã gắn nhãn giả. Vùng đệm 0,3 giây chỉ loại khung sát nhất, các khung cùng cảnh vẫn vào tập huấn luyện của E2, nên dev-val ưu ái các vòng E2.'
+  - 'Hai: recall nhãn giả chỉ 8,4 % ở vòng 1 và 11,2 % ở vòng 2. Gần như mọi người thật trên khung dev bị gắn là nền, và trò học cách bỏ qua người nhỏ.'
+  - 'Ba: 100 khung, 36 khung có người, quá ít để xếp hạng các model cách nhau vài phần trăm. Bằng chứng: chênh lệch giữa letterbox vuông và chữ nhật trên dev-val đổi dấu giữa các model, âm 0,034 với vòng 1 và cộng 0,021 với E1 D2. mAP50 dev-val của E1 D2 còn nhảy từ 0,327 xuống 0,137 giữa hai epoch liền nhau.'
+  - 'Câu hỏi thứ hai: vì sao mạng thua bộ lọc cổ điển. Mạng học ánh xạ D2 về D0, tức ảnh camera giả về ảnh VisDrone sạch. Phần D2 mô phỏng sát thì nó học tốt: điểm hồng giảm 99,9 %. Phần mù thì không: dark channel chỉ giảm 36,8 %. Giải thích nhóm em cho là hợp lý nhất, chưa kiểm riêng, là mức mù trên cặp huấn luyện nhẹ hơn khung thật.'
+  - 'Màu nguội có thể đến từ chính đích D0, vốn mang cân bằng màu của VisDrone chứ không phải màu bãi cỏ. Mạng còn tẩy cả vật vốn màu hồng, như một chiếc áo, một mẩu giấy trên khung golden, vì cặp huấn luyện không có vật hồng thật. Bộ lọc cổ điển không học gì nên không thừa hưởng các thiên lệch này: nó khử mù theo dark channel của chính khung đang xem.'
+  - Giới hạn. Mọi số đo đến từ một bãi bay trong một buổi sáng; ánh sáng hay nền khác có thể cho số khác. Tập test có 39 khung có người nên khoảng tin cậy của mAP50 rộng khoảng cộng trừ 0,1. Không model nào đạt báo nhầm không quá 0,05; tốt nhất là E1 D2 với 0,302.
+  - Bảng lượng tử mới đo ở q12, trong khi web IOT-CV tự hạ chất lượng tới q40 khi Wi-Fi yếu. Thử A/B chỉ có một người chấm, 25 lượt mỗi so sánh, độ nhất quán 3 trên 5. Ở nhịp camera thật, ngân sách p95 50 ms không đạt trên laptop này.
+  nhan: nhãn giả recall 8,4 % và 11,2 % · dev-val E1 D2 0,327 → 0,137 · 39 khung có người
+- section: 19
+  name: Kết luận và hướng tiếp
+  text:
+  - 'Câu hỏi một. Làm xấu theo số đo của chính camera, D2, không cho mAP50 cao hơn làm xấu ngẫu nhiên một cách chắc chắn: cộng 0,093, khoảng tin cậy chạm 0. Nhưng D2 giảm báo nhầm trên khung bay không người từ 0,99 xuống 0,30 hộp mỗi khung, với khoảng tin cậy nằm trọn một phía. E1 D2 đạt mAP50 0,236, so với 0,126 của mốc.'
+  - Câu hỏi hai. Với bộ đã tinh chỉnh, làm rõ trước khi nhận diện làm mAP50 giảm 0,085 với mạng và 0,112 với bộ cổ điển. Nên nhận diện giữ trên khung gốc.
+  - Bundle detector-v1.0.0 chạy trong IOT-CV ở 23,6 ms mỗi khung trung vị và theo kịp camera, nhưng mAP50 test chỉ 0,120 vì dev-val đã chọn sai model. Bộ lọc cổ điển, 9,2 ms trên CPU, thắng NAFNet 24 trên 25 lượt chấm mù.
+  - 'Bước tiếp theo, theo thứ tự ưu tiên. Một: hạ phơi sáng và chỉnh cân bằng trắng của chính OV3660 để vùng sáng không cắt kênh G, và đo thêm bảng lượng tử ở q40. Hai: thu thêm khung bay có người ở nhiều độ cao và nhiều buổi, tách dev-val thành một đoạn bay riêng, rồi chọn lại giữa E1 D2, vòng 1 và vòng 2. Ba: thêm hàm mất mát màu trên a, b và hàm mất mát nhất quán giữa khung liền nhau cho mạng làm rõ, chấm lại bằng trang A/B phóng to. Bốn: thử detector 960 px hoặc FP16 để vào ngân sách 50 ms, rồi chấm lại mAP trên 198 khung test.'
+  - Nhóm em cảm ơn thầy đã lắng nghe.
+  nhan: 0,99 → 0,30 · −0,085 · 24/25
+- section: 20
+  name: Tài liệu tham khảo
+  text:
+  - Các phương pháp lấy từ những công trình gốc rồi chỉnh theo camera của nhóm em. Khử mù và guided filter theo He, Sun và Tang, 2011 và 2013. Làm xấu ngẫu nhiên theo Real-ESRGAN của Wang và cộng sự, 2021. Mạng làm rõ là NAFNet của Chen và cộng sự, 2022. Bộ nhận diện là Ultralytics YOLO11, tự huấn luyện theo RoyChowdhury và cộng sự, 2019, nối vệt bằng ByteTrack. Dữ liệu nguồn là VisDrone của Zhu và cộng sự, 2022. Đo độ giống thật bằng C2ST của Lopez-Paz và Oquab, KID của Bińkowski và cộng sự, đặc trưng DINOv2. Hiệu chỉnh bằng CMA-ES của Hansen.
+  - Mã và dữ liệu ở repo XLA. Mọi bảng và hình sinh bằng scripts/reproduce.py từ kết quả đã lưu. Lệnh reproduce.py --check chấm lại 15 tệp dự đoán trên CPU và so sha256 của 9 bảng, hình.
+  nhan: 15 tệp dự đoán · 9 bảng, hình

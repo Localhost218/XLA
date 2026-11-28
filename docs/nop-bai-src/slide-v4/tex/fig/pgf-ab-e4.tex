@@ -1,0 +1,46 @@
+% (a) A/B mù: tỉ lệ mạng thắng [Wilson 95 %] (t4); (b) E4: mAP50 trên ba biến thể khung, hai bộ nhận diện (t5, e4.json)
+\begin{subfigure}[b]{0.47\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[baocao, width=6.9cm, height=5.0cm, xbar, /pgf/bar width=11pt,
+  ymajorgrids=false, xmajorgrids, xmin=0, xmax=1, xlabel={tỉ lệ lượt mạng thắng},
+  ymin=0.4, ymax=4.6, ytick={1,2,3,4},
+  yticklabels={{vs cổ điển\\lần 2, 2$\times$},{vs gốc\\lần 2, 2$\times$},{vs cổ điển\\lần 1},{vs gốc\\lần 1}},
+  y tick label style={align=right,font=\scriptsize}, /pgf/number format/precision=1,
+  error bars/x dir=both, error bars/x explicit, error bars/error bar style={line width=0.7pt,black!70},
+  error bars/error mark options={mark size=3pt,black!70}]
+\addplot[fill=cTim!80, draw=none, bar shift=0pt] coordinates {(0.44,4) += (0.189,0) -= (0.173,0) (0.52,2) += (0.180,0) -= (0.185,0)};
+\addplot[fill=cCam!85, draw=none, bar shift=0pt] coordinates {(0.04,3) += (0.155,0) -= (0.033,0) (0.20,1) += (0.191,0) -= (0.111,0)};
+\draw[cLuc, line width=1.2pt] (axis cs:0.70,3.6) -- (axis cs:0.70,4.4);
+\draw[cLuc, line width=1.2pt] (axis cs:0.70,1.6) -- (axis cs:0.70,2.4);
+\draw[cLuc, line width=1.2pt] (axis cs:0.55,2.6) -- (axis cs:0.55,3.4);
+\draw[cLuc, line width=1.2pt] (axis cs:0.55,0.6) -- (axis cs:0.55,1.4);
+\draw[cXam, dashed] (axis cs:0.5,0.4) -- (axis cs:0.5,4.6);
+\node[font=\scriptsize, anchor=west] at (axis cs:0.80,4) {11/25};
+\node[font=\scriptsize, anchor=west] at (axis cs:0.80,3) {1/25};
+\node[font=\scriptsize, anchor=west] at (axis cs:0.80,2) {13/25};
+\node[font=\scriptsize, anchor=west] at (axis cs:0.80,1) {5/25};
+\end{axis}
+\end{tikzpicture}
+\caption{Thử mù A/B (CI Wilson 95\,\%). Vạch lục: ngưỡng đặt trước (0,70 với gốc, 0,55 với cổ điển)}
+\label{fig:ab}
+\end{subfigure}\hfill
+\begin{subfigure}[b]{0.5\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[baocao, width=7.3cm, height=5.0cm, ybar, /pgf/bar width=13pt,
+  ymin=0, ymax=0.46, ylabel={mAP50 test}, xmin=0.5, xmax=2.5, xtick={1,2},
+  xticklabels={mốc YOLO11s COCO,bundle đã tinh chỉnh}, x tick label style={font=\scriptsize},
+  /pgf/number format/precision=1,
+  legend style={at={(0.5,1.02)},anchor=south,legend columns=3},
+  error bars/y dir=both, error bars/y explicit, error bars/error bar style={line width=0.7pt,black!70},
+  error bars/error mark options={rotate=90,mark size=2pt,black!70}]
+\addplot[fill=cXam!70, draw=none] coordinates {(1,0.126) += (0,0.098) -= (0,0.096) (2,0.119) += (0,0.078) -= (0,0.087)};
+\addlegendentry{khung gốc}
+\addplot[fill=cXanh!80, draw=none] coordinates {(1,0.081) += (0,0.066) -= (0,0.061) (2,0.007) += (0,0.015) -= (0,0.007)};
+\addlegendentry{sau cổ điển}
+\addplot[fill=cTim!80, draw=none] coordinates {(1,0.195) += (0,0.239) -= (0,0.161) (2,0.035) += (0,0.045) -= (0,0.023)};
+\addlegendentry{sau mạng}
+\end{axis}
+\end{tikzpicture}
+\caption{E4: mAP50 khi nhận diện trên ảnh đã làm rõ (CI 95\,\% bootstrap khối)}
+\label{fig:e4}
+\end{subfigure}

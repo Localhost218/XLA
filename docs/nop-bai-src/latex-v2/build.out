@@ -1,0 +1,457 @@
+Rc files read (in order):
+  NONE
+Latexmk: This is Latexmk, John Collins, 9 March 2026. Version 4.88.
+Latexmk: applying rule 'xelatex'...
+Rule 'xelatex':  Reasons for rerun
+Changed files or newly in use/created:
+  fig/pgf-ab-ms.tex
+  sections/05-thao-luan.tex
+Category 'changed_user':
+  fig/pgf-ab-ms.tex
+  sections/05-thao-luan.tex
+
+------------
+Run number 1 of rule 'xelatex'
+------------
+------------
+Running 'xelatex -no-pdf -interaction=nonstopmode -halt-on-error -file-line-error -recorder  "main.tex"'
+------------
+This is XeTeX, Version 3.141592653-2.6-0.999997 (MiKTeX 25.12) (preloaded format=xelatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\scrartcl.c
+ls
+Document Class: scrartcl 2026/10/19 v3.49.3 KOMA-Script document class (article
+)
+
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\scrkbase.s
+ty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\scrbase.st
+y
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\scrlfile.s
+ty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\scrlfile-h
+ook.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\scrlogo.st
+y)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)))
+
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\tocbasic.s
+ty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\scrsize12p
+t.clo)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\typearea.s
+ty))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/fontspec\fontspec.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xpar
+se.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-xe
+tex.def)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/fontspec\fontspec-xete
+x.sty (C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
+)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/fontspec\fontspec.cfg)
+))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/polyglossia\polyglossi
+a.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+ (C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/polyglossia\gloss-late
+x.ldf))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/polyglossia\gloss-viet
+namese.ldf)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg)
+)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/setspace\setspace.sty)
+ (C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.
+cfg)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\xetex.def
+))) (C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg
+)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.ltx
+))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/colortbl\colortbl.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+ (C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/multirow\multirow.sty)
+ (C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/placeins\placeins.sty
+)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/caption\subcaption.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption3.sty))
+)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.sty)
+
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/frontendlayer\tikz
+.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgf.sty
+
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfrcs.s
+ty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfuti
+l-common.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfuti
+l-latex.def)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfrcs
+.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf\pgf.revision.tex
+)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgfcore
+.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/systemlayer\pgfsys
+.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfs
+ys.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkey
+s.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkey
+slibraryfiltered.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgf.
+cfg)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfs
+ys-xetex.def
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfs
+ys-dvipdfmx.def
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfs
+ys-common-pdf.def))))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfs
+yssoftpath.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfs
+ysprotocol.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+re.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.cod
+e.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathutil
+.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathpars
+er.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunc
+tions.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunc
+tions.basic.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunc
+tions.trigonometric.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunc
+tions.random.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunc
+tions.comparison.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunc
+tions.base.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunc
+tions.round.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunc
+tions.misc.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunc
+tions.integerarithmetics.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathcalc
+.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfloa
+t.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfint.code
+.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+repoints.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+repathconstruct.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+repathusage.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+rescopes.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+regraphicstate.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+retransformations.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+requick.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+reobjects.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+repathprocessing.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+rearrows.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+reshade.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+reimage.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+reexternal.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+relayers.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+retransparency.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+repatterns.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfco
+rerdf.code.tex)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodul
+eshapes.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodul
+eplot.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/compatibility\pgfc
+omp-version-0-65.sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/compatibility\pgfc
+omp-version-1-18.sty))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgffor.s
+ty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfkeys.
+sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkey
+s.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/math\pgfmath.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.cod
+e.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgffor
+.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz\tikz.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflib
+raryplothandlers.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodul
+ematrix.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibrarytopaths.code.tex)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibrarypositioning.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflib
+raryarrows.meta.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibraryshapes.geometric.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/shapes
+\pgflibraryshapes.geometric.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibrarycalc.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibraryfit.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibrarybackgrounds.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibrarydecorations.pathreplacing.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibrarydecorations.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodul
+edecorations.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/decora
+tions\pgflibrarydecorations.pathreplacing.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibraryshadows.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibraryfadings.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflib
+raryfadings.code.tex)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/tikz-3dplot\tikz-3dplo
+t.sty (C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty)
+
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibrary3d.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibraryarrows.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflib
+raryarrows.code.tex)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/pgfplots\pgfplots.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplots.re
+vision.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplots.co
+de.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplotscor
+e.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/sys\pgfplot
+ssysgeneric.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/libs\pgfplo
+tslibrary.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/oldpgfcompa
+tib\pgfplotsoldpgfsupp_loader.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflib
+raryfpu.code.tex)
+Package pgfplots: loading complementary utilities for your pgf version...
+
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/oldpgfcompa
+tib\pgfplotsoldpgfsupp_pgfutil-common-lists.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/util\pgfplo
+tsutil.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/liststructu
+re\pgfplotsliststructure.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/liststructu
+re\pgfplotsliststructureext.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/liststructu
+re\pgfplotsarray.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/liststructu
+re\pgfplotsmatrix.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/numtable\pg
+fplotstableshared.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/liststructu
+re\pgfplotsdeque.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/util\pgfplo
+tsbinary.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/util\pgfplo
+tsbinary.data.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/util\pgfplo
+tsutil.verb.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/libs\pgflib
+rarypgfplots.surfshading.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/sys\pgflibr
+arypgfplots.surfshading.pgfsys-xetex.def
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/sys\pgflibr
+arypgfplots.surfshading.pgfsys-dvipdfmx.def))))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/util\pgfplo
+tscolormap.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/util\pgfplo
+tscolor.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplotssta
+ckedplots.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplotsplo
+thandlers.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplotsmes
+hplothandler.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplotsmes
+hplotimage.code.tex)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplots.sc
+aling.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplotscoo
+rdprocessing.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplots.er
+rorbars.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplots.ma
+rkers.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplotstic
+ks.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots\pgfplots.pa
+ths.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibrarydecorations.pathmorphing.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/decora
+tions\pgflibrarydecorations.pathmorphing.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/libs\tikzli
+brarypgfplots.contourlua.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibraryplotmarks.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflib
+raryplotmarks.code.tex)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/libs\tikzli
+brarypgfplots.groupplots.code.tex)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/libs\tikzli
+brarypgfplots.fillbetween.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/pgfcontrib\
+tikzlibraryfillbetween.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/ti
+kz/libraries\tikzlibraryintersections.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflib
+raryintersections.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/pgfcontrib\
+tikzlibrarydecorations.softclip.code.tex
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/pgfcontrib\
+pgflibraryfillbetween.code.tex)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pgfplots/libs\tikzli
+brarypgfplots.decorations.softclip.code.tex))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.st
+y)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefin
+ekeys.sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.
+sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmd
+s.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.
+sty)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\getti
+tlestring.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.st
+y)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.
+sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcal
+c.sty)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hxetex.def
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfi
+lecheck.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\unique
+counter.sty)))
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/bookmark\bookmark.sty
+(C:\Users\Nghaiz\AppData\Local\Programs\MiKTeX\tex/latex/bookmark\bkm-xetex.def
+)) (main.aux)
+*geometry* driver: auto-detecting
+*geometry* detected driver: xetex
+Package pgfplots notification 'compat/show suggested version=true': document ha
+s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
+
+(sections/00-bia.tex [1]) (sections/01-bai-toan.tex (fig/tikz-pipeline.tex)
+Underfull \hbox (badness 1067) in paragraph at lines 41--41
+[][]|\TU/TimesNewRoman(0)/m/n/10 Mảng hồng phóng 4$\OMS/cmsy/m/n/10 ^^B$\TU/Tim
+esNewRoman(0)/m/n/10 , thấy
+
+Underfull \hbox (badness 1117) in paragraph at lines 47--47
+[][]|\TU/TimesNewRoman(0)/m/n/10 Biên khối,
+) (sections/02-du-lieu.tex [1] [2]) (sections/03-phuong-phap.tex [3] [4]
+(fig/tikz-classic.tex) (fig/pgf-3d-surfaces.tex) [5]) (sections/04-ket-qua.tex
+(fig/pgf-tang.tex) [6]
+Underfull \hbox (badness 10000) in paragraph at lines 71--71
+[]|\TU/TimesNewRoman(0)/m/n/10 không xuất: mạng học theo đích
+
+Underfull \hbox (badness 1394) in paragraph at lines 71--71
+[]|\TU/TimesNewRoman(0)/m/n/10 dừng ở probe: ORT 1.24.4 không có
+[7] (fig/pgf-ab-ms.tex)) (sections/05-thao-luan.tex [8] [9])
+(sections/06-phan-cong.tex) (sections/07-khai-bao-ai.tex
+Underfull \hbox (badness 10000) in paragraph at lines 17--17
+[]|\TU/TimesNewRoman(0)/m/n/10 Chạy test tự động; so số với
+) [10] (sections/08-tai-lieu.tex) [11] (main.aux) )
+(see the transcript file for additional information)
+Output written on main.xdv (12 pages, 2399152 bytes).
+Transcript written on main.log.
+xelatex: major issue: So far, you have not checked for MiKTeX updates.
+Latexmk: Getting log file 'main.log'
+Latexmk: Examining 'main.fls'
+Latexmk: Examining 'main.log'
+Latexmk: Log file says output to 'main.xdv'
+Latexmk: applying rule 'xdvipdfmx'...
+Rule 'xdvipdfmx':  Reasons for rerun
+Changed files or newly in use/created:
+  main.xdv
+Category 'changed_source_rules':
+  xelatex
+
+------------
+Run number 1 of rule 'xdvipdfmx'
+------------
+------------
+Running 'xdvipdfmx -E -o "main.pdf"  "main.xdv"'
+------------
+main.xdv -> main.pdf
+[1][2
+xdvipdfmx:warning: Object @page.1 already defined.
+][3][4][5][6][7][8][9][10][11][12]
+1844808 bytes written
+xdvipdfmx: major issue: So far, you have not checked for MiKTeX updates.
+Latexmk: All targets (main.xdv main.pdf) are up-to-date
+
+latexmk: major issue: So far, you have not checked for MiKTeX updates.
+Đã ghi D:\XLA\docs\nop-bai-src\latex-v2\..\..\nop-bai\v2\BaoCao_XLA_Nhom10.pdf

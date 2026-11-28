@@ -1,0 +1,5 @@
+\section{Kết luận}\label{sec:ket-luan}
+
+Câu hỏi 1: làm xấu theo số đo của chính camera (D2) không cho mAP50 cao hơn làm xấu ngẫu nhiên một cách chắc chắn (+0,093, CI chạm 0), nhưng giảm báo nhầm trên khung bay không người từ 0,99 xuống 0,30 hộp/khung với CI nằm trọn một phía. E1 D2 đạt mAP50 0,236 trên 198 khung test, so với 0,126 của mốc COCO. Câu hỏi 2: với bộ đã tinh chỉnh, làm rõ trước khi nhận diện làm mAP50 giảm 0,085 (mạng) và 0,112 (cổ điển), nên nhận diện giữ trên khung gốc.
+
+Bundle \texttt{detector-v1.0.0} chạy trong IOT-CV ở 23,6 ms/khung trung vị và theo kịp camera, nhưng mAP50 test chỉ 0,120 vì dev-val đã chọn sai model; việc cần làm ngay là chọn lại giữa E1 D2 và r2 bằng một dev-val tách khỏi khối huấn luyện. Bộ lọc cổ điển (9,2 ms trên CPU) thắng mạng NAFNet 24/25 lượt chấm mù, nên nhóm đề xuất đưa nó vào IOT-CV làm luồng ảnh rõ; việc này cần mở rộng hợp đồng model vì bộ lọc là hàm Python chứ không phải ONNX.

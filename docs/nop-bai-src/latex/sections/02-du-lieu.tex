@@ -1,0 +1,37 @@
+\section{Dữ liệu}\label{sec:du-lieu}
+
+\subsection{Khung bay thật}
+
+Toàn bộ khung thật đến từ một buổi sáng, ngày 02/11/2026: sáu chuyến bay trên cùng một bãi, ghi lại trong bản ghi \texttt{20261102-100941}. Từ 17\,775 đoạn video, nhóm giữ khung nằm trong cửa sổ bay và có độ cao trên 3 m (2\,944 khung), rồi bỏ 29 khung có độ cao vọt bất thường, còn 2\,915 khung.
+
+Khung liền nhau của một luồng 2–9 khung/s gần như giống hệt nhau. Chia ngẫu nhiên theo khung thì tập test sẽ có ``anh em sinh đôi'' trong tập huấn luyện và điểm số bị thổi phồng. Vì vậy nhóm cắt chuyến bay thành 24 khối 30 giây, chọn 13 khối làm test theo tầng (độ cao, có người hay không), và trong khối test chỉ lấy khung cách nhau ít nhất 1 giây. Quanh mỗi khối test có vùng đệm 5 giây không thuộc tập nào (Hình~\ref{fig:timeline}). Tập dev-val gồm 100 khung dev cách nhau ít nhất 1 giây, phân tầng như test, chỉ dùng để chọn checkpoint và ngưỡng. Không quyết định nào được chọn trên tập test.
+
+\begin{figure}[!htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{fig/tikz-timeline}}
+\caption[Chia khung bay theo khối thời gian (seed 20261118)]{Chia khung bay theo khối thời gian (seed 20261118). Mỗi ô là một khối 30 s, bề rộng tỉ lệ số khung; dải dưới là bin độ cao trung vị của khối. Hàng dưới cùng: 2\,915 khung bay đi về đâu.}
+\label{fig:timeline}
+\end{figure}
+
+Nhãn người của tập test được gán trước bằng nhiều model kèm SAHI, soát lại từng khung bằng mắt, rồi duyệt lần cuối trên Label Studio chạy tại máy. Ở lượt duyệt cuối, 25,8\,\% số hộp của bản soát trước bị sửa, phần lớn là chỉnh ranh giới hộp. Bảng~\ref{tab:split} tổng hợp các tập. 198 khung test vượt mức tối thiểu 50 ảnh đánh giá của đề, nhưng chỉ 39 khung trong đó có người, nên mọi khoảng tin cậy về mAP ở mục~\ref{sec:ket-qua} đều rộng.
+
+\begin{table}[!htbp]
+\centering\footnotesize
+\caption[Các tập khung thật]{Các tập khung thật. Khung âm dùng đo báo nhầm; người trên khung bay rất nhỏ (ước lượng sơ bộ trên khung dev: cạnh ngắn của hộp trung vị 54 px).}
+\label{tab:split}
+\begin{tabularx}{\textwidth}{@{}l r r X@{}}
+\toprule
+Tập & Khung & Hộp người & Dùng để \\
+\midrule
+dev & 1\,115 & chưa gán & đo hồ sơ camera, hiệu chỉnh D2, nhãn giả của E2 \\
+\quad trong đó dev-val & 100 & 115 & chọn checkpoint, ngưỡng vận hành (36 khung có người) \\
+test & 198 & 149 & chấm điểm cuối (39 khung có người) \\
+\quad khung bay không người & 159 & 0 & báo nhầm trên khung bay (\texttt{neg\_flight}) \\
+khung âm trong nhà (\texttt{neg}) & 300 & 0 & báo nhầm trong nhà (\texttt{neg\_indoor}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Ảnh nguồn để huấn luyện}
+
+Khung bay thật có người quá ít để huấn luyện, nên ảnh huấn luyện lấy từ VisDrone~\cite{visdrone}: ảnh drone có nhãn người, nhìn từ trên cao. Nhóm có cân nhắc NOMAD và đã tải 420 ảnh, nhưng xem lại thì toàn bộ nhìn xiên khoảng 45–60\textdegree, trong khi camera của nhóm nhìn thẳng xuống, nên NOMAD bị loại. Mỗi ảnh nguồn được cắt thành cửa sổ 624$\times$480 sao cho người có cỡ như trên khung thật. Bốn tập D0 (sạch), D1, D2, D2+Real-SR dùng chung 3\,493 cửa sổ từ 1\,841 ảnh nguồn: 3\,006 để huấn luyện (2\,394 ảnh có người, 19\,792 người) và 487 để kiểm tra. Ảnh VisDrone không được đưa vào repo hay báo cáo; mọi ảnh minh hoạ ở đây là khung bay của nhóm hoặc ảnh thử tự vẽ.

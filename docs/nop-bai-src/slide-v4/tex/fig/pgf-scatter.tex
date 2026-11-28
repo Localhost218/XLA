@@ -1,0 +1,24 @@
+% mAP50 test theo báo nhầm/khung bay không người (t1_nhan_dien.md), 9 model
+\begin{tikzpicture}
+\begin{axis}[baocao, width=11.5cm, height=5.4cm, xmajorgrids,
+  xmin=0, xmax=2.15, ymin=0.08, ymax=0.34,
+  xlabel={báo nhầm / khung bay không người (nhỏ = tốt)}, ylabel={mAP50 test (lớn = tốt)},
+  /pgf/number format/precision=2, xtick={0,0.5,1,1.5,2}, ytick={0.1,0.15,0.2,0.25,0.3},
+  clip=false]
+\fill[cLuc!25] (axis cs:0,0.227) rectangle (axis cs:0.05,0.34);
+\draw[-{Stealth[length=2.5mm]}, cLuc, line width=1pt] (axis cs:1.6,0.21) -- node[above, sloped, font=\scriptsize] {hướng tốt hơn} (axis cs:1.25,0.25);
+\addplot[only marks, mark=*, mark size=3.2pt, cXam] coordinates {(0.597,0.126)};
+\addplot[only marks, mark=square*, mark size=3pt, cXanh] coordinates {(1.195,0.297) (0.994,0.143) (0.302,0.236) (1.956,0.149)};
+\addplot[only marks, mark=triangle*, mark size=3.8pt, cTim] coordinates {(0.390,0.218) (0.868,0.156) (0.522,0.313)};
+\addplot[only marks, mark=diamond*, mark size=4pt, cCam] coordinates {(0.881,0.120)};
+\node[font=\scriptsize, anchor=north] at (axis cs:0.597,0.119) {mốc COCO};
+\node[font=\scriptsize, anchor=west] at (axis cs:1.23,0.297) {E1 D0};
+\node[font=\scriptsize, anchor=west] at (axis cs:1.03,0.143) {E1 D1};
+\node[font=\scriptsize\bfseries, anchor=east] at (axis cs:0.27,0.236) {E1 D2};
+\node[font=\scriptsize, anchor=east] at (axis cs:1.92,0.149) {E1 D2+SR};
+\node[font=\scriptsize, anchor=west] at (axis cs:0.43,0.214) {thầy 11m};
+\node[font=\scriptsize, anchor=south] at (axis cs:0.868,0.163) {E2 r1};
+\node[font=\scriptsize, anchor=west] at (axis cs:0.56,0.313) {E2 r2};
+\node[font=\scriptsize, anchor=west] at (axis cs:0.92,0.118) {bundle (ship)};
+\end{axis}
+\end{tikzpicture}

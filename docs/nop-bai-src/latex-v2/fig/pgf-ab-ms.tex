@@ -1,0 +1,39 @@
+% (a) A/B mù, lượt cả khung (bảng t8); (b) p95 ms nhịp thật có "Ảnh rõ" (bảng t9)
+\begin{subfigure}[b]{0.47\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[baocao, width=6.1cm, height=4.9cm, xbar, /pgf/bar width=12pt,
+  ymajorgrids=false, xmajorgrids, xmin=0, xmax=1.18, xlabel={tỉ lệ lượt bên thứ nhất thắng},
+  xtick={0,0.25,0.5,0.75,1},
+  ymin=0.4, ymax=3.6, ytick={1,2,3},
+  yticklabels={{Real-ESRGAN $\times$2\\vs cổ điển},{Real-ESRGAN $\times$2\\vs gốc},{cổ điển\\vs gốc}},
+  y tick label style={align=right,font=\scriptsize}, /pgf/number format/precision=2,
+  error bars/x dir=both, error bars/x explicit, error bars/error bar style={line width=0.7pt,black!70},
+  error bars/error mark options={mark size=3pt,black!70}]
+\addplot[fill=cXanh!85, draw=none, bar shift=0pt] coordinates {(1.0,3) -= (0.133,0)};
+\addplot[fill=cTim!80, draw=none, bar shift=0pt] coordinates {(1.0,2) -= (0.133,0) (0.64,1) += (0.158,0) -= (0.195,0)};
+\draw[cXam, dashed] (axis cs:0.5,0.4) -- (axis cs:0.5,3.6);
+\node[font=\scriptsize, anchor=west, white] at (axis cs:0.02,3) {25/25};
+\node[font=\scriptsize, anchor=west, white] at (axis cs:0.02,2) {25/25};
+\node[font=\scriptsize, anchor=west, white] at (axis cs:0.02,1) {16/25};
+\end{axis}
+\end{tikzpicture}
+\caption{Thử mù A/B, 25 cặp mỗi so sánh, CI Wilson 95\,\%}
+\label{fig:ab}
+\end{subfigure}\hfill
+\begin{subfigure}[b]{0.5\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[baocao, width=7.4cm, height=4.9cm, ybar=1pt, bar width=9pt,
+  ymin=0, ymax=140, ylabel={p95 ms, nhịp thật},
+  symbolic x coords={det,ver,enh,tong}, xtick={det,ver,enh,tong},
+  xticklabels={detector,verifier,ảnh rõ,tổng},
+  x tick label style={font=\scriptsize}, enlarge x limits=0.18,
+  legend style={at={(0.03,0.97)},anchor=north west,legend columns=1},
+  nodes near coords, every node near coord/.append style={font=\tiny, /pgf/number format/precision=1},
+  /pgf/number format/precision=1]
+\addplot[fill=cXam!60, draw=none] coordinates {(det,63.3) (enh,34.4) (tong,99.1)}; \addlegendentry{một tầng + NAFNet}
+\addplot[fill=cXanh!85, draw=none] coordinates {(det,63.4) (ver,8.9) (enh,19.3) (tong,89.5)}; \addlegendentry{ba tầng + bộ lọc cổ điển}
+\end{axis}
+\end{tikzpicture}
+\caption{IOT-CV phát lại 600 khung, có người xem ``Ảnh rõ''}
+\label{fig:ms}
+\end{subfigure}

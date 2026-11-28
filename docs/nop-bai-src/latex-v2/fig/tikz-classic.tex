@@ -1,0 +1,19 @@
+% Chuỗi classic theo đúng thứ tự xla.enhance.classic.STEPS, tham số configs/enhance_classic.yaml 1.0.0
+\begin{tikzpicture}[
+  font=\scriptsize, x=1cm, y=1cm,
+  buoc/.style={draw=#1, fill=#1!12, line width=0.8pt, rounded corners=2pt, align=center, text width=19mm, inner sep=1.5pt, minimum height=17mm},
+  mui/.style={-{Stealth[length=1.8mm]}, line width=0.8pt, cXam},
+]
+\foreach \i/\ten/\mau/\ghi in {
+  0/{Cắt 16 cột}/cXam/{bỏ dải mép},
+  1/{Khử khối}/cCam/{chỉ trên lưới 8$\times$8,\\$\alpha$ 10, $\beta$ 4},
+  2/{Khử hồng}/cHong/{$\min(R,B)-G\geq6$,\\$\max(R,B)\geq230$,\\giữ Y},
+  3/{Bù tối góc}/cVang/{chia $\cos^4$,\\trần 1,35},
+  4/{Khử mù}/cXanh/{dark channel 15 px,\\$\omega$ 0,85, $t\geq 0{,}4$},
+  5/{Làm nét}/cLuc/{unsharp trên Y,\\bỏ $|d|\leq 2\sigma_n$},
+  6/{Đệm mép}/cXam/{lặp cột 16}} {
+  \node[buoc=\mau] (n\i) at (\i*2.28,0) {\textbf{\ten}\\[1pt]\ghi};
+}
+\foreach \i [evaluate=\i as \j using int(\i+1)] in {0,...,5} \draw[mui] (n\i) -- (n\j);
+\node[anchor=north west, font=\scriptsize, cXam, text width=15.6cm] at ($(n0.west |- n2.south)+(0,-0.12)$) {Một graph ONNX opset 17, fp32, 703 nút; vào \texttt{frame} uint8 480$\times$640$\times$3 BGR, ra cùng cỡ. Sai khác với bản numpy trên 50 khung dev: MAE $\leq$ 0,018 (ORT CPU và CUDA).};
+\end{tikzpicture}

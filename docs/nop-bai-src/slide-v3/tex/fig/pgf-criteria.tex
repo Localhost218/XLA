@@ -1,0 +1,24 @@
+% Tiêu chí t3 + ms/khung: cổ điển (xanh) và mạng (tím); vạch lục là ngưỡng đặt trước
+\begin{tikzpicture}
+\begin{groupplot}[group style={group size=4 by 1, horizontal sep=7mm},
+  baocao, ybar, /pgf/bar width=12pt, width=3.55cm, height=4.0cm, xmin=0.4, xmax=2.6,
+  xtick={1,2}, xticklabels={cổ điển,mạng}, ymin=0, x tick label style={font=\scriptsize},
+  nodes near coords, nodes near coords style={font=\tiny, /pgf/number format/precision=1}]
+\nextgroupplot[title={\scriptsize điểm hồng giảm (\%)}, ymax=115]
+\addplot[fill=cXanh!80, draw=none, bar shift=0pt] coordinates {(1,89.2)};
+\addplot[fill=cTim!80, draw=none, bar shift=0pt] coordinates {(2,99.9)};
+\draw[cLuc, line width=1.2pt] (axis cs:0.4,90) -- (axis cs:2.6,90) node[pos=0.5, below, font=\tiny] {$\geq$ 90};
+\nextgroupplot[title={\scriptsize dark channel giảm (\%)}, ymax=70]
+\addplot[fill=cXanh!80, draw=none, bar shift=0pt] coordinates {(1,51.6)};
+\addplot[fill=cTim!80, draw=none, bar shift=0pt] coordinates {(2,36.8)};
+\draw[cLuc, line width=1.2pt] (axis cs:0.4,50) -- (axis cs:2.6,50) node[pos=0.8, above, font=\tiny] {$\geq$ 50};
+\nextgroupplot[title={\scriptsize nhấp nháy (lần)}, ymax=2.7, nodes near coords style={font=\tiny, /pgf/number format/precision=2}]
+\addplot[fill=cXanh!80, draw=none, bar shift=0pt] coordinates {(1,2.18)};
+\addplot[fill=cTim!80, draw=none, bar shift=0pt] coordinates {(2,1.81)};
+\draw[cLuc, line width=1.2pt] (axis cs:0.4,1) -- (axis cs:2.6,1) node[pos=0.5, below, font=\tiny] {$\leq$ 1};
+\nextgroupplot[title={\scriptsize ms/khung p50}, ymax=36]
+\addplot[fill=cXanh!80, draw=none, bar shift=0pt] coordinates {(1,9.2)};
+\addplot[fill=cTim!80, draw=none, bar shift=0pt] coordinates {(2,20.7)};
+\draw[cLuc, line width=1.2pt] (axis cs:0.4,30) -- (axis cs:2.6,30) node[pos=0.5, above, font=\tiny] {$\leq$ 30};
+\end{groupplot}
+\end{tikzpicture}

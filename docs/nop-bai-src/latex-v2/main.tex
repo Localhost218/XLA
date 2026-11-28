@@ -1,0 +1,90 @@
+% Báo cáo ngắn phần AI xử lý ảnh, Nhóm 10. Dựng bằng build.ps1 (latexmk -xelatex).
+\documentclass[a4paper,fontsize=12pt,parskip=false,numbers=noenddot,bibliography=totoc]{scrartcl}
+
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{polyglossia}
+\setmainlanguage{vietnamese}
+
+\usepackage[top=2.5cm,bottom=2cm,left=3cm,right=2cm,footskip=1cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.15}
+\setlength{\parindent}{1.2em}
+\setlength{\parskip}{0.1em}
+
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
+\usepackage{amsmath}
+\usepackage{booktabs,tabularx,multirow,array}
+\usepackage{placeins}
+\usepackage{subcaption}
+\usepackage[font=small,labelfont=bf,skip=4pt]{caption}
+\usepackage{enumitem}
+\setlist{nosep,leftmargin=1.4em}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,calc,fit,backgrounds,decorations.pathreplacing,shadows}
+\usepackage{tikz-3dplot}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots,fillbetween}
+\usepackage[hidelinks]{hyperref}
+
+% ----- bảng màu chung cho mọi hình TikZ và pgfplots
+\definecolor{cXanh}{HTML}{1F5A96}  % xanh dương đậm: dev, E1, luồng chính
+\definecolor{cCam}{HTML}{E07B24}   % cam: test, tầng 1, cảnh báo
+\definecolor{cLuc}{HTML}{2E8B57}   % lục: nhãn thật, đạt
+\definecolor{cHong}{HTML}{C2397F}  % hồng: ám hồng, lỗi camera
+\definecolor{cTim}{HTML}{6B4FA0}   % tím: E2, mạng NAFNet
+\definecolor{cXam}{HTML}{5B6770}   % xám: mốc, chú thích
+\definecolor{cVang}{HTML}{D8A51D}  % vàng đất: độ cao, tô nền phụ
+
+\pgfplotsset{
+  baocao/.style={
+    tick label style={font=\scriptsize}, scaled ticks=false, /pgf/number format/fixed,
+    label style={font=\small},
+    legend style={font=\scriptsize,draw=none,fill=none},
+    /pgf/number format/use comma,
+    /pgf/number format/1000 sep={\,},
+    axis line style={cXam},
+    major tick style={cXam},
+    ymajorgrids, grid style={cXam!20},
+  },
+}
+\pgfplotsset{colormap={baocao}{rgb255=(31,90,150) rgb255=(107,79,160) rgb255=(194,57,127) rgb255=(224,123,36) rgb255=(216,165,29)}}
+
+% ----- tiêu đề mục: Times đậm, không dùng font sans của KOMA
+\setkomafont{disposition}{\normalfont\bfseries}
+\setkomafont{section}{\normalfont\bfseries\large}
+\setkomafont{subsection}{\normalfont\bfseries\normalsize}
+\setkomafont{subsubsection}{\normalfont\bfseries\itshape\normalsize}
+\RedeclareSectionCommand[beforeskip=1.1em,afterskip=0.5em]{section}
+\RedeclareSectionCommand[beforeskip=0.8em,afterskip=0.35em]{subsection}
+\setcounter{tocdepth}{2}
+\captionsetup[subfigure]{font=footnotesize,skip=2pt}
+
+\renewcommand{\topfraction}{0.92}\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.06}\renewcommand{\floatpagefraction}{0.8}
+\setcounter{topnumber}{4}\setcounter{bottomnumber}{3}\setcounter{totalnumber}{6}
+\setlength{\textfloatsep}{8pt plus 2pt minus 3pt}\setlength{\floatsep}{6pt plus 2pt}\setlength{\intextsep}{6pt plus 2pt}
+\newcommand{\ci}[2]{[#1;\,#2]}
+\newcommand{\so}[1]{#1}
+\setlength{\emergencystretch}{2.5em}
+
+\begin{document}
+
+\input{sections/00-bia}
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\input{sections/01-bai-toan}
+\input{sections/02-du-lieu}
+\input{sections/03-phuong-phap}
+\input{sections/04-ket-qua}
+\input{sections/05-thao-luan}
+\input{sections/06-phan-cong}
+\input{sections/07-khai-bao-ai}
+\FloatBarrier
+\input{sections/08-tai-lieu}
+
+\end{document}

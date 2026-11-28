@@ -1,0 +1,22 @@
+\begin{tikzpicture}[font=\scriptsize, x=1cm, y=1cm]
+\input{fig/timeline-blocks}
+\draw[cXam, -{Stealth[length=2mm]}] (0,-0.55) -- (\tlW+0.2,-0.55) node[right, cXam] {thời gian};
+\node[anchor=east, cXam] at (-0.08,0.45) {khối 30 s};
+\node[anchor=east, cXam] at (-0.08,-0.21) {độ cao};
+% chú giải
+\begin{scope}[shift={(0,-1.25)}]
+\fill[cXanh] (0,0) rectangle ++(0.35,0.22); \node[anchor=west] at (0.4,0.11) {khối dev: 1\,115 khung (gồm dev-val 100)};
+\fill[cCam] (6.6,0) rectangle ++(0.35,0.22); \node[anchor=west] at (7.0,0.11) {khối test: 198 khung cách nhau $\geq$ 1 s};
+\node[anchor=west] at (0,-0.33) {độ cao trung vị:};
+\fill[cVang!55] (2.2,-0.44) rectangle ++(0.35,0.22); \node[anchor=west] at (2.6,-0.33) {3–8 m};
+\fill[cVang!85!cCam] (3.7,-0.44) rectangle ++(0.35,0.22); \node[anchor=west] at (4.1,-0.33) {8–14 m};
+\fill[cCam!70!cHong] (5.3,-0.44) rectangle ++(0.35,0.22); \node[anchor=west] at (5.7,-0.33) {$>$14 m};
+\end{scope}
+% cột tổng
+\begin{scope}[shift={(0,-2.75)}]
+\foreach \x/\w/\c/\t in {0/5.74/cXanh/{dev 1\,115},5.74/1.02/cCam/{test 198},6.76/1.88/cXam!60/{đệm 5 s: 366},8.64/6.36/cCam!35/{khung khối test không chọn: 1\,236}}
+  {\fill[\c] (\x,0) rectangle ++(\w-0.04,0.42); \node[font=\scriptsize] at (\x+\w/2,0.21) {\t};}
+\node[anchor=east, cXam] at (-0.08,0.21) {2\,915 khung};
+\fill[cLuc!70] (0,-0.62) rectangle ++(1.54,0.42); \node[anchor=west] at (1.6,-0.41) {300 khung âm quay trong nhà (\texttt{neg}), tách riêng, không thuộc chuyến bay};
+\end{scope}
+\end{tikzpicture}
