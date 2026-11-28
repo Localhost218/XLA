@@ -14,3 +14,11 @@ results/**/runs/
 .pytest_cache/
 .ruff_cache/
 # KHÔNG ignore khung thật: data/real/, results/ab/img/, models/release/**/golden/ (Deferred 14)
+
+# Nộp bài: bản sao lưu trùng slide-v3, pptx giải nén, rác build LaTeX (28/11/2026)
+docs/nop-bai-src/scratchpad-backup-*/
+docs/nop-bai-src/pttk_unpacked/
+**/unz/
+docs/**/*.aux
+docs/**/*.log
+docs/**/*.xdv
